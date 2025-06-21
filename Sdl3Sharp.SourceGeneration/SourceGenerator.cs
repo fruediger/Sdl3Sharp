@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq;
 
 namespace Sdl3Sharp.SourceGeneration;
 
@@ -10,7 +9,7 @@ internal sealed partial class SourceGenerator : IIncrementalGenerator
 	private const string DiagnosticDescriptorIdPrefix = "SDL3SRCGN";
 	private const string DiagnosticDescriptorCategory = $"{nameof(Sdl3Sharp)}.{nameof(SourceGeneration)}";
 
-	private static readonly (string Name, string Version) Tool = typeof(SourceGenerator).Assembly.GetName() switch { var assemblyName => (assemblyName.Name, assemblyName.Version.ToString(3)) };
+	private static readonly (string Name, string Version) mTool = typeof(SourceGenerator).Assembly.GetName() switch { var assemblyName => (assemblyName.Name, assemblyName.Version.ToString(3)) };
 
 	public void Initialize(IncrementalGeneratorInitializationContext context)
 	{

@@ -156,7 +156,7 @@ partial class SourceGenerator
             builder.Append($$"""
 
                 #pragma warning disable CS8500
-                {{indentation}}[global::System.CodeDom.Compiler.GeneratedCode("{{Tool.Name}}", "{{Tool.Version}}")]
+                {{indentation}}[global::System.CodeDom.Compiler.GeneratedCode("{{mTool.Name}}", "{{mTool.Version}}")]
                 {{indentation}}[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
                 {{indentation}}{{TargetModifiers}} {{TargetMethod.ToDisplayString(mPartialMethodDeclarationWithoutModifiersDisplayFormat)}}
                 {{indentation}}{
@@ -405,10 +405,10 @@ partial class SourceGenerator
             var functionPointerType = compilation.CreateFunctionPointerTypeSymbol(
                 returnType: TargetMethod.ReturnType,
                 returnRefKind: TargetMethod switch { { ReturnsByRef: true } => RefKind.Ref, { ReturnsByRefReadonly: true } => RefKind.RefReadOnly, _ => RefKind.None },
-                parameterTypes: TargetMethod.Parameters.Select(static param => param.Type).ToImmutableArray(),
-                parameterRefKinds: TargetMethod.Parameters.Select(static param => param.RefKind).ToImmutableArray(),
+                parameterTypes: [..TargetMethod.Parameters.Select(static param => param.Type)],
+                parameterRefKinds: [..TargetMethod.Parameters.Select(static param => param.RefKind)],
                 callingConvention: System.Reflection.Metadata.SignatureCallingConvention.Unmanaged,
-                callingConventionTypes: CallConvs.Select(static typedConstant => typedConstant.Value).OfType<INamedTypeSymbol>().ToImmutableArray()
+                callingConventionTypes: [..CallConvs.Select(static typedConstant => typedConstant.Value).OfType<INamedTypeSymbol>()]
             );
 
             builder.Append($$"""

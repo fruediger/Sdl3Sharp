@@ -26,7 +26,7 @@ partial class SourceGenerator
         isEnabledByDefault: true
     );
 
-    private static readonly SymbolDisplayFormat DefaultTypeSymbolDisplayFormat = new(
+    private static readonly SymbolDisplayFormat mDefaultTypeSymbolDisplayFormat = new(
         globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Included,
         typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
         genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
@@ -110,18 +110,18 @@ partial class SourceGenerator
             }
 
             var libraryIdentifier = string.Format(CultureInfo.InvariantCulture, LibraryIdentifierFormat, libraryId++);
-            var importLibraryTypeName = importLibraryType.ToDisplayString(DefaultTypeSymbolDisplayFormat);
+            var importLibraryTypeName = importLibraryType.ToDisplayString(mDefaultTypeSymbolDisplayFormat);
 
             builder.Append($$"""
 
-                [global::System.CodeDom.Compiler.GeneratedCode("{{Tool.Name}}", "{{Tool.Version}}")]
+                [global::System.CodeDom.Compiler.GeneratedCode("{{mTool.Name}}", "{{mTool.Version}}")]
                 file static class {{libraryIdentifier}}
                 {
                 """);
 
             var symbolId = 0;
 
-            foreach (var (symbolName, imports) in unconditionalImports)
+            foreach (var (_, imports) in unconditionalImports)
             {
                 var symbolIdentifier = string.Format(CultureInfo.InvariantCulture, SymbolIdentifierFormat, symbolId++);
 
@@ -140,7 +140,7 @@ partial class SourceGenerator
 
             foreach (var (_, importsBySymbolName) in conditionalImports)
             {
-                foreach (var (symbolName, imports) in importsBySymbolName)
+                foreach (var (_, imports) in importsBySymbolName)
                 {
                     var symbolIdentifier = string.Format(CultureInfo.InvariantCulture, SymbolIdentifierFormat, symbolId++);
 
@@ -180,7 +180,7 @@ partial class SourceGenerator
 
                     builder.Append($$"""
                         
-                                var {{string.Format(CultureInfo.InvariantCulture, ConditionLocalFormat, conditionId++)}} = global::{{NativeImportAttributesNamespaceName}}.{{NativeImportConditionTypeName}}.{{NativeImportConditionEvaluateMethodName}}<{{conditionType.ToDisplayString(DefaultTypeSymbolDisplayFormat)}}>();
+                                var {{string.Format(CultureInfo.InvariantCulture, ConditionLocalFormat, conditionId++)}} = global::{{NativeImportAttributesNamespaceName}}.{{NativeImportConditionTypeName}}.{{NativeImportConditionEvaluateMethodName}}<{{conditionType.ToDisplayString(mDefaultTypeSymbolDisplayFormat)}}>();
                         """);
                 }
 
@@ -287,7 +287,7 @@ partial class SourceGenerator
 
                             if ({{unconditionalImports.Count switch
                 {
-                    > 0 => $"global::{NativeImportAttributesNamespaceName}.{NativeImportConditionTypeName}.{NativeImportConditionEvaluateMethodName}<{conditionType.ToDisplayString(DefaultTypeSymbolDisplayFormat)}>()",
+                    > 0 => $"global::{NativeImportAttributesNamespaceName}.{NativeImportConditionTypeName}.{NativeImportConditionEvaluateMethodName}<{conditionType.ToDisplayString(mDefaultTypeSymbolDisplayFormat)}>()",
                     _ => string.Format(CultureInfo.InvariantCulture, ConditionLocalFormat, conditionId++)
                 }}})
                             {

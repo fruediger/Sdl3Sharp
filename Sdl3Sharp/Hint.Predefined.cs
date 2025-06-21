@@ -1,4 +1,8 @@
-﻿using System.Runtime.CompilerServices;
+﻿using Sdl3Sharp.Events;
+using System;
+using System.Runtime.CompilerServices;
+using static Sdl3Sharp.Hint;
+using static System.Net.WebRequestMethods;
 
 namespace Sdl3Sharp;
 
@@ -31,6 +35,7 @@ partial struct Hint
 	/// This hint can be set anytime.
 	/// </para>
 	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_ALLOW_ALT_TAB_WHILE_GRABBED">SDL_HINT_ALLOW_ALT_TAB_WHILE_GRABBED</seealso>
 	public static Hint AllowAltTabWhileGrabbed { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_ALLOW_ALT_TAB_WHILE_GRABBED"); }
 
 	/// <summary>SDL_HINT_ANDROID_*</summary>
@@ -63,6 +68,7 @@ partial struct Hint
 		/// This hint can be set anytime.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_ANDROID_ALLOW_RECREATE_ACTIVITY">SDL_HINT_ANDROID_ALLOW_RECREATE_ACTIVITY</seealso>
 		public static Hint AllowRecreateActivity { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_ANDROID_ALLOW_RECREATE_ACTIVITY"); }
 
 		/// <summary>
@@ -89,6 +95,7 @@ partial struct Hint
 		/// This hint should be set before <see cref="Sdl(Sdl.BuildAction?)">SDL is initialized</see>.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_ANDROID_BLOCK_ON_PAUSE"></seealso>
 		public static Hint BlockOnPause { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_ANDROID_BLOCK_ON_PAUSE"); }
 
 		/// <summary>
@@ -118,6 +125,7 @@ partial struct Hint
 		/// This hint should be set before <see cref="SubSystem.Audio">SDL audio</see> is initialized.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_ANDROID_LOW_LATENCY_AUDIO">SDL_HINT_ANDROID_LOW_LATENCY_AUDIO</seealso>
 		public static Hint LowLatencyAudio { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_ANDROID_LOW_LATENCY_AUDIO"); }
 
 		/// <summary>
@@ -147,6 +155,7 @@ partial struct Hint
 		/// This hint can be set anytime.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_ANDROID_TRAP_BACK_BUTTON">SDL_HINT_ANDROID_TRAP_BACK_BUTTON</seealso>
 		public static Hint TrapBackButton { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_ANDROID_TRAP_BACK_BUTTON"); }
 	}
 
@@ -167,6 +176,7 @@ partial struct Hint
 	/// This hint should be set before <see cref="Sdl(Sdl.BuildAction?)">SDL is initialized</see>.
 	/// </para>
 	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_APP_ID">SDL_HINT_APP_ID</seealso>
 	public static Hint AppId { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_APP_ID"); }
 
 	/// <summary>
@@ -186,6 +196,7 @@ partial struct Hint
 	/// This hint should be set before <see cref="Sdl(Sdl.BuildAction?)">SDL is initialized</see>.
 	/// </para>
 	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_APP_NAME">SDL_HINT_APP_NAME</seealso>
 	public static Hint AppName { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_APP_NAME"); }
 
 	/// <summary>SDL_HINT_APPLE_TV_*</summary>
@@ -221,6 +232,7 @@ partial struct Hint
 		/// This hint can be set anytime.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_APPLE_TV_CONTROLLER_UI_EVENTS">SDL_HINT_APPLE_TV_CONTROLLER_UI_EVENTS</seealso>
 		public static Hint ControllerUIEvents { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_APPLE_TV_CONTROLLER_UI_EVENTS"); }
 
 		/// <summary>
@@ -247,6 +259,7 @@ partial struct Hint
 		/// This hint can be set anytime.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_APPLE_TV_REMOTE_ALLOW_ROTATION">SDL_HINT_APPLE_TV_REMOTE_ALLOW_ROTATION</seealso>
 		public static Hint RemoteAllowRotation { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_APPLE_TV_REMOTE_ALLOW_ROTATION"); }
 	}
 
@@ -289,6 +302,7 @@ partial struct Hint
 	/// This hint should be set before an assertion failure is triggered and can be changed at any time.
 	/// </para>
 	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_ASSERT">SDL_HINT_ASSERT</seealso>
 	public static Hint Assert { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_ASSERT"); }
 
 	/// <summary>SDL_HINT_AUDIO_*</summary>
@@ -314,6 +328,7 @@ partial struct Hint
 			/// This hint should be set before <see cref="">an audio device is opened</see>.
 			/// </para>
 			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_AUDIO_ALSA_DEFAULT_DEVICE">SDL_HINT_AUDIO_ALSA_DEFAULT_DEVICE</seealso>
 			public static Hint DefaultDevice { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_AUDIO_ALSA_DEFAULT_DEVICE"); }
 
 			/// <summary>
@@ -333,6 +348,7 @@ partial struct Hint
 			/// This hint should be set before <see cref="">an audio device is opened</see>.
 			/// </para>
 			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_AUDIO_ALSA_DEFAULT_PLAYBACK_DEVICE">SDL_HINT_AUDIO_ALSA_DEFAULT_PLAYBACK_DEVICE</seealso>
 			public static Hint DefaultPlaybackDevice { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_AUDIO_ALSA_DEFAULT_PLAYBACK_DEVICE"); }
 
 			/// <summary>
@@ -352,6 +368,7 @@ partial struct Hint
 			/// This hint should be set before <see cref="">an audio device is opened</see>.
 			/// </para>
 			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_AUDIO_ALSA_DEFAULT_RECORDING_DEVICE">SDL_HINT_AUDIO_ALSA_DEFAULT_RECORDING_DEVICE</seealso>
 			public static Hint DefaultRecordingDevice { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_AUDIO_ALSA_DEFAULT_RECORDING_DEVICE"); }
 		}
 
@@ -382,6 +399,7 @@ partial struct Hint
 		/// This hint should be set before <see cref="">an audio device is opened</see>.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_AUDIO_CATEGORY">SDL_HINT_AUDIO_CATEGORY</seealso>
 		public static Hint Category { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_AUDIO_CATEGORY"); }
 
 		/// <summary>
@@ -398,6 +416,7 @@ partial struct Hint
 		/// This hint should be set before <see cref="">an audio device is opened</see>.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_AUDIO_CHANNELS">SDL_HINT_AUDIO_CHANNELS</seealso>
 		public static Hint Channels { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_AUDIO_CHANNELS"); }
 
 		/// <summary>SDL_HINT_AUDIO_DEVICE_*</summary>
@@ -420,6 +439,7 @@ partial struct Hint
 			/// This hint should be set before <see cref="">an audio device is opened</see>.
 			/// </para>
 			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_AUDIO_DEVICE_APP_ICON_NAME">SDL_HINT_AUDIO_DEVICE_APP_ICON_NAME</seealso>
 			public static Hint AppIconName { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_AUDIO_DEVICE_APP_ICON_NAME"); }
 
 			/// <summary>
@@ -442,6 +462,7 @@ partial struct Hint
 			/// This hint should be set before <see cref="">an audio device is opened</see>.
 			/// </para>
 			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_AUDIO_DEVICE_SAMPLE_FRAMES">SDL_HINT_AUDIO_DEVICE_SAMPLE_FRAMES</seealso>
 			public static Hint SampleFrames { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_AUDIO_DEVICE_SAMPLE_FRAMES"); }
 
 			/// <summary>
@@ -467,6 +488,7 @@ partial struct Hint
 			/// This hint should be set before <see cref="">an audio device is opened</see>.
 			/// </para>
 			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_AUDIO_DEVICE_STREAM_NAME">SDL_HINT_AUDIO_DEVICE_STREAM_NAME</seealso>
 			public static Hint StreamName { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_AUDIO_DEVICE_STREAM_NAME"); }
 
 			/// <summary>
@@ -492,6 +514,7 @@ partial struct Hint
 			/// This hint should be set before <see cref="">an audio device is opened</see>.
 			/// </para>
 			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_AUDIO_DEVICE_STREAM_ROLE">SDL_HINT_AUDIO_DEVICE_STREAM_ROLE</seealso>
 			public static Hint StreamRole { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_AUDIO_DEVICE_STREAM_ROLE"); }
 		}
 
@@ -512,6 +535,7 @@ partial struct Hint
 			/// This hint should be set before <see cref="">an audio device is opened</see>.
 			/// </para>
 			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_AUDIO_DISK_INPUT_FILE">SDL_HINT_AUDIO_DISK_INPUT_FILE</seealso>
 			public static Hint InputFile { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_AUDIO_DISK_INPUT_FILE"); }
 
 			/// <summary>
@@ -528,6 +552,7 @@ partial struct Hint
 			/// This hint should be set before <see cref="">an audio device is opened</see>.
 			/// </para>
 			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_AUDIO_DISK_OUTPUT_FILE">SDL_HINT_AUDIO_DISK_OUTPUT_FILE</seealso>
 			public static Hint OutputFile { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_AUDIO_DISK_OUTPUT_FILE"); }
 
 			/// <summary>
@@ -544,6 +569,7 @@ partial struct Hint
 			/// This hint should be set before <see cref="">an audio device is opened</see>.
 			/// </para>
 			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_AUDIO_DISK_TIMESCALE">SDL_HINT_AUDIO_DISK_TIMESCALE</seealso>
 			public static Hint Timescale { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_AUDIO_DISK_TIMESCALE"); }
 		}
 
@@ -561,6 +587,7 @@ partial struct Hint
 		/// This hint should be set before <see cref="Sdl(Sdl.BuildAction?)">SDL is initialized</see>.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_AUDIO_DRIVER">SDL_HINT_AUDIO_DRIVER</seealso>
 		public static Hint Driver { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_AUDIO_DRIVER"); }
 
 		/// <summary>SDL_HINT_AUDIO_DUMMY_*</summary>
@@ -580,6 +607,7 @@ partial struct Hint
 			/// This hint should be set before <see cref="">an audio device is opened</see>.
 			/// </para>
 			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_AUDIO_DUMMY_TIMESCALE">SDL_HINT_AUDIO_DUMMY_TIMESCALE</seealso>
 			public static Hint Timescale { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_AUDIO_DUMMY_TIMESCALE"); }
 		}
 
@@ -646,6 +674,7 @@ partial struct Hint
 		/// This hint should be set before <see cref="">an audio device is opened</see>.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_AUDIO_FORMAT">SDL_HINT_AUDIO_FORMAT</seealso>
 		public static Hint Format { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_AUDIO_FORMAT"); }
 
 		/// <summary>
@@ -662,6 +691,7 @@ partial struct Hint
 		/// This hint should be set before <see cref="">an audio device is opened</see>.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_AUDIO_FREQUENCY">SDL_HINT_AUDIO_FREQUENCY</seealso>
 		public static Hint Frequency { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_AUDIO_FREQUENCY"); }
 
 		/// <summary>
@@ -694,6 +724,7 @@ partial struct Hint
 		/// This hint should be set before <see cref="Sdl(Sdl.BuildAction?)">SDL is initialized</see>.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_AUDIO_INCLUDE_MONITORS">SDL_HINT_AUDIO_INCLUDE_MONITORS</seealso>
 		public static Hint IncludeMonitors { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_AUDIO_INCLUDE_MONITORS"); }
 	}
 
@@ -721,6 +752,7 @@ partial struct Hint
 	/// This hint can be set anytime.
 	/// </para>
 	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_AUTO_UPDATE_JOYSTICKS">SDL_HINT_AUTO_UPDATE_JOYSTICKS</seealso>
 	public static Hint AutoUpdateJoysticks { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_AUTO_UPDATE_JOYSTICKS"); }
 
 	/// <summary>
@@ -747,8 +779,8 @@ partial struct Hint
 	/// This hint can be set anytime.
 	/// </para>
 	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_AUTO_UPDATE_SENSORS">SDL_HINT_AUTO_UPDATE_SENSORS</seealso>
 	public static Hint AutoUpdateSensors { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_AUTO_UPDATE_SENSORS"); }
-
 
 	/// <summary>
 	/// Gets a hint to control whether or not to prevent SDL from using version 4 of the bitmap header when saving BMPs
@@ -777,6 +809,7 @@ partial struct Hint
 	/// This hint can be set anytime.
 	/// </para>
 	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_BMP_SAVE_LEGACY_FORMAT">SDL_HINT_BMP_SAVE_LEGACY_FORMAT</seealso>
 	public static Hint BmpSaveLegacyFormat { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_BMP_SAVE_LEGACY_FORMAT"); }
 
 	/// <summary>SDL_HINT_CAMERA_*</summary>
@@ -796,6 +829,7 @@ partial struct Hint
 		/// The default value is unset, in which case SDL will try to figure out the best camera backend on your behalf. This hint needs to be set before <see cref="Sdl(Sdl.BuildAction?)">the <see cref="Sdl"/> instance is created</see> to be useful.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_CAMERA_DRIVER">SDL_HINT_CAMERA_DRIVER</seealso>
 		public static Hint Driver { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_CAMERA_DRIVER"); }
 	}
 
@@ -835,26 +869,32 @@ partial struct Hint
 	/// The items can be prefixed by <c>'+'</c>/<c>'-'</c> to add/remove features.
 	/// </para>
 	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_CPU_FEATURE_MASK">SDL_HINT_CPU_FEATURE_MASK</seealso>
 	public static Hint CpuFeatureMask { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_CPU_FEATURE_MASK"); }
 
-	/// <summary>
-	/// Gets a hint serving as an override for <see cref="SDL_GetDisplayUsableBounds"/>()
-	/// </summary>
-	/// <value>
-	/// A hint serving as an override for <see cref="SDL_GetDisplayUsableBounds"/>()
-	/// </value>
-	/// <remarks>
-	/// <para>
-	/// If set, this hint will override the expected results for <see cref="SDL_GetDisplayUsableBounds"/>() for display index 0. Generally you don't want to do this, but this allows an embedded system to request that some of the screen be reserved for other uses when paired with a well-behaved application.
-	/// </para>
-	/// <para>
-	/// The contents of this hint must be 4 comma-separated integers, the first is the bounds x, then y, width and height, in that order.
-	/// </para>
-	/// <para>
-	/// This hint can be set anytime.
-	/// </para>
-	/// </remarks>
-	public static Hint DisplayUsableBounds { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_DISPLAY_USABLE_BOUNDS"); }
+	/// <summary>SDL_HINT_DISPLAY_*</summary>
+	public static class Display
+	{
+		/// <summary>
+		/// Gets a hint serving as an override for <see cref="SDL_GetDisplayUsableBounds"/>()
+		/// </summary>
+		/// <value>
+		/// A hint serving as an override for <see cref="SDL_GetDisplayUsableBounds"/>()
+		/// </value>
+		/// <remarks>
+		/// <para>
+		/// If set, this hint will override the expected results for <see cref="SDL_GetDisplayUsableBounds"/>() for display index 0. Generally you don't want to do this, but this allows an embedded system to request that some of the screen be reserved for other uses when paired with a well-behaved application.
+		/// </para>
+		/// <para>
+		/// The contents of this hint must be 4 comma-separated integers, the first is the bounds x, then y, width and height, in that order.
+		/// </para>
+		/// <para>
+		/// This hint can be set anytime.
+		/// </para>
+		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_DISPLAY_USABLE_BOUNDS">SDL_HINT_DISPLAY_USABLE_BOUNDS</seealso>
+		public static Hint UsableBounds { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_DISPLAY_USABLE_BOUNDS"); }
+	}
 
 	/// <summary>SDL_HINT_EGL_*</summary>
 	public static class Egl
@@ -868,6 +908,7 @@ partial struct Hint
 		/// <remarks>
 		/// This hint should be set before <see cref="">creating an OpenGL window</see> or <see cref="">creating an OpenGL context</see>. This hint is only considered if SDL is using EGL to manage OpenGL contexts. If this hint isn't set, SDL will choose a reasonable default.
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_EGL_LIBRARY">SDL_HINT_EGL_LIBRARY</seealso>
 		public static Hint Library { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_EGL_LIBRARY"); }
 	}
 
@@ -904,6 +945,7 @@ partial struct Hint
 		/// This hint can be set anytime.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_EMSCRIPTEN_ASYNCIFY">SDL_HINT_EMSCRIPTEN_ASYNCIFY</seealso>
 		public static Hint Asyncify { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_EMSCRIPTEN_ASYNCIFY"); }
 
 		/// <summary>
@@ -923,6 +965,7 @@ partial struct Hint
 		/// This hint should be set before <see cref="">creating a window</see>.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_EMSCRIPTEN_CANVAS_SELECTOR">SDL_HINT_EMSCRIPTEN_CANVAS_SELECTOR</seealso>
 		public static Hint CanvasSelector { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_EMSCRIPTEN_CANVAS_SELECTOR"); }
 
 		/// <summary>
@@ -968,6 +1011,7 @@ partial struct Hint
 		/// This hint should be set before <see cref="">creating a window</see>.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT">SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT</seealso>
 		public static Hint KeyboardElement { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_EMSCRIPTEN_KEYBOARD_ELEMENT"); }
 	}
 
@@ -999,8 +1043,8 @@ partial struct Hint
 	/// This hint must be set before <see cref="SDL_StartTextInput"/>() is called.
 	/// </para>
 	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_ENABLE_SCREEN_KEYBOARD">SDL_HINT_ENABLE_SCREEN_KEYBOARD</seealso>
 	public static Hint EnableScreenKeyboard { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_ENABLE_SCREEN_KEYBOARD"); }
-
 
 	/// <summary>
 	/// Gets a hint containing a list of evdev devices to use if udev is not available
@@ -1018,6 +1062,7 @@ partial struct Hint
 	/// This hint should be set before <see cref="Sdl(Sdl.BuildAction?)">SDL is initialized</see>.
 	/// </para>
 	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_EVDEV_DEVICES">SDL_HINT_EVDEV_DEVICES</seealso>
 	public static Hint EvDevDevices { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_EVDEV_DEVICES"); }
 
 	/// <summary>
@@ -1053,6 +1098,7 @@ partial struct Hint
 	/// This hint can be set anytime.
 	/// </para>
 	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_EVENT_LOGGING">SDL_HINT_EVENT_LOGGING</seealso>
 	public static Hint EventLogging { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_EVENT_LOGGING"); }
 
 	/// <summary>
@@ -1094,6 +1140,7 @@ partial struct Hint
 	/// This hint can be set anytime.
 	/// </para>
 	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_FILE_DIALOG_DRIVER">SDL_HINT_FILE_DIALOG_DRIVER</seealso>
 	public static Hint FileDialogDriver { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_FILE_DIALOG_DRIVER"); }
 
 	/// <summary>
@@ -1124,6 +1171,7 @@ partial struct Hint
 	/// This hint can be set anytime.
 	/// </para>
 	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_FORCE_RAISEWINDOW">SDL_HINT_FORCE_RAISEWINDOW</seealso>
 	public static Hint ForceRaiseWindow { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_FORCE_RAISEWINDOW"); }
 
 	/// <summary>
@@ -1157,12 +1205,12 @@ partial struct Hint
 	/// This hint should be set before calling <see cref="SDL_GetWindowSurface"/>()
 	/// </para>
 	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_FRAMEBUFFER_ACCELERATION">SDL_HINT_FRAMEBUFFER_ACCELERATION</seealso>
 	public static Hint FramebufferAcceleration { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_FRAMEBUFFER_ACCELERATION"); }
 
 	/// <summary>SDL_HINT_GAMECONTROLLER*</summary>
 	public static class GameController
 	{
-
 		/// <summary>
 		/// Gets a hint that lets you manually hint extra gamecontroller db entries
 		/// </summary>
@@ -1180,6 +1228,7 @@ partial struct Hint
 		/// This hint should be set before <see cref="Sdl(Sdl.BuildAction?)">SDL is initialized</see>.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_GAMECONTROLLERCONFIG">SDL_HINT_GAMECONTROLLERCONFIG</seealso>
 		public static Hint Config { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_GAMECONTROLLERCONFIG"); }
 
 		/// <summary>
@@ -1199,6 +1248,7 @@ partial struct Hint
 		/// This hint should be set before <see cref="Sdl(Sdl.BuildAction?)">SDL is initialized</see>.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_GAMECONTROLLERCONFIG_FILE">SDL_HINT_GAMECONTROLLERCONFIG_FILE</seealso>
 		public static Hint ConfigFile { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_GAMECONTROLLERCONFIG_FILE"); }
 
 		/// <summary>
@@ -1218,6 +1268,7 @@ partial struct Hint
 		/// This hint can be set anytime.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_GAMECONTROLLER_IGNORE_DEVICES">SDL_HINT_GAMECONTROLLER_IGNORE_DEVICES</seealso>
 		public static Hint IgnoreDevices { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_GAMECONTROLLER_IGNORE_DEVICES"); }
 
 		/// <summary>
@@ -1237,6 +1288,7 @@ partial struct Hint
 		/// This hint can be set anytime.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_GAMECONTROLLER_IGNORE_DEVICES_EXCEPT">SDL_HINT_GAMECONTROLLER_IGNORE_DEVICES_EXCEPT</seealso>
 		public static Hint IgnoreDevicesExcept { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_GAMECONTROLLER_IGNORE_DEVICES_EXCEPT"); }
 
 		/// <summary>
@@ -1269,6 +1321,7 @@ partial struct Hint
 		/// This hint should be set before <see cref="">a gamepad is opened</see>.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_GAMECONTROLLER_SENSOR_FUSION">SDL_HINT_GAMECONTROLLER_SENSOR_FUSION</seealso>
 		public static Hint SensorFusion { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_GAMECONTROLLER_SENSOR_FUSION"); }
 
 		/// <summary>
@@ -1299,17 +1352,14 @@ partial struct Hint
 		/// This hint should be set before <see cref="Sdl(Sdl.BuildAction?)">SDL is initialized</see>.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_GAMECONTROLLERTYPE">SDL_HINT_GAMECONTROLLERTYPE</seealso>
 		public static Hint Type { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_GAMECONTROLLERTYPE"); }
 	}
 
-	/// <summary>
-	/// SDL_HINT_GDK_*
-	/// </summary>
+	/// <summary>SDL_HINT_GDK_*</summary>
 	public static class Gdk
 	{
-		/// <summary>
-		/// SDL_HINT_GDK_TEXTINPUT_*
-		/// </summary>
+		/// <summary>SDL_HINT_GDK_TEXTINPUT_*</summary>
 		public static class TextInput
 		{
 			/// <summary>
@@ -1326,6 +1376,7 @@ partial struct Hint
 			/// This hint should be set before calling <see cref="SDL_StartTextInput"/>().
 			/// </para>
 			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_GDK_TEXTINPUT_DEFAULT_TEXT">SDL_HINT_GDK_TEXTINPUT_DEFAULT_TEXT</seealso>
 			public static Hint DefaultText { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_GDK_TEXTINPUT_DEFAULT_TEXT"); }
 
 			/// <summary>
@@ -1342,6 +1393,7 @@ partial struct Hint
 			/// This hint should be set before calling <see cref="SDL_StartTextInput"/>().
 			/// </para>
 			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_GDK_TEXTINPUT_DESCRIPTION">SDL_HINT_GDK_TEXTINPUT_DESCRIPTION</seealso>
 			public static Hint Description { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_GDK_TEXTINPUT_DESCRIPTION"); }
 
 			/// <summary>
@@ -1361,6 +1413,7 @@ partial struct Hint
 			/// This hint should be set before calling <see cref="SDL_StartTextInput"/>().
 			/// </para>
 			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_GDK_TEXTINPUT_MAX_LENGTH">SDL_HINT_GDK_TEXTINPUT_MAX_LENGTH</seealso>
 			public static Hint MaxLength { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_GDK_TEXTINPUT_MAX_LENGTH"); }
 
 			/// <summary>
@@ -1381,6 +1434,7 @@ partial struct Hint
 			/// This hint should be set before calling <see cref="SDL_StartTextInput"/>().
 			/// </para>
 			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_GDK_TEXTINPUT_SCOPE">SDL_HINT_GDK_TEXTINPUT_SCOPE</seealso>
 			public static Hint Scope { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_GDK_TEXTINPUT_SCOPE"); }
 
 			/// <summary>
@@ -1397,13 +1451,12 @@ partial struct Hint
 			/// This hint should be set before calling <see cref="SDL_StartTextInput"/>().
 			/// </para>
 			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_GDK_TEXTINPUT_TITLE">SDL_HINT_GDK_TEXTINPUT_TITLE</seealso>
 			public static Hint Title { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_GDK_TEXTINPUT_TITLE"); }
 		}
 	}
 
-	/// <summary>
-	/// SDL_HINT_GPU_*
-	/// </summary>
+	/// <summary>SDL_HINT_GPU_*</summary>
 	public static class Gpu
 	{
 		/// <summary>
@@ -1421,16 +1474,1187 @@ partial struct Hint
 		/// This hint should be set before any GPU functions are called.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_GPU_DRIVER">SDL_HINT_GPU_DRIVER</seealso>
 		public static Hint Driver { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_GPU_DRIVER"); }
 	}
 
-	// TODO
+	/// <summary>SDL_HINT_HIDAPI_*</summary>
+	public static class HidApi
+	{
+		/// <summary>
+		/// Gets a hint to control whether <see cref="SDL_hid_enumerate"/>() enumerates all HID devices or only controllers
+		/// </summary>
+		/// <value>
+		/// A hint to control whether <see cref="SDL_hid_enumerate"/>() enumerates all HID devices or only controllers
+		/// </value>
+		/// <remarks>
+		/// <para>
+		/// The hint can be set to the following values:
+		/// <list type="bullet">
+		///		<item>
+		///			<term><c>"0"</c></term>
+		///			<description><see cref="SDL_hid_enumerate"/>() will enumerate all HID devices</description>
+		///		</item>
+		///		<item>
+		///			<term><c>"1"</c></term>
+		///			<description><see cref="SDL_hid_enumerate"/>() will only enumerate controllers (default)</description>
+		///		</item>
+		/// </list>
+		/// </para>
+		/// <para>
+		/// By default SDL will only enumerate controllers, to reduce risk of hanging or crashing on devices with bad drivers and avoiding macOS keyboard capture permission prompts.
+		/// </para>
+		/// <para>
+		/// This hint can be set anytime.
+		/// </para>
+		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_HIDAPI_ENUMERATE_ONLY_CONTROLLERS">SDL_HINT_HIDAPI_ENUMERATE_ONLY_CONTROLLERS</seealso>
+		public static Hint EnumerateOnlyControllers { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_HIDAPI_ENUMERATE_ONLY_CONTROLLERS"); }
+
+		/// <summary>
+		/// Gets a hint containing a list of devices to ignore in <see cref="SDL_hid_enumerate"/>()
+		/// </summary>
+		/// <value>
+		/// A hint containing a list of devices to ignore in <see cref="SDL_hid_enumerate"/>()
+		/// </value>
+		/// <remarks>
+		/// <para>
+		/// The format of the hint is a comma separated list of USB VID/PID pairs in hexadecimal form, e.g. <c>"0xAAAA/0xBBBB,0xCCCC/0xDDDD"</c>.
+		/// </para>
+		/// <para>
+		/// For example, to ignore the Shanwan DS3 controller and any Valve controller, you might use the string <c>"0x2563/0x0523,0x28de/0x0000"</c>.
+		/// </para>
+		/// <para>
+		/// This hint can be set anytime.
+		/// </para>
+		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_HIDAPI_IGNORE_DEVICES">SDL_HINT_HIDAPI_IGNORE_DEVICES</seealso>
+		public static Hint IgnoreDevices { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_HIDAPI_IGNORE_DEVICES"); }
+
+		/// <summary>
+		/// Gets a hint to control whether HIDAPI uses libusb for device access
+		/// </summary>
+		/// <value>
+		/// A hint to control whether HIDAPI uses libusb for device access
+		/// </value>
+		/// <remarks>
+		/// <para>
+		/// By default libusb will only be used for a few devices that require direct USB access, and this can be controlled with <see cref="LibUsbWhitelist"/>.
+		/// </para>
+		/// <para>
+		/// The hint can be set to the following values:
+		/// <list type="bullet">
+		///		<item>
+		///			<term><c>"0"</c></term>
+		///			<description>HIDAPI will not use libusb for device access</description>
+		///		</item>
+		///		<item>
+		///			<term><c>"1"</c></term>
+		///			<description>HIDAPI will use libusb for device access if available (default)</description>
+		///		</item>
+		/// </list>
+		/// </para>
+		/// <para>
+		/// This hint should be set before <see cref="Sdl(Sdl.BuildAction?)">SDL is initialized</see>.
+		/// </para>
+		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_HIDAPI_LIBUSB">SDL_HINT_HIDAPI_LIBUSB</seealso>
+		public static Hint LibUsb { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_HIDAPI_LIBUSB"); }
+
+		/// <summary>
+		/// Gets a hint to control whether HIDAPI uses libusb only for whitelisted devices
+		/// </summary>
+		/// <value>
+		/// A hint to control whether HIDAPI uses libusb only for whitelisted devices
+		/// </value>
+		/// <remarks>
+		/// <para>
+		/// By default libusb will only be used for a few devices that require direct USB access.
+		/// </para>
+		/// <para>
+		/// The hint can be set to the following values:
+		/// <list type="bullet">
+		///		<item>
+		///			<term><c>"0"</c></term>
+		///			<description>HIDAPI will use libusb for all device access</description>
+		///		</item>
+		///		<item>
+		///			<term><c>"1"</c></term>
+		///			<description>HIDAPI will use libusb only for whitelisted devices (default)</description>
+		///		</item>
+		/// </list>
+		/// </para>
+		/// <para>
+		/// This hint should be set before <see cref="Sdl(Sdl.BuildAction?)">SDL is initialized</see>.
+		/// </para>
+		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_HIDAPI_LIBUSB_WHITELIST">SDL_HINT_HIDAPI_LIBUSB_WHITELIST</seealso>
+		public static Hint LibUsbWhitelist { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_HIDAPI_LIBUSB_WHITELIST"); }
+
+		/// <summary>
+		/// Gets a hint to control whether HIDAPI uses udev for device detection
+		/// </summary>
+		/// <value>
+		/// A hint to control whether HIDAPI uses udev for device detection
+		/// </value>
+		/// <remarks>
+		/// <para>
+		/// The hint can be set to the following values:
+		/// <list type="bullet">
+		///		<item>
+		///			<term><c>"0"</c></term>
+		///			<description>HIDAPI will poll for device changes</description>
+		///		</item>
+		///		<item>
+		///			<term><c>"1"</c></term>
+		///			<description>HIDAPI will use udev for device detection (default)</description>
+		///		</item>
+		/// </list>
+		/// </para>
+		/// <para>
+		/// This hint should be set before <see cref="Sdl(Sdl.BuildAction?)">SDL is initialized</see>.
+		/// </para>
+		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_HIDAPI_UDEV">SDL_HINT_HIDAPI_UDEV</seealso>
+		public static Hint UDev { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_HIDAPI_UDEV"); }
+	}
 
 	/// <summary>
-	/// SDL_HINT_JOYSTICK_*
+	/// Gets a hint describing what IME UI elements the application can display
 	/// </summary>
+	/// <value>
+	/// A hint describing what IME UI elements the application can display
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// By default IME UI is handled using native components by the OS where possible, however this can interfere with or not be visible when exclusive fullscreen mode is used.
+	/// </para>
+	/// <para>
+	/// The hint can be set to a comma separated list containing the following items:
+	/// <list type="bullet">
+	///		<item>
+	///			<term><c>"none"</c> or <c>"0"</c></term>
+	///			<description>The application can't render any IME elements, and native UI should be used (default)</description>
+	///		</item>
+	///		<item>
+	///			<term><c>"composition"</c></term>
+	///			<description>The application handles <see cref="SDL_EVENT_TEXT_EDITING"/> events and can render the composition text</description>
+	///		</item>
+	///		<item>
+	///			<term><c>"candidates"</c></term>
+	///			<description>The application handles <see cref="SDL_EVENT_TEXT_EDITING_CANDIDATES"/> and can render the candidate list</description>
+	///		</item>
+	/// </list>
+	/// </para>
+	/// <para>
+	/// This hint should be set before <see cref="Sdl(Sdl.BuildAction?)">SDL is initialized</see>.
+	/// </para>
+	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_IME_IMPLEMENTED_UI">SDL_HINT_IME_IMPLEMENTED_UI</seealso>
+	public static Hint ImeImplementedUI { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_IME_IMPLEMENTED_UI"); }
+
+	/// <summary>SDL_HINT_IOS_*</summary>
+	public static class IOS
+	{
+		/// <summary>
+		/// Gets a hint controlling whether the home indicator bar on iPhone X should be hidden
+		/// </summary>
+		/// <value>
+		/// A hint controlling whether the home indicator bar on iPhone X should be hidden
+		/// </value>
+		/// <remarks>
+		/// <para>
+		/// The hint can be set to the following values:
+		/// <list type="bullet">
+		///		<item>
+		///			<term><c>"0"</c></term>
+		///			<description>The indicator bar is not hidden (default for windowed applications)</description>
+		///		</item>
+		///		<item>
+		///			<term><c>"1"</c></term>
+		///			<description>The indicator bar is hidden and is shown when the screen is touched (useful for movie playback applications)</description>
+		///		</item>
+		///		<item>
+		///			<term><c>"2"</c></term>
+		///			<description>The indicator bar is dim and the first swipe makes it visible and the second swipe performs the "home" action (default for fullscreen applications)</description>
+		///		</item>
+		/// </list>
+		/// </para>
+		/// <para>
+		/// This hint can be set anytime.
+		/// </para>
+		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_IOS_HIDE_HOME_INDICATOR">SDL_HINT_IOS_HIDE_HOME_INDICATOR</seealso>
+		public static Hint HideHomeIndicator { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_IOS_HIDE_HOME_INDICATOR"); }
+	}
+
+	/// <summary>SDL_HINT_JOYSTICK_*</summary>
 	public static class Joystick
 	{
+		/// <summary>
+		/// Gets a hint that lets you enable joystick (and gamecontroller) events even when your app is in the background
+		/// </summary>
+		/// <value>
+		/// A hint that lets you enable joystick (and gamecontroller) events even when your app is in the background
+		/// </value>
+		/// <remarks>
+		/// <para>
+		/// The hint can be set to the following values:
+		/// <list type="bullet">
+		///		<item>
+		///			<term><c>"0"</c></term>
+		///			<description>Disable joystick &amp; gamecontroller input events when the application is in the background (default)</description>
+		///		</item>
+		///		<item>
+		///			<term><c>"1"</c></term>
+		///			<description>Enable joystick &amp; gamecontroller input events when the application is in the background</description>
+		///		</item>
+		/// </list>
+		/// </para>
+		/// <para>
+		/// This hint can be set anytime.
+		/// </para>
+		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS">SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS</seealso>
+		public static Hint AllowBackgroundEvents { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS"); }
+
+		/// <summary>SDL_HINT_JOYSTICK_ARCADESTICK_*</summary>
+		public static class ArcadeStick
+		{
+			/// <summary>
+			/// Gets a hint containing a list of arcade stick style controllers
+			/// </summary>
+			/// <value>
+			/// A hint containing a list of arcade stick style controllers
+			/// </value>
+			/// <remarks>
+			/// <para>
+			/// The format of this hint is a comma separated list of USB VID/PID pairs in hexadecimal form, e.g. <c>"0xAAAA/0xBBBB,0xCCCC/0xDDDD"</c>.
+			/// </para>
+			/// <para>
+			/// The hint can also take the form of <c>"@file"</c>, in which case the named <c>file</c> will be loaded and interpreted as the value of the hint.
+			/// </para>
+			/// <para>
+			/// This hint can be set anytime.
+			/// </para>
+			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_ARCADESTICK_DEVICES">SDL_HINT_JOYSTICK_ARCADESTICK_DEVICES</seealso>
+			public static Hint Devices { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_ARCADESTICK_DEVICES"); }
+
+			/// <summary>
+			/// Gets a hint containing a list of devices that are not arcade stick style controllers
+			/// </summary>
+			/// <value>
+			/// A hint containing a list of devices that are not arcade stick style controllers
+			/// </value>
+			/// <remarks>
+			/// <para>
+			/// </para>
+			/// This hint will override <see cref="Devices"/> and the built in device list.
+			/// <para>
+			/// The format of this hint is a comma separated list of USB VID/PID pairs in hexadecimal form, e.g. <c>"0xAAAA/0xBBBB,0xCCCC/0xDDDD"</c>.
+			/// </para>
+			/// <para>
+			/// The hint can also take the form of <c>"@file"</c>, in which case the named <c>file</c> will be loaded and interpreted as the value of the hint.
+			/// </para>
+			/// <para>
+			/// This hint can be set anytime.
+			/// </para>
+			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_ARCADESTICK_DEVICES_EXCLUDED">SDL_HINT_JOYSTICK_ARCADESTICK_DEVICES_EXCLUDED</seealso>
+			public static Hint DevicesExcluded { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_ARCADESTICK_DEVICES_EXCLUDED"); }
+		}
+
+		/// <summary>SDL_HINT_JOYSTICK_BLACKLIST_*</summary>
+		public static class Blacklist
+		{
+			/// <summary>
+			/// Gets a hint containing a list of devices that should not be considered joysticks
+			/// </summary>
+			/// <value>
+			/// A hint containing a list of devices that should not be considered joysticks
+			/// </value>
+			/// <remarks>
+			/// <para>
+			/// The format of this hint is a comma separated list of USB VID/PID pairs in hexadecimal form, e.g. <c>"0xAAAA/0xBBBB,0xCCCC/0xDDDD"</c>.
+			/// </para>
+			/// <para>
+			/// The hint can also take the form of <c>"@file"</c>, in which case the named <c>file</c> will be loaded and interpreted as the value of the hint.
+			/// </para>
+			/// <para>
+			/// This hint can be set anytime.
+			/// </para>
+			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_BLACKLIST_DEVICES">SDL_HINT_JOYSTICK_BLACKLIST_DEVICES</seealso>
+			public static Hint Devices { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_BLACKLIST_DEVICES"); }
+
+			/// <summary>
+			/// Gets a hint containing a list of devices that should be considered joysticks
+			/// </summary>
+			/// <value>
+			/// A hint containing a list of devices that should be considered joysticks
+			/// </value>
+			/// <remarks>
+			/// <para>
+			/// </para>
+			/// This hint will override <see cref="Devices"/> and the built in device list.
+			/// <para>
+			/// The format of this hint is a comma separated list of USB VID/PID pairs in hexadecimal form, e.g. <c>"0xAAAA/0xBBBB,0xCCCC/0xDDDD"</c>.
+			/// </para>
+			/// <para>
+			/// The hint can also take the form of <c>"@file"</c>, in which case the named <c>file</c> will be loaded and interpreted as the value of the hint.
+			/// </para>
+			/// <para>
+			/// This hint can be set anytime.
+			/// </para>
+			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_BLACKLIST_DEVICES_EXCLUDED">SDL_HINT_JOYSTICK_BLACKLIST_DEVICES_EXCLUDED</seealso>
+			public static Hint DevicesExcluded { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_BLACKLIST_DEVICES_EXCLUDED"); }
+		}
+
+		/// <summary>
+		/// Gets a hint containing a comma separated list of devices to open as joysticks
+		/// </summary>
+		/// <value>
+		/// A hint containing a comma separated list of devices to open as joysticks
+		/// </value>
+		/// <remarks>
+		/// <para>
+		/// This hint is currently only used by the Linux joystick driver
+		/// </para>
+		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_DEVICE">SDL_HINT_JOYSTICK_DEVICE</seealso>
+		public static Hint Device { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_HINT_JOYSTICK_DEVICE"); }
+
+		/// <summary>
+		/// Gets a hint controlling whether DirectInput should be used for controllers
+		/// </summary>
+		/// <value>
+		/// A hint controlling whether DirectInput should be used for controllers
+		/// </value>
+		/// <remarks>
+		/// <para>
+		/// The hint can be set to the following values:
+		/// <list type="bullet">
+		///		<item>
+		///			<term><c>"0"</c></term>
+		///			<description>Disable DirectInput detection</description>
+		///		</item>
+		///		<item>
+		///			<term><c>"1"</c></term>
+		///			<description>Enable DirectInput detection (default)</description>
+		///		</item>
+		/// </list>
+		/// </para>
+		/// <para>
+		/// This hint should be set before <see cref="Sdl(Sdl.BuildAction?)">SDL is initialized</see>.
+		/// </para>
+		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_DIRECTINPUT">SDL_HINT_JOYSTICK_DIRECTINPUT</seealso>
+		public static Hint DirectInput { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_DIRECTINPUT"); }
+
+		/// <summary>
+		/// Gets a hint controlling whether enhanced reports should be used for controllers when using the HIDAPI driver
+		/// </summary>
+		/// <value>
+		/// A hint controlling whether enhanced reports should be used for controllers when using the HIDAPI driver
+		/// </value>
+		/// <remarks>
+		/// <para>
+		/// Enhanced reports allow rumble and effects on Bluetooth PlayStation controllers and gyro on Nintendo Switch controllers, 
+		/// but break Windows DirectInput for other applications that don't use SDL.
+		/// </para>
+		///<para>
+		/// Once enhanced reports are enabled, they can't be disabled on PlayStation controllers without power cycling the controller.
+		/// </para>
+		/// <para>
+		/// The hint can be set to the following values:
+		/// <list type="bullet">
+		///		<item>
+		///			<term><c>"0"</c></term>
+		///			<description>Enhanced reports are not enabled</description>
+		///		</item>
+		///		<item>
+		///			<term><c>"1"</c></term>
+		///			<description>Enhanced reports are enabled (default)</description>
+		///		</item>
+		///		<item>
+		///			<term><c>"auto"</c></term>
+		///			<description>Enhanced features are advertised to the application, but SDL doesn't change the controller report mode unless the application uses them</description>
+		///		</item>
+		/// </list>
+		/// </para>
+		/// <para>
+		/// This hint can be set anytime.
+		/// </para>
+		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_ENHANCED_REPORTS">SDL_HINT_JOYSTICK_ENHANCED_REPORTS</seealso>
+		public static Hint EnhancedReports { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_ENHANCED_REPORTS"); }
+
+		/// <summary>SDL_HINT_JOYSTICK_FLIGHTSTICK_*</summary>
+		public static class FlightStick
+		{
+			/// <summary>
+			/// Gets a hint containing a list of flightstick style controllers
+			/// </summary>
+			/// <value>
+			/// A hint containing a list of flightstick style controllers
+			/// </value>
+			/// <remarks>
+			/// <para>
+			/// The format of this hint is a comma separated list of USB VID/PID pairs in hexadecimal form, e.g. <c>"0xAAAA/0xBBBB,0xCCCC/0xDDDD"</c>.
+			/// </para>
+			/// <para>
+			/// The hint can also take the form of <c>"@file"</c>, in which case the named <c>file</c> will be loaded and interpreted as the value of the hint.
+			/// </para>
+			/// <para>
+			/// This hint can be set anytime.
+			/// </para>
+			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_FLIGHTSTICK_DEVICES">SDL_HINT_JOYSTICK_FLIGHTSTICK_DEVICES</seealso>
+			public static Hint Devices { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_FLIGHTSTICK_DEVICES"); }
+
+			/// <summary>
+			/// Gets a hint containing a list of devices that are not flightstick style controllers
+			/// </summary>
+			/// <value>
+			/// A hint containing a list of devices that are not flightstick style controllers
+			/// </value>
+			/// <remarks>
+			/// <para>
+			/// </para>
+			/// This hint will override <see cref="Devices"/> and the built in device list.
+			/// <para>
+			/// The format of this hint is a comma separated list of USB VID/PID pairs in hexadecimal form, e.g. <c>"0xAAAA/0xBBBB,0xCCCC/0xDDDD"</c>.
+			/// </para>
+			/// <para>
+			/// The hint can also take the form of <c>"@file"</c>, in which case the named <c>file</c> will be loaded and interpreted as the value of the hint.
+			/// </para>
+			/// <para>
+			/// This hint can be set anytime.
+			/// </para>
+			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_FLIGHTSTICK_DEVICES_EXCLUDED">SDL_HINT_JOYSTICK_FLIGHTSTICK_DEVICES_EXCLUDED</seealso>
+			public static Hint DevicesExcluded { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_FLIGHTSTICK_DEVICES_EXCLUDED"); }
+		}
+
+		/// <summary>SDL_HINT_JOYSTICK_GAMECUBE_*</summary>
+		public static class GameCube
+		{
+			/// <summary>
+			/// Gets a hint containing a list of devices known to have a GameCube form factor
+			/// </summary>
+			/// <value>
+			/// A hint containing a list of devices known to have a GameCube form factor
+			/// </value>
+			/// <remarks>
+			/// <para>
+			/// The format of this hint is a comma separated list of USB VID/PID pairs in hexadecimal form, e.g. <c>"0xAAAA/0xBBBB,0xCCCC/0xDDDD"</c>.
+			/// </para>
+			/// <para>
+			/// The hint can also take the form of <c>"@file"</c>, in which case the named <c>file</c> will be loaded and interpreted as the value of the hint.
+			/// </para>
+			/// <para>
+			/// This hint can be set anytime.
+			/// </para>
+			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_GAMECUBE_DEVICES">SDL_HINT_JOYSTICK_GAMECUBE_DEVICES</seealso>
+			public static Hint Devices { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_GAMECUBE_DEVICES"); }
+
+			/// <summary>
+			/// Gets a hint containing a list of devices known not to have a GameCube form factor
+			/// </summary>
+			/// <value>
+			/// A hint containing a list of devices known not to have a GameCube form factor
+			/// </value>
+			/// <remarks>
+			/// <para>
+			/// </para>
+			/// This hint will override <see cref="Devices"/> and the built in device list.
+			/// <para>
+			/// The format of this hint is a comma separated list of USB VID/PID pairs in hexadecimal form, e.g. <c>"0xAAAA/0xBBBB,0xCCCC/0xDDDD"</c>.
+			/// </para>
+			/// <para>
+			/// The hint can also take the form of <c>"@file"</c>, in which case the named <c>file</c> will be loaded and interpreted as the value of the hint.
+			/// </para>
+			/// <para>
+			/// This hint can be set anytime.
+			/// </para>
+			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_GAMECUBE_DEVICES_EXCLUDED">SDL_HINT_JOYSTICK_GAMECUBE_DEVICES_EXCLUDED</seealso>
+			public static Hint DevicesExcluded { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_GAMECUBE_DEVICES_EXCLUDED"); }
+		}
+
+		/// <summary>
+		/// Gets a hint controlling whether GameInput should be used for controller handling on Windows
+		/// </summary>
+		/// <value>
+		/// A hint controlling whether GameInput should be used for controller handling on Windows
+		/// </value> 
+		/// <remarks>
+		/// <para>
+		/// The hint can be set to the following values:
+		/// <list type="bullet">
+		///		<item>
+		///			<term><c>"0"</c></term>
+		///			<description>GameInput is not used</description>
+		///		</item>
+		///		<item>
+		///			<term><c>"1"</c></term>
+		///			<description>GameInput is used</description>
+		///		</item>
+		/// </list>
+		/// </para>
+		/// <para>
+		/// The default is <c>"1"</c> on GDK platforms, and <c>"0"</c> otherwise.
+		/// </para>
+		/// <para>
+		/// This hint should be set before <see cref="Sdl(Sdl.BuildAction?)">SDL is initialized</see>.
+		/// </para>
+		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_GAMEINPUT">SDL_HINT_JOYSTICK_GAMEINPUT</seealso>
+		public static Hint GameInput { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_GAMEINPUT"); }
+
+		/// <summary>
+		/// Gets a hint containing a list of devices and their desired number of haptic (force feedback) enabled axis
+		/// </summary>
+		/// <value>
+		/// A hint containing a list of devices and their desired number of haptic (force feedback) enabled axis
+		/// </value>
+		/// <remarks>
+		/// <para>
+		/// The format of this hint is a comma separated list of USB VID/PID pairs in hexadecimal form plus the number of desired axes,
+		/// e.g. <c>"0xAAAA/0xBBBB/1,0xCCCC/0xDDDD/3"</c>.
+		/// </para>
+		/// <para>
+		/// This hint supports a "wildcard" device that will set the number of haptic axes on all initialized haptic devices which were not defined explicitly in this hint:
+		/// <c>"0xFFFF/0xFFFF/1"</c>.
+		/// </para>
+		/// <para>
+		/// This hint should be set before <see cref="">a controller is opened</see>. The number of haptic axes won't exceed the number of real axes found on the device.
+		/// </para>
+		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HAPTIC_AXES">SDL_HINT_JOYSTICK_HAPTIC_AXES</seealso>
+		public static Hint HapticAxes { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_HAPTIC_AXES"); }
+
+		/// <summary>SDL_HINT_JOYSTICK_HIDAPI_*</summary>
+		/// <remarks>
+		/// For the hint SDL_HINT_JOYSTICK_HIDAPI (<c>"SDL_JOYSTICK_HIDAPI"</c>) see <see cref="UseDrivers"/>.
+		/// </remarks>
+		public static class HidApi
+		{
+			/// <summary>SDL_HINT_JOYSTICK_HIDAPI_8BITDO_*</summary>
+			/// <remarks>
+			/// For the hint SDL_HINT_JOYSTICK_HIDAPI_8BITDO (<c>"SDL_JOYSTICK_HIDAPI_8BITDO"</c>) see <see cref="UseDriver"/>.
+			/// </remarks>
+			public static class _8BitDo
+			{
+				/// <summary>
+				/// Gets a hint controlling whether the HIDAPI driver for 8BitDo controllers should be used
+				/// </summary>
+				/// <value>
+				/// A hint controlling whether the HIDAPI driver for 8BitDo controllers should be used
+				/// </value>
+				/// <remarks>
+				/// <para>
+				/// The hint can be set to the following values:
+				/// <list type="bullet">
+				///		<item>
+				///			<term><c>"0"</c></term>
+				///			<description>HIDAPI driver is not used</description>
+				///		</item>
+				///		<item>
+				///			<term><c>"1"</c></term>
+				///			<description>HIDAPI driver is used</description>
+				///		</item>
+				/// </list>
+				/// </para>
+				/// <para>
+				/// The default value for this hint is the value of <see cref="UseDrivers"/>.
+				/// </para>
+				/// </remarks>
+				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_8BITDO">SDL_HINT_JOYSTICK_HIDAPI_8BITDO</seealso>
+				public static Hint UseDriver { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_HIDAPI_8BITDO"); }
+			}
+
+			/// <summary>SDL_HINT_JOYSTICK_HIDAPI_FLYDIGI_*</summary>
+			/// <remarks>
+			/// For the hint SDL_HINT_JOYSTICK_HIDAPI_FLYDIGI (<c>"SDL_JOYSTICK_HIDAPI_FLYDIGI"</c>) see <see cref="UseDriver"/>.
+			/// </remarks>
+			public static class Flydigi
+			{
+				/// <summary>
+				/// Gets a hint controlling whether the HIDAPI driver for Flydigi controllers should be used
+				/// </summary>
+				/// <value>
+				/// A hint controlling whether the HIDAPI driver for Flydigi controllers should be used
+				/// </value>
+				/// <remarks>
+				/// <para>
+				/// The hint can be set to the following values:
+				/// <list type="bullet">
+				///		<item>
+				///			<term><c>"0"</c></term>
+				///			<description>HIDAPI driver is not used</description>
+				///		</item>
+				///		<item>
+				///			<term><c>"1"</c></term>
+				///			<description>HIDAPI driver is used</description>
+				///		</item>
+				/// </list>
+				/// </para>
+				/// <para>
+				/// The default value for this hint is the value of <see cref="UseDrivers"/>.
+				/// </para>
+				/// </remarks>
+				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_FLYDIGI">SDL_HINT_JOYSTICK_HIDAPI_FLYDIGI</seealso>
+				public static Hint UseDriver { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_HIDAPI_FLYDIGI"); }
+			}
+
+			/// <summary>SDL_HINT_JOYSTICK_HIDAPI_GAMECUBE_*</summary>
+			/// <remarks>
+			/// For the hint SDL_HINT_JOYSTICK_HIDAPI_GAMECUBE (<c>"SDL_JOYSTICK_HIDAPI_GAMECUBE"</c>) see <see cref="UseDriver"/>.
+			/// </remarks>
+			public static class GameCube
+			{
+				/// <summary>
+				/// Gets a hint controlling whether rumble is used to implement the GameCube controller's 3 rumble modes (Stop(0), Rumble(1), and StopHard(2))
+				/// </summary>
+				/// <value>
+				/// A hint controlling whether rumble is used to implement the GameCube controller's 3 rumble modes (Stop(0), Rumble(1), and StopHard(2))
+				/// </value>
+				/// <remarks>
+				/// <para>
+				/// This is useful for applications that need full compatibility for things like ADSR envelopes.
+				/// <list type="bullet">
+				///		<item>
+				///			<description>Stop is implemented by setting <see cref="low_frequency_rumble"/> to <c>0</c> and <see cref="high_frequency_rumble"/> <c>&gt; 0</c></description>
+				///		</item>
+				///		<item>
+				///			<description>Rumble is both at any arbitrary value</description>
+				///		</item>
+				///		<item>
+				///			<description>StopHard is implemented by setting both <see cref="low_frequency_rumble"/> and <see cref="high_frequency_rumble"/> to <c>0</c></description>
+				///		</item>
+				/// </list>
+				/// </para>
+				/// <para>
+				/// The hint can be set to the following values:
+				/// <list type="bullet">
+				///		<item>
+				///			<term><c>"0"</c></term>
+				///			<description>Normal rumble behavior is behavior is used (default)</description>
+				///		</item>
+				///		<item>
+				///			<term><c>"1"</c></term>
+				///			<description>Proper GameCube controller rumble behavior is used</description>
+				///		</item>
+				/// </list>
+				/// </para>
+				/// <para>
+				/// This hint can be set anytime.
+				/// </para>
+				/// </remarks>
+				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_GAMECUBE_RUMBLE_BRAKE">SDL_HINT_JOYSTICK_HIDAPI_GAMECUBE_RUMBLE_BRAKE</seealso>
+				public static Hint RumbleBrake { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_HIDAPI_GAMECUBE_RUMBLE_BRAKE"); }
+
+				/// <summary>
+				/// Gets a hint controlling whether the HIDAPI driver for Nintendo GameCube controllers should be used
+				/// </summary>
+				/// <value>
+				/// A hint controlling whether the HIDAPI driver for Nintendo GameCube controllers should be used
+				/// </value>
+				/// <remarks>
+				/// <para>
+				/// The hint can be set to the following values:
+				/// <list type="bullet">
+				///		<item>
+				///			<term><c>"0"</c></term>
+				///			<description>HIDAPI driver is not used</description>
+				///		</item>
+				///		<item>
+				///			<term><c>"1"</c></term>
+				///			<description>HIDAPI driver is used</description>
+				///		</item>
+				/// </list>
+				/// </para>
+				/// <para>
+				/// The default value for this hint is the value of <see cref="UseDrivers"/>.
+				/// </para>
+				/// <para>
+				/// This hint should be set before initializing joysticks and gamepads
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// </para>
+				/// </remarks>
+				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_GAMECUBE">SDL_HINT_JOYSTICK_HIDAPI_GAMECUBE</seealso>
+				public static Hint UseDriver { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_HIDAPI_GAMECUBE"); }
+			}
+
+			/// <summary>SDL_HINT_JOYSTICK_HIDAPI_GIP_*</summary>
+			/// <remarks>
+			/// For the hint SDL_HINT_JOYSTICK_HIDAPI_GIP (<c>"SDL_JOYSTICK_HIDAPI_GIP"</c>) see <see cref="UseDriver"/>.
+			/// </remarks>
+			public static class Gip
+			{
+				/// <summary>
+				/// Gets a hint controlling whether the new HIDAPI driver for wired Xbox One (GIP) controllers should reset the controller if it can't get the metadata from the controller
+				/// </summary>
+				/// <value>
+				/// A hint controlling whether the new HIDAPI driver for wired Xbox One (GIP) controllers should reset the controller if it can't get the metadata from the controller
+				/// </value>
+				/// <remarks>
+				/// <para>
+				/// The hint can be set to the following values:
+				/// <list type="bullet">
+				///		<item>
+				///			<term><c>"0"</c></term>
+				///			<description>Assume this is a generic controller</description>
+				///		</item>
+				///		<item>
+				///			<term><c>"1"</c></term>
+				///			<description>Reset the controller to get metadata</description>
+				///		</item>
+				/// </list>
+				/// </para>
+				/// <para>
+				/// By default the controller is not reset.
+				/// </para>
+				/// <para>
+				/// This hint should be set before initializing joysticks and gamepads
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// </para>
+				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_GIP_RESET_FOR_METADATA">SDL_HINT_JOYSTICK_HIDAPI_GIP_RESET_FOR_METADATA</seealso>
+				/// </remarks>
+				public static Hint ResetForMetadata { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_HIDAPI_GIP_RESET_FOR_METADATA"); }
+
+				/// <summary>
+				/// Gets a hint controlling whether the new HIDAPI driver for wired Xbox One (GIP) controllers should be used
+				/// </summary>
+				/// <value>
+				/// A hint controlling whether the new HIDAPI driver for wired Xbox One (GIP) controllers should be used
+				/// </value>
+				/// <remarks>
+				/// <para>
+				/// The hint can be set to the following values:
+				/// <list type="bullet">
+				///		<item>
+				///			<term><c>"0"</c></term>
+				///			<description>HIDAPI driver is not used</description>
+				///		</item>
+				///		<item>
+				///			<term><c>"1"</c></term>
+				///			<description>HIDAPI driver is used</description>
+				///		</item>
+				/// </list>
+				/// </para>
+				/// <para>
+				/// The default value for this hint is the value of <see cref="SDL_HINT_JOYSTICK_HIDAPI_XBOX_ONE"/>.
+				/// </para>
+				/// <para>
+				/// This hint should be set before initializing joysticks and gamepads
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// </para>
+				/// </remarks>
+				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_GIP">SDL_HINT_JOYSTICK_HIDAPI_GIP</seealso>
+				public static Hint UseDriver { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_HIDAPI_GIP"); }
+			}
+
+			/// <summary>
+			/// SDL_HINT_JOYSTICK_HIDAPI_JOYCON_*, SDL_HINT_JOYSTICK_HIDAPI_JOY_CONS_* and SDL_HINT_JOYSTICK_HIDAPI_*_JOY_CONS
+			/// </summary>
+			/// <remarks>
+			/// For the hint SDL_HINT_JOYSTICK_HIDAPI_JOY_CONS (<c>"SDL_JOYSTICK_HIDAPI_JOY_CONS"</c>) see <see cref="UseDriver"/>.
+			/// </remarks>
+			public static class JoyCons
+			{
+				/// <summary>
+				/// Gets a hint controlling whether Nintendo Switch Joy-Con controllers will be combined into a single Pro-like controller when using the HIDAPI driver
+				/// </summary>
+				/// <value>
+				/// A hint controlling whether Nintendo Switch Joy-Con controllers will be combined into a single Pro-like controller when using the HIDAPI driver
+				/// </value>
+				/// <remarks>
+				/// <para>
+				/// The hint can be set to the following values:
+				/// <list type="bullet">
+				///		<item>
+				///			<term><c>"0"</c></term>
+				///			<description>Left and right Joy-Con controllers will not be combined and each will be a mini-gamepad</description>
+				///		</item>
+				///		<item>
+				///			<term><c>"1"</c></term>
+				///			<description>Left and right Joy-Con controllers will be combined into a single controller (default)</description>
+				///		</item>
+				/// </list>
+				/// </para>
+				/// <para>
+				/// This hint should be set before initializing joysticks and gamepads
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// </para>
+				/// </remarks>
+				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_COMBINE_JOY_CONS">SDL_HINT_JOYSTICK_HIDAPI_COMBINE_JOY_CONS</seealso>
+				public static Hint Combine { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_HIDAPI_COMBINE_JOY_CONS"); }
+
+				/// <summary>
+				/// Gets a hint controlling whether the Home button LED should be turned on when a Nintendo Switch Joy-Con controller is opened
+				/// </summary>
+				/// <value>
+				/// A hint controlling whether the Home button LED should be turned on when a Nintendo Switch Joy-Con controller is opened
+				/// </value>
+				/// <remarks>
+				/// <para>
+				/// The hint can be set to the following values:
+				/// <list type="bullet">
+				///		<item>
+				///			<term><c>"0"</c></term>
+				///			<description>Home button LED is turned off</description>
+				///		</item>
+				///		<item>
+				///			<term><c>"1"</c></term>
+				///			<description>Home button LED is turned on</description>
+				///		</item>
+				/// </list>
+				/// </para>
+				/// <para>
+				/// By default the Home button LED state is not changed.
+				/// This hint can also be set to a floating point value between <c>0.0</c> and <c>1.0</c> which controls the brightness of the Home button LED.
+				/// </para>
+				/// <para>
+				/// This hint can be set anytime.
+				/// </para>
+				/// </remarks>
+				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_JOYCON_HOME_LED">SDL_HINT_JOYSTICK_HIDAPI_JOYCON_HOME_LED</seealso>
+				public static Hint HomeLed { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_HIDAPI_JOYCON_HOME_LED"); }
+
+				/// <summary>
+				/// Gets a hint controlling whether the HIDAPI driver for Nintendo Switch Joy-Cons should be used
+				/// </summary>
+				/// <value>
+				/// A hint controlling whether the HIDAPI driver for Nintendo Switch Joy-Cons should be used
+				/// </value>
+				/// <remarks>
+				/// <para>
+				/// The hint can be set to the following values:
+				/// <list type="bullet">
+				///		<item>
+				///			<term><c>"0"</c></term>
+				///			<description>HIDAPI driver is not used</description>
+				///		</item>
+				///		<item>
+				///			<term><c>"1"</c></term>
+				///			<description>HIDAPI driver is used</description>
+				///		</item>
+				/// </list>
+				/// </para>
+				/// <para>
+				/// The default value for this hint is the value of <see cref="UseDrivers"/>.
+				/// </para>
+				/// <para>
+				/// This hint should be set before initializing joysticks and gamepads
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// </para>
+				/// </remarks>
+				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_JOY_CONS">SDL_HINT_JOYSTICK_HIDAPI_JOY_CONS</seealso>
+				public static Hint UseDriver { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_HIDAPI_JOY_CONS"); }
+
+				/// <summary>
+				/// Gets a hint controlling whether Nintendo Switch Joy-Con controllers will be in vertical mode when using the HIDAPI driver
+				/// </summary>
+				/// <value>
+				/// A hint controlling whether Nintendo Switch Joy-Con controllers will be in vertical mode when using the HIDAPI driver
+				/// </value>
+				/// <remarks>
+				/// <para>
+				/// The hint can be set to the following values:
+				/// <list type="bullet">
+				///		<item>
+				///			<term><c>"0"</c></term>
+				///			<description>Left and right Joy-Con controllers will not be in vertical mode (default)</description>
+				///		</item>
+				///		<item>
+				///			<term><c>"1"</c></term>
+				///			<description>Left and right Joy-Con controllers will be in vertical mode</description>
+				///		</item>
+				/// </list>
+				/// </para>
+				/// <para>
+				/// This hint should be set before <see cref="">opening a Joy-Con controller</see>.
+				/// </para>
+				/// </remarks>
+				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_VERTICAL_JOY_CONS">SDL_HINT_JOYSTICK_HIDAPI_VERTICAL_JOY_CONS</seealso>
+				public static Hint Vertical { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_HIDAPI_VERTICAL_JOY_CONS"); }
+			}
+
+			/// <summary>SDL_HINT_JOYSTICK_HIDAPI_LG4FF_*</summary>
+			/// <remarks>
+			/// For the hint SDL_HINT_JOYSTICK_HIDAPI_LG4FF (<c>"SDL_JOYSTICK_HIDAPI_LG4FF"</c>) see <see cref="UseDriver"/>.
+			/// </remarks>
+			public static class Lg4Ff
+			{
+				/// <summary>
+				/// Gets a hint controlling whether the HIDAPI driver for some Logitech wheels should be used
+				/// </summary>
+				/// <value>
+				/// A hint controlling whether the HIDAPI driver for some Logitech wheels should be used
+				/// </value>
+				/// <remarks>
+				/// <para>
+				/// The hint can be set to the following values:
+				/// <list type="bullet">
+				///		<item>
+				///			<term><c>"0"</c></term>
+				///			<description>HIDAPI driver is not used</description>
+				///		</item>
+				///		<item>
+				///			<term><c>"1"</c></term>
+				///			<description>HIDAPI driver is used</description>
+				///		</item>
+				/// </list>
+				/// </para>
+				/// <para>
+				/// The default value for this hint is the value of <see cref="UseDrivers"/>.
+				/// </para>
+				/// </remarks>
+				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_LG4FF">SDL_HINT_JOYSTICK_HIDAPI_LG4FF</seealso>
+				public static Hint UseDriver { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_HIDAPI_LG4FF"); }
+			}
+
+			/// <summary>SDL_HINT_JOYSTICK_HIDAPI_LUNA_*</summary>
+			/// <remarks>
+			/// For the hint SDL_HINT_JOYSTICK_HIDAPI_LUNA (<c>"SDL_JOYSTICK_HIDAPI_LUNA"</c>) see <see cref="UseDriver"/>.
+			/// </remarks>
+			public static class Luna
+			{
+				/// <summary>
+				/// Gets a hint controlling whether the HIDAPI driver for Amazon Luna controllers connected via Bluetooth should be used
+				/// </summary>
+				/// <value>
+				/// A hint controlling whether the HIDAPI driver for Amazon Luna controllers connected via Bluetooth should be used
+				/// </value>
+				/// <remarks>
+				/// <para>
+				/// The hint can be set to the following values:
+				/// <list type="bullet">
+				///		<item>
+				///			<term><c>"0"</c></term>
+				///			<description>HIDAPI driver is not used</description>
+				///		</item>
+				///		<item>
+				///			<term><c>"1"</c></term>
+				///			<description>HIDAPI driver is used</description>
+				///		</item>
+				/// </list>
+				/// </para>
+				/// <para>
+				/// The default value for this hint is the value of <see cref="UseDrivers"/>.
+				/// </para>
+				/// <para>
+				/// This hint should be set before initializing joysticks and gamepads
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// </para>
+				/// </remarks>
+				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_LUNA">SDL_HINT_JOYSTICK_HIDAPI_LUNA</seealso>
+				public static Hint UseDriver { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_HIDAPI_LUNA"); }
+			}
+
+			/// <summary>SDL_HINT_JOYSTICK_HIDAPI_NINTENDO_CLASSIC_*</summary>
+			/// <remarks>
+			/// For the hint SDL_HINT_JOYSTICK_HIDAPI_NINTENDO_CLASSIC (<c>"SDL_JOYSTICK_HIDAPI_NINTENDO_CLASSIC"</c>) see <see cref="UseDriver"/>.
+			/// </remarks>
+			public static class NintendoClassic
+			{
+				/// <summary>
+				/// Gets a hint controlling whether the HIDAPI driver for Nintendo Online classic controllers should be used
+				/// </summary>
+				/// <value>
+				/// A hint controlling whether the HIDAPI driver for Nintendo Online classic controllers should be used
+				/// </value>
+				/// <remarks>
+				/// <para>
+				/// The hint can be set to the following values:
+				/// <list type="bullet">
+				///		<item>
+				///			<term><c>"0"</c></term>
+				///			<description>HIDAPI driver is not used</description>
+				///		</item>
+				///		<item>
+				///			<term><c>"1"</c></term>
+				///			<description>HIDAPI driver is used</description>
+				///		</item>
+				/// </list>
+				/// </para>
+				/// <para>
+				/// The default value for this hint is the value of <see cref="UseDrivers"/>.
+				/// </para>
+				/// <para>
+				/// This hint should be set before initializing joysticks and gamepads
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// </para>
+				/// </remarks>
+				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_NINTENDO_CLASSIC">SDL_HINT_JOYSTICK_HIDAPI_NINTENDO_CLASSIC</seealso>
+				public static Hint UseDriver { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_HIDAPI_NINTENDO_CLASSIC"); }
+			}
+
+			/// <summary>SDL_HINT_JOYSTICK_HIDAPI_PS3_*</summary>
+			/// <remarks>
+			/// For the hint SDL_HINT_JOYSTICK_HIDAPI_PS3 (<c>"SDL_JOYSTICK_HIDAPI_PS3"</c>) see <see cref="UseDriver"/>.
+			/// </remarks>
+			public static class PS3
+			{
+				/// <summary>
+				/// Gets a hint controlling whether the Sony driver (sixaxis.sys) for PS3 controllers (Sixaxis/DualShock 3) should be used
+				/// </summary>
+				/// <value>
+				/// A hint controlling whether the Sony driver (sixaxis.sys) for PS3 controllers (Sixaxis/DualShock 3) should be used
+				/// </value>
+				/// <remarks>
+				/// <para>
+				/// The hint can be set to the following values:
+				/// <list type="bullet">
+				///		<item>
+				///			<term><c>"0"</c></term>
+				///			<description>Sony driver (sixaxis.sys) is not used</description>
+				///		</item>
+				///		<item>
+				///			<term><c>"1"</c></term>
+				///			<description>Sony driver (sixaxis.sys) is used</description>
+				///		</item>
+				/// </list>
+				/// </para>
+				/// <para>
+				/// The default value for this hint is <c>0</c>.
+				/// </para>
+				/// <para>
+				/// This hint should be set before initializing joysticks and gamepads
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// </para>
+				/// </remarks>
+				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_PS3_SIXAXIS_DRIVER">SDL_HINT_JOYSTICK_HIDAPI_PS3_SIXAXIS_DRIVER</seealso>
+				public static Hint SixaxisDriver { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_HIDAPI_PS3_SIXAXIS_DRIVER"); }
+
+				/// <summary>
+				/// Gets a hint controlling whether the HIDAPI driver for PS3 controllers should be used
+				/// </summary>
+				/// <value>
+				/// A hint controlling whether the HIDAPI driver for PS3 controllers should be used
+				/// </value>
+				/// <remarks>
+				/// <para>
+				/// The hint can be set to the following values:
+				/// <list type="bullet">
+				///		<item>
+				///			<term><c>"0"</c></term>
+				///			<description>HIDAPI driver is not used</description>
+				///		</item>
+				///		<item>
+				///			<term><c>"1"</c></term>
+				///			<description>HIDAPI driver is used</description>
+				///		</item>
+				/// </list>
+				/// </para>
+				/// <para>
+				/// The default value for this hint is the value of <see cref="UseDrivers"/> on macOS, and <c>"0"</c> on other platforms.
+				/// </para>
+				/// <para>
+				/// For official Sony driver (sixaxis.sys) use <see cref="SixaxisDriver"/>. See <see href="https://github.com/ViGEm/DsHidMini"/> for an alternative driver on Windows.
+				/// </para>
+				/// <para>
+				/// This hint should be set before initializing joysticks and gamepads
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// </para>
+				/// </remarks>
+				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_PS3">SDL_HINT_JOYSTICK_HIDAPI_PS3</seealso>
+				public static Hint UseDriver { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_HIDAPI_PS3"); }
+			}
+
+			/// <summary>SDL_HINT_JOYSTICK_HIDAPI_PS4_*</summary>
+			/// <remarks>
+			/// For the hint SDL_HINT_JOYSTICK_HIDAPI_PS4 (<c>"SDL_JOYSTICK_HIDAPI_PS4"</c>) see <see cref="UseDriver"/>.
+			/// </remarks>
+			public static class PS4
+			{
+				/// <summary>
+				/// Gets a hint controlling the update rate of the PS4 controller over Bluetooth when using the HIDAPI driver
+				/// </summary>
+				/// <value>
+				/// A hint controlling the update rate of the PS4 controller over Bluetooth when using the HIDAPI driver
+				/// </value>
+				/// <remarks>
+				/// <para>
+				/// This defaults to 4 ms, to match the behavior over USB, and to be more friendly to other Bluetooth devices and older Bluetooth hardware on the computer.
+				/// It can be set to <c>"1"</c> (1000 Hz), <c>"2"</c> (500 Hz), and <c>"4"</c> (250 Hz).
+				/// </para>
+				/// <para>
+				/// This hint can be set anytime, but only takes effect when extended input reports are enabled.
+				/// </para>
+				/// </remarks>
+				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_PS4_REPORT_INTERVAL">SDL_HINT_JOYSTICK_HIDAPI_PS4_REPORT_INTERVAL</seealso>
+				public static Hint ReportInterval { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_HIDAPI_PS4_REPORT_INTERVAL"); }
+
+				/// <summary>
+				/// Gets a hint controlling whether the HIDAPI driver for PS4 controllers should be used
+				/// </summary>
+				/// <value>
+				/// A hint controlling whether the HIDAPI driver for PS4 controllers should be used
+				/// </value>
+				/// <remarks>
+				/// <para>
+				/// The hint can be set to the following values:
+				/// <list type="bullet">
+				///		<item>
+				///			<term><c>"0"</c></term>
+				///			<description>HIDAPI driver is not used</description>
+				///		</item>
+				///		<item>
+				///			<term><c>"1"</c></term>
+				///			<description>HIDAPI driver is used</description>
+				///		</item>
+				/// </list>
+				/// </para>
+				/// <para>
+				/// The default value for this hint is the value of <see cref="UseDrivers"/>.
+				/// </para>
+				/// <para>
+				/// This hint should be set before initializing joysticks and gamepads
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// </para>
+				/// </remarks>
+				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_PS4">SDL_HINT_JOYSTICK_HIDAPI_PS4</seealso>
+				public static Hint UseDriver { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_HIDAPI_PS4"); }
+			}
+
+			/// <summary>
+			/// Gets a hint controlling whether the HIDAPI joystick drivers should be used
+			/// </summary>
+			/// <value>
+			/// A hint controlling whether the HIDAPI joystick drivers should be used
+			/// </value>
+			/// <remarks>
+			/// <para>
+			/// The hint can be set to the following values:
+			/// <list type="bullet">
+			///		<item>
+			///			<term><c>"0"</c></term>
+			///			<description>HIDAPI drivers are not used</description>
+			///		</item>
+			///		<item>
+			///			<term><c>"1"</c></term>
+			///			<description>HIDAPI drivers are used (default)</description>
+			///		</item>
+			/// </list>
+			/// </para>
+			/// <para>
+			/// This variable is the default for all drivers, but can be overridden by the hints for specific drivers.
+			/// </para>
+			/// <para>
+			/// This hint should be set before initializing joysticks and gamepads
+			/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+			/// </para>
+			/// </remarks>
+			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI">SDL_HINT_JOYSTICK_HIDAPI</seealso>
+			public static Hint UseDrivers { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_HIDAPI"); }
+		}
+
 		// TODO
 
 		/// <summary>
@@ -1457,6 +2681,7 @@ partial struct Hint
 		/// This hint should be set before <see cref="Sdl(Sdl.BuildAction?)">SDL is initialized</see>.
 		/// </para>
 		/// </remarks>
+		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_THREAD">SDL_HINT_JOYSTICK_THREAD</seealso>
 		public static Hint Thread { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_THREAD"); }
 	}
 
@@ -1486,6 +2711,7 @@ partial struct Hint
 	/// This hint can be set anytime and is allowed to be changed at anytime.
 	/// </para>
 	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_MAIN_CALLBACK_RATE">SDL_HINT_MAIN_CALLBACK_RATE</seealso>
 	public static Hint MainCallbackRate { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_MAIN_CALLBACK_RATE"); }
 
 	// TODO
