@@ -1,8 +1,4 @@
-﻿using Sdl3Sharp.Events;
-using System;
-using System.Runtime.CompilerServices;
-using static Sdl3Sharp.Hint;
-using static System.Net.WebRequestMethods;
+﻿using System.Runtime.CompilerServices;
 
 namespace Sdl3Sharp;
 
