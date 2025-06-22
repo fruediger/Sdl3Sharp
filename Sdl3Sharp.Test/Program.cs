@@ -5,6 +5,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
+Hint.MainCallbackRate.TrySetValue("120");
+
 using var sdl = new Sdl(builder => builder.SetMetadata("Frame Counter", "0.1", appIdentifier: null));
 
 return sdl.Run(new App(), args);
