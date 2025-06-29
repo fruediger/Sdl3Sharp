@@ -781,3 +781,6 @@ $RECYCLE.BIN/
 
 # Ignoriere das gesamte .idea-Verzeichnis
 .idea/
+
+#???
+TemplateEngineHost/
