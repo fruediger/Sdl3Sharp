@@ -1,8 +1,8 @@
 ﻿using Sdl3Sharp.Internal;
+using Sdl3Sharp.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
 
 namespace Sdl3Sharp;
@@ -365,7 +365,7 @@ public sealed partial class Sdl : IDisposable
 
 			if (args.Length is > 0)
 			{
-				argv = (byte**)NativeMemory.Alloc(unchecked((nuint)args.Length), unchecked((nuint)sizeof(byte*)));
+				argv = (byte**)NativeMemory.Malloc(unchecked((nuint)args.Length * (nuint)sizeof(byte*)));
 				if (argv is not null)
 				{
 					foreach (var arg in args)
@@ -461,7 +461,7 @@ public sealed partial class Sdl : IDisposable
 
 			if (args is { Count: var count } && count is > 0)
 			{
-				argv = (byte**)NativeMemory.Alloc(unchecked((nuint)count), unchecked((nuint)sizeof(byte*)));
+				argv = (byte**)NativeMemory.Malloc(unchecked((nuint)count * (nuint)sizeof(byte*)));
 
 				if (argv is not null)
 				{

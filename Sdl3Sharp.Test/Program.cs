@@ -1,13 +1,20 @@
 ﻿using Sdl3Sharp;
 using Sdl3Sharp.Timing;
+using Sdl3Sharp.Utilities;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
+NativeMemory.TrySetMemoryFunctions(new LoggedMemoryFunctions());
+
 Hint.MainCallbackRate.TrySetValue("120");
 
-using var sdl = new Sdl(builder => builder.SetMetadata("Frame Counter", "0.1", appIdentifier: null));
+using var sdl = new Sdl(builder => builder
+	.SetMetadata("Frame Counter", "0.1", appIdentifier: null)
+	.InitializeSubSystems([SubSystem.Video])
+);
 
 return sdl.Run(new App(), args);
 
@@ -21,7 +28,7 @@ file class App : AppBase
 		var counter = mCounter;
 		var ticks = Timer.NanosecondTicks;
 
-		mTimer = new(app, 250, (timer, interval) =>
+		mTimer = new(app, 1000, (timer, interval) =>
 		{
 			(counter, ticks, var lastCounter, var lastTicks) = (mCounter, Timer.NanosecondTicks, counter, ticks);
 
@@ -42,6 +49,72 @@ file class App : AppBase
 	{
 		mTimer?.Dispose();
 		mTimer = null;
+	}
+}
+
+file sealed class LoggedMemoryFunctions : INativeMemoryFunctions
+{
+	private readonly INativeMemoryFunctions mPreviousMemoryFunctions = NativeMemory.GetMemoryFunctions();
+	private readonly Dictionary<IntPtr, nuint> mAllocations = [];
+
+	public unsafe void* Calloc(nuint elementCount, nuint elementSize)
+	{
+		var result = mPreviousMemoryFunctions.Calloc(elementCount, elementSize);
+		
+		var size = unchecked(elementCount * elementSize);
+
+		_ = Console.Out.WriteLineAsync($"\x1b[2m{nameof(Calloc)}({nameof(elementCount)}: {elementCount}, {nameof(elementSize)}: {elementSize}) returned {(result is not null ? $"0x{unchecked((IntPtr)result).ToString(Unsafe.SizeOf<IntPtr>() is <= 4 ? "X8" : "X16")} ({unchecked((decimal)size).Unitize(out var prefix, scale: 1024):0.###}{(prefix is not null ? $"{prefix}i" : "")}b allocated)": "null")}\x1b[0m");
+
+		if (result is not null)
+		{
+			mAllocations[unchecked((IntPtr)result)] = size;
+		}
+
+		return result;
+	}
+
+	public unsafe void Free(void* memory)
+	{	
+		mPreviousMemoryFunctions.Free(memory);
+
+		_ = Console.Out.WriteLineAsync($"\x1b[2m{nameof(Free)}({nameof(memory)}: {(memory is not null ? $"0x{unchecked((IntPtr)memory).ToString(Unsafe.SizeOf<IntPtr>() is <= 4 ? "X8" : "X16")}": "null")}){(mAllocations.TryGetValue(unchecked((IntPtr)memory), out var size) ? $" ({unchecked((decimal)size).Unitize(out var prefix, scale: 1024):0.###}{(prefix is not null ? $"{prefix}i" : "")}b freed)" : "")}\x1b[0m");
+
+		mAllocations.Remove(unchecked((IntPtr)memory));
+	}
+
+	public unsafe void* Malloc(nuint size)
+	{
+		var result = mPreviousMemoryFunctions.Malloc(size);
+
+		_ = Console.Out.WriteLineAsync($"\x1b[2m{nameof(Malloc)}({nameof(size)}: {size}) returned {(result is not null ? $"0x{unchecked((IntPtr)result).ToString(Unsafe.SizeOf<IntPtr>() is <= 4 ? "X8" : "X16")} ({unchecked((decimal)size).Unitize(out var prefix, scale: 1024):0.###}{(prefix is not null ? $"{prefix}i" : "")}b allocated)": "null")}\x1b[0m");
+
+		if (result is not null)
+		{
+			mAllocations[unchecked((IntPtr)result)] = size;
+		}
+
+		return result;
+	}
+
+	public unsafe void* Realloc(void* memory, nuint newSize)
+	{
+		if (!mAllocations.TryGetValue(unchecked((IntPtr)memory), out var size))
+		{
+			size = 0;
+		}
+
+		var result = mPreviousMemoryFunctions.Realloc(memory, newSize);
+
+		_ = Console.Out.WriteLineAsync($"\x1b[2m{nameof(Realloc)}({nameof(memory)}: {(memory is not null ? $"0x{unchecked((IntPtr)memory).ToString(Unsafe.SizeOf<IntPtr>() is <= 4 ? "X8" : "X16")}" : "null")}, {nameof(newSize)}: {newSize}) returned {(result is not null ? $"0x{unchecked((IntPtr)result).ToString(Unsafe.SizeOf<IntPtr>() is <= 4 ? "X8" : "X16")} ({unchecked((decimal)(newSize > size is var allocated && allocated ? unchecked(newSize - size) : unchecked(size - newSize))).Unitize(out var prefix, scale: 1024):0.###}{(prefix is not null ? $"{prefix}i" : "")}b {(allocated ? "allocated" : "freed")})": "null")}\x1b[0m");
+
+		if (result is not null)
+		{
+			mAllocations[unchecked((IntPtr)result)] = newSize;
+		}
+
+		mAllocations.Remove(unchecked((IntPtr)memory));
+
+		return result;
 	}
 }
 
