@@ -91,6 +91,7 @@ public readonly partial struct EventType :
 			if (destination.Length is > 0)
 			{
 				destination[0] = value;
+				destination = destination[1..];
 				charsWritten += 1;
 
 				return true;

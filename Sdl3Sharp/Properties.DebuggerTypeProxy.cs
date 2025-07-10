@@ -11,7 +11,7 @@ namespace Sdl3Sharp;
 partial class Properties
 {
 	[DebuggerDisplay("???", Name = $"{{{nameof(mName)},nq}}", Type = $"{{{nameof(mType)},nq}}")]
-	private class DebuggerPropertyProxy
+	private class DebuggerPropertyProxy(string name, PropertyType type)
 	{	
 		[DebuggerDisplay($"{{{nameof(mValue)}}}", Name = $"{{{nameof(mName)},nq}}", Type = $"{{{nameof(mType)},nq}}")]
 		private sealed class WithValue<T>(T? value, string name, PropertyType type) : DebuggerPropertyProxy(name, type)
@@ -19,10 +19,8 @@ partial class Properties
 			[DebuggerBrowsable(DebuggerBrowsableState.Never)] private readonly T? mValue = value;
 		}
 
-		[DebuggerBrowsable(DebuggerBrowsableState.Never)] private readonly string mName;
-		[DebuggerBrowsable(DebuggerBrowsableState.Never)] private readonly PropertyType mType;
-
-		private DebuggerPropertyProxy(string name, PropertyType type) { mName = name; mType = type; }
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)] private readonly string mName = name;
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)] private readonly PropertyType mType = type;
 
 		public static DebuggerPropertyProxy Create(string name, PropertyType type) => new(name, type);
 

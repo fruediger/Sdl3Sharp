@@ -53,14 +53,6 @@ partial class Sdl
 	internal unsafe static partial byte* SDL_GetAppMetadataProperty(byte* name);
 
 	/// <summary>
-	/// Get the global SDL properties
-	/// </summary>
-	/// <returns>Returns a valid property ID on success or 0 on failure; call <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError()</see> for more information</returns>
-	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetGlobalProperties">SDL_GetGlobalProperties</seealso>
-	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal static partial uint SDL_GetGlobalProperties();
-
-	/// <summary>
 	/// Get the code revision of SDL that is linked against your program
 	/// </summary>
 	/// <returns>Returns an arbitrary string, uniquely identifying the exact revision of the SDL library in use</returns>

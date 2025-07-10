@@ -117,13 +117,13 @@ public sealed partial class Sdl : IDisposable
 	/// <value>
 	/// The global <see cref="Properties">group</see> of SDL properties, if those could get successfully retrieved; otherwise, <c><see langword="null"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)
 	/// </value>
-	public static Properties? GlobalProperties => (SDL_GetGlobalProperties(), mGlobalProperties) switch
+	public static Properties? GlobalProperties => (Properties.SDL_GetGlobalProperties(), mGlobalProperties) switch
 	{
 		(0, _) => mGlobalProperties = null,
 		(var id, { Id: var otherId }) when id == otherId => mGlobalProperties,
 		(var id, _) => mGlobalProperties = new(sdl: null, id)
 	};
-
+	
 	/// <summary>
 	/// Gets the revision string of the currently loaded native SDL library
 	/// </summary>
@@ -159,6 +159,41 @@ public sealed partial class Sdl : IDisposable
 	/// The version of the currently loaded native SDL library
 	/// </value>
 	public static Version Version => SDL_GetVersion();
+
+	/// <summary>
+	/// Gets the <see cref="Environment">set of environment variables</see> for the current process
+	/// </summary>
+	/// <value>
+	/// The <see cref="Environment">set of environment variables</see> for the current process, if those could get successfully retrieved; otherwise, <c><see langword="null"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// This <see cref="Environment">set of environment variables</see> is initialized at application start and is not affected by external calls to modify process environments (e.g. setenv() or unsetenv()) after that point.
+	/// </para>
+	/// <para>
+	/// To modify this <see cref="Environment">set of environment variables</see> use <see cref="Utilities.Environment.TrySetVariable(string, string, bool)"/> or <see cref="Utilities.Environment.TryUnsetVariable(string)"/>.
+	/// Changes made in this way will not persist outside of SDL, and especially not after <see cref="Dispose">SDL is shut down</see>.
+	/// </para>
+	/// <para>
+	/// If you want for changes to persist in the C runtime environment after <see cref="Dispose">SDL is shut down</see>, use <see cref="Utilities.Environment.TrySetProcessVariableUnsafe(string, string, bool)"/> or <see cref="Utilities.Environment.TryUnsetProcessVariableUnsafe(string)"/>.
+	/// </para>
+	/// </remarks>
+	/// <inheritdoc cref="Utilities.Environment.Environment(Sdl, Utilities.Environment.SDL_Environment*)"/>
+	public Utilities.Environment? ProcessEnvironment
+	{
+		get
+		{
+			unsafe
+			{
+				if (Utilities.Environment.SDL_GetEnvironment() is var environementPtr && environementPtr is not null)
+				{
+					return new(this, environementPtr);
+				}
+
+				return null;
+			}
+		}
+	}
 
 	/// <summary>
 	/// Disposes the <see cref="Sdl"/> instance and quits SDL

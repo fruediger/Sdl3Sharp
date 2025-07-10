@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using unsafe CallocFunc = delegate* unmanaged[Cdecl, SuppressGCTransition]<System.UIntPtr, System.UIntPtr, void*>;
 using unsafe FreeFunc = delegate* unmanaged[Cdecl, SuppressGCTransition]<void*, void>;
@@ -256,6 +257,152 @@ public static partial class NativeMemory
 	public unsafe static T* Malloc<T>(nuint elementCount)
 		where T : unmanaged
 		=> unchecked((T*)SDL_malloc(unchecked((elementCount is > 0 ? elementCount : 1) * (nuint)Unsafe.SizeOf<T>())));
+
+	/// <summary>
+	/// Compares two buffers of memory
+	/// </summary>
+	/// <param name="firstBuffer">The first buffer to compare</param>
+	/// <param name="secondBuffer">The second buffer to compare</param>
+	/// <param name="length">The number of bytes to compare between the buffers</param>
+	/// <returns>
+	/// A value less than <c>0</c>, if <paramref name="firstBuffer"/> is considered "less than" <paramref name="secondBuffer"/> after the first <paramref name="length"/> bytes;
+	/// otherwise a value greater than <c>0</c>, if <paramref name="firstBuffer"/> is considered "greater than" <paramref name="secondBuffer"/> after the first <paramref name="length"/> bytes;
+	/// otherwise <c>0</c>, which means <paramref name="firstBuffer"/> matches <paramref name="secondBuffer"/> exactly for <paramref name="length"/> bytes
+	/// </returns>
+	/// <remarks>
+	/// <para>
+	/// There are special checks in place, for when <paramref name="firstBuffer"/> or <paramref name="secondBuffer"/> are <c><see langword="null"/></c>:
+	/// <list type="bullet">
+	/// <item>
+	///		<term><paramref name="firstBuffer"/> and <paramref name="secondBuffer"/> are both <c><see langword="null"/></c></term>
+	///		<description>This method returns <c>0</c></description>
+	/// </item>
+	/// <item>
+	///		<term><paramref name="firstBuffer"/> is <c><see langword="null"/></c> while <paramref name="secondBuffer"/> is not</term>
+	///		<description>This method returns <c>-1</c></description>
+	/// </item>
+	/// <item>
+	///		<term><paramref name="firstBuffer"/> is not <c><see langword="null"/></c> while <paramref name="secondBuffer"/> is</term>
+	///		<description>This method returns <c>1</c></description>
+	/// </item>
+	/// </list>
+	/// Notice that in all of the special cases above the <paramref name="length"/> doesn't play a role.
+	/// </para>
+	/// <para>
+	/// Note: There are no additional checks in place regarding the length of the buffers and the given <paramref name="length"/> parameter.
+	/// Make sure that both buffers, <paramref name="firstBuffer"/> and <paramref name="secondBuffer"/>, are safely dereferencable for reading for at least <paramref name="length"/> bytes!
+	/// </para>
+	/// </remarks>
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	public unsafe static int MemCmp(void* firstBuffer, void* secondBuffer, nuint length) => (unchecked((IntPtr)firstBuffer), unchecked((IntPtr)secondBuffer)) switch
+	{
+		(0, 0) => 0,
+		(0, _) => -1,
+		(_, 0) => 1,
+		_ => SDL_memcmp(firstBuffer, secondBuffer, length)
+	};
+
+	/// <summary>
+	/// Copies specified number of bytes form one buffer of memory into another non-overlapping one
+	/// </summary>
+	/// <param name="destination">The destination memory region. Must not overlap with <paramref name="source"/>.</param>
+	/// <param name="source">The source memory region. Must not overlap with <paramref name="destination"/>.</param>
+	/// <param name="length">The length in bytes of both <paramref name="destination"/> and <paramref name="source"/></param>
+	/// <returns>The same pointer as the given <paramref name="destination"/></returns>
+	/// <remarks>
+	/// <para>
+	/// There are special checks in place, for when <paramref name="destination"/> or <paramref name="source"/> are <c><see langword="null"/></c>.
+	/// In those cases <paramref name="destination"/> is just returned (even if it's <c><see langword="null"/></c>) without doing anything else.
+	/// </para>
+	/// <para>
+	/// The memory regions must not overlap! If they might do, use <see cref="MemMove(void*, void*, nuint)"/> instead.
+	/// </para>
+	/// <para>
+	/// Note: There are no additional checks in place regarding the length of the buffers and the given <paramref name="length"/> parameter.
+	/// Make sure that <paramref name="destination"/> is safely dereferenable for writing and <paramref name="source"/> is safely dereferencable for reading, both for at least <paramref name="length"/> bytes!
+	/// </para>
+	/// </remarks>
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	public unsafe static void* MemCpy(void* destination, void* source, nuint length) => (unchecked((IntPtr)destination), unchecked((IntPtr)source)) switch
+	{
+		(0, _) or (_, 0) => destination,
+		_ => SDL_memcpy(destination, source, length)
+	};
+
+	/// <summary>
+	/// Copies specified number of bytes form one buffer of memory into another one that might overlap
+	/// </summary>
+	/// <param name="destination">The destination memory region</param>
+	/// <param name="source">The source memory region</param>
+	/// <param name="length">The length in bytes of both <paramref name="destination"/> and <paramref name="source"/></param>
+	/// <returns>The same pointer as the given <paramref name="destination"/></returns>
+	/// <remarks>
+	/// <para>
+	/// There are special checks in place, for when <paramref name="destination"/> or <paramref name="source"/> are <c><see langword="null"/></c>.
+	/// In those cases <paramref name="destination"/> is just returned (even if it's <c><see langword="null"/></c>) without doing anything else.
+	/// </para>
+	/// <para>
+	/// It is okay for the memory regions to overlap. If you are confident that the regions never overlap, you might want to uss <see cref="MemCpy(void*, void*, nuint)"/> instead to improve performance.
+	/// </para>
+	/// <para>
+	/// Note: There are no additional checks in place regarding the length of the buffers and the given <paramref name="length"/> parameter.
+	/// Make sure that <paramref name="destination"/> is safely dereferenable for writing and <paramref name="source"/> is safely dereferencable for reading, both for at least <paramref name="length"/> bytes!
+	/// </para>
+	/// </remarks>
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	public unsafe static void* MemMove(void* destination, void* source, nuint length) => (unchecked((IntPtr)destination), unchecked((IntPtr)source)) switch
+	{
+		(0, _) or (_, 0) => destination,
+		_ => SDL_memcpy(destination, source, length)
+	};
+
+	/// <summary>
+	/// Initialize all bytes of a buffer of memory to a specified value
+	/// </summary>
+	/// <param name="destination">The destination memory region</param>
+	/// <param name="value">The <see cref="byte"/> value to set</param>
+	/// <param name="length">The length in bytes to set in <paramref name="destination"/></param>
+	/// <returns>The same pointer as the given <paramref name="destination"/></returns>
+	/// <remarks>
+	/// <para>
+	/// There is a special check in place, for when <paramref name="destination"/> is <c><see langword="null"/></c>.
+	/// In that case <c><see langword="null"/></c> is just returned without doing anything else.
+	/// </para>
+	/// <para>
+	/// Note: There are no additional checks in place regarding the length of <paramref name="destination"/> and the given <paramref name="length"/> parameter.
+	/// Make sure that <paramref name="destination"/> is safely dereferenable for writing for at least <paramref name="length"/> bytes!
+	/// </para>
+	/// </remarks>
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	public unsafe static void* MemSet(void* destination, byte value, nuint length) => destination switch
+	{
+		null => null,
+		_ => SDL_memset(destination, value, length)
+	};
+
+	/// <summary>
+	/// Initialize all 32-bit words of a buffer of memory to a specific value
+	/// </summary>
+	/// <param name="destination">The destination memory region</param>
+	/// <param name="value">The <see cref="uint"/> value to set</param>
+	/// <param name="dwords">The number of <see cref="uint"/> values (32-bit words) to set in <paramref name="destination"/></param>
+	/// <returns>The same pointer as the given <paramref name="destination"/></returns>
+	/// <remarks>
+	/// <para>
+	/// There is a special check in place, for when <paramref name="destination"/> is <c><see langword="null"/></c>.
+	/// In that case <c><see langword="null"/></c> is just returned without doing anything else.
+	/// </para>
+	/// <para>
+	/// Note: There are no additional checks in place regarding the length of <paramref name="destination"/> and the given <paramref name="dwords"/> parameter.
+	/// Make sure that <paramref name="destination"/> is safely dereferenable for writing for at least the number of <see cref="uint"/> values given by <paramref name="dwords"/> (that is <c><see langword="sizeof"/>(<see cref="uint"/>) * <paramref name="dwords"/></c> bytes)!
+	/// </para>
+	/// </remarks>
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	public unsafe static void* MemSet(void* destination, uint value, nuint dwords) => destination switch
+	{
+		null => null,
+		_ => SDL_memset4(destination, value, dwords)
+	};
 
 	/// <summary>
 	/// Changes the size of allocated memory

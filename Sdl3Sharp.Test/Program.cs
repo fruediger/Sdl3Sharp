@@ -9,7 +9,11 @@ using System.Runtime.CompilerServices;
 
 NativeMemory.TrySetMemoryFunctions(new LoggedMemoryFunctions());
 
-Hint.MainCallbackRate.TrySetValue("120");
+Log.Info($"SDL version: {Sdl.Version}");
+
+var l = Sdl3Sharp.Utilities.Math.RoundToInteger(6.5);
+
+Console.WriteLine(l);
 
 using var sdl = new Sdl(builder => builder
 	.SetMetadata("Frame Counter", "0.1", appIdentifier: null)
@@ -42,7 +46,7 @@ file class App : AppBase
 
 	protected override AppResult OnIterate(Sdl app)
 	{
-		return mCounter++ < uint.MaxValue ? Continue : Success;
+		return mCounter++ < 100 ? Continue : Success;
 	}
 
 	protected override void OnQuit(Sdl app, AppResult result)

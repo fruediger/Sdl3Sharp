@@ -90,7 +90,7 @@ public sealed partial class Properties :
 	{ }
 
 	/// <inheritdoc/>
-	~Properties() => Dispose(deregister: true);
+	~Properties() => Dispose(deregister: true);	
 
 	/// <summary>
 	/// Gets the id of the group of properties
@@ -100,18 +100,6 @@ public sealed partial class Properties :
 	/// </value>
 	/// <remarks>An id value of <c>0</c> indicates an invalid group of properties</remarks>
 	public uint Id { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mId; }
-
-	/*
-	/// <summary>
-	/// Gets a <see cref="Property"/> with a specified <see cref="Property.Name">name</see> within the group of properties
-	/// </summary>
-	/// <value>
-	/// A <see cref="Property"/> with a specified <see cref="Property.Name">name</see> within the group of properties
-	/// </value>
-	/// <param name="name">The name of the property</param>
-	/// <inheritdoc cref="Property(Properties, string)"/>
-	public Property this[string name] { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(this, name); }
-	*/
 
 	/// <summary>
 	/// Determines whether a property with a specified <paramref name="name"/> exists within the group of properties

@@ -141,6 +141,8 @@ public readonly struct Version(int major, int minor, int micro) :
 	/// <inheritdoc/>
 	public readonly bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default)
 	{
+		var x = destination;
+
 		static bool tryWriteInt(int value, ref Span<char> destination, ref int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
 		{
 			var result = value.TryFormat(destination, out var tmp, format, provider);
@@ -159,6 +161,7 @@ public readonly struct Version(int major, int minor, int micro) :
 			if (destination.Length is > 0)
 			{
 				destination[0] = value;
+				destination = destination[1..];
 				charsWritten += 1;
 
 				return true;

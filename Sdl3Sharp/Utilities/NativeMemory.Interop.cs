@@ -79,7 +79,7 @@ partial class NativeMemory
 	/// The returned memory address will be a multiple of the alignment value, and the size of the memory allocated will be a multiple of the alignment value.
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_aligned_alloc">SDL_aligned_alloc</seealso>
-	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl), typeof(CallConvSuppressGCTransition)])]
+	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
 	internal unsafe static partial void* SDL_aligned_alloc(UIntPtr alignment, UIntPtr size);
 
 	/// <summary>
@@ -92,7 +92,7 @@ partial class NativeMemory
 	/// If <c><paramref name="mem"/></c> is NULL, this function does nothing.
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_aligned_free">SDL_aligned_free</seealso>
-	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl), typeof(CallConvSuppressGCTransition)])]
+	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
 	internal unsafe static partial void SDL_aligned_free(void* mem);
 
 	/// <summary>
@@ -109,7 +109,7 @@ partial class NativeMemory
 	/// If the allocation is successful, the returned pointer is guaranteed to be aligned to either the <em>fundamental alignment</em> (<c>alignof(max_align_t)</c> in C11 and later) or <c>2 * sizeof(void *)</c>, whichever is smaller.
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_calloc">SDL_calloc</seealso>
-	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl), typeof(CallConvSuppressGCTransition)])]
+	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
 	internal unsafe static partial void* SDL_calloc(UIntPtr nmemb, UIntPtr size);
 
 	/// <summary>
@@ -122,7 +122,7 @@ partial class NativeMemory
 	/// If <c><paramref name="mem"/></c> is NULL, this function does nothing.
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_free">SDL_free</seealso>
-	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl), typeof(CallConvSuppressGCTransition)])]
+	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
 	internal unsafe static partial void SDL_free(void* mem);
 
 	/// <summary>
@@ -139,8 +139,85 @@ partial class NativeMemory
 	/// Use <see href="https://wiki.libsdl.org/SDL3/SDL_aligned_alloc">SDL_aligned_alloc</see>() if you need to allocate memory aligned to an alignment greater than this guarantee.
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_malloc">SDL_malloc</seealso>
-	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl), typeof(CallConvSuppressGCTransition)])]
+	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
 	internal unsafe static partial void* SDL_malloc(UIntPtr size);
+
+	/// <summary>
+	/// Compare two buffers of memory
+	/// </summary>
+	/// <param name="s1">The first buffer to compare. NULL is not permitted!</param>
+	/// <param name="s2">The second buffer to compare. NULL is not permitted!</param>
+	/// <param name="len">The number of bytes to compare between the buffers</param>
+	/// <returns>Returns less than zero if s1 is "less than" s2, greater than zero if s1 is "greater than" s2, and zero if the buffers match exactly for <c><paramref name="len"/></c> bytes</returns>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_memcmp">SDL_memcmp</seealso>
+	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
+	internal unsafe static partial int SDL_memcmp(void* s1, void* s2, nuint len);
+
+	/// <summary>
+	/// Copy non-overlapping memory
+	/// </summary>
+	/// <param name="dst">The destination memory region. Must not be NULL, and must not overlap with <c><paramref name="src"/></c>.</param>
+	/// <param name="src">The source memory region. Must not be NULL, and must not overlap with <c><paramref name="dst"/></c>.</param>
+	/// <param name="len">The length in bytes of both <c><paramref name="dst"/></c> and <c><paramref name="src"/></c></param>
+	/// <returns>Returns <c><paramref name="dst"/></c></returns>
+	/// <remarks>
+	/// The memory regions must not overlap. If they do, use <see href="https://wiki.libsdl.org/SDL3/SDL_memmove">SDL_memmove</see>() instead.
+	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_memcpy">SDL_memcpy</seealso>
+	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
+	internal unsafe static partial void* SDL_memcpy(void* dst, void* src, nuint len);
+
+	/// <summary>
+	/// Copy memory ranges that might overlap
+	/// </summary>
+	/// <param name="dst">The destination memory region. Must not be NULL.</param>
+	/// <param name="src">The source memory region. Must not be NULL.</param>
+	/// <param name="len">The length in bytes of both <c><paramref name="dst"/></c> and <c><paramref name="src"/></c></param>
+	/// <returns>Returns <c><paramref name="dst"/></c></returns>
+	/// <remarks>
+	/// It is okay for the memory regions to overlap. If you are confident that the regions never overlap, using <see href="https://wiki.libsdl.org/SDL3/SDL_memcpy">SDL_memcpy</see>() may improve performance.
+	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_memmove">SDL_memmove</seealso>
+	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
+	internal unsafe static partial void* SDL_memmove(void* dst, void* src, nuint len);
+
+	/// <summary>
+	/// Initialize all bytes of buffer of memory to a specific value
+	/// </summary>
+	/// <param name="dst">The destination memory region. Must not be NULL.</param>
+	/// <param name="c">The byte value to set</param>
+	/// <param name="len">The length, in bytes, to set in <c><paramref name="dst"/></c></param>
+	/// <returns>Returns <c><paramref name="dst"/></c></returns>
+	/// <remarks>
+	/// <para>
+	/// This function will set <c><paramref name="len"/></c> bytes, pointed to by <c><paramref name="dst"/></c>, to the value specified in <c><paramref name="c"/></c>.
+	/// </para>
+	/// <para>
+	/// Despite <c><paramref name="c"/></c> being an <c>int</c> instead of a <c>char</c>, this only operates on bytes; <c><paramref name="c"/></c> must be a value between 0 and 255, inclusive.
+	/// </para>
+	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_memset">SDL_memset</seealso>
+	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
+	internal unsafe static partial void* SDL_memset(void* dst, int c, nuint len);
+
+	/// <summary>
+	/// Initialize all 32-bit words of buffer of memory to a specific value
+	/// </summary>
+	/// <param name="dst">The destination memory region. Must not be NULL.</param>
+	/// <param name="val">The <see href="https://wiki.libsdl.org/SDL3/Uint32">Uint32</see> value to set</param>
+	/// <param name="dwords">The number of <see href="https://wiki.libsdl.org/SDL3/Uint32">Uint32</see> values to set in <c><paramref name="dst"/></c></param>
+	/// <returns>Returns <c><paramref name="dst"/></c></returns>
+	/// <remarks>
+	/// <para>
+	/// This function will set a buffer of <c>dwords</c> <see href="https://wiki.libsdl.org/SDL3/Uint32">Uint32</see> values, pointed to by <c><paramref name="dst"/></c>, to the value specified in <c><paramref name="val"/></c>.
+	/// </para>
+	/// <para>
+	/// Unlike <see href="https://wiki.libsdl.org/SDL3/SDL_memset">SDL_memset</see>, this sets 32-bit values, not bytes, so it's not limited to a range of 0-255.
+	/// </para>
+	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_memset4">SDL_memset4</seealso>
+	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
+	internal unsafe static partial void* SDL_memset4(void* dst, uint val, nuint dwords);
 
 	/// <summary>
 	/// Change the size of allocated memor
@@ -170,6 +247,6 @@ partial class NativeMemory
 	/// If the allocation is successfully resized, the returned pointer is guaranteed to be aligned to either the <em>fundamental alignment</em> (<c>alignof(max_align_t)</c> in C11 and later) or <c>2 * sizeof(void *)</c>, whichever is smaller.
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_realloc">SDL_realloc</seealso>
-	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl), typeof(CallConvSuppressGCTransition)])]
+	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
 	internal unsafe static partial void* SDL_realloc(void* mem, UIntPtr size);
 }

@@ -37,13 +37,19 @@ partial class Properties
 		/// Tries to create a new <see cref="Enumerator"/> for a <see cref="Properties">group of properties</see>
 		/// </summary>
 		/// <param name="propertyGroup">The group of properties to enumerate</param>
-		/// <param name="enumerator">The newly created enumerator for the <see cref="Properties">group of properties</see></param>
+		/// <param name="enumerator">The newly created enumerator for the <see cref="Properties">group of properties</see>, when this mehtod returns <c><see langword="true"/></c>; otherwise, <c><see langword="default"/>(<see cref="Enumerator"/>)</c></param>
 		/// <returns><c><see langword="true"/></c> if a new <see cref="Enumerator"/> was successfully created for the <see cref="Properties">group of properties</see>; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
 		/// <remarks>
 		/// NOTE: The actual enumeration of the properties within the group of properties is performed during the call to this method
 		/// </remarks>
+		/// <exception cref="ArgumentNullException"><paramref name="propertyGroup"/> is <c><see langword="null"/></c></exception>
 		public static bool TryCreate(Properties propertyGroup, out Enumerator enumerator)
 		{
+			if (propertyGroup is null)
+			{
+				failPropertyGroupArgumentNull();
+			}
+
 			unsafe
 			{
 				var list = new List<string>();
@@ -67,6 +73,9 @@ partial class Properties
 
 				return false;
 			}
+
+			[DoesNotReturn]
+			static void failPropertyGroupArgumentNull() => throw new ArgumentNullException(nameof(propertyGroup));
 		}
 
 		/// <inheritdoc/>
