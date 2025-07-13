@@ -5,7 +5,7 @@ namespace Sdl3Sharp.Utilities;
 /// <summary>
 /// Provides methods to generate and seed pseudo-random numbers
 /// </summary>
-public sealed partial class Random
+public static partial class Random
 {
 	/// <summary>
 	/// Generates a pseudo-random integer number less than a specified positive integer
