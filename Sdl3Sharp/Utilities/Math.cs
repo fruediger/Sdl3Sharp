@@ -1,4 +1,5 @@
-﻿using Sdl3Sharp.Internal.NativeImportConditions;
+﻿using Sdl3Sharp.Internal.Interop.NativeImportConditions;
+using Sdl3Sharp.SourceGeneration;
 using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -778,7 +779,7 @@ public static partial class Math
 	/// </para>
 	/// </remarks>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static long RoundToInteger(double x) => IsLLP64.Evaluate()
+	public static long RoundToInteger(double x) => INativeImportCondition.Evaluate<IsLLP64>()
 		? SDL_lround_LLP64(x)
 		: SDL_lround_LP64(x);
 
@@ -799,7 +800,7 @@ public static partial class Math
 	/// </para>
 	/// </remarks>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static long RoundToInteger(float x) => IsLLP64.Evaluate()
+	public static long RoundToInteger(float x) => INativeImportCondition.Evaluate<IsLLP64>()
 		? SDL_lroundf_LLP64(x)
 		: SDL_lroundf_LP64(x);
 

@@ -1,11 +1,11 @@
-﻿using Sdl3Sharp.Interop;
+﻿using Sdl3Sharp.Internal.Interop;
 using Sdl3Sharp.SourceGeneration;
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
-using unsafe CleanupPropertyCallback = delegate* unmanaged[Cdecl]<void*, void*, void>;
-using unsafe EnumeratePropertiesCallback = delegate* unmanaged[Cdecl]<void*, uint, byte*, void>;
+using unsafe SDL_CleanupPropertyCallback = delegate* unmanaged[Cdecl]<void*, void*, void>;
+using unsafe SDL_EnumeratePropertiesCallback = delegate* unmanaged[Cdecl]<void*, uint, byte*, void>;
 
 namespace Sdl3Sharp;
 
@@ -98,7 +98,7 @@ partial class Properties
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_EnumerateProperties">SDL_EnumerateProperties</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_EnumerateProperties(uint props, EnumeratePropertiesCallback callback, void* userdata);
+	internal unsafe static partial CBool SDL_EnumerateProperties(uint props, SDL_EnumeratePropertiesCallback callback, void* userdata);
 
 	/// <summary>
 	/// Get a boolean property from a group of properties
@@ -127,14 +127,6 @@ partial class Properties
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetFloatProperty">SDL_GetFloatProperty</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
 	internal unsafe static partial float SDL_GetFloatProperty(uint props, byte* name, float default_value);
-
-	/// <summary>
-	/// Get the global SDL properties
-	/// </summary>
-	/// <returns>Returns a valid property ID on success or 0 on failure; call <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError()</see> for more information</returns>
-	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetGlobalProperties">SDL_GetGlobalProperties</seealso>
-	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal static partial uint SDL_GetGlobalProperties();
 
 	/// <summary>
 	/// Get a number property from a group of properties
@@ -267,7 +259,7 @@ partial class Properties
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_SetPointerPropertyWithCleanup">SDL_SetPointerPropertyWithCleanup</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_SetPointerPropertyWithCleanup(uint props, byte* name, void* value, CleanupPropertyCallback cleanup, void* userdata);
+	internal unsafe static partial CBool SDL_SetPointerPropertyWithCleanup(uint props, byte* name, void* value, SDL_CleanupPropertyCallback cleanup, void* userdata);
 
 	/// <summary>
 	/// Set a string property in a group of properties

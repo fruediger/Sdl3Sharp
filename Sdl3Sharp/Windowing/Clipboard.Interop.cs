@@ -1,9 +1,9 @@
-﻿using Sdl3Sharp.Interop;
+﻿using Sdl3Sharp.Internal.Interop;
 using Sdl3Sharp.SourceGeneration;
 using System;
 using System.Runtime.CompilerServices;
-using unsafe ClipboardCleanupCallback = delegate* unmanaged[Cdecl]<void*, void>;
-using unsafe ClipboardDataCallback = delegate* unmanaged[Cdecl]<void*, byte*, System.UIntPtr*, void*>;
+using unsafe SDL_ClipboardCleanupCallback = delegate* unmanaged[Cdecl]<void*, void>;
+using unsafe SDL_ClipboardDataCallback = delegate* unmanaged[Cdecl]<void*, byte*, System.UIntPtr*, void*>;
 
 namespace Sdl3Sharp.Windowing;
 
@@ -92,7 +92,7 @@ partial class Clipboard
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_SetClipboardData">SDL_SetClipboardData</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_SetClipboardData(ClipboardDataCallback callback, ClipboardCleanupCallback cleanup, void* userdate, byte** mime_types, UIntPtr num_mime_types);
+	internal unsafe static partial CBool SDL_SetClipboardData(SDL_ClipboardDataCallback callback, SDL_ClipboardCleanupCallback cleanup, void* userdate, byte** mime_types, UIntPtr num_mime_types);
 
 	/// <summary>
 	/// Put UTF-8 text into the clipboard

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Sdl3Sharp.Events;
 
@@ -6,6 +6,9 @@ partial struct EventType
 {
 	internal enum Kind : uint
 	{
+		/// <summary>SDL_EVENT_FIRST</summary>
+		First = 0,
+
 		#region Application events
 
 		/// <summary>SDL_EVENT_QUIT</summary>
@@ -385,22 +388,22 @@ partial struct EventType
 
 		/// <summary>SDL_EVENT_PRIVATE0</summary>
 		/// <remarks>Reserved event for private platforms. Do not use.</remarks>
-		[Obsolete("Reserved event for private platforms")]
+		[Experimental("SDL6010")] //TODO: make 'SDL6010' the diagnostics id for 'reserved events for private platforms'
 		Private0 = 0x4000,
 
 		/// <summary>SDL_EVENT_PRIVATE1</summary>
 		/// <remarks>Reserved event for private platforms. Do not use.</remarks>
-		[Obsolete("Reserved event for private platforms")]
+		[Experimental("SDL6010")] //TODO: make 'SDL6010' the diagnostics id for 'reserved events for private platforms'
 		Private1,
 
 		/// <summary>SDL_EVENT_PRIVATE2</summary>
 		/// <remarks>Reserved event for private platforms. Do not use.</remarks>
-		[Obsolete("Reserved event for private platforms")]
+		[Experimental("SDL6010")] //TODO: make 'SDL6010' the diagnostics id for 'reserved events for private platforms'
 		Private2,
 
 		/// <summary>SDL_EVENT_PRIVATE3</summary>
 		/// <remarks>Reserved event for private platforms. Do not use.</remarks>
-		[Obsolete("Reserved event for private platforms")]
+		[Experimental("SDL6010")] //TODO: make 'SDL6010' the diagnostics id for 'reserved events for private platforms'
 		Private3,
 
 		#endregion
@@ -411,136 +414,11 @@ partial struct EventType
 		PollSentinel = 0x7F00,
 
 		/// <summary>SDL_EVENT_USER</summary>
-		User = 0x8000,
+		User = 0x8000,		
+
+		#endregion
 
 		/// <summary>SDL_EVENT_LAST</summary>
 		Last = 0xFFFF,
-
-		#endregion
 	}
-
-	private static string? KnownKindToString(Kind kind) => kind switch
-	{
-		Kind.Quit => $"{nameof(Application)}.{nameof(Application.Quit)}",
-		Kind.Terminating => $"{nameof(Application)}.{nameof(Application.Terminating)}",
-		Kind.LowMemory => $"{nameof(Application)}.{nameof(Application.LowMemory)}",
-		Kind.WillEnterBackground => $"{nameof(Application)}.{nameof(Application.WillEnterBackground)}",
-		Kind.DidEnterBackground => $"{nameof(Application)}.{nameof(Application.DidEnterBackground)}",
-		Kind.WillEnterForeground => $"{nameof(Application)}.{nameof(Application.WillEnterForeground)}",
-		Kind.DidEnterForeground => $"{nameof(Application)}.{nameof(Application.DidEnterForeground)}",
-		Kind.LocaleChanged => $"{nameof(Application)}.{nameof(Application.LocaleChanged)}",
-		Kind.SystemThemeChanged => $"{nameof(Application)}.{nameof(Application.SystemThemeChanged)}",
-
-		Kind.DisplayOrientation => $"{nameof(Display)}.{nameof(Display.OrientationChanged)}",
-		Kind.DisplayAdded => $"{nameof(Display)}.{nameof(Display.Added)}",
-		Kind.DisplayRemoved => $"{nameof(Display)}.{nameof(Display.Removed)}",
-		Kind.DisplayMoved => $"{nameof(Display)}.{nameof(Display.Moved)}",
-		Kind.DisplayDesktopModeChanged => $"{nameof(Display)}.{nameof(Display.DesktopModeChanged)}",
-		Kind.DisplayCurrentModeChanged => $"{nameof(Display)}.{nameof(Display.CurrentModeChanged)}",
-		Kind.DisplayContentScaleChanged => $"{nameof(Display)}.{nameof(Display.ContentScaleChanged)}",
-
-		Kind.WindowShown => $"{nameof(Window)}.{nameof(Window.Shown)}",
-		Kind.WindowHidden => $"{nameof(Window)}.{nameof(Window.Hidden)}",
-		Kind.WindowExposed => $"{nameof(Window)}.{nameof(Window.Exposed)}",
-		Kind.WindowMoved => $"{nameof(Window)}.{nameof(Window.Moved)}",
-		Kind.WindowResized => $"{nameof(Window)}.{nameof(Window.Resized)}",
-		Kind.WindowPixelSizeChanged => $"{nameof(Window)}.{nameof(Window.PixelSizeChanged)}",
-		Kind.WindowMetalViewResized => $"{nameof(Window)}.{nameof(Window.MetalViewResized)}",
-		Kind.WindowMinimized => $"{nameof(Window)}.{nameof(Window.Minimized)}",
-		Kind.WindowMaximized => $"{nameof(Window)}.{nameof(Window.Maximized)}",
-		Kind.WindowRestored => $"{nameof(Window)}.{nameof(Window.Restored)}",
-		Kind.WindowMouseEnter => $"{nameof(Window)}.{nameof(Window.MouseEnter)}",
-		Kind.WindowMouseLeave => $"{nameof(Window)}.{nameof(Window.MouseLeave)}",
-		Kind.WindowFocusGained => $"{nameof(Window)}.{nameof(Window.FocusGained)}",
-		Kind.WindowFocusLost => $"{nameof(Window)}.{nameof(Window.FocusLost)}",
-		Kind.WindowCloseRequested => $"{nameof(Window)}.{nameof(Window.CloseRequested)}",
-		Kind.WindowHitTest => $"{nameof(Window)}.{nameof(Window.HitTest)}",
-		Kind.WindowIccProfileChnaged => $"{nameof(Window)}.{nameof(Window.IccProfileChanged)}",
-		Kind.WindowDisplayChanged => $"{nameof(Window)}.{nameof(Window.DisplayChanged)}",
-		Kind.WindowDisplayScaleChanged => $"{nameof(Window)}.{nameof(Window.DisplayScaleChanged)}",
-		Kind.WindowSafeAreaChanged => $"{nameof(Window)}.{nameof(Window.SafeAreaChanged)}",
-		Kind.WindowOccluded => $"{nameof(Window)}.{nameof(Window.Occluded)}",
-		Kind.WindowEnterFullscreen => $"{nameof(Window)}.{nameof(Window.EnterFullscreen)}",
-		Kind.WindowLeaveFullscreen => $"{nameof(Window)}.{nameof(Window.LeaveFullscreen)}",
-		Kind.WindowDestroyed => $"{nameof(Window)}.{nameof(Window.Destroyed)}",
-		Kind.WindowHdrStateChanged => $"{nameof(Window)}.{nameof(Window.HdrStateChanged)}",
-
-		Kind.KeyDown => $"{nameof(Keyboard)}.{nameof(Keyboard.KeyDown)}",
-		Kind.KeyUp => $"{nameof(Keyboard)}.{nameof(Keyboard.KeyUp)}",
-		Kind.TextEditing => $"{nameof(Keyboard)}.{nameof(Keyboard.TextEditing)}",
-		Kind.TextInput => $"{nameof(Keyboard)}.{nameof(Keyboard.TextInput)}",
-		Kind.KeymapChanged => $"{nameof(Keyboard)}.{nameof(Keyboard.KeymapChanged)}",
-		Kind.KeyboardAdded => $"{nameof(Keyboard)}.{nameof(Keyboard.Added)}",
-		Kind.KeyboardRemoved => $"{nameof(Keyboard)}.{nameof(Keyboard.Removed)}",
-		Kind.TextEditingCandidates => $"{nameof(Keyboard)}.{nameof(Keyboard.TextEditingCandidates)}",
-
-		Kind.MouseMotion => $"{nameof(Mouse)}.{nameof(Mouse.Motion)}",
-		Kind.MouseButtonDown => $"{nameof(Mouse)}.{nameof(Mouse.ButtonDown)}",
-		Kind.MouseButtonUp => $"{nameof(Mouse)}.{nameof(Mouse.ButtonUp)}",
-		Kind.MouseWheel => $"{nameof(Mouse)}.{nameof(Mouse.WheelMotion)}",
-		Kind.MouseAdded => $"{nameof(Mouse)}.{nameof(Mouse.Added)}",
-		Kind.MouseRemoved => $"{nameof(Mouse)}.{nameof(Mouse.Removed)}",
-
-		Kind.JoystickAxisMotion => $"{nameof(Joystick)}.{nameof(Joystick.AxisMotion)}",
-		Kind.JoystickBallMotion => $"{nameof(Joystick)}.{nameof(Joystick.BallMotion)}",
-		Kind.JoystickHatMotion => $"{nameof(Joystick)}.{nameof(Joystick.HatMotion)}",
-		Kind.JoystickButtonDown => $"{nameof(Joystick)}.{nameof(Joystick.ButtonDown)}",
-		Kind.JoystickButtonUp => $"{nameof(Joystick)}.{nameof(Joystick.ButtonUp)}",
-		Kind.JoystickAdded => $"{nameof(Joystick)}.{nameof(Joystick.Added)}",
-		Kind.JoystickRemoved => $"{nameof(Joystick)}.{nameof(Joystick.Removed)}",
-		Kind.JoystickBatteryUpdated => $"{nameof(Joystick)}.{nameof(Joystick.BatteryUpdated)}",
-		Kind.JoystickUpdateCompleted => $"{nameof(Joystick)}.{nameof(Joystick.UpdateCompleted)}",
-
-		Kind.GamepadAxisMotion => $"{nameof(Gamepad)}.{nameof(Gamepad.AxisMotion)}",
-		Kind.GamepadButtonDown => $"{nameof(Gamepad)}.{nameof(Gamepad.ButtonDown)}",
-		Kind.GamepadButtonUp => $"{nameof(Gamepad)}.{nameof(Gamepad.ButtonUp)}",
-		Kind.GamepadAdded => $"{nameof(Gamepad)}.{nameof(Gamepad.Added)}",
-		Kind.GamepadRemoved => $"{nameof(Gamepad)}.{nameof(Gamepad.Removed)}",
-		Kind.GamepadRemapped => $"{nameof(Gamepad)}.{nameof(Gamepad.Remapped)}",
-		Kind.GamepadTouchpadDown => $"{nameof(Gamepad)}.{nameof(Gamepad.TouchpadDown)}",
-		Kind.GamepadTouchpadMotion => $"{nameof(Gamepad)}.{nameof(Gamepad.TouchpadMotion)}",
-		Kind.GamepadTouchpadUp => $"{nameof(Gamepad)}.{nameof(Gamepad.TouchpadUp)}",
-		Kind.GamepadSensorUpdated => $"{nameof(Gamepad)}.{nameof(Gamepad.SensorUpdated)}",
-		Kind.GamepadUpdateCompleted => $"{nameof(Gamepad)}.{nameof(Gamepad.UpdateCompleted)}",
-		Kind.GamepadSteamHandleUpdated => $"{nameof(Gamepad)}.{nameof(Gamepad.SteamHandleUpdated)}",
-
-		Kind.FingerDown => $"{nameof(Touch)}.{nameof(Touch.FingerDown)}",
-		Kind.FingerUp => $"{nameof(Touch)}.{nameof(Touch.FingerUp)}",
-		Kind.FingerMotion => $"{nameof(Touch)}.{nameof(Touch.FingerMotion)}",
-		Kind.FingerCanceled => $"{nameof(Touch)}.{nameof(Touch.FingerCanceled)}",
-
-		Kind.ClipboardUpdated => $"{nameof(Clipboard)}.{nameof(Clipboard.Updated)}",
-
-		Kind.DropFile => $"{nameof(DragAndDrop)}.{nameof(DragAndDrop.File)}",
-		Kind.DropText => $"{nameof(DragAndDrop)}.{nameof(DragAndDrop.Text)}",
-		Kind.DropBegin => $"{nameof(DragAndDrop)}.{nameof(DragAndDrop.Begin)}",
-		Kind.DropCompleted => $"{nameof(DragAndDrop)}.{nameof(DragAndDrop.Completed)}",
-		Kind.DropPosition => $"{nameof(DragAndDrop)}.{nameof(DragAndDrop.Position)}",
-
-		Kind.AudioDeviceAdded => $"{nameof(AudioDevice)}.{nameof(AudioDevice.Added)}",
-		Kind.AudioDeviceRemoved => $"{nameof(AudioDevice)}.{nameof(AudioDevice.Removed)}",
-		Kind.AudioDeviceFormatChanged => $"{nameof(AudioDevice)}.{nameof(AudioDevice.FormatChanged)}",
-
-		Kind.SensorUpdated => $"{nameof(Sensor)}.{nameof(Sensor.Updated)}",
-
-		Kind.PenProximityIn => $"{nameof(Pen)}.{nameof(Pen.ProximityIn)}",
-		Kind.PenProximityOut => $"{nameof(Pen)}.{nameof(Pen.ProximityOut)}",
-		Kind.PenDown => $"{nameof(Pen)}.{nameof(Pen.Down)}",
-		Kind.PenUp => $"{nameof(Pen)}.{nameof(Pen.Up)}",
-		Kind.PenButtonDown => $"{nameof(Pen)}.{nameof(Pen.ButtonDown)}",
-		Kind.PenButtonUp => $"{nameof(Pen)}.{nameof(Pen.ButtonUp)}",
-		Kind.PenMotion => $"{nameof(Pen)}.{nameof(Pen.Motion)}",
-		Kind.PenAxis => $"{nameof(Pen)}.{nameof(Pen.AxisChanged)}",
-
-		Kind.CameraDeviceAdded => $"{nameof(CameraDevice)}.{nameof(CameraDevice.Added)}",
-		Kind.CameraDeviceRemoved => $"{nameof(CameraDevice)}.{nameof(CameraDevice.Removed)}",
-		Kind.CameraDeviceApproved => $"{nameof(CameraDevice)}.{nameof(CameraDevice.Approved)}",
-		Kind.CameraDeviceDenied => $"{nameof(CameraDevice)}.{nameof(CameraDevice.Denied)}",
-
-		Kind.RenderTargetsReset => $"{nameof(Render)}.{nameof(Render.TargetsReset)}",
-		Kind.RenderDeviceReset => $"{nameof(Render)}.{nameof(Render.DeviceReset)}",
-		Kind.RenderDeviceLost => $"{nameof(Render)}.{nameof(Render.DeviceLost)}",
-
-		_ => default
-	};
 }

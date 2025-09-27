@@ -4,9 +4,8 @@ using System.Diagnostics.CodeAnalysis;
 namespace Sdl3Sharp.Internal;
 
 // this exists, so we don't need a reference to 'Microsoft.Extensions.ObjectPool'
-internal sealed class SimpleConcurrentPool<T, TFactory>
+internal sealed class SimpleConcurrentPool<T>
 	where T : class
-	where TFactory : IFactory<T>
 {
 	private sealed class Node
 	{
@@ -18,7 +17,8 @@ internal sealed class SimpleConcurrentPool<T, TFactory>
 
 	private volatile Node? mFreeHead, mAcquiredHead;
 
-	public T Get()
+	public T Get<TFactory>()
+		where TFactory : IFactory<T>
 	{
 		mLock.Enter(0);
 		try
@@ -33,6 +33,36 @@ internal sealed class SimpleConcurrentPool<T, TFactory>
 			else
 			{
 				node = new() { Value = TFactory.Create() };
+			}
+
+			node.Next = mAcquiredHead;
+
+			mAcquiredHead = node;
+
+			return node.Value!;
+		}
+		finally
+		{
+			mLock.Exit(0);
+		}
+	}
+
+	public T Get<TFactory, TArg>(in TArg arg)
+		where TFactory : IFactory<TArg, T>
+	{
+		mLock.Enter(0);
+		try
+		{
+			Node node;
+			if (mFreeHead is not null)
+			{
+				node = mFreeHead;
+
+				mFreeHead = node.Next;
+			}
+			else
+			{
+				node = new() { Value = TFactory.Create(in arg) };
 			}
 
 			node.Next = mAcquiredHead;

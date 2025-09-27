@@ -351,4 +351,68 @@ public static partial class Character
 	/// </remarks>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	public static bool IsUpper(Rune rune) => SDL_isupper(rune.Value) is not 0;
+
+	/// <summary>
+	/// Converts a character to lower case
+	/// </summary>
+	/// <param name="character">The character to covert to lower case</param>
+	/// <returns>The lower case version of the given <paramref name="character"/>, if it's convertable and not already lower case; otherwise, just the given <paramref name="character"/></returns>
+	/// <remarks>
+	/// <para>
+	/// <em>WARNING</em>: Regardless of the system locale, this will only convert ASCII values <c>0x41</c> (<c>'A'</c>) through <c>0x5A</c> (<c>'Z'</c>) to lower case.
+	/// </para>
+	/// <para>
+	/// If the given <paramref name="character"/> cannot be converted, or it is already lower case, this method just returns the given <paramref name="character"/>.
+	/// </para>
+	/// </remarks>
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	public static int ToLower(int character) => SDL_tolower(character);
+
+	/// <summary>
+	/// Converts a character rune to lower case
+	/// </summary>
+	/// <param name="rune">The character rune to covert to lower case</param>
+	/// <returns>The lower case version of the given <paramref name="rune"/>, if it's convertable and not already lower case; otherwise, just the given <paramref name="rune"/></returns>
+	/// <remarks>
+	/// <para>
+	/// <em>WARNING</em>: Regardless of the system locale, this will only convert ASCII values <c>0x41</c> (<c>'A'</c>) through <c>0x5A</c> (<c>'Z'</c>) to lower case.
+	/// </para>
+	/// <para>
+	/// If the given character <paramref name="rune"/> cannot be converted, or it is already lower case, this method just returns the given character <paramref name="rune"/>.
+	/// </para>
+	/// </remarks>
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	public static Rune ToLower(Rune rune) => Unsafe.BitCast<int, Rune>(SDL_tolower(rune.Value));
+
+	/// <summary>
+	/// Converts a character to upper case
+	/// </summary>
+	/// <param name="character">The character to covert to upper case</param>
+	/// <returns>The upper case version of the given <paramref name="character"/>, if it's convertable and not already upper case; otherwise, just the given <paramref name="character"/></returns>
+	/// <remarks>
+	/// <para>
+	/// <em>WARNING</em>: Regardless of the system locale, this will only convert ASCII values <c>0x61</c> (<c>'a'</c>) through <c>0x7A</c> (<c>'z'</c>) to upper case.
+	/// </para>
+	/// <para>
+	/// If the given <paramref name="character"/> cannot be converted, or it is already upper case, this method just returns the given <paramref name="character"/>.
+	/// </para>
+	/// </remarks>
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	public static int ToUpper(int character) => SDL_toupper(character);
+
+	/// <summary>
+	/// Converts a character rune to upper case
+	/// </summary>
+	/// <param name="rune">The character rune to covert to upper case</param>
+	/// <returns>The upper case version of the given <paramref name="rune"/>, if it's convertable and not already upper case; otherwise, just the given <paramref name="rune"/></returns>
+	/// <remarks>
+	/// <para>
+	/// <em>WARNING</em>: Regardless of the system locale, this will only convert ASCII values <c>0x61</c> (<c>'a'</c>) through <c>0x7A</c> (<c>'z'</c>) to upper case.
+	/// </para>
+	/// <para>
+	/// If the given character <paramref name="rune"/> cannot be converted, or it is already upper case, this method just returns the given character <paramref name="rune"/>.
+	/// </para>
+	/// </remarks>
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	public static Rune ToUpper(Rune rune) => Unsafe.BitCast<int, Rune>(SDL_toupper(rune.Value));
 }

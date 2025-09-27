@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
@@ -41,7 +40,7 @@ public readonly partial struct LogPriority :
 	}
 
 	/// <inheritdoc/>
-	public readonly int CompareTo(LogPriority other) => Comparer<Kind>.Default.Compare(mKind, other.mKind);
+	public readonly int CompareTo(LogPriority other) => unchecked((int)mKind).CompareTo(unchecked((int)other.mKind));
 
 	/// <inheritdoc/>
 	public readonly override bool Equals([NotNullWhen(true)] object? obj) => obj is LogPriority other && Equals(other);

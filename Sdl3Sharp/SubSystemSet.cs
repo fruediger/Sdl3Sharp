@@ -1,5 +1,4 @@
 ﻿using Sdl3Sharp.Internal;
-using Sdl3Sharp.Interop;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -151,7 +150,7 @@ public readonly partial struct SubSystemSet :
 
 		if (enumerator.MoveNext())
 		{
-			var builder = Shared.StringBuilderPool.Get();
+			var builder = Shared.StringBuilder;
 
 			try
 			{
@@ -169,7 +168,6 @@ public readonly partial struct SubSystemSet :
 			finally
 			{
 				builder.Clear();
-				Shared.StringBuilderPool.Return(builder);
 			}
 		}
 
@@ -179,47 +177,21 @@ public readonly partial struct SubSystemSet :
 	/// <inheritdoc/>
 	public readonly bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default)
 	{
-		static bool tryWriteSpan(ReadOnlySpan<char> value, ref Span<char> destination, ref int charsWritten)
-		{
-			var result = value.TryCopyTo(destination);
-
-			if (result)
-			{
-				destination = destination[value.Length..];
-				charsWritten += value.Length;
-			}
-
-			return result;
-		}
-
-		static bool tryWriteSubSystem(SubSystem subSystem, ref Span<char> destination, ref int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
-		{
-			var result = subSystem.TryFormat(destination, out var tmp, format, provider);
-
-			if (result)
-			{
-				destination = destination[tmp..];
-				charsWritten += tmp;
-			}
-
-			return result;
-		}
-
 		charsWritten = 0;
 
 		using var enumerator = GetEnumerator();
 
 		if (enumerator.MoveNext())
 		{
-			if (!tryWriteSubSystem(enumerator.Current, ref destination, ref charsWritten, format, provider))
+			if (!SpanFormat.TryWrite(enumerator.Current, ref destination, ref charsWritten, format, provider))
 			{
 				return false;
 			}
 
 			while (enumerator.MoveNext())
 			{
-				if (!tryWriteSpan(", ", ref destination, ref charsWritten) ||
-					!tryWriteSubSystem(enumerator.Current, ref destination, ref charsWritten, format, provider))
+				if (!SpanFormat.TryWrite(", ", ref destination, ref charsWritten) ||
+					!SpanFormat.TryWrite(enumerator.Current, ref destination, ref charsWritten, format, provider))
 				{
 					return false;
 				}
@@ -228,7 +200,7 @@ public readonly partial struct SubSystemSet :
 			return true;
 		}
 
-		return tryWriteSpan("<Empty>", ref destination, ref charsWritten);
+		return SpanFormat.TryWrite("<Empty>", ref destination, ref charsWritten);
 	}
 
 	/// <inheritdoc/>

@@ -1,9 +1,9 @@
-﻿using Sdl3Sharp.Interop;
+﻿using Sdl3Sharp.Internal.Interop;
 using Sdl3Sharp.SourceGeneration;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
-using unsafe LogOutputFunction = delegate* unmanaged[Cdecl]<void*, Sdl3Sharp.LogCategory, Sdl3Sharp.LogPriority, byte*, void>;
+using unsafe SDL_LogOutputFunction = delegate* unmanaged[Cdecl]<void*, Sdl3Sharp.LogCategory, Sdl3Sharp.LogPriority, byte*, void>;
 
 namespace Sdl3Sharp;
 
@@ -33,7 +33,7 @@ partial class Log
 	/// <returns>Returns the default log output callback</returns>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetDefaultLogOutputFunction">SDL_GetDefaultLogOutputFunction</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial LogOutputFunction SDL_GetDefaultLogOutputFunction();
+	internal unsafe static partial SDL_LogOutputFunction SDL_GetDefaultLogOutputFunction();
 
 	/// <summary>
 	/// Get the current log output function
@@ -42,7 +42,7 @@ partial class Log
 	/// <param name="userdata">a pointer filled in with the pointer that is passed to <c>callback</c></param>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetLogOutputFunction">SDL_GetLogOutputFunction</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial void SDL_GetLogOutputFunction(LogOutputFunction* callback, void** userdata);
+	internal unsafe static partial void SDL_GetLogOutputFunction(SDL_LogOutputFunction* callback, void** userdata);
 
 	/// <summary>
 	/// Log a message with <see href="https://wiki.libsdl.org/SDL3/SDL_LOG_CATEGORY_APPLICATION">SDL_LOG_CATEGORY_APPLICATION</see> and <see href="https://wiki.libsdl.org/SDL3/SDL_LOG_PRIORITY_INFO">SDL_LOG_PRIORITY_INFO</see>
@@ -168,5 +168,5 @@ partial class Log
 	/// <param name="userdata">a pointer that is passed to <c>callback</c></param>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_SetLogOutputFunction">SDL_SetLogOutputFunction</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial void SDL_SetLogOutputFunction(LogOutputFunction callback, void* userdata);
+	internal unsafe static partial void SDL_SetLogOutputFunction(SDL_LogOutputFunction callback, void* userdata);
 }

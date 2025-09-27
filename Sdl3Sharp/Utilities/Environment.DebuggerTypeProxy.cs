@@ -60,7 +60,7 @@ partial class Environment
 						}
 						finally
 						{
-							NativeMemory.SDL_free(array);
+							NativeMemoryManager.SDL_free(array);
 						}
 					}
 

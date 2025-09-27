@@ -7,15 +7,15 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-NativeMemory.TrySetMemoryFunctions(new LoggedMemoryFunctions());
-
-Log.Info($"SDL version: {Sdl.Version}");
+NativeMemoryManager.TrySetMemoryFunctions(new LoggedMemoryFunctions());
 
 Hint.MainCallbackRate.TrySetValue("120");
 
+MessageBox.TryShowSimple(MessageBoxFlags.Information, "Hello World", $"...from SDL version {Sdl.Version}");
+
 using var sdl = new Sdl(builder => builder
 	.SetMetadata("Frame Counter", "0.1", appIdentifier: null)
-	.InitializeSubSystems([SubSystem.Video])
+	.InitializeSubSystems([SubSystem.Video, SubSystem.Events, SubSystem.Audio])
 );
 
 return sdl.Run(new App(), args);
@@ -25,12 +25,12 @@ file class App : AppBase
 	private volatile uint mCounter = 0;
 	private Timer? mTimer;
 
-	protected override AppResult OnInitialize(Sdl app, string[] args)
+	protected override AppResult OnInitialize(Sdl sdl, string[] args)
 	{
 		var counter = mCounter;
 		var ticks = Timer.NanosecondTicks;
 
-		mTimer = new(app, 1000, (timer, interval) =>
+		mTimer = new(sdl, 1000, (timer, interval) =>
 		{
 			(counter, ticks, var lastCounter, var lastTicks) = (mCounter, Timer.NanosecondTicks, counter, ticks);
 
@@ -42,12 +42,12 @@ file class App : AppBase
 		return Continue;
 	}
 
-	protected override AppResult OnIterate(Sdl app)
+	protected override AppResult OnIterate(Sdl sdl)
 	{
 		return mCounter++ < uint.MaxValue ? Continue : Success;
 	}
 
-	protected override void OnQuit(Sdl app, AppResult result)
+	protected override void OnQuit(Sdl sdl, AppResult result)
 	{
 		mTimer?.Dispose();
 		mTimer = null;
@@ -56,7 +56,7 @@ file class App : AppBase
 
 file sealed class LoggedMemoryFunctions : INativeMemoryFunctions
 {
-	private readonly INativeMemoryFunctions mPreviousMemoryFunctions = NativeMemory.GetMemoryFunctions();
+	private readonly INativeMemoryFunctions mPreviousMemoryFunctions = NativeMemoryManager.GetMemoryFunctions();
 	private readonly Dictionary<IntPtr, nuint> mAllocations = [];
 
 	public unsafe void* Calloc(nuint elementCount, nuint elementSize)

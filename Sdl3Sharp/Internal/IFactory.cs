@@ -7,3 +7,9 @@ internal interface IFactory<T>
 	[return: NotNull]
 	static abstract T Create();
 }
+
+internal interface IFactory<TArg, T>
+{
+	[return: NotNull]
+	static abstract T Create(in TArg arg);
+}

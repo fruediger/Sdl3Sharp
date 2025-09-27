@@ -114,7 +114,7 @@ public static partial class Clipboard
 					}
 					finally
 					{
-						Utilities.NativeMemory.SDL_free(resultPtr);
+						Utilities.NativeMemoryManager.SDL_free(resultPtr);
 					}
 				}			
 
@@ -167,7 +167,7 @@ public static partial class Clipboard
 				}
 				finally
 				{
-					Utilities.NativeMemory.SDL_free(resultPtr);
+					Utilities.NativeMemoryManager.SDL_free(resultPtr);
 				}
 			}
 
@@ -202,7 +202,7 @@ public static partial class Clipboard
 				}
 				finally
 				{
-					Utilities.NativeMemory.SDL_free(resultPtr);
+					Utilities.NativeMemoryManager.SDL_free(resultPtr);
 				}
 			}
 
@@ -238,7 +238,7 @@ public static partial class Clipboard
 		{
 			if (dataGetter is not null && mimeTypes.Length is > 0)
 			{
-				var mimeTypesUtf8 = (byte**)Utilities.NativeMemory.Malloc(unchecked((nuint)mimeTypes.Length * (nuint)sizeof(byte*)));
+				var mimeTypesUtf8 = (byte**)Utilities.NativeMemoryManager.Malloc(unchecked((nuint)mimeTypes.Length * (nuint)sizeof(byte*)));
 
 				if (mimeTypesUtf8 is not null)
 				{	
@@ -263,7 +263,7 @@ public static partial class Clipboard
 							Utf8StringMarshaller.Free(mimeTypesUtf8[--mimeTypesCount]);
 						}
 
-						Utilities.NativeMemory.Free(mimeTypesUtf8);
+						Utilities.NativeMemoryManager.Free(mimeTypesUtf8);
 					}
 				}
 			}

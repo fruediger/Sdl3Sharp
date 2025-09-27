@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Sdl3Sharp.Internal;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -16,6 +18,8 @@ namespace Sdl3Sharp;
 public sealed partial class Properties :
 	IEnumerable<string>, IDisposable, Sdl.IDisposeReceiver, IEquatable<Properties>, IFormattable, ISpanFormattable
 {
+	private static readonly ConcurrentDictionary<uint, Properties> mKnownInstances = [];
+
 	/// <exception cref="ArgumentNullException"><c><paramref name="sdl"/></c> is <c><see langword="null"/></c></exception>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	[return: NotNull]
@@ -54,7 +58,7 @@ public sealed partial class Properties :
 	private string DebuggerDisplay => ToString(CultureInfo.InvariantCulture);
 
 	/// <exception cref="InvalidOperationException">Could not register the <see cref="Properties"/> with the given <paramref name="sdl"/> instance</exception>
-	internal Properties(Sdl? sdl, uint id)
+	private Properties(Sdl? sdl, uint id)
 	{
 		if (sdl is not null)
 		{
@@ -87,10 +91,26 @@ public sealed partial class Properties :
 	/// <inheritdoc cref="ValidateId(uint)"/>
 	/// <inheritdoc cref="Properties(Sdl?, uint)"/>
 	public Properties(Sdl sdl) : this(ValidateSdl(sdl), ValidateId(SDL_CreateProperties()))
-	{ }
+	{
+		mKnownInstances.AddOrUpdate(mId, add, update, this);
+
+		static Properties add(uint id, Properties newProperties) => newProperties;
+
+		static Properties update(uint id, Properties previousProperties, Properties newProperties)
+		{
+#pragma warning disable IDE0079
+#pragma warning disable CA1816
+			GC.SuppressFinalize(previousProperties);
+#pragma warning restore CA1816
+#pragma warning restore IDE0079
+			previousProperties.Dispose(deregister: true, forget: false);
+
+			return newProperties;
+		}
+	}
 
 	/// <inheritdoc/>
-	~Properties() => Dispose(deregister: true);	
+	~Properties() => Dispose(deregister: true, forget: true);	
 
 	/// <summary>
 	/// Gets the id of the group of properties
@@ -100,6 +120,13 @@ public sealed partial class Properties :
 	/// </value>
 	/// <remarks>An id value of <c>0</c> indicates an invalid group of properties</remarks>
 	public uint Id { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mId; }
+
+	internal static Properties GetOrCreate(Sdl? sdl, uint id)
+	{
+		return mKnownInstances.GetOrAdd(id, create, sdl);
+
+		static Properties create(uint id, Sdl? sdl) => new(sdl, id);
+	}
 
 	/// <summary>
 	/// Determines whether a property with a specified <paramref name="name"/> exists within the group of properties
@@ -138,7 +165,7 @@ public sealed partial class Properties :
 	public void Dispose()
 	{
 		GC.SuppressFinalize(this);
-		Dispose(deregister: true);
+		Dispose(deregister: true, forget: true);
 	}
 
 	void Sdl.IDisposeReceiver.DisposeFromSdl(Sdl sdl)
@@ -148,10 +175,10 @@ public sealed partial class Properties :
 		GC.SuppressFinalize(this);
 #pragma warning restore CA1816
 #pragma warning restore IDE0079
-		Dispose(deregister: false);
+		Dispose(deregister: false, forget: true);
 	}
 
-	private void Dispose(bool deregister)
+	private void Dispose(bool deregister, bool forget)
 	{
 		if (mId is not 0)
 		{
@@ -165,6 +192,11 @@ public sealed partial class Properties :
 				mSdlReference = null;
 
 				SDL_DestroyProperties(mId);
+			}
+
+			if (forget)
+			{
+				mKnownInstances.TryRemove(Id, out _);
 			}
 
 			mId = 0;
@@ -407,40 +439,14 @@ public sealed partial class Properties :
 	/// <inheritdoc/>
 	public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default)
 	{
-		static bool tryWriteSpan(ReadOnlySpan<char> value, ref Span<char> destination, ref int charsWritten)
-		{
-			var result = value.TryCopyTo(destination);
-
-			if (result)
-			{
-				destination = destination[value.Length..];
-				charsWritten += value.Length;
-			}
-
-			return result;
-		}
-
-		static bool tryWriteUInt(uint value, ref Span<char> destination, ref int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
-		{
-			var result = value.TryFormat(destination, out var tmp, format, provider);
-
-			if (result)
-			{
-				destination = destination[tmp..];
-				charsWritten += tmp;
-			}
-
-			return result;
-		}
-
 		charsWritten = 0;
 
 		return mId switch
 		{
-			0 => tryWriteSpan("<Invalid>", ref destination, ref charsWritten),
-			_ => tryWriteSpan($"{{ {nameof(Id)}: ", ref destination, ref charsWritten)
-			  && tryWriteUInt(mId, ref destination, ref charsWritten, format, provider)
-			  && tryWriteSpan(" }", ref destination, ref charsWritten)
+			0 => SpanFormat.TryWrite("<Invalid>", ref destination, ref charsWritten),
+			_ => SpanFormat.TryWrite($"{{ {nameof(Id)}: ", ref destination, ref charsWritten)
+			  && SpanFormat.TryWrite(mId, ref destination, ref charsWritten, format, provider)
+			  && SpanFormat.TryWrite(" }", ref destination, ref charsWritten)
 		};
 	}
 

@@ -6,7 +6,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace Sdl3Sharp.Interop;
+namespace Sdl3Sharp.Internal.Interop;
 
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
@@ -17,6 +17,8 @@ internal readonly struct CBool(bool value) :
 	private readonly byte mValue = unchecked(Unsafe.BitCast<bool, byte>(value));
 
 	public readonly bool AsClrBool { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => Unsafe.BitCast<byte, bool>(mValue); }
+
+	public readonly byte RawValue { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mValue; }
 
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly string DebuggerDisplay => ToString(CultureInfo.InvariantCulture);

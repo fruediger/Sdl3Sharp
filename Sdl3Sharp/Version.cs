@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sdl3Sharp.Internal;
+using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -141,45 +142,16 @@ public readonly struct Version(int major, int minor, int micro) :
 	/// <inheritdoc/>
 	public readonly bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default)
 	{
-		var x = destination;
-
-		static bool tryWriteInt(int value, ref Span<char> destination, ref int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
-		{
-			var result = value.TryFormat(destination, out var tmp, format, provider);
-
-			if (result)
-			{
-				destination = destination[tmp..];
-				charsWritten += tmp;
-			}
-
-			return result;
-		}
-
-		static bool tryWriteChar(char value, ref Span<char> destination, ref int charsWritten)
-		{
-			if (destination.Length is > 0)
-			{
-				destination[0] = value;
-				destination = destination[1..];
-				charsWritten += 1;
-
-				return true;
-			}
-
-			return false;
-		}
-
 		charsWritten = 0;
 
-		return tryWriteInt(Major, ref destination, ref charsWritten, format, provider)
-			&& tryWriteChar('.', ref destination, ref charsWritten)
-			&& tryWriteInt(Minor, ref destination, ref charsWritten, format, provider)
+		return SpanFormat.TryWrite(Major, ref destination, ref charsWritten, format, provider)
+			&& SpanFormat.TryWrite('.', ref destination, ref charsWritten)
+			&& SpanFormat.TryWrite(Minor, ref destination, ref charsWritten, format, provider)
 			&& Micro switch
 			{
 				var micro when micro is not 0
-					=> tryWriteChar('.', ref destination, ref charsWritten)
-					&& tryWriteInt(micro, ref destination, ref charsWritten, format, provider),
+					=> SpanFormat.TryWrite('.', ref destination, ref charsWritten)
+					&& SpanFormat.TryWrite(micro, ref destination, ref charsWritten, format, provider),
 
 				_ => true
 			};

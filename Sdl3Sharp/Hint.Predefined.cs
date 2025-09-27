@@ -1,4 +1,7 @@
-﻿using System.Runtime.CompilerServices;
+﻿using Sdl3Sharp.Events;
+using Sdl3Sharp.Input;
+using System.Runtime.CompilerServices;
+using static System.Net.WebRequestMethods;
 
 namespace Sdl3Sharp;
 
@@ -132,7 +135,7 @@ partial struct Hint
 		/// </value>
 		/// <remarks>
 		/// <para>
-		/// This is necessary for the right mouse button to work on some Android devices, or to be able to trap the back button for use in your code reliably. If this hint is true, the back button will show up as an <see cref="SDL_EVENT_KEY_DOWN"/> / <see cref="SDL_EVENT_KEY_UP"/> pair with a keycode of <see cref="SDL_SCANCODE_AC_BACK"/>.
+		/// This is necessary for the right mouse button to work on some Android devices, or to be able to trap the back button for use in your code reliably. If this hint is true, the back button will show up as an <see cref="EventType.Keyboard.KeyDown"/> / <see cref="EventType.Keyboard.KeyUp"/> pair with a keycode of <see cref="Scancode.ApplicationControl.Back"/>.
 		/// </para>
 		/// <para>
 		/// The hint can be set to the following values:
@@ -1634,11 +1637,11 @@ partial struct Hint
 	///		</item>
 	///		<item>
 	///			<term><c>"composition"</c></term>
-	///			<description>The application handles <see cref="SDL_EVENT_TEXT_EDITING"/> events and can render the composition text</description>
+	///			<description>The application handles <see cref="EventType.Keyboard.TextEditing"/> events and can render the composition text</description>
 	///		</item>
 	///		<item>
 	///			<term><c>"candidates"</c></term>
-	///			<description>The application handles <see cref="SDL_EVENT_TEXT_EDITING_CANDIDATES"/> and can render the candidate list</description>
+	///			<description>The application handles <see cref="EventType.Keyboard.TextEditingCandidates"/> and can render the candidate list</description>
 	///		</item>
 	/// </list>
 	/// </para>
@@ -2244,7 +2247,7 @@ partial struct Hint
 				/// </list>
 				/// </para>
 				/// <para>
-				/// The default value for this hint is the value of <see cref="SDL_HINT_JOYSTICK_HIDAPI_XBOX_ONE"/>.
+				/// The default value for this hint is the value of <see cref="XBoxOne.UseDriver"/>.
 				/// </para>
 				/// <para>
 				/// This hint should be set before initializing joysticks and gamepads
@@ -2679,6 +2682,40 @@ partial struct Hint
 				/// </remarks>
 				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_PS5">SDL_HINT_JOYSTICK_HIDAPI_PS5</seealso>
 				public static Hint UseDriver { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_HIDAPI_PS5"); }
+			}
+
+			/// <summary>SDL_HINT_JOYSTICK_HIDAPI_SINPUT_*</summary>
+			/// <remarks>
+			/// For the hint SDL_HINT_JOYSTICK_HIDAPI_SINPUT (<c>"SDL_JOYSTICK_HIDAPI_SINPUT"</c>) see <see cref="UseDriver"/>.
+			/// </remarks>
+			public static class SInput
+			{
+				/// <summary>
+				/// Gets a hint controlling whether the HIDAPI driver for SInput controllers should be used
+				/// </summary>
+				/// <value>
+				/// A hint controlling whether the HIDAPI driver for SInput controllers should be used
+				/// </value>
+				/// <remarks>
+				/// <para>
+				/// The hint can be set to the following values:
+				/// <list type="bullet">
+				///		<item>
+				///			<term><c>"0"</c></term>
+				///			<description>HIDAPI driver is not used</description>
+				///		</item>
+				///		<item>
+				///			<term><c>"1"</c></term>
+				///			<description>HIDAPI driver is used</description>
+				///		</item>
+				/// </list>
+				/// </para>
+				/// <para>
+				/// The default value for this hint is the value of <see cref="UseDrivers"/>.
+				/// </para>
+				/// </remarks>
+				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_SINPUT">SDL_HINT_JOYSTICK_HIDAPI_SINPUT</seealso>
+				public static Hint UseDriver { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_HIDAPI_SINPUT"); }
 			}
 
 			/// <summary>SDL_HINT_JOYSTICK_HIDAPI_SHIELD_*</summary>
@@ -3722,6 +3759,50 @@ partial struct Hint
 		public static Hint ZeroCenteredDevices { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_ZERO_CENTERED_DEVICES"); }
 	}
 
+	/// <summary>
+	/// Gets a hint that controls keycode representation in keyboard events
+	/// </summary>
+	/// <value>
+	/// A hint that controls keycode representation in keyboard events
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The hint is a comma separated set of options for translating keycodes in events:
+	/// <list type="bullet">
+	///		<item>
+	///			<term><c>"none"</c></term>
+	///			<description>Keycode options are cleared, this overrides other options</description>
+	///		</item>
+	///		<item>
+	///			<term><c>"hide_numpad"</c></term>
+	///			<description>The numpad keysyms will be translated into their non-numpad versions based on the current NumLock state. For example, <see cref="Keycode.Keypad._4"/> would become <see cref="Keycode._4"/> if <see cref="Keymod.NumLock"/> is set in the event modifiers, and <see cref="Keycode.Left"/> if it is unset.</description>
+	///		</item>
+	///		<item>
+	///			<term><c>"french_numbers"</c></term>
+	///			<description>The number row on French keyboards is inverted, so pressing the 1 key would yield the keycode <see cref="Keycode._1"/>, or <c>'1'</c>, instead of <see cref="Keycode.Ampersand"/>, or <c>'&amp;'</c></description>
+	///		</item>
+	///		<item>
+	///			<term><c>"latin_letters"</c></term>
+	///			<description>For keyboards using non-Latin letters, such as Russian or Thai, the letter keys generate keycodes as though it had an en_US layout. E.g. pressing the key associated with <see cref="Scancode.A"/> on a Russian keyboard would yield <c>'a'</c> instead of a Cyrillic letter.</description>
+	///		</item>
+	/// </list>
+	/// </para>
+	/// <para>
+	/// The default value for this hint is <c>"french_numbers,latin_letters"</c>
+	/// </para>
+	/// <para>
+	/// Some platforms like Emscripten only provide modified keycodes and the options are not used.
+	/// </para>
+	/// <para>
+	/// These options do not affect the return value of <see cref="Keycode.TryGetFromScancode(Scancode, Keymod, out Keycode)"/>() or <see cref="Scancode.TryGetFromKeycode(Keycode, out Keymod, out Scancode)"/>(), they just apply to the keycode included in key events.
+	/// </para>
+	/// <para>
+	/// This hint can be set anytime.
+	/// </para>
+	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_KEYCODE_OPTIONS">SDL_HINT_KEYCODE_OPTIONS</seealso>
+	public static Hint KeycodeOptions { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_KEYCODE_OPTIONS"); }
+
 	// TODO
 
 	/// <summary>
@@ -3738,7 +3819,7 @@ partial struct Hint
 	/// </para>
 	/// <para>
 	/// There are other string values that have special meaning.
-	/// If set to <c>"waitevent"</c>, <see cref="AppBase.OnIterate(Sdl)"/> will not be called until new event(s) have arrived (and been processed by <see cref="AppBase.OnEvent(Sdl, ref readonly Events.Event)"/>).
+	/// If set to <c>"waitevent"</c>, <see cref="AppBase.OnIterate(Sdl)"/> will not be called until new event(s) have arrived (and been processed by <see cref="AppBase.OnEvent(Sdl, ref readonly Event)"/>).
 	/// This can be useful for apps that are completely idle except in response to input.
 	/// </para>
 	/// <para>

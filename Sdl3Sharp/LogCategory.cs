@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sdl3Sharp.Internal;
+using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -130,69 +131,16 @@ public readonly partial struct LogCategory :
 	/// <inheritdoc/>
 	public readonly bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default)
 	{
-		static bool tryWriteSpan(ReadOnlySpan<char> value, ref Span<char> destination, ref int charsWritten)
-		{
-			var result = value.TryCopyTo(destination);
-
-			if (result)
-			{
-				destination = destination[value.Length..];
-				charsWritten += value.Length;
-			}
-
-			return result;
-		}
-
-		static bool tryWriteInt(int value, ref Span<char> destination, ref int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
-		{
-			var result = value.TryFormat(destination, out var tmp, format, provider);
-
-			if (result)
-			{
-				destination = destination[tmp..];
-				charsWritten += tmp;
-			}
-
-			return result;
-		}
-
-		static bool tryWriteChar(char value, ref Span<char> destination, ref int charsWritten)
-		{
-			if (destination.Length is > 0)
-			{
-				destination[0] = value;
-				destination = destination[1..];
-				charsWritten += 1;
-
-				return true;
-			}
-
-			return false;
-		}
-
-		static bool tryWriteKind(Kind value, ref Span<char> destination, ref int charsWritten, ReadOnlySpan<char> format)
-		{
-			var result = Enum.TryFormat(value, destination, out var tmp, format);
-
-			if (result)
-			{
-				destination = destination[tmp..];
-				charsWritten += tmp;
-			}
-
-			return result;
-		}
-
 		charsWritten = 0;
 
 		return mKind switch
 		{
 			>= Kind.Custom
-				=> tryWriteSpan($"{nameof(Custom)}(", ref destination, ref charsWritten)
-				&& tryWriteInt(unchecked(mKind - Kind.Custom), ref destination, ref charsWritten, format, provider)
-				&& tryWriteChar(')', ref destination, ref charsWritten),
+				=> SpanFormat.TryWrite($"{nameof(Custom)}(", ref destination, ref charsWritten)
+				&& SpanFormat.TryWrite(unchecked(mKind - Kind.Custom), ref destination, ref charsWritten, format, provider)
+				&& SpanFormat.TryWrite(')', ref destination, ref charsWritten),
 
-			_ => tryWriteKind(mKind, ref destination, ref charsWritten, format)
+			_ => SpanFormat.TryWrite(mKind, ref destination, ref charsWritten, format)
 		};
 	}
 

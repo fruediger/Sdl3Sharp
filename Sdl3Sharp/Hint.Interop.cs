@@ -1,9 +1,9 @@
-﻿using Sdl3Sharp.Interop;
+﻿using Sdl3Sharp.Internal.Interop;
 using Sdl3Sharp.SourceGeneration;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
-using unsafe HintCallback = delegate* unmanaged[Cdecl]<void*, byte*, byte*, byte*, void>;
+using unsafe SDL_HintCallback = delegate* unmanaged[Cdecl]<void*, byte*, byte*, byte*, void>;
 
 namespace Sdl3Sharp;
 
@@ -32,7 +32,7 @@ partial struct Hint
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_AddHintCallback">SDL_AddHintCallback</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_AddHintCallback(byte* name, HintCallback callback, void* userdata);
+	internal unsafe static partial CBool SDL_AddHintCallback(byte* name, SDL_HintCallback callback, void* userdata);
 
 	/// <summary>
 	/// Get the value of a hint
@@ -61,7 +61,7 @@ partial struct Hint
 	/// <param name="userdata">a pointer being passed to the callback function</param>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_RemoveHintCallback">SDL_RemoveHintCallback</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial void SDL_RemoveHintCallback(byte* name, HintCallback callback, void* userdata);
+	internal unsafe static partial void SDL_RemoveHintCallback(byte* name, SDL_HintCallback callback, void* userdata);
 
 	/// <summary>
 	/// Reset a hint to the default value

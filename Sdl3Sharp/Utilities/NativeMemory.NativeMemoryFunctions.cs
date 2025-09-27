@@ -1,19 +1,19 @@
 ﻿using System.Runtime.CompilerServices;
-using unsafe CallocFunc = delegate* unmanaged[Cdecl, SuppressGCTransition]<System.UIntPtr, System.UIntPtr, void*>;
-using unsafe FreeFunc = delegate* unmanaged[Cdecl, SuppressGCTransition]<void*, void>;
-using unsafe MallocFunc = delegate* unmanaged[Cdecl, SuppressGCTransition]<System.UIntPtr, void*>;
-using unsafe ReallocFunc = delegate* unmanaged[Cdecl, SuppressGCTransition]<void*, System.UIntPtr, void*>;
+using unsafe SDL_calloc_func = delegate* unmanaged[Cdecl, SuppressGCTransition]<System.UIntPtr, System.UIntPtr, void*>;
+using unsafe SDL_free_func = delegate* unmanaged[Cdecl, SuppressGCTransition]<void*, void>;
+using unsafe SDL_malloc_func = delegate* unmanaged[Cdecl, SuppressGCTransition]<System.UIntPtr, void*>;
+using unsafe SDL_realloc_func = delegate* unmanaged[Cdecl, SuppressGCTransition]<void*, System.UIntPtr, void*>;
 
 namespace Sdl3Sharp.Utilities;
 
-partial class NativeMemory
+partial struct NativeMemory
 {
-	private unsafe sealed class NativeMemoryFunctions(MallocFunc malloc, CallocFunc calloc, ReallocFunc realloc, FreeFunc free) : INativeMemoryFunctions
+	private unsafe sealed class NativeMemoryFunctions(SDL_malloc_func malloc, SDL_calloc_func calloc, SDL_realloc_func realloc, SDL_free_func free) : INativeMemoryFunctions
 	{
-		public readonly MallocFunc Malloc = malloc;
-		public readonly CallocFunc Calloc = calloc;
-		public readonly ReallocFunc Realloc = realloc;
-		public readonly FreeFunc Free = free;
+		public readonly SDL_malloc_func Malloc = malloc;
+		public readonly SDL_calloc_func Calloc = calloc;
+		public readonly SDL_realloc_func Realloc = realloc;
+		public readonly SDL_free_func Free = free;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		unsafe void* INativeMemoryFunctions.Calloc(nuint elementCount, nuint elementSize) => Calloc(elementCount, elementSize);

@@ -1,7 +1,7 @@
 ﻿using Sdl3Sharp.SourceGeneration;
 using System.Runtime.InteropServices;
 
-namespace Sdl3Sharp.Interop;
+namespace Sdl3Sharp.Internal.Interop;
 
 internal sealed class Library : INativeImportLibrary
 {

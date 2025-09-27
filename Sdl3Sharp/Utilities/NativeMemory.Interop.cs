@@ -1,15 +1,15 @@
-﻿using Sdl3Sharp.Interop;
+﻿using Sdl3Sharp.Internal.Interop;
 using Sdl3Sharp.SourceGeneration;
 using System;
 using System.Runtime.CompilerServices;
-using unsafe CallocFunc = delegate* unmanaged[Cdecl, SuppressGCTransition]<System.UIntPtr, System.UIntPtr, void*>;
-using unsafe FreeFunc = delegate* unmanaged[Cdecl, SuppressGCTransition]<void*, void>;
-using unsafe MallocFunc = delegate* unmanaged[Cdecl, SuppressGCTransition]<System.UIntPtr, void*>;
-using unsafe ReallocFunc = delegate* unmanaged[Cdecl, SuppressGCTransition]<void*, System.UIntPtr, void*>;
+using unsafe SDL_calloc_func = delegate* unmanaged[Cdecl, SuppressGCTransition]<System.UIntPtr, System.UIntPtr, void*>;
+using unsafe SDL_free_func = delegate* unmanaged[Cdecl, SuppressGCTransition]<void*, void>;
+using unsafe SDL_malloc_func = delegate* unmanaged[Cdecl, SuppressGCTransition]<System.UIntPtr, void*>;
+using unsafe SDL_realloc_func = delegate* unmanaged[Cdecl, SuppressGCTransition]<void*, System.UIntPtr, void*>;
 
 namespace Sdl3Sharp.Utilities;
 
-partial class NativeMemory
+partial struct NativeMemory
 {
 	/// <summary>
 	/// Get the current set of SDL memory functions
@@ -23,7 +23,7 @@ partial class NativeMemory
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetMemoryFunctions">SDL_GetMemoryFunctions</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial void SDL_GetMemoryFunctions(MallocFunc* malloc_func, CallocFunc* calloc_func, ReallocFunc* realloc_func, FreeFunc* free_func);
+	internal unsafe static partial void SDL_GetMemoryFunctions(SDL_malloc_func* malloc_func, SDL_calloc_func* calloc_func, SDL_realloc_func* realloc_func, SDL_free_func* free_func);
 
 	/// <summary>
 	/// Get the number of outstanding (unfreed) allocations
@@ -46,7 +46,7 @@ partial class NativeMemory
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetOriginalMemoryFunctions">SDL_GetOriginalMemoryFunctions</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial void SDL_GetOriginalMemoryFunctions(MallocFunc* malloc_func, CallocFunc* calloc_func, ReallocFunc* realloc_func, FreeFunc* free_func);
+	internal unsafe static partial void SDL_GetOriginalMemoryFunctions(SDL_malloc_func* malloc_func, SDL_calloc_func* calloc_func, SDL_realloc_func* realloc_func, SDL_free_func* free_func);
 
 	/// <summary>
 	/// Replace SDL's memory allocation functions with a custom set
@@ -63,7 +63,7 @@ partial class NativeMemory
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_SetMemoryFunctions">SDL_SetMemoryFunctions</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_SetMemoryFunctions(MallocFunc malloc_func, CallocFunc calloc_func, ReallocFunc realloc_func, FreeFunc free_func);
+	internal unsafe static partial CBool SDL_SetMemoryFunctions(SDL_malloc_func malloc_func, SDL_calloc_func calloc_func, SDL_realloc_func realloc_func, SDL_free_func free_func);
 
 	/// <summary>
 	/// Allocate memory aligned to a specific alignment

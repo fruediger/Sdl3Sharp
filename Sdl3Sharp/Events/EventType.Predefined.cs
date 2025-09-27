@@ -5,9 +5,21 @@ using System.Runtime.CompilerServices;
 namespace Sdl3Sharp.Events;
 
 partial struct EventType
-{
+{	
 	/// <summary>
-	/// Provides <see cref="EventType">event types</see> for application events
+	/// Gets the first valid event type (<c>First</c>)
+	/// </summary>
+	/// <value>
+	/// The first valid event type (<c>First</c>)
+	/// </value>
+	/// <remarks>
+	/// This is not an actual event type which could be send or received. It represents the absolute lower bound of valid event types.
+	/// Therefore it can be useful when declaring ranges of event types, where it can be used as an extreme lower bound.
+	/// </remarks>
+	public static EventType First { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.First); }
+
+	/// <summary>
+	/// Provides predefined <see cref="EventType"/>s for application events
 	/// </summary>
 	public static class Application
 	{
@@ -20,7 +32,7 @@ partial struct EventType
 		/// <remarks>
 		/// User-requested quit
 		/// </remarks>
-		public static EventType Quit { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.Quit); }
+		public static EventType<QuitEvent> Quit { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.Quit); }
 
 		/// <summary>
 		/// Gets the event type <c>Application.Terminating</c>
@@ -29,11 +41,11 @@ partial struct EventType
 		/// The event type <c>Application.Terminating</c>
 		/// </value>
 		/// <remarks>
-		/// The application is being terminated by the OS. This event must be handled in a callback set with <see cref="SDL_AddEventWatch"/>().
+		/// The application is being terminated by the OS. This event must be handled in an event handler registered with <see cref="Sdl.EventWatch"/>.
 		/// Called on iOS in <c>applicationWillTerminate()</c>.
 		/// Called on Android in <c>onDestroy()</c>.
 		/// </remarks>
-		public static EventType Terminating { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.Terminating); }
+		public static EventType<Event> Terminating { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.Terminating); }
 
 		/// <summary>
 		/// Gets the event type <c>Application.LowMemory</c>
@@ -42,11 +54,11 @@ partial struct EventType
 		/// The event type <c>Application.LowMemory</c>
 		/// </value>
 		/// <remarks>
-		/// The application is low on memory, free memory if possible. This event must be handled in a callback set with <see cref="SDL_AddEventWatch"/>().
+		/// The application is low on memory, free memory if possible. This event must be handled in an event handler registered with <see cref="Sdl.EventWatch"/>.
 		/// Called on iOS in <c>applicationDidReceiveMemoryWarning</c>().
 		/// Called on Android in <c>onTrimMemory</c>().
 		/// </remarks>
-		public static EventType LowMemory { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.LowMemory); }
+		public static EventType<Event> LowMemory { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.LowMemory); }
 
 		/// <summary>
 		/// Gets the event type <c>Application.WillEnterBackground</c>
@@ -55,11 +67,11 @@ partial struct EventType
 		/// The event type <c>Application.WillEnterBackground</c>
 		/// </value>
 		/// <remarks>
-		/// The application is about to enter the background. This event must be handled in a callback set with <see cref="SDL_AddEventWatch"/>().
+		/// The application is about to enter the background. This event must be handled in an event handler registered with <see cref="Sdl.EventWatch"/>.
 		/// Called on iOS in <c>applicationWillResignActive()</c>.
 		/// Called on Android in <c>onPause()</c>.
 		/// </remarks>
-		public static EventType WillEnterBackground { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WillEnterBackground); }
+		public static EventType<Event> WillEnterBackground { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WillEnterBackground); }
 
 		/// <summary>
 		/// Gets the event type <c>Application.DidEnterBackground</c>
@@ -68,11 +80,11 @@ partial struct EventType
 		/// The event type <c>Application.DidEnterBackground</c>
 		/// </value>
 		/// <remarks>
-		/// The application did enter the background and may not get CPU for some time. This event must be handled in a callback set with <see cref="SDL_AddEventWatch"/>().
+		/// The application did enter the background and may not get CPU for some time. This event must be handled in an event handler registered with <see cref="Sdl.EventWatch"/>.
 		/// Called on iOS in <c>applicationDidEnterBackground()</c>.
 		/// Called on Android in <c>onPause()</c>.
 		/// </remarks>
-		public static EventType DidEnterBackground { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DidEnterBackground); }
+		public static EventType<Event> DidEnterBackground { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DidEnterBackground); }
 
 		/// <summary>
 		/// Gets the event type <c>Application.WillEnterForeground</c>
@@ -81,11 +93,11 @@ partial struct EventType
 		/// The event type <c>Application.WillEnterForeground</c>
 		/// </value>
 		/// <remarks>
-		/// The application is about to enter the foreground. This event must be handled in a callback set with <see cref="SDL_AddEventWatch"/>().
+		/// The application is about to enter the foreground. This event must be handled in an event handler registered with <see cref="Sdl.EventWatch"/>.
 		/// Called on iOS in <c>applicationWillEnterForeground()</c>.
 		/// Called on Android in <c>onResume()</c>.
 		/// </remarks>
-		public static EventType WillEnterForeground { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WillEnterForeground); }
+		public static EventType<Event> WillEnterForeground { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WillEnterForeground); }
 
 		/// <summary>
 		/// Gets the event type <c>Application.DidEnterForeground</c>
@@ -94,11 +106,11 @@ partial struct EventType
 		/// The event type <c>Application.DidEnterForeground</c>
 		/// </value>
 		/// <remarks>
-		/// The application is now interactive. This event must be handled in a callback set with <see cref="SDL_AddEventWatch"/>().
+		/// The application is now interactive. This event must be handled in an event handler registered with <see cref="Sdl.EventWatch"/>.
 		/// Called on iOS in <c>applicationDidBecomeActive()</c>.
 		/// Called on Android in <c>onResume()</c>.
 		/// </remarks>
-		public static EventType DidEnterForeground { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DidEnterForeground); }
+		public static EventType<Event> DidEnterForeground { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DidEnterForeground); }
 
 		/// <summary>
 		/// Gets the event type <c>Application.LocaleChanged</c>
@@ -109,7 +121,7 @@ partial struct EventType
 		/// <remarks>
 		/// The user's locale preferences have changed
 		/// </remarks>
-		public static EventType LocaleChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.LocaleChanged); }
+		public static EventType<Event> LocaleChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.LocaleChanged); }
 
 		/// <summary>
 		/// Gets the event type <c>Application.SystemThemeChanged</c>
@@ -120,11 +132,11 @@ partial struct EventType
 		/// <remarks>
 		/// The system theme changed
 		/// </remarks>
-		public static EventType SystemThemeChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.SystemThemeChanged); }
+		public static EventType<Event> SystemThemeChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.SystemThemeChanged); }
 	}
 
 	/// <summary>
-	/// Provides <see cref="EventType">event types</see> for display events
+	/// Provides predefined <see cref="EventType"/>s for display events
 	/// </summary>
 	public static class Display
 	{
@@ -135,9 +147,9 @@ partial struct EventType
 		/// The event type <c>Display.OrientationChanged</c>
 		/// </value>
 		/// <remarks>
-		/// The display orientation has changed to <see cref="data1"/>
+		/// The display orientation has changed to <see cref="DisplayEvent.Data1"/>
 		/// </remarks>
-		public static EventType OrientationChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DisplayOrientation); }
+		public static EventType<DisplayEvent> OrientationChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DisplayOrientation); }
 
 		/// <summary>
 		/// Gets the event type <c>Display.Added</c>
@@ -148,7 +160,7 @@ partial struct EventType
 		/// <remarks>
 		/// A display has been added to the system
 		/// </remarks>
-		public static EventType Added { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DisplayAdded); }
+		public static EventType<DisplayEvent> Added { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DisplayAdded); }
 
 		/// <summary>
 		/// Gets the event type <c>Display.Removed</c>
@@ -159,7 +171,7 @@ partial struct EventType
 		/// <remarks>
 		/// A display has been removed from the system
 		/// </remarks>
-		public static EventType Removed { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DisplayRemoved); }
+		public static EventType<DisplayEvent> Removed { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DisplayRemoved); }
 
 		/// <summary>
 		/// Gets the event type <c>Display.Moved</c>
@@ -170,7 +182,7 @@ partial struct EventType
 		/// <remarks>
 		/// A display has changed position
 		/// </remarks>
-		public static EventType Moved { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DisplayMoved); }
+		public static EventType<DisplayEvent> Moved { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DisplayMoved); }
 
 		/// <summary>
 		/// Gets the event type <c>Display.DesktopModeChanged</c>
@@ -181,7 +193,7 @@ partial struct EventType
 		/// <remarks>
 		/// A display has changed desktop mode
 		/// </remarks>
-		public static EventType DesktopModeChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DisplayDesktopModeChanged); }
+		public static EventType<DisplayEvent> DesktopModeChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DisplayDesktopModeChanged); }
 
 		/// <summary>
 		/// Gets the event type <c>Display.CurrentModeChanged</c>
@@ -192,7 +204,7 @@ partial struct EventType
 		/// <remarks>
 		/// A display has changed current mode
 		/// </remarks>
-		public static EventType CurrentModeChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DisplayCurrentModeChanged); }
+		public static EventType<DisplayEvent> CurrentModeChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DisplayCurrentModeChanged); }
 
 		/// <summary>
 		/// Gets the event type <c>Display.ContentScaleChanged</c>
@@ -203,11 +215,11 @@ partial struct EventType
 		/// <remarks>
 		/// A display has changed content scale
 		/// </remarks>
-		public static EventType ContentScaleChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DisplayContentScaleChanged); }
+		public static EventType<DisplayEvent> ContentScaleChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DisplayContentScaleChanged); }
 	}
 
 	/// <summary>
-	/// Provides <see cref="EventType">event types</see> for window events
+	/// Provides predefined <see cref="EventType"/>s for window events
 	/// </summary>
 	public static class Window
 	{
@@ -220,7 +232,7 @@ partial struct EventType
 		/// <remarks>
 		/// A window has been shown
 		/// </remarks>
-		public static EventType Shown { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowShown); }
+		public static EventType<WindowEvent> Shown { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowShown); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.Hidden</c>
@@ -231,7 +243,7 @@ partial struct EventType
 		/// <remarks>
 		/// A window has been hidden
 		/// </remarks>
-		public static EventType Hidden { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowHidden); }
+		public static EventType<WindowEvent> Hidden { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowHidden); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.Exposed</c>
@@ -242,7 +254,7 @@ partial struct EventType
 		/// <remarks>
 		/// A window has been exposed and should be redrawn, and can be redrawn directly from event watchers for this event
 		/// </remarks>
-		public static EventType Exposed { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowExposed); }
+		public static EventType<WindowEvent> Exposed { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowExposed); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.Moved</c>
@@ -251,9 +263,9 @@ partial struct EventType
 		/// The event type <c>Window.Moved</c>
 		/// </value>
 		/// <remarks>
-		/// A window has been moved to <see cref="data1"/>, <see cref="data2"/>
+		/// A window has been moved to <see cref="WindowEvent.Data1"/>, <see cref="WindowEvent.Data2"/>
 		/// </remarks>
-		public static EventType Moved { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowMoved); }
+		public static EventType<WindowEvent> Moved { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowMoved); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.Resized</c>
@@ -262,9 +274,9 @@ partial struct EventType
 		/// The event type <c>Window.Resized</c>
 		/// </value>
 		/// <remarks>
-		/// A window has been resized to <see cref="data1"/>×<see cref="data2"/>
+		/// A window has been resized to <see cref="WindowEvent.Data1"/>×<see cref="WindowEvent.Data2"/>
 		/// </remarks>
-		public static EventType Resized { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowResized); }
+		public static EventType<WindowEvent> Resized { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowResized); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.PixelSizeChanged</c>
@@ -273,9 +285,9 @@ partial struct EventType
 		/// The event type <c>Window.PixelSizeChanged</c>
 		/// </value>
 		/// <remarks>
-		/// The pixel size of a window has changed to <see cref="data1"/>×<see cref="data2"/>
+		/// The pixel size of a window has changed to <see cref="WindowEvent.Data1"/>×<see cref="WindowEvent.Data2"/>
 		/// </remarks>
-		public static EventType PixelSizeChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowPixelSizeChanged); }
+		public static EventType<WindowEvent> PixelSizeChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowPixelSizeChanged); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.MetalViewResized</c>
@@ -286,7 +298,7 @@ partial struct EventType
 		/// <remarks>
 		/// The pixel size of a Metal view associated with a window has changed
 		/// </remarks>
-		public static EventType MetalViewResized { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowMetalViewResized); }
+		public static EventType<WindowEvent> MetalViewResized { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowMetalViewResized); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.Minimized</c>
@@ -297,7 +309,7 @@ partial struct EventType
 		/// <remarks>
 		/// A window has been minimized
 		/// </remarks>
-		public static EventType Minimized { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowMinimized); }
+		public static EventType<WindowEvent> Minimized { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowMinimized); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.Maximized</c>
@@ -308,7 +320,7 @@ partial struct EventType
 		/// <remarks>
 		/// A window has been maximized
 		/// </remarks>
-		public static EventType Maximized { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowMaximized); }
+		public static EventType<WindowEvent> Maximized { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowMaximized); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.Restored</c>
@@ -319,7 +331,7 @@ partial struct EventType
 		/// <remarks>
 		/// A window has been restored to normal size and position
 		/// </remarks>
-		public static EventType Restored { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowRestored); }
+		public static EventType<WindowEvent> Restored { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowRestored); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.MouseEnter</c>
@@ -330,7 +342,7 @@ partial struct EventType
 		/// <remarks>
 		/// A window has gained mouse focus
 		/// </remarks>
-		public static EventType MouseEnter { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowMouseEnter); }
+		public static EventType<WindowEvent> MouseEnter { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowMouseEnter); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.MouseLeave</c>
@@ -341,7 +353,7 @@ partial struct EventType
 		/// <remarks>
 		/// A window has lost mouse focus
 		/// </remarks>
-		public static EventType MouseLeave { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowMouseLeave); }
+		public static EventType<WindowEvent> MouseLeave { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowMouseLeave); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.FocusGained</c>
@@ -352,7 +364,7 @@ partial struct EventType
 		/// <remarks>
 		/// A window has gained keyboard focus
 		/// </remarks>
-		public static EventType FocusGained { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowFocusGained); }
+		public static EventType<WindowEvent> FocusGained { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowFocusGained); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.FocusLost</c>
@@ -363,7 +375,7 @@ partial struct EventType
 		/// <remarks>
 		/// A window has lost keyboard focus
 		/// </remarks>
-		public static EventType FocusLost { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowFocusLost); }
+		public static EventType<WindowEvent> FocusLost { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowFocusLost); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.CloseRequested</c>
@@ -374,7 +386,7 @@ partial struct EventType
 		/// <remarks>
 		/// The window manager requests that a window should be closed
 		/// </remarks>
-		public static EventType CloseRequested { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowCloseRequested); }
+		public static EventType<WindowEvent> CloseRequested { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowCloseRequested); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.HitTest</c>
@@ -385,7 +397,7 @@ partial struct EventType
 		/// <remarks>
 		/// A window had a hit test that wasn't <see cref="SDL_HITTEST_NORMAL"/>
 		/// </remarks>
-		public static EventType HitTest { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowHitTest); }
+		public static EventType<WindowEvent> HitTest { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowHitTest); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.IccProfileChanged</c>
@@ -396,7 +408,7 @@ partial struct EventType
 		/// <remarks>
 		/// The ICC profile of a window's display has changed
 		/// </remarks>
-		public static EventType IccProfileChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowIccProfileChnaged); }
+		public static EventType<WindowEvent> IccProfileChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowIccProfileChnaged); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.DisplayChanged</c>
@@ -405,9 +417,9 @@ partial struct EventType
 		/// The event type <c>Window.DisplayChanged</c>
 		/// </value>
 		/// <remarks>
-		/// A window has been moved to display <see cref="data1"/>
+		/// A window has been moved to display <see cref="WindowEvent.Data1"/>
 		/// </remarks>
-		public static EventType DisplayChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowDisplayChanged); }
+		public static EventType<WindowEvent> DisplayChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowDisplayChanged); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.DisplayScaleChanged</c>
@@ -418,7 +430,7 @@ partial struct EventType
 		/// <remarks>
 		/// A window's display scale has been changed
 		/// </remarks>
-		public static EventType DisplayScaleChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowDisplayScaleChanged); }
+		public static EventType<WindowEvent> DisplayScaleChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowDisplayScaleChanged); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.SafeAreaChanged</c>
@@ -429,7 +441,7 @@ partial struct EventType
 		/// <remarks>
 		/// A window's safe area has been changed
 		/// </remarks>
-		public static EventType SafeAreaChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowSafeAreaChanged); }
+		public static EventType<WindowEvent> SafeAreaChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowSafeAreaChanged); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.Occluded</c>
@@ -440,7 +452,7 @@ partial struct EventType
 		/// <remarks>
 		/// A window has been occluded
 		/// </remarks>
-		public static EventType Occluded { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowOccluded); }
+		public static EventType<WindowEvent> Occluded { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowOccluded); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.EnterFullscreen</c>
@@ -451,7 +463,7 @@ partial struct EventType
 		/// <remarks>
 		/// A window has entered fullscreen mode
 		/// </remarks>
-		public static EventType EnterFullscreen { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowEnterFullscreen); }
+		public static EventType<WindowEvent> EnterFullscreen { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowEnterFullscreen); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.LeaveFullscreen</c>
@@ -462,7 +474,7 @@ partial struct EventType
 		/// <remarks>
 		/// A window has left fullscreen mode
 		/// </remarks>
-		public static EventType LeaveFullscreen { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowLeaveFullscreen); }
+		public static EventType<WindowEvent> LeaveFullscreen { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowLeaveFullscreen); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.Destroyed</c>
@@ -475,7 +487,7 @@ partial struct EventType
 		/// If this message is being handled in an event watcher, the window handle is still valid and can still be used to retrieve any properties associated with the window.
 		/// Otherwise, the handle has already been destroyed and all resources associated with it are invalid.
 		/// </remarks>
-		public static EventType Destroyed { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowDestroyed); }
+		public static EventType<WindowEvent> Destroyed { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowDestroyed); }
 
 		/// <summary>
 		/// Gets the event type <c>Window.HdrStateChanged</c>
@@ -486,11 +498,11 @@ partial struct EventType
 		/// <remarks>
 		/// A window's HDR properties have changed
 		/// </remarks>
-		public static EventType HdrStateChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowHdrStateChanged); }
+		public static EventType<WindowEvent> HdrStateChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.WindowHdrStateChanged); }
 	}
 
 	/// <summary>
-	/// Provides <see cref="EventType">event types</see> for keyboard events
+	/// Provides predefined <see cref="EventType"/>s for keyboard events
 	/// </summary>
 	public static class Keyboard
 	{
@@ -503,7 +515,7 @@ partial struct EventType
 		/// <remarks>
 		/// Key pressed
 		/// </remarks>
-		public static EventType KeyDown { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.KeyDown); }
+		public static EventType<KeyboardEvent> KeyDown { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.KeyDown); }
 
 		/// <summary>
 		/// Gets the event type <c>Keyboard.KeyUp</c>
@@ -514,7 +526,9 @@ partial struct EventType
 		/// <remarks>
 		/// Key released
 		/// </remarks>
-		public static EventType KeyUp { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.KeyUp); }
+		public static EventType<KeyboardEvent> KeyUp { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.KeyUp); }
+
+		// TODO: change EventType to EventType<?>
 
 		/// <summary>
 		/// Gets the event type <c>Keyboard.TextEditing</c>
@@ -527,6 +541,8 @@ partial struct EventType
 		/// </remarks>
 		public static EventType TextEditing { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.TextEditing); }
 
+		// TODO: change EventType to EventType<?>
+
 		/// <summary>
 		/// Gets the event type <c>Keyboard.TextInput</c>
 		/// </summary>
@@ -537,6 +553,8 @@ partial struct EventType
 		/// Keyboard text input
 		/// </remarks>
 		public static EventType TextInput { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.TextInput); }
+
+		// TODO: change EventType to EventType<?>
 
 		/// <summary>
 		/// Gets the event type <c>Keyboard.KeymapChanged</c>
@@ -558,7 +576,7 @@ partial struct EventType
 		/// <remarks>
 		/// A new keyboard has been inserted into the system
 		/// </remarks>
-		public static EventType Added { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.KeyboardAdded); }
+		public static EventType<KeyboardDeviceEvent> Added { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.KeyboardAdded); }
 
 		/// <summary>
 		/// Gets the event type <c>Keyboard.Removed</c>
@@ -569,7 +587,9 @@ partial struct EventType
 		/// <remarks>
 		/// A keyboard has been removed
 		/// </remarks>
-		public static EventType Removed { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.KeyboardRemoved); }
+		public static EventType<KeyboardDeviceEvent> Removed { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.KeyboardRemoved); }
+
+		// TODO: change EventType to EventType<?>
 
 		/// <summary>
 		/// Gets the event type <c>Keyboard.TextEditingCandidates</c>
@@ -584,7 +604,7 @@ partial struct EventType
 	}
 
 	/// <summary>
-	/// Provides <see cref="EventType">event types</see> for mouse events
+	/// Provides predefined <see cref="EventType"/>s for mouse events
 	/// </summary>
 	public static class Mouse
 	{
@@ -656,7 +676,7 @@ partial struct EventType
 	}
 
 	/// <summary>
-	/// Provides <see cref="EventType">event types</see> for joystick events
+	/// Provides predefined <see cref="EventType"/>s for joystick events
 	/// </summary>
 	public static class Joystick
 	{
@@ -761,7 +781,7 @@ partial struct EventType
 	}
 
 	/// <summary>
-	/// Provides <see cref="EventType">event types</see> for gamepad events
+	/// Provides predefined <see cref="EventType"/>s for gamepad events
 	/// </summary>
 	public static class Gamepad
 	{
@@ -899,7 +919,7 @@ partial struct EventType
 	}
 
 	/// <summary>
-	/// Provides <see cref="EventType">event types</see> for touch events
+	/// Provides predefined <see cref="EventType"/>s for touch events
 	/// </summary>
 	public static class Touch
 	{
@@ -937,7 +957,7 @@ partial struct EventType
 	}
 
 	/// <summary>
-	/// Provides <see cref="EventType">event types</see> for clipboard events
+	/// Provides predefined <see cref="EventType"/>s for clipboard events
 	/// </summary>
 	public static class Clipboard
 	{
@@ -950,11 +970,11 @@ partial struct EventType
 		/// <remarks>
 		/// The clipboard or primary selection changed
 		/// </remarks>
-		public static EventType Updated { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.ClipboardUpdated); }
+		public static EventType<ClipboardEvent> Updated { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.ClipboardUpdated); }
 	}
 
 	/// <summary>
-	/// Provides <see cref="EventType">event types</see> for drag and drop events
+	/// Provides predefined <see cref="EventType"/>s for drag and drop events
 	/// </summary>
 	public static class DragAndDrop
 	{
@@ -965,9 +985,9 @@ partial struct EventType
 		/// The event type <c>DragAndDrop.File</c>
 		/// </value>
 		/// <remarks>
-		/// The system requests a file open
+		/// The system requests a file open. <see cref="DropEvent.Data"/> contains the filename.
 		/// </remarks>
-		public static EventType File { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DropFile); }
+		public static EventType<DropEvent> File { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DropFile); }
 
 		/// <summary>
 		/// Gets the event type <c>DragAndDrop.Text</c>
@@ -976,9 +996,9 @@ partial struct EventType
 		/// The event type <c>DragAndDrop.Text</c>
 		/// </value>
 		/// <remarks>
-		/// text/plain drag-and-drop event
+		/// A plain text drag-and-drop event occured. <see cref="DropEvent.Data"/> contains the text.
 		/// </remarks>
-		public static EventType Text { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DropText); }
+		public static EventType<DropEvent> Text { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DropText); }
 
 		/// <summary>
 		/// Gets the event type <c>DragAndDrop.Begin</c>
@@ -987,9 +1007,9 @@ partial struct EventType
 		/// The event type <c>DragAndDrop.Begin</c>
 		/// </value>
 		/// <remarks>
-		/// A new set of drops is beginning (<see langword="null"/> <see cref="filename"/>)
+		/// A new set of drops is beginning. <see cref="DropEvent.Data"/> is <c><see langword="null"/></c>.
 		/// </remarks>
-		public static EventType Begin { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DropBegin); }
+		public static EventType<DropEvent> Begin { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DropBegin); }
 
 		/// <summary>
 		/// Gets the event type <c>DragAndDrop.Completed</c>
@@ -998,9 +1018,9 @@ partial struct EventType
 		/// The event type <c>DragAndDrop.Completed</c>
 		/// </value>
 		/// <remarks>
-		/// Current set of drops is now complete (<see langword="null"/> <see cref="filename"/>)
+		/// Current set of drops is now complete. <see cref="DropEvent.Data"/> is <c><see langword="null"/></c>.
 		/// </remarks>
-		public static EventType Completed { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DropCompleted); }
+		public static EventType<DropEvent> Completed { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DropCompleted); }
 
 		/// <summary>
 		/// Gets the event type <c>DragAndDrop.Position</c>
@@ -1011,11 +1031,11 @@ partial struct EventType
 		/// <remarks>
 		/// Position while moving over the window
 		/// </remarks>
-		public static EventType Position { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DropPosition); }
+		public static EventType<DropEvent> Position { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.DropPosition); }
 	}
 
 	/// <summary>
-	/// Provides <see cref="EventType">event types</see> for audio hotplug events
+	/// Provides predefined <see cref="EventType"/>s for audio hotplug events
 	/// </summary>
 	public static class AudioDevice
 	{
@@ -1028,7 +1048,7 @@ partial struct EventType
 		/// <remarks>
 		/// A new audio device is available
 		/// </remarks>
-		public static EventType Added { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.AudioDeviceAdded); }
+		public static EventType<AudioDeviceEvent> Added { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.AudioDeviceAdded); }
 
 		/// <summary>
 		/// Gets the event type <c>AudioDevice.Removed</c>
@@ -1039,7 +1059,7 @@ partial struct EventType
 		/// <remarks>
 		/// An audio device has been removed
 		/// </remarks>
-		public static EventType Removed { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.AudioDeviceRemoved); }
+		public static EventType<AudioDeviceEvent> Removed { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.AudioDeviceRemoved); }
 
 		/// <summary>
 		/// Gets the event type <c>AudioDevice.FormatChanged</c>
@@ -1050,11 +1070,11 @@ partial struct EventType
 		/// <remarks>
 		/// An audio device's format has been changed by the system
 		/// </remarks>
-		public static EventType FormatChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.AudioDeviceFormatChanged); }
+		public static EventType<AudioDeviceEvent> FormatChanged { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.AudioDeviceFormatChanged); }
 	}
 
 	/// <summary>
-	/// Provides <see cref="EventType">event types</see> for sensor events
+	/// Provides predefined <see cref="EventType"/>s for sensor events
 	/// </summary>
 	public static class Sensor
 	{
@@ -1071,7 +1091,7 @@ partial struct EventType
 	}
 
 	/// <summary>
-	/// Provides <see cref="EventType">event types</see> for pressure-sensitive pen events
+	/// Provides predefined <see cref="EventType"/>s for pressure-sensitive pen events
 	/// </summary>
 	public static class Pen
 	{
@@ -1165,7 +1185,7 @@ partial struct EventType
 	}
 
 	/// <summary>
-	/// Provides <see cref="EventType">event types</see> for camera hotplug events
+	/// Provides predefined <see cref="EventType"/>s for camera hotplug events
 	/// </summary>
 	public static class CameraDevice
 	{
@@ -1178,7 +1198,7 @@ partial struct EventType
 		/// <remarks>
 		/// A new camera device is available
 		/// </remarks>
-		public static EventType Added { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.CameraDeviceAdded); }
+		public static EventType<CameraDeviceEvent> Added { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.CameraDeviceAdded); }
 
 		/// <summary>
 		/// Gets the event type <c>CameraDevice.Removed</c>
@@ -1189,7 +1209,7 @@ partial struct EventType
 		/// <remarks>
 		/// A camera device has been removed
 		/// </remarks>
-		public static EventType Removed { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.CameraDeviceRemoved); }
+		public static EventType<CameraDeviceEvent> Removed { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.CameraDeviceRemoved); }
 
 		/// <summary>
 		/// Gets the event type <c>CameraDevice.Approved</c>
@@ -1200,7 +1220,7 @@ partial struct EventType
 		/// <remarks>
 		/// A camera device has been approved for use by the user
 		/// </remarks>
-		public static EventType Approved { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.CameraDeviceApproved); }
+		public static EventType<CameraDeviceEvent> Approved { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.CameraDeviceApproved); }
 
 		/// <summary>
 		/// Gets the event type <c>CameraDevice.Denied</c>
@@ -1211,11 +1231,11 @@ partial struct EventType
 		/// <remarks>
 		/// A camera device has been denied for use by the user
 		/// </remarks>
-		public static EventType Denied { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.CameraDeviceDenied); }
+		public static EventType<CameraDeviceEvent> Denied { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.CameraDeviceDenied); }
 	}
 
 	/// <summary>
-	/// Provides <see cref="EventType">event types</see> for render events
+	/// Provides predefined <see cref="EventType"/>s for render events
 	/// </summary>
 	public static class Render
 	{
@@ -1253,19 +1273,38 @@ partial struct EventType
 		public static EventType DeviceLost { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.RenderDeviceLost); }
 	}
 
+	internal static class Internal
+	{
+		internal static EventType PollSentinell { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.PollSentinel); }
+
+		internal static EventType User { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.User); }
+	}
+
 	/// <summary>
-	/// Gets a user event type
+	/// Gets the last valid event type (<c>Last</c>)
+	/// </summary>
+	/// <value>
+	/// The last valid event type (<c>Last</c>)
+	/// </value>
+	/// <remarks>
+	/// This is not an actual event type which could be send or received. It represents the absolute upper bound of valid event types.
+	/// Therefore it can be useful when declaring ranges of event types, where it can be used as an extreme upper bound.
+	/// </remarks>
+	public static EventType Last { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(Kind.Last); }
+
+	/// <summary>
+	/// Gets a user defined <see cref="EventType"/>
 	/// </summary>
 	/// <param name="userValue">The user value of the resulting event type; used to identify the event type</param>
 	/// <returns>A user event type identified by <c><paramref name="userValue"/></c></returns>
 	/// <exception cref="ArgumentOutOfRangeException"><c><paramref name="userValue"/></c> is less than <c>0</c> or greater than <c>32767</c></exception>
 	/// <remarks>
-	/// User events should be allocated with <see cref="SDL_RegisterEvents"/>()
+	/// User defined events should be first registered with <see cref="TryRegister(int, out Enumerable)"/> in order to use them with the SDL event system.
 	/// </remarks>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static EventType User(int userValue)
+	public static EventType<UserEvent> User(int userValue)
 	{
-		if (userValue is < 0 or > (int)(Kind.Last - Kind.User))
+		if (userValue is < (int)Kind.First or > (int)(Kind.Last - Kind.User))
 		{
 			failUserValueArgumentOutOfRange();
 		}
@@ -1275,4 +1314,135 @@ partial struct EventType
 		[DoesNotReturn]
 		static void failUserValueArgumentOutOfRange() => throw new ArgumentOutOfRangeException(nameof(userValue));
 	}
+
+	private static string? KnownKindToString(Kind kind) => kind switch
+	{
+		Kind.First => nameof(First),
+
+		Kind.Quit => $"{nameof(Application)}.{nameof(Application.Quit)}",
+		Kind.Terminating => $"{nameof(Application)}.{nameof(Application.Terminating)}",
+		Kind.LowMemory => $"{nameof(Application)}.{nameof(Application.LowMemory)}",
+		Kind.WillEnterBackground => $"{nameof(Application)}.{nameof(Application.WillEnterBackground)}",
+		Kind.DidEnterBackground => $"{nameof(Application)}.{nameof(Application.DidEnterBackground)}",
+		Kind.WillEnterForeground => $"{nameof(Application)}.{nameof(Application.WillEnterForeground)}",
+		Kind.DidEnterForeground => $"{nameof(Application)}.{nameof(Application.DidEnterForeground)}",
+		Kind.LocaleChanged => $"{nameof(Application)}.{nameof(Application.LocaleChanged)}",
+		Kind.SystemThemeChanged => $"{nameof(Application)}.{nameof(Application.SystemThemeChanged)}",
+
+		Kind.DisplayOrientation => $"{nameof(Display)}.{nameof(Display.OrientationChanged)}",
+		Kind.DisplayAdded => $"{nameof(Display)}.{nameof(Display.Added)}",
+		Kind.DisplayRemoved => $"{nameof(Display)}.{nameof(Display.Removed)}",
+		Kind.DisplayMoved => $"{nameof(Display)}.{nameof(Display.Moved)}",
+		Kind.DisplayDesktopModeChanged => $"{nameof(Display)}.{nameof(Display.DesktopModeChanged)}",
+		Kind.DisplayCurrentModeChanged => $"{nameof(Display)}.{nameof(Display.CurrentModeChanged)}",
+		Kind.DisplayContentScaleChanged => $"{nameof(Display)}.{nameof(Display.ContentScaleChanged)}",
+
+		Kind.WindowShown => $"{nameof(Window)}.{nameof(Window.Shown)}",
+		Kind.WindowHidden => $"{nameof(Window)}.{nameof(Window.Hidden)}",
+		Kind.WindowExposed => $"{nameof(Window)}.{nameof(Window.Exposed)}",
+		Kind.WindowMoved => $"{nameof(Window)}.{nameof(Window.Moved)}",
+		Kind.WindowResized => $"{nameof(Window)}.{nameof(Window.Resized)}",
+		Kind.WindowPixelSizeChanged => $"{nameof(Window)}.{nameof(Window.PixelSizeChanged)}",
+		Kind.WindowMetalViewResized => $"{nameof(Window)}.{nameof(Window.MetalViewResized)}",
+		Kind.WindowMinimized => $"{nameof(Window)}.{nameof(Window.Minimized)}",
+		Kind.WindowMaximized => $"{nameof(Window)}.{nameof(Window.Maximized)}",
+		Kind.WindowRestored => $"{nameof(Window)}.{nameof(Window.Restored)}",
+		Kind.WindowMouseEnter => $"{nameof(Window)}.{nameof(Window.MouseEnter)}",
+		Kind.WindowMouseLeave => $"{nameof(Window)}.{nameof(Window.MouseLeave)}",
+		Kind.WindowFocusGained => $"{nameof(Window)}.{nameof(Window.FocusGained)}",
+		Kind.WindowFocusLost => $"{nameof(Window)}.{nameof(Window.FocusLost)}",
+		Kind.WindowCloseRequested => $"{nameof(Window)}.{nameof(Window.CloseRequested)}",
+		Kind.WindowHitTest => $"{nameof(Window)}.{nameof(Window.HitTest)}",
+		Kind.WindowIccProfileChnaged => $"{nameof(Window)}.{nameof(Window.IccProfileChanged)}",
+		Kind.WindowDisplayChanged => $"{nameof(Window)}.{nameof(Window.DisplayChanged)}",
+		Kind.WindowDisplayScaleChanged => $"{nameof(Window)}.{nameof(Window.DisplayScaleChanged)}",
+		Kind.WindowSafeAreaChanged => $"{nameof(Window)}.{nameof(Window.SafeAreaChanged)}",
+		Kind.WindowOccluded => $"{nameof(Window)}.{nameof(Window.Occluded)}",
+		Kind.WindowEnterFullscreen => $"{nameof(Window)}.{nameof(Window.EnterFullscreen)}",
+		Kind.WindowLeaveFullscreen => $"{nameof(Window)}.{nameof(Window.LeaveFullscreen)}",
+		Kind.WindowDestroyed => $"{nameof(Window)}.{nameof(Window.Destroyed)}",
+		Kind.WindowHdrStateChanged => $"{nameof(Window)}.{nameof(Window.HdrStateChanged)}",
+
+		Kind.KeyDown => $"{nameof(Keyboard)}.{nameof(Keyboard.KeyDown)}",
+		Kind.KeyUp => $"{nameof(Keyboard)}.{nameof(Keyboard.KeyUp)}",
+		Kind.TextEditing => $"{nameof(Keyboard)}.{nameof(Keyboard.TextEditing)}",
+		Kind.TextInput => $"{nameof(Keyboard)}.{nameof(Keyboard.TextInput)}",
+		Kind.KeymapChanged => $"{nameof(Keyboard)}.{nameof(Keyboard.KeymapChanged)}",
+		Kind.KeyboardAdded => $"{nameof(Keyboard)}.{nameof(Keyboard.Added)}",
+		Kind.KeyboardRemoved => $"{nameof(Keyboard)}.{nameof(Keyboard.Removed)}",
+		Kind.TextEditingCandidates => $"{nameof(Keyboard)}.{nameof(Keyboard.TextEditingCandidates)}",
+
+		Kind.MouseMotion => $"{nameof(Mouse)}.{nameof(Mouse.Motion)}",
+		Kind.MouseButtonDown => $"{nameof(Mouse)}.{nameof(Mouse.ButtonDown)}",
+		Kind.MouseButtonUp => $"{nameof(Mouse)}.{nameof(Mouse.ButtonUp)}",
+		Kind.MouseWheel => $"{nameof(Mouse)}.{nameof(Mouse.WheelMotion)}",
+		Kind.MouseAdded => $"{nameof(Mouse)}.{nameof(Mouse.Added)}",
+		Kind.MouseRemoved => $"{nameof(Mouse)}.{nameof(Mouse.Removed)}",
+
+		Kind.JoystickAxisMotion => $"{nameof(Joystick)}.{nameof(Joystick.AxisMotion)}",
+		Kind.JoystickBallMotion => $"{nameof(Joystick)}.{nameof(Joystick.BallMotion)}",
+		Kind.JoystickHatMotion => $"{nameof(Joystick)}.{nameof(Joystick.HatMotion)}",
+		Kind.JoystickButtonDown => $"{nameof(Joystick)}.{nameof(Joystick.ButtonDown)}",
+		Kind.JoystickButtonUp => $"{nameof(Joystick)}.{nameof(Joystick.ButtonUp)}",
+		Kind.JoystickAdded => $"{nameof(Joystick)}.{nameof(Joystick.Added)}",
+		Kind.JoystickRemoved => $"{nameof(Joystick)}.{nameof(Joystick.Removed)}",
+		Kind.JoystickBatteryUpdated => $"{nameof(Joystick)}.{nameof(Joystick.BatteryUpdated)}",
+		Kind.JoystickUpdateCompleted => $"{nameof(Joystick)}.{nameof(Joystick.UpdateCompleted)}",
+
+		Kind.GamepadAxisMotion => $"{nameof(Gamepad)}.{nameof(Gamepad.AxisMotion)}",
+		Kind.GamepadButtonDown => $"{nameof(Gamepad)}.{nameof(Gamepad.ButtonDown)}",
+		Kind.GamepadButtonUp => $"{nameof(Gamepad)}.{nameof(Gamepad.ButtonUp)}",
+		Kind.GamepadAdded => $"{nameof(Gamepad)}.{nameof(Gamepad.Added)}",
+		Kind.GamepadRemoved => $"{nameof(Gamepad)}.{nameof(Gamepad.Removed)}",
+		Kind.GamepadRemapped => $"{nameof(Gamepad)}.{nameof(Gamepad.Remapped)}",
+		Kind.GamepadTouchpadDown => $"{nameof(Gamepad)}.{nameof(Gamepad.TouchpadDown)}",
+		Kind.GamepadTouchpadMotion => $"{nameof(Gamepad)}.{nameof(Gamepad.TouchpadMotion)}",
+		Kind.GamepadTouchpadUp => $"{nameof(Gamepad)}.{nameof(Gamepad.TouchpadUp)}",
+		Kind.GamepadSensorUpdated => $"{nameof(Gamepad)}.{nameof(Gamepad.SensorUpdated)}",
+		Kind.GamepadUpdateCompleted => $"{nameof(Gamepad)}.{nameof(Gamepad.UpdateCompleted)}",
+		Kind.GamepadSteamHandleUpdated => $"{nameof(Gamepad)}.{nameof(Gamepad.SteamHandleUpdated)}",
+
+		Kind.FingerDown => $"{nameof(Touch)}.{nameof(Touch.FingerDown)}",
+		Kind.FingerUp => $"{nameof(Touch)}.{nameof(Touch.FingerUp)}",
+		Kind.FingerMotion => $"{nameof(Touch)}.{nameof(Touch.FingerMotion)}",
+		Kind.FingerCanceled => $"{nameof(Touch)}.{nameof(Touch.FingerCanceled)}",
+
+		Kind.ClipboardUpdated => $"{nameof(Clipboard)}.{nameof(Clipboard.Updated)}",
+
+		Kind.DropFile => $"{nameof(DragAndDrop)}.{nameof(DragAndDrop.File)}",
+		Kind.DropText => $"{nameof(DragAndDrop)}.{nameof(DragAndDrop.Text)}",
+		Kind.DropBegin => $"{nameof(DragAndDrop)}.{nameof(DragAndDrop.Begin)}",
+		Kind.DropCompleted => $"{nameof(DragAndDrop)}.{nameof(DragAndDrop.Completed)}",
+		Kind.DropPosition => $"{nameof(DragAndDrop)}.{nameof(DragAndDrop.Position)}",
+
+		Kind.AudioDeviceAdded => $"{nameof(AudioDevice)}.{nameof(AudioDevice.Added)}",
+		Kind.AudioDeviceRemoved => $"{nameof(AudioDevice)}.{nameof(AudioDevice.Removed)}",
+		Kind.AudioDeviceFormatChanged => $"{nameof(AudioDevice)}.{nameof(AudioDevice.FormatChanged)}",
+
+		Kind.SensorUpdated => $"{nameof(Sensor)}.{nameof(Sensor.Updated)}",
+
+		Kind.PenProximityIn => $"{nameof(Pen)}.{nameof(Pen.ProximityIn)}",
+		Kind.PenProximityOut => $"{nameof(Pen)}.{nameof(Pen.ProximityOut)}",
+		Kind.PenDown => $"{nameof(Pen)}.{nameof(Pen.Down)}",
+		Kind.PenUp => $"{nameof(Pen)}.{nameof(Pen.Up)}",
+		Kind.PenButtonDown => $"{nameof(Pen)}.{nameof(Pen.ButtonDown)}",
+		Kind.PenButtonUp => $"{nameof(Pen)}.{nameof(Pen.ButtonUp)}",
+		Kind.PenMotion => $"{nameof(Pen)}.{nameof(Pen.Motion)}",
+		Kind.PenAxis => $"{nameof(Pen)}.{nameof(Pen.AxisChanged)}",
+
+		Kind.CameraDeviceAdded => $"{nameof(CameraDevice)}.{nameof(CameraDevice.Added)}",
+		Kind.CameraDeviceRemoved => $"{nameof(CameraDevice)}.{nameof(CameraDevice.Removed)}",
+		Kind.CameraDeviceApproved => $"{nameof(CameraDevice)}.{nameof(CameraDevice.Approved)}",
+		Kind.CameraDeviceDenied => $"{nameof(CameraDevice)}.{nameof(CameraDevice.Denied)}",
+
+		Kind.RenderTargetsReset => $"{nameof(Render)}.{nameof(Render.TargetsReset)}",
+		Kind.RenderDeviceReset => $"{nameof(Render)}.{nameof(Render.DeviceReset)}",
+		Kind.RenderDeviceLost => $"{nameof(Render)}.{nameof(Render.DeviceLost)}",
+
+		Kind.PollSentinel => $"{nameof(Internal)}.{nameof(Internal.PollSentinell)}",
+
+		Kind.Last => nameof(Last),
+
+		_ => default
+	};
 }

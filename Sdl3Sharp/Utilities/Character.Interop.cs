@@ -1,4 +1,4 @@
-﻿using Sdl3Sharp.Interop;
+﻿using Sdl3Sharp.Internal.Interop;
 using Sdl3Sharp.SourceGeneration;
 using System.Runtime.CompilerServices;
 
@@ -189,4 +189,38 @@ partial class Character
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_isxdigit">SDL_isxdigit</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl), typeof(CallConvSuppressGCTransition)])]
 	internal static partial int SDL_isxdigit(int x);
+
+	/// <summary>
+	/// Convert low-ASCII English letters to lowercase
+	/// </summary>
+	/// <param name="x">Character value to check</param>
+	/// <returns>Returns lowercase version of x, or x if no conversion available</returns>
+	/// <remarks>
+	/// <para>
+	/// <em>WARNING</em>: Regardless of system locale, this will only convert ASCII values 'A' through 'Z' to uppercase.
+	/// </para>
+	/// <para>
+	/// This function returns the lowercase equivalent of x. If a character cannot be converted, or is already lowercase, this function returns x.
+	/// </para>
+	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_tolower">SDL_tolower</seealso>
+	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl), typeof(CallConvSuppressGCTransition)])]
+	internal static partial int SDL_tolower(int x);
+
+	/// <summary>
+	/// Convert low-ASCII English letters to uppercase
+	/// </summary>
+	/// <param name="x">Character value to check</param>
+	/// <returns>Returns capitalized version of x, or x if no conversion available</returns>
+	/// <remarks>
+	/// <para>
+	/// <em>WARNING</em>: Regardless of system locale, this will only convert ASCII values 'a' through 'z' to uppercase.
+	/// </para>
+	/// <para>
+	/// This function returns the uppercase equivalent of x. If a character cannot be converted, or is already uppercase, this function returns x.
+	/// </para>
+	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_toupper">SDL_toupper</seealso>
+	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl), typeof(CallConvSuppressGCTransition)])]
+	internal static partial int SDL_toupper(int x);
 }

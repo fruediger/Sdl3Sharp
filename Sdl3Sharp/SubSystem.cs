@@ -1,4 +1,4 @@
-﻿using Sdl3Sharp.Interop;
+﻿using Sdl3Sharp.Internal;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -66,38 +66,12 @@ public readonly partial struct SubSystem
 	/// <inheritdoc/>
 	public readonly bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default)
 	{
-		static bool tryWriteSpan(ReadOnlySpan<char> value, ref Span<char> destination, ref int charsWritten)
-		{
-			var result = value.TryCopyTo(destination);
-
-			if (result)
-			{
-				destination = destination[value.Length..];
-				charsWritten += value.Length;
-			}
-
-			return result;
-		}
-
-		static bool tryWriteUInt(uint value, ref Span<char> destination, ref int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
-		{
-			var result = value.TryFormat(destination, out var tmp, format, provider);
-
-			if (result)
-			{
-				destination = destination[tmp..];
-				charsWritten += tmp;
-			}
-
-			return result;
-		}
-
 		charsWritten = 0;
 
 		return KnownInitFlagToString(InitFlag) switch
 		{
-			string knownInitFlag => tryWriteSpan(knownInitFlag, ref destination, ref charsWritten),
-			_ => tryWriteUInt(unchecked((uint)InitFlag), ref destination, ref charsWritten, format, provider)
+			string knownInitFlag => SpanFormat.TryWrite(knownInitFlag, ref destination, ref charsWritten),
+			_ => SpanFormat.TryWrite(unchecked((uint)InitFlag), ref destination, ref charsWritten, format, provider)
 		};
 	}
 

@@ -1,5 +1,5 @@
-﻿using Sdl3Sharp.Internal.NativeImportConditions;
-using Sdl3Sharp.Interop;
+﻿using Sdl3Sharp.Internal.Interop;
+using Sdl3Sharp.Internal.Interop.NativeImportConditions;
 using Sdl3Sharp.SourceGeneration;
 using System.Runtime.CompilerServices;
 

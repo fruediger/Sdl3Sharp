@@ -162,36 +162,10 @@ public sealed partial class SubSystemInit :
 	/// <inheritdoc/>
 	public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default)
 	{
-		static bool tryWriteSpan(ReadOnlySpan<char> value, ref Span<char> destination, ref int charsWritten)
-		{
-			var result = value.TryCopyTo(destination);
-
-			if (result)
-			{
-				destination = destination[value.Length..];
-				charsWritten += value.Length;
-			}
-
-			return result;
-		}
-
-		static bool tryWriteSubSystemSet(SubSystemSet value, ref Span<char> destination, ref int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
-		{
-			var result = value.TryFormat(destination, out var tmp, format, provider);
-
-			if (result)
-			{
-				destination = destination[tmp..];
-				charsWritten += tmp;
-			}
-
-			return result;
-		}
-
 		charsWritten = 0;
 
-		return tryWriteSpan($"{{ {nameof(SubSystems)}: [", ref destination, ref charsWritten)
-			&& tryWriteSubSystemSet(mSubSystems, ref destination, ref charsWritten, format, provider)
-			&& tryWriteSpan("] }", ref destination, ref charsWritten);
+		return SpanFormat.TryWrite($"{{ {nameof(SubSystems)}: [", ref destination, ref charsWritten)
+			&& SpanFormat.TryWrite(mSubSystems, ref destination, ref charsWritten, format, provider)
+			&& SpanFormat.TryWrite("] }", ref destination, ref charsWritten);
 	}
 }

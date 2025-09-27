@@ -99,7 +99,7 @@ partial class SourceGenerator
                     /// and can be <see langword="null"/>.
                     /// </returns>
                     /// <remarks>This method might get called multiple times as a result of a call to <see cref="{{NativeImportLibraryHandleLibraryImportErrorMethodName}}(string?, System.Runtime.InteropServices.DllImportSearchPath?, System.Runtime.ExceptionServices.ExceptionDispatchInfo?)">{{NativeImportLibraryHandleLibraryImportErrorMethodName}}</see></remarks>
-                    static abstract (string? {{NativeImportLibraryGetLibraryNameAndSearchPathResultLibraryNamePartName}}, global::System.Runtime.InteropServices.DllImportSearchPath? {{NativeImportLibraryGetLibraryNameAndSearchPathResultSearchPathPartName}}) {{NativeImportLibraryGetLibraryNameAndSearchPathMethodName}}();
+                    internal static abstract (string? {{NativeImportLibraryGetLibraryNameAndSearchPathResultLibraryNamePartName}}, global::System.Runtime.InteropServices.DllImportSearchPath? {{NativeImportLibraryGetLibraryNameAndSearchPathResultSearchPathPartName}}) {{NativeImportLibraryGetLibraryNameAndSearchPathMethodName}}();
 
                     /// <summary>Handles an error that occured during an attempt to import the native library</summary>
                     /// <param name="libraryName">
@@ -125,7 +125,7 @@ partial class SourceGenerator
                     /// This methods defaults to rethrowing any non-<see langword="null"/> <paramref name="libraryLoadErrorInfo"/>s or otherwise returning <see langword="false"/>,
                     /// if not overwritten
                     /// </remarks>
-                    static virtual bool {{NativeImportLibraryHandleLibraryImportErrorMethodName}}(string? libraryName, global::System.Runtime.InteropServices.DllImportSearchPath? searchPath, global::System.Runtime.ExceptionServices.ExceptionDispatchInfo? libraryLoadErrorInfo)
+                    internal static virtual bool {{NativeImportLibraryHandleLibraryImportErrorMethodName}}(string? libraryName, global::System.Runtime.InteropServices.DllImportSearchPath? searchPath, global::System.Runtime.ExceptionServices.ExceptionDispatchInfo? libraryLoadErrorInfo)
                     {
                         libraryLoadErrorInfo?.Throw();
 
@@ -150,7 +150,7 @@ partial class SourceGenerator
                     /// This methods defaults to rethrowing any non-<see langword="null"/> <paramref name="symbolLoadErrorInfo"/>s or otherwise returning <see langword="true"/>,
                     /// if not overwritten
                     /// </remarks>
-                    static virtual bool {{NativeImportLibraryHandleSymbolImportErrorMethodName}}(string? symbolName, global::System.Runtime.ExceptionServices.ExceptionDispatchInfo? symbolLoadErrorInfo)
+                    internal static virtual bool {{NativeImportLibraryHandleSymbolImportErrorMethodName}}(string? symbolName, global::System.Runtime.ExceptionServices.ExceptionDispatchInfo? symbolLoadErrorInfo)
                     {
                         symbolLoadErrorInfo?.Throw();
 
@@ -167,7 +167,7 @@ partial class SourceGenerator
                     /// <see cref="{{NativeImportLibraryGetLibraryNameAndSearchPathMethodName}}">{{NativeImportLibraryGetLibraryNameAndSearchPathMethodName}}</see> which lead to the successful importation).
                     /// This value might be <see langword="null"/>.
                     /// </param>
-                    static virtual void {{NativeImportLibraryAfterSuccessfullyLoadedMethodName}}(string libraryName, global::System.Runtime.InteropServices.DllImportSearchPath? searchPath)
+                    internal static virtual void {{NativeImportLibraryAfterSuccessfullyLoadedMethodName}}(string libraryName, global::System.Runtime.InteropServices.DllImportSearchPath? searchPath)
                     { }
 
                     /// <remarks>For internal use only</remarks>
@@ -204,7 +204,7 @@ partial class SourceGenerator
                 {
                     /// <summary>Gets a value indicating of conditionally imported native symbol of function should be imported</summary>
                     /// <returns><see langword="true"/> of the conditionally imported native symbol or function should be imported; otherwise, <see langword="false"/></returns>
-                    static abstract bool {{NativeImportConditionEvaluateMethodName}}();
+                    internal static abstract bool {{NativeImportConditionEvaluateMethodName}}();
 
                     /// <remarks>For internal use only</remarks>
                     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
@@ -237,7 +237,7 @@ partial class SourceGenerator
                     where {{NativeImportAttributeLibraryTypeParameterName}} : notnull, {{NativeImportLibraryTypeName}}
                 {
                     /// <summary>Gets the name of the symbol which should get imported</summary>
-                    /// <value>The name of the symbol which should get imported. If omitted (<see langword="null"/>), the target method's name is used instead.</value>
+                    /// <value>The name of the symbol which should get imported. If omitted (<see langword="null"/>), the target method's name is used instead</value>
                     public string? {{NativeImportAttributeSymbolNamePropertyName}} => {{symbolNameParameterName}};
 
                     /// <summary>Gets or initializes the kind of access to the imported native symbol</summary>
@@ -261,7 +261,7 @@ partial class SourceGenerator
                     where {{NativeImportAttributeConditionTypeParameterName}} : notnull, {{NativeImportConditionTypeName}}
                 {
                     /// <summary>Gets the name of the symbol which should get imported</summary>
-                    /// <value>The name of the symbol which should get imported. If omitted (<see langword="null"/>), the target method's name is used instead.</value>
+                    /// <value>The name of the symbol which should get imported. If omitted (<see langword="null"/>), the target method's name is used instead</value>
                     public string? {{NativeImportAttributeSymbolNamePropertyName}} => {{symbolNameParameterName}};
 
                     /// <summary>Gets or initializes the kind of access to the imported native symbol</summary>
@@ -277,7 +277,7 @@ partial class SourceGenerator
                     where {{NativeImportAttributeLibraryTypeParameterName}} : notnull, {{NativeImportLibraryTypeName}}
                 {
                     /// <summary>Gets the name of the symbol which should get imported</summary>
-                    /// <value>The name of the symbol which should get imported. If omitted (<see langword="null"/>), the target method's name is used instead.</value>
+                    /// <value>The name of the symbol which should get imported. If omitted (<see langword="null"/>), the target method's name is used instead</value>
                     public string? {{NativeImportAttributeSymbolNamePropertyName}} => {{symbolNameParameterName}};
 
                     /// <summary>Gets or initializes a collection of types indicating calling conventions for the imported native function</summary>
@@ -303,7 +303,7 @@ partial class SourceGenerator
                     where {{NativeImportAttributeConditionTypeParameterName}} : notnull, {{NativeImportConditionTypeName}}
                 {
                     /// <summary>Gets the name of the symbol which should get imported</summary>
-                    /// <value>The name of the symbol which should get imported. If omitted (<see langword="null"/>), the target method's name is used instead.</value>
+                    /// <value>The name of the symbol which should get imported. If omitted (<see langword="null"/>), the target method's name is used instead</value>
                     public string? {{NativeImportAttributeSymbolNamePropertyName}} => {{symbolNameParameterName}};
 
                     /// <summary>Gets or initializes a collection of types indicating calling conventions for the imported native function</summary>

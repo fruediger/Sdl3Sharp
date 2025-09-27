@@ -1,9 +1,9 @@
-﻿using Sdl3Sharp.Interop;
+﻿using Sdl3Sharp.Internal.Interop;
 using Sdl3Sharp.SourceGeneration;
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using unsafe TLSDestructorCallback = delegate* unmanaged[Cdecl]<void*, void>;
+using unsafe SDL_TLSDestructorCallback = delegate* unmanaged[Cdecl]<void*, void>;
 
 namespace Sdl3Sharp.Threading;
 
@@ -54,5 +54,5 @@ partial class ThreadLocal
 	/// <c>destructor</c> can be NULL; it is assumed that <c>value</c> does not need to be cleaned up if so.
 	/// </remarks>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_SetTLS(AtomicInt32* id, void* value, TLSDestructorCallback destructor);
+	internal unsafe static partial CBool SDL_SetTLS(AtomicInt32* id, void* value, SDL_TLSDestructorCallback destructor);
 }

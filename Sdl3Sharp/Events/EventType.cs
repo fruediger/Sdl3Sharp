@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sdl3Sharp.Internal;
+using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -13,8 +14,8 @@ namespace Sdl3Sharp.Events;
 /// </summary>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
-public readonly partial struct EventType :
-	IEquatable<EventType>, IFormattable, ISpanFormattable, IEqualityOperators<EventType, EventType, bool>
+public readonly partial struct EventType : IEventType,
+	IComparable, IComparable<EventType>, IEquatable<EventType>, IFormattable, ISpanFormattable, IComparisonOperators<EventType, EventType, bool>, IEqualityOperators<EventType, EventType, bool>
 {
 	private readonly Kind mKind;
 
@@ -22,14 +23,100 @@ public readonly partial struct EventType :
 	private readonly string DebuggerDisplay => ToString(formatProvider: CultureInfo.InvariantCulture);
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	private EventType(Kind kind) => mKind = kind;
+	internal EventType(Kind kind) => mKind = kind;
+
+	/// <summary>
+	/// Tries to register new user defined events
+	/// </summary>
+	/// <param name="count">The number of user defined events that should be registered. Must be greater than <c>0</c>.</param>
+	/// <param name="eventTypes">A enumeration of <see cref="EventType"/>s of length <paramref name="count"/> which represent the newly registered user defined events, when this mehtod returns <c><see langword="true"/></c>; otherwise <c><see langword="default"/>(<see cref="Enumerable"/>)</c> (has length <c>0</c>)</param>
+	/// <returns><c><see langword="true"/></c> if the requested amount of user defined events was successfully registered; otherwise, <c><see langword="false"/></c> (<paramref name="count"/> might be invalid or there weren't enough free user defined <see cref="EventType"/>s left to register <paramref name="count"/> of them)</returns>
+	/// <remarks>
+	/// Enumerate the resulting <paramref name="eventTypes"/> to get the newly registered user defined event types.
+	/// </remarks>
+	public static bool TryRegister(int count, out Enumerable eventTypes)
+	{
+		var start = SDL_RegisterEvents(count);
+
+		if (start.mKind is 0)
+		{
+			eventTypes = default;
+			return false;
+		}
+
+		eventTypes = new(start, unchecked((uint)count));
+		return true;
+	}
+
+	readonly EventType IEventType.Base { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => this; }
+
+	/// <summary>
+	/// Gets or sets a value determining whether the current <see cref="EventType"/> is enabled within SDL's event system or not
+	/// </summary>
+	/// <value>
+	/// A value determining whether the current <see cref="EventType"/> is enabled within SDL's event system or not
+	/// </value>
+	/// <remarks>
+	/// <see cref="EventType"/>s whose <see cref="Enabled"/> property is set to <c><see langword="false"/></c> won't get processed by SDL.
+	/// </remarks>
+	public readonly bool Enabled
+	{
+		get => SDL_EventEnabled(this);
+		set => SDL_SetEventEnabled(this, value);
+	}
 
 	/// <inheritdoc/>
-	public readonly override bool Equals([NotNullWhen(true)] object? obj) => obj is EventType other && Equals(other);
+	public int CompareTo(object? obj)
+	{
+		return obj switch
+		{
+			null => 1,
+			EventType other => CompareTo(other),
+			IEventType other => CompareTo(other),
+			_ => failObjArgumentIsNotEventType()
+		};
+
+		[DoesNotReturn]
+		static int failObjArgumentIsNotEventType() => throw new ArgumentException($"{nameof(obj)} is not of type {nameof(EventType)}", nameof(obj));
+	}
 
 	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public readonly bool Equals(EventType other) => mKind == other.mKind;
+	public readonly int CompareTo(EventType other) => unchecked((uint)mKind).CompareTo(unchecked((uint)other.mKind));	
+
+	/// <inheritdoc cref="IComparable{IEventType}.CompareTo(IEventType)"/>
+	internal readonly int CompareTo(IEventType? other) => other switch
+	{
+		{ Base: var @base } => CompareTo(@base),
+		_ /* null */ => 1,
+	};	
+
+	/// <inheritdoc/>
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	readonly int IComparable<IEventType>.CompareTo(IEventType? other) => CompareTo(other);
+
+	/// <inheritdoc/>
+	public readonly override bool Equals([NotNullWhen(true)] object? obj) => obj switch
+	{
+		EventType other => Equals(other),
+		IEventType other => Equals(other),
+		_ => false
+	};
+
+	/// <inheritdoc/>
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	public readonly bool Equals(EventType other) => mKind == other.mKind;	
+
+	/// <inheritdoc cref="IEquatable{IEventType}.Equals(IEventType)"/>
+	internal readonly bool Equals([NotNullWhen(true)] IEventType? other) => other switch
+	{
+		{ Base: var @base } => Equals(@base),
+		_ /* null */ => false,
+	};
+
+	/// <inheritdoc/>
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	readonly bool IEquatable<IEventType>.Equals([NotNullWhen(true)] IEventType? other) => Equals(other);
 
 	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -60,73 +147,20 @@ public readonly partial struct EventType :
 	/// <inheritdoc/>
 	public readonly bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default)
 	{
-		static bool tryWriteSpan(ReadOnlySpan<char> value, ref Span<char> destination, ref int charsWritten)
-		{
-			var result = value.TryCopyTo(destination);
-
-			if (result)
-			{
-				destination = destination[value.Length..];
-				charsWritten += value.Length;
-			}
-
-			return result;
-		}
-
-		static bool tryWriteUInt(uint value, ref Span<char> destination, ref int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
-		{
-			var result = value.TryFormat(destination, out var tmp, format, provider);
-
-			if (result)
-			{
-				destination = destination[tmp..];
-				charsWritten += tmp;
-			}
-
-			return result;
-		}
-
-		static bool tryWriteChar(char value, ref Span<char> destination, ref int charsWritten)
-		{
-			if (destination.Length is > 0)
-			{
-				destination[0] = value;
-				destination = destination[1..];
-				charsWritten += 1;
-
-				return true;
-			}
-
-			return false;
-		}
-
-		static bool tryWriteKind(Kind value, ref Span<char> destination, ref int charsWritten, ReadOnlySpan<char> format)
-		{
-			var result = Enum.TryFormat(value, destination, out var tmp, format);
-
-			if (result)
-			{
-				destination = destination[tmp..];
-				charsWritten += tmp;
-			}
-
-			return result;
-		}
-
 		charsWritten = 0;
 
 		return mKind switch
 		{
-			>= Kind.User and <= Kind.Last
-				=> tryWriteSpan($"{nameof(User)}(", ref destination, ref charsWritten)
-				&& tryWriteUInt(unchecked(mKind - Kind.User), ref destination, ref charsWritten, format, provider)
-				&& tryWriteChar(')', ref destination, ref charsWritten),
+			>= Kind.User and < Kind.Last
+				=> SpanFormat.TryWrite($"{nameof(User)}(", ref destination, ref charsWritten)
+				&& SpanFormat.TryWrite(unchecked(mKind - Kind.User), ref destination, ref charsWritten, format, provider)
+				&& SpanFormat.TryWrite(')', ref destination, ref charsWritten),
 
 			_ => KnownKindToString(mKind) switch
 			{
-				string knownKind => tryWriteSpan(knownKind, ref destination, ref charsWritten),
+				string knownKind => SpanFormat.TryWrite(knownKind, ref destination, ref charsWritten),
 
-				_ => tryWriteKind(mKind, ref destination, ref charsWritten, format)
+				_ => SpanFormat.TryWrite(mKind, ref destination, ref charsWritten, format)
 			}
 		};
 	}
@@ -150,6 +184,18 @@ public readonly partial struct EventType :
 
 		return false;
 	}
+
+	/// <inheritdoc/>
+	public static bool operator >(EventType left, EventType right) => left.mKind > right.mKind;
+
+	/// <inheritdoc/>
+	public static bool operator >=(EventType left, EventType right) => left.mKind >= right.mKind;
+
+	/// <inheritdoc/>
+	public static bool operator <(EventType left, EventType right) => left.mKind < right.mKind;
+
+	/// <inheritdoc/>
+	public static bool operator <=(EventType left, EventType right) => left.mKind <= right.mKind;
 
 	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]

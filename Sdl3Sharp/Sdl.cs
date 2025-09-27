@@ -21,10 +21,8 @@ namespace Sdl3Sharp;
 public sealed partial class Sdl : IDisposable
 {
 	private enum LifetimeState { Uninitialized = default, Initializing, BeforeRun, Running, AfterRun, Disposing, Disposed }
-		
-	private static volatile Properties? mGlobalProperties = null;
 
-	private static readonly SimpleSpinYieldLock mLock = new();
+	private static SimpleSpinYieldLock mLock = new();
 	private static volatile bool mSdlExists = false;
 
 	private volatile LifetimeState mLifetimeState;
@@ -43,7 +41,7 @@ public sealed partial class Sdl : IDisposable
 	/// </para>
 	/// <para>
 	/// The file I/O (for example: <see cref="SDL_IOFromFile"/>) and threading (<see cref="SDL_CreateThread"/>) subsystems are initialized by default.
-	/// Message boxes (<see cref="SDL_ShowSimpleMessageBox"/>) also attempt to work without initializing the <see cref="SubSystem.Video">video subsystem</see>,
+	/// Message boxes (<see cref="MessageBox.TryShowSimple(MessageBoxFlags, string, string, Windowing.Window?)"/> and <see cref="MessageBox.TryShow(out int)"/>) also attempt to work without initializing the <see cref="SubSystem.Video">video subsystem</see>,
 	/// in hopes of being useful in showing an error dialog even before SDL initializes correclty.
 	/// Logging (such as <see cref="Log.Info(string)"/>) works without initialization, too.
 	/// </para>
@@ -117,11 +115,10 @@ public sealed partial class Sdl : IDisposable
 	/// <value>
 	/// The global <see cref="Properties">group</see> of SDL properties, if those could get successfully retrieved; otherwise, <c><see langword="null"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)
 	/// </value>
-	public static Properties? GlobalProperties => (Properties.SDL_GetGlobalProperties(), mGlobalProperties) switch
+	public static Properties? GlobalProperties => SDL_GetGlobalProperties() switch
 	{
-		(0, _) => mGlobalProperties = null,
-		(var id, { Id: var otherId }) when id == otherId => mGlobalProperties,
-		(var id, _) => mGlobalProperties = new(sdl: null, id)
+		0 => null,
+		var id => Properties.GetOrCreate(sdl: null, id)
 	};
 	
 	/// <summary>
@@ -263,11 +260,20 @@ public sealed partial class Sdl : IDisposable
 		{
 			try
 			{
-				exceptions?.Clear();
+				try
+				{
+					exceptions?.Clear();
 
-				mRegisteredDisposeReceivers.Clear();
+					mRegisteredDisposeReceivers.Clear();				
 
-				SDL_Quit();
+					// Call additional dipose composites	
+					DisposeEventHandlers();
+					DisposeEventQueue();
+				}
+				finally
+				{
+					SDL_Quit();
+				}
 			}
 			finally
 			{
@@ -351,106 +357,29 @@ public sealed partial class Sdl : IDisposable
 	/// <inheritdoc cref="SubSystemInit(Sdl, SubSystemSet)"/>
 	public SubSystemInit InitializeSubSystems(params SubSystemSet subSystems) => new(this, subSystems);
 
-	/// <summary>
-	/// Executes the provided <paramref name="app"/> and <see cref="Dispose">deinitializes the current <see cref="Sdl"/> instance</see> afterwards
-	/// </summary>
 	/// <param name="app">The <see cref="AppBase"/> to execute</param>
 	/// <param name="args">A collection of arguments to pass to <see cref="AppBase.OnInitialize(Sdl, string[])"/></param>
-	/// <returns>A standard Unix main return value (a non-zero value, if there was a failure; otherwise, <c>0</c>)</returns>
-	/// <exception cref="ArgumentNullException"><paramref name="app"/> is <c><see langword="null"/></c></exception>
-	/// <exception cref="InvalidOperationException">The current <see cref="Sdl"/> instance is currently already executing an <see cref="AppBase"/>. You can only execute a single <see cref="AppBase"/> at a time.</exception>
-	/// <exception cref="ObjectDisposedException">The current <see cref="Sdl"/> instance is already disposed</exception>
-	/// <remarks>
-	/// <para>
-	/// It's important to notice, that this method will always <see cref="Dispose">dispose</see> the current <see cref="Sdl"/> instance after it finishes executing the <paramref name="app"/>!
-	/// This is unavoidable!
-	/// </para>
-	/// <para>
-	/// You might be able to reuse the provided <paramref name="app"/> after this method returns, but you can't reuse this instance of <see cref="Sdl"/> (as SDL will be shut down).
-	/// If you want to use SDL after a call to this method, you must create a new <see cref="Sdl"/> instance and use that one instead.
-	/// </para>
-	/// </remarks>
+	/// <inheritdoc cref="RunImpl{TArgumentsEnumerator}(AppBase, TArgumentsEnumerator, int)"/>
 	public int Run(AppBase app, ReadOnlySpan<string> args)
-	{
-		if (app is null)
-		{
-			failAppArgumentNull();
-		}
+		=> RunImpl(app, args.GetSpanEnumerator(), args.Length);
 
-		mLock.Enter(0);
-		try
-		{
-			switch (mLifetimeState)
-			{
-				case LifetimeState.Running: failSdlAlreadyRunning(); break;
-				case not LifetimeState.BeforeRun: failSdlDisposed(); break;
-			}
-
-			mLifetimeState = LifetimeState.Running;
-		}
-		finally
-		{
-			mLock.Exit(0);
-		}
-
-		unsafe
-		{
-			int argc = 0;
-			byte** argv;
-
-			if (args.Length is > 0)
-			{
-				argv = (byte**)NativeMemory.Malloc(unchecked((nuint)args.Length * (nuint)sizeof(byte*)));
-				if (argv is not null)
-				{
-					foreach (var arg in args)
-					{
-						argv[argc++] = Utf8StringMarshaller.ConvertToUnmanaged(arg);
-					}
-				}
-			}
-			else
-			{
-				argv = null;
-			}
-
-			try
-			{
-				return Run(app, argc, argv);
-			}
-			finally
-			{
-				if (argv is not null)
-				{
-					while (argc is > 0)
-					{
-						Utf8StringMarshaller.Free(argv[--argc]);
-					}
-
-					NativeMemory.Free(argv);
-				}
-
-				mLifetimeState = LifetimeState.AfterRun;
-				Dispose();
-			}
-		}
-
-		[DoesNotReturn]
-		static void failAppArgumentNull() => throw new ArgumentNullException(nameof(app));
-
-		[DoesNotReturn]
-		static void failSdlAlreadyRunning() => throw new InvalidOperationException($"The {nameof(Sdl)} instance is already running");
-
-		[DoesNotReturn]
-		static void failSdlDisposed() => throw new ObjectDisposedException(nameof(Sdl));
-	}
-
-	/// <summary>
-	/// Executes the provided <paramref name="app"/> and <see cref="Dispose">deinitializes the current <see cref="Sdl"/> instance</see> afterwards
-	/// </summary>
 	/// <typeparam name="TArguments">The source type of collection of arguments to pass to <see cref="AppBase.OnInitialize(Sdl, string[])"/></typeparam>
 	/// <param name="app">The <see cref="AppBase"/> to execute</param>
 	/// <param name="args">A collection of arguments to pass to <see cref="AppBase.OnInitialize(Sdl, string[])"/></param>
+	/// <inheritdoc cref="RunImpl{TArgumentsEnumerator}(AppBase, TArgumentsEnumerator, int)"/>
+	public int Run<TArguments>(AppBase app, [AllowNull] in TArguments? args)
+		where TArguments : IReadOnlyCollection<string>, allows ref struct
+	{
+		var (argumentsEnumerator, argumentsCount) = args is not null
+			? (args.GetEnumerator(), args.Count)
+			: (null, 0);
+
+		return RunImpl(app, argumentsEnumerator, argumentsCount);
+	}
+	
+	/// <summary>
+	/// Executes the provided <paramref name="app"/> and <see cref="Dispose">deinitializes the current <see cref="Sdl"/> instance</see> afterwards
+	/// </summary>
 	/// <returns>A standard Unix main return value (a non-zero value, if there was a failure; otherwise, <c>0</c>)</returns>
 	/// <exception cref="ArgumentNullException"><paramref name="app"/> is <c><see langword="null"/></c></exception>
 	/// <exception cref="InvalidOperationException">The current <see cref="Sdl"/> instance is currently already executing an <see cref="AppBase"/>. You can only execute a single <see cref="AppBase"/> at a time.</exception>
@@ -465,8 +394,8 @@ public sealed partial class Sdl : IDisposable
 	/// If you want to use SDL after a call to this method, you must create a new <see cref="Sdl"/> instance and use that one instead.
 	/// </para>
 	/// </remarks>
-	public int Run<TArguments>(AppBase app, [AllowNull] TArguments? args)
-		where TArguments : IReadOnlyCollection<string>
+	private int RunImpl<TArgumentsEnumerator>(AppBase app, [AllowNull] TArgumentsEnumerator? argumentsEnumerator, int argumentsCount)
+		where TArgumentsEnumerator : IEnumerator<string>, allows ref struct
 	{
 		if (app is null)
 		{
@@ -494,15 +423,18 @@ public sealed partial class Sdl : IDisposable
 			int argc = 0;
 			byte** argv;
 
-			if (args is { Count: var count } && count is > 0)
+			if (argumentsEnumerator is not null && argumentsCount is > 0)
 			{
-				argv = (byte**)NativeMemory.Malloc(unchecked((nuint)count * (nuint)sizeof(byte*)));
+				argv = (byte**)NativeMemoryManager.Malloc(unchecked((nuint)argumentsCount * (nuint)sizeof(byte*)));
 
 				if (argv is not null)
 				{
-					foreach (var arg in args)
+					using (argumentsEnumerator)
 					{
-						argv[argc++] = Utf8StringMarshaller.ConvertToUnmanaged(arg);
+						while (argumentsEnumerator.MoveNext())
+						{
+							argv[argc++] = Utf8StringMarshaller.ConvertToUnmanaged(argumentsEnumerator.Current);
+						}
 					}
 				}
 			}
@@ -513,7 +445,7 @@ public sealed partial class Sdl : IDisposable
 
 			try
 			{
-				return Run(app, argc, argv);
+				return RunImpl(app, argc, argv);
 			}
 			finally
 			{
@@ -524,7 +456,7 @@ public sealed partial class Sdl : IDisposable
 						Utf8StringMarshaller.Free(argv[--argc]);
 					}
 
-					NativeMemory.Free(argv);
+					NativeMemoryManager.Free(argv);
 				}
 
 				mLifetimeState = LifetimeState.AfterRun;

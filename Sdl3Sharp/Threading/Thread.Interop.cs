@@ -1,11 +1,11 @@
-﻿using Sdl3Sharp.Interop;
+﻿using Sdl3Sharp.Internal.Interop;
 using Sdl3Sharp.SourceGeneration;
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using unsafe FunctionPointer = delegate* unmanaged[Cdecl]<void>;
-using unsafe MainThreadCallback = delegate* unmanaged[Cdecl]<void*, void>;
-using unsafe ThreadFunction = delegate* unmanaged[Cdecl]<void*, int>;
+using unsafe SDL_FunctionPointer = delegate* unmanaged[Cdecl]<void>;
+using unsafe SDL_MainThreadCallback = delegate* unmanaged[Cdecl]<void*, void>;
+using unsafe SDL_ThreadFunction = delegate* unmanaged[Cdecl]<void*, int>;
 
 namespace Sdl3Sharp.Threading;
 
@@ -59,7 +59,7 @@ partial class Thread
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_CreateThread">SDL_CreateThread</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial SDL_Thread* SDL_CreateThreadRuntime(ThreadFunction fn, byte* name, void* data, FunctionPointer pfnBeginThread, FunctionPointer pfnEndThread);
+	internal unsafe static partial SDL_Thread* SDL_CreateThreadRuntime(SDL_ThreadFunction fn, byte* name, void* data, SDL_FunctionPointer pfnBeginThread, SDL_FunctionPointer pfnEndThread);
 
 	/// <summary>
 	/// Create a new thread with with the specified properties
@@ -103,7 +103,7 @@ partial class Thread
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_CreateThreadWithProperties">SDL_CreateThreadWithProperties</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial SDL_Thread* SDL_CreateThreadWithPropertiesRuntime(uint props, FunctionPointer pfnBeginThread, FunctionPointer pfnEndThread);
+	internal unsafe static partial SDL_Thread* SDL_CreateThreadWithPropertiesRuntime(uint props, SDL_FunctionPointer pfnBeginThread, SDL_FunctionPointer pfnEndThread);
 
 	/// <summary>
 	/// Wait a specified number of milliseconds before returning
@@ -227,7 +227,7 @@ partial class Thread
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_RunOnMainThread">SDL_RunOnMainThread</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_RunOnMainThread(MainThreadCallback callback, void* userdata, CBool wait_complete);
+	internal unsafe static partial CBool SDL_RunOnMainThread(SDL_MainThreadCallback callback, void* userdata, CBool wait_complete);
 
 	/// <summary>
 	/// Set the priority for the current thread

@@ -1,15 +1,12 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Sdl3Sharp.Internal;
 
 internal static class Shared
 {
-	internal sealed class StringBuilderFactory : IFactory<StringBuilder>
-	{
-		[return: NotNull]
-		public static StringBuilder Create() => new();
-	}
+	[ThreadStatic] private static StringBuilder? mStringBuilder;
 
-	internal static readonly SimpleConcurrentPool<StringBuilder, StringBuilderFactory> StringBuilderPool = new();
+	public static StringBuilder StringBuilder { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mStringBuilder ??= new(); }
 }

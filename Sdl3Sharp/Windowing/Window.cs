@@ -2,4 +2,5 @@
 
 public partial class Window
 {
+	internal unsafe SDL_Window* WindowPtr;
 }

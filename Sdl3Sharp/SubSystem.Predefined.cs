@@ -1,5 +1,4 @@
-﻿using Sdl3Sharp.Interop;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 namespace Sdl3Sharp;
 

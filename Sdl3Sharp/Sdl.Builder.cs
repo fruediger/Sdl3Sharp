@@ -150,6 +150,7 @@ partial class Sdl
 
 		/// <exception cref="InvalidOperationException">The <see cref="Builder"/> is used outside of the initialization process of a <see cref="Sdl"/> instance</exception>
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+		[MemberNotNull(nameof(mSdl))]
 		private void Validate()
 		{
 			if (mSdl?.mLifetimeState is not LifetimeState.Initializing || Unsafe.IsNullRef(ref mSubSystems))

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sdl3Sharp.Interop;
+namespace Sdl3Sharp;
 
 /// <summary>
 /// Initialization flags for <see href="https://wiki.libsdl.org/SDL3/SDL_Init">SDL_Init</see> and/or <see href="https://wiki.libsdl.org/SDL3/SDL_InitSubSystem">SDL_InitSubSystem</see>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sdl3Sharp.Internal;
+using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -221,36 +222,10 @@ public sealed partial class Timer :
 
 	public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default)
 	{
-		static bool tryWriteSpan(ReadOnlySpan<char> value, ref Span<char> destination, ref int charsWritten)
-		{
-			var result = value.TryCopyTo(destination);
-
-			if (result)
-			{
-				destination = destination[value.Length..];
-				charsWritten += value.Length;
-			}
-
-			return result;
-		}
-
-		static bool tryWriteUInt(uint value, ref Span<char> destination, ref int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
-		{
-			var result = value.TryFormat(destination, out var tmp, format, provider);
-
-			if (result)
-			{
-				destination = destination[tmp..];
-				charsWritten += tmp;
-			}
-
-			return result;
-		}
-
 		charsWritten = 0;
 
-		return tryWriteSpan($"{{ {nameof(Id)}: ", ref destination, ref charsWritten)
-			&& tryWriteUInt(mId, ref destination, ref charsWritten, format, provider)
-			&& tryWriteSpan(" }", ref destination, ref charsWritten);
+		return SpanFormat.TryWrite($"{{ {nameof(Id)}: ", ref destination, ref charsWritten)
+			&& SpanFormat.TryWrite(mId, ref destination, ref charsWritten, format, provider)
+			&& SpanFormat.TryWrite(" }", ref destination, ref charsWritten);
 	}
 }

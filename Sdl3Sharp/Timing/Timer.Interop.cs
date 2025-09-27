@@ -1,8 +1,8 @@
-﻿using Sdl3Sharp.Interop;
+﻿using Sdl3Sharp.Internal.Interop;
 using Sdl3Sharp.SourceGeneration;
 using System.Runtime.CompilerServices;
-using unsafe NSTimerCallback = delegate* unmanaged[Cdecl]<void*, uint, ulong, ulong>;
-using unsafe TimerCallback = delegate* unmanaged[Cdecl]<void*, uint, uint, uint>;
+using unsafe SDL_NSTimerCallback = delegate* unmanaged[Cdecl]<void*, uint, ulong, ulong>;
+using unsafe SDL_TimerCallback = delegate* unmanaged[Cdecl]<void*, uint, uint, uint>;
 
 namespace Sdl3Sharp.Timing;
 
@@ -26,7 +26,7 @@ partial class Timer
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_AddTimer">SDL_AddTimer</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial uint SDL_AddTimer(uint interval, TimerCallback callback, void* userdata);
+	internal unsafe static partial uint SDL_AddTimer(uint interval, SDL_TimerCallback callback, void* userdata);
 
 	/// <summary>
 	/// Call a callback function at a future time
@@ -46,7 +46,7 @@ partial class Timer
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_AddTimerNS">SDL_AddTimerNS</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial uint SDL_AddTimerNS(ulong interval, NSTimerCallback callback, void* userdata);
+	internal unsafe static partial uint SDL_AddTimerNS(ulong interval, SDL_NSTimerCallback callback, void* userdata);
 
 	/// <summary>
 	/// Get the current value of the high resolution counter
