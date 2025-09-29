@@ -1,0 +1,8 @@
+<Project>
+    <PropertyGroup>
+        <PackageId>Sdl3Sharp</PackageId>
+        <Version>0.5</Version>
+        <VersionSuffix>alpha</VersionSuffix>
+        <TargetFramework>net9.0</TargetFramework>
+    </PropertyGroup>
+</Project>

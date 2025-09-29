@@ -784,3 +784,8 @@ $RECYCLE.BIN/
 
 #???
 TemplateEngineHost/
+
+# Ignore make.cs 'build', '.cache', '.temp' (they need to be setup accordingly in 'make.json'!)
+build/
+.cache/
+.temp/

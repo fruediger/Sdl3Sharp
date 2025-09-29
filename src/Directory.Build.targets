@@ -1,0 +1,5 @@
+<Project>
+    <PropertyGroup Condition="'$(MakeFlavor)' == 'rid' And '$(MakeFlavorRid)' != ''">
+        <PackageId>$(PackageId).$(MakeFlavorRid)</PackageId>
+    </PropertyGroup>
+</Project>

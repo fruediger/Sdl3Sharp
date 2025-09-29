@@ -1,0 +1,14 @@
+{
+  "project":                    "./src/Sdl3Sharp",
+
+  "runtimesVersion":            "3.2.22",
+  "runtimesUrl":                "https://github.com/fruediger/SDL-native/releases/download/v{0}/runtimes.zip",
+  "runtimesLicenseFileUrl":     "https://github.com/fruediger/SDL-native/releases/download/v{0}/LICENSE.txt",
+  "runtimesLicenseSpdxFileUrl": "https://github.com/fruediger/SDL-native/releases/download/v{0}/LICENSE.spdx",
+
+  "outputDir":                  "./build",
+  "cacheDir":                   "./src/.cache",
+  "tempDir":                    "./src/.temp",
+
+  "_notes" : [ "'cacheDir' as well as 'tempDir' need to be a subdirectory in './src' for 'Directory.Build.props' and 'Directory.Build.targets' to work properly" ]
+}
