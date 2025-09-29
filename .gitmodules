@@ -1,0 +1,3 @@
+[submodule "src/Sdl3Sharp.SourceGeneration"]
+	path = src/Sdl3Sharp.SourceGeneration
+	url = git@github.com:fruediger/Sdl3Sharp.SourceGeneration.git
