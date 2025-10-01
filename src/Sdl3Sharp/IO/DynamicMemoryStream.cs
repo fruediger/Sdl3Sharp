@@ -34,12 +34,35 @@ public sealed partial class DynamicMemoryStream : Stream
 		set => Properties?.TrySetNumberValue(PropertyNames.ChunkSizeNumber, value);
 	}
 
-	public NativeMemoryManager? MemoryManager
+	//TODO: doc: warn: only knowledged user ~ use 'TryGetMemoryManagerAndDispose' instead
+	public IntPtr Memory
 	{
 		get => Properties?.TryGetPointerValue(PropertyNames.MemoryPointer, out var memory) is true
 			? memory
 			: default;
 
 		set => Properties?.TrySetNumberValue(PropertyNames.MemoryPointer, value);
+	}
+
+	public bool TryGetMemoryManagerAndDispose([NotNullWhen(true)] out NativeMemoryManager? memoryManager)
+	{
+		unsafe
+		{
+			var length = Length;
+
+			if (!(Properties is { } properties
+				&& properties.TryGetPointerValue(PropertyNames.MemoryPointer, out var memory)
+				&& properties.TrySetPointerValue(PropertyNames.MemoryPointer, 0)))
+			{
+				memoryManager = null;
+				return false;
+			}
+
+			memoryManager = new(unchecked((void*)memory), (nuint)length, &NativeMemory.SDL_free);
+
+			Dispose();
+
+			return true;
+		}
 	}
 }

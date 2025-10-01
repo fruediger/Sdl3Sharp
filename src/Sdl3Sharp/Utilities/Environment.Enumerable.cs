@@ -71,7 +71,7 @@ partial class Environment
 		{
 			unsafe
 			{
-				NativeMemoryManager.SDL_free(mArray);
+				NativeMemory.SDL_free(mArray);
 				mArray = mCurrent = null;
 			}
 		}

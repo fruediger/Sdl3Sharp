@@ -31,7 +31,7 @@ public partial class MessageBox
 			try
 			{
 				var numButtons = mButtons.Count;
-				var buttons = NativeMemoryManager.Malloc<SDL_MessageBoxButtonData>(unchecked((nuint)numButtons));
+				var buttons = (SDL_MessageBoxButtonData*)NativeMemory.Malloc(unchecked((nuint)numButtons * (nuint)Unsafe.SizeOf<SDL_MessageBoxButtonData>()));
 				
 				try
 				{
@@ -82,7 +82,7 @@ public partial class MessageBox
 				}
 				finally
 				{
-					NativeMemoryManager.Free(buttons);
+					NativeMemory.Free(buttons);
 				}
 			}
 			finally

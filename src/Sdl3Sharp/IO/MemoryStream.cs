@@ -36,7 +36,7 @@ public sealed partial class MemoryStream : Stream
 	{
 		if (!nativeMemory.IsValid)
 		{
-			// TODO: fail
+			failNativeMemoryArgumentInvalid();
 		}
 
 		nativeMemoryPin = nativeMemory.Pin();
@@ -53,6 +53,9 @@ public sealed partial class MemoryStream : Stream
 
 			throw;
 		}
+
+		[DoesNotReturn]
+		static void failNativeMemoryArgumentInvalid() => throw new ArgumentException(message: $"{nameof(nativeMemory)} is invalid", paramName: nameof(nativeMemory));
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -60,10 +63,13 @@ public sealed partial class MemoryStream : Stream
 	{
 		if (mem is null)
 		{
-			// TODO: fail
+			failMemArgumentNull();
 		}
 
 		return unchecked((IntPtr)mem);
+
+		[DoesNotReturn]
+		static void failMemArgumentNull() => throw new ArgumentNullException(nameof(mem));
 	}
 
 	private MemoryHandle mMemoryHandle;
@@ -85,13 +91,30 @@ public sealed partial class MemoryStream : Stream
 		mNativeMemoryPin = nativeMemoryPin;
 	}
 
-	public unsafe MemoryStream(void* mem, nuint size, MemoryStreamFreeFunc? free = default) :
+	public unsafe MemoryStream(void* mem, nuint size, MemoryStreamFreeFunc? freeFunc = null) :
 		this(ValidateUnsafeMemory(mem), size, default(IUnsafeConstructorDispatch?))
 	{
-		
+		FreeFunc = freeFunc;
 	}
 
-	public IntPtr Memory
+	public IntPtr Memory => Properties?.TryGetPointerValue(PropertyNames.MemoryPointer, out var memory) is true
+		? memory
+		: default;
+
+	public long Size => Properties?.TryGetNumberValue(PropertyNames.SizeNumber, out var size) is true
+		? size
+		: default;
+
+	public MemoryStreamFreeFunc? FreeFunc
+	{
+		get => Properties?.TryGetPointerValue(PropertyNames.FreeFuncPointer, out var freeFunc) is true
+			? Marshal.GetDelegateForFunctionPointer<MemoryStreamFreeFunc>(freeFunc)
+			: null;
+
+		set => Properties?.TrySetPointerValue(PropertyNames.FreeFuncPointer, value is not null
+			? Marshal.GetFunctionPointerForDelegate(value)
+			: 0);
+	}
 
 	protected override void Dispose(bool disposing, bool close)
 	{

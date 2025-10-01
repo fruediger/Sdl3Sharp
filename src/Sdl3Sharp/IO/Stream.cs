@@ -8,7 +8,7 @@ using System.Runtime.InteropServices.Marshalling;
 
 namespace Sdl3Sharp.IO;
 
-public abstract partial class Stream : IDisposable
+public partial class Stream : IDisposable
 {
 	private unsafe SDL_IOStream* mContext = null;
 	private GCHandle mImplementationHandle = default;
@@ -20,6 +20,7 @@ public abstract partial class Stream : IDisposable
 	/// </remarks>
 	private protected unsafe Stream(SDL_IOStream* context) => mContext = context;
 
+	// TODO: docs
 	/// <summary>
 	/// 
 	/// </summary>

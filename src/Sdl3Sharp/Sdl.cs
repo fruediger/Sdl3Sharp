@@ -425,7 +425,7 @@ public sealed partial class Sdl : IDisposable
 
 			if (argumentsEnumerator is not null && argumentsCount is > 0)
 			{
-				argv = (byte**)NativeMemoryManager.Malloc(unchecked((nuint)argumentsCount * (nuint)sizeof(byte*)));
+				argv = (byte**)NativeMemory.Malloc(unchecked((nuint)argumentsCount * (nuint)sizeof(byte*)));
 
 				if (argv is not null)
 				{
@@ -456,7 +456,7 @@ public sealed partial class Sdl : IDisposable
 						Utf8StringMarshaller.Free(argv[--argc]);
 					}
 
-					NativeMemoryManager.Free(argv);
+					NativeMemory.Free(argv);
 				}
 
 				mLifetimeState = LifetimeState.AfterRun;

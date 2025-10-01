@@ -34,7 +34,7 @@ partial struct NativeMemory<T> : IEnumerable<T>
 
 				mPin = nativeMemory.Pin();
 
-				if (nativeMemory.TryGetNonNullStartPointer(out var start))
+				if (nativeMemory.RawPointer is var start && start is not null)
 				{
 					mCurrent = start - 1;
 					mEnd = start + nativeMemory.Length;

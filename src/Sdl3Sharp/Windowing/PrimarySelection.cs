@@ -57,7 +57,7 @@ public static partial class PrimarySelection
 				}
 				finally
 				{
-					Utilities.NativeMemoryManager.SDL_free(resultPtr);
+					Utilities.NativeMemory.SDL_free(resultPtr);
 				}
 			}
 

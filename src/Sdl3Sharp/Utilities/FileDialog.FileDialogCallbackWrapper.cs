@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.Marshalling;
 
 namespace Sdl3Sharp.Utilities;
@@ -36,7 +37,7 @@ partial class FileDialog
 						Utf8StringMarshaller.Free(filter.Name);
 				}
 
-				NativeMemoryManager.Free(mFilters);
+				NativeMemory.SDL_free(mFilters);
 
 				mFilters = null;
 			}
@@ -86,7 +87,7 @@ partial class FileDialog
 		{
 			if (filtersEnumerator is not null && filtersCount is > 0)
 			{
-				filters = NativeMemoryManager.Malloc<SDL_DialogFileFilter>(unchecked((nuint)filtersCount));
+				filters = unchecked((SDL_DialogFileFilter*)NativeMemory.Malloc(unchecked((nuint)filtersCount * (nuint)Unsafe.SizeOf<SDL_DialogFileFilter>())));
 				filtersCount = 0;
 
 				if (filters is not null)
@@ -124,7 +125,7 @@ partial class FileDialog
 						Utf8StringMarshaller.Free(filter.Name);
 					}
 
-					NativeMemoryManager.Free(filters);
+					NativeMemory.Free(filters);
 
 					filters = null;
 				}

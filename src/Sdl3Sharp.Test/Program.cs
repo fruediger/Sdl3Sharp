@@ -7,7 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-NativeMemoryManager.TrySetMemoryFunctions(new LoggedMemoryFunctions());
+NativeMemory.TrySetMemoryFunctions(new LoggedMemoryFunctions());
 
 Hint.MainCallbackRate.TrySetValue("120");
 
@@ -56,7 +56,7 @@ file class App : AppBase
 
 file sealed class LoggedMemoryFunctions : INativeMemoryFunctions
 {
-	private readonly INativeMemoryFunctions mPreviousMemoryFunctions = NativeMemoryManager.GetMemoryFunctions();
+	private readonly INativeMemoryFunctions mPreviousMemoryFunctions = NativeMemory.GetMemoryFunctions();
 	private readonly Dictionary<IntPtr, nuint> mAllocations = [];
 
 	public unsafe void* Calloc(nuint elementCount, nuint elementSize)

@@ -124,7 +124,7 @@ public readonly partial struct Locale(string language, string? country = null) :
 				localesPtrs++;
 			}
 
-			Utilities.NativeMemoryManager.SDL_free(resultLocales);
+			Utilities.NativeMemory.SDL_free(resultLocales);
 
 			return true;
 		}
