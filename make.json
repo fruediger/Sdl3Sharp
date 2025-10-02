@@ -1,5 +1,6 @@
 {
   "project":                    "./src/Sdl3Sharp",
+  "logoFile":                   "./assets/icon.txt",
 
   "runtimesVersion":            "3.2.22",
   "runtimesUrl":                "https://github.com/fruediger/SDL-native/releases/download/v{0}/runtimes.zip",
