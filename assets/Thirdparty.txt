@@ -1,7 +1,0 @@
-The Sdl3Sharp logos and icons use the free font "Hubot" or "Hubot Sans" (in its ExtraBold variant) in version 1.0.1 for their textual parts.
-The font is licensed under the SIL Open Font License (OFL) version 1.1.
-
-See also:
-
-Repository: https://github.com/github/hubot-sans/
-License: https://github.com/github/hubot-sans/blob/main/LICENSE and https://github.com/github/hubot-sans/blob/main/OFL.txt
