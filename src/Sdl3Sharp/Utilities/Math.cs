@@ -779,9 +779,9 @@ public static partial class Math
 	/// </para>
 	/// </remarks>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static long RoundToInteger(double x) => INativeImportCondition.Evaluate<IsLLP64>()
-		? SDL_lround_LLP64(x)
-		: SDL_lround_LP64(x);
+	public static long RoundToInteger(double x) => INativeImportCondition.Evaluate<IsLP64>()		
+		? SDL_lround_LP64(x)
+		: SDL_lround_LLP64(x);
 
 	/// <summary>
 	/// Rounds a specified real value to the nearest integer value
@@ -800,9 +800,9 @@ public static partial class Math
 	/// </para>
 	/// </remarks>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static long RoundToInteger(float x) => INativeImportCondition.Evaluate<IsLLP64>()
-		? SDL_lroundf_LLP64(x)
-		: SDL_lroundf_LP64(x);
+	public static long RoundToInteger(float x) => INativeImportCondition.Evaluate<IsLP64>()		
+		? SDL_lroundf_LP64(x)
+		: SDL_lroundf_LLP64(x);
 
 	/// <summary>
 	/// Scales a specified real value by a specified integer power of two

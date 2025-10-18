@@ -5,13 +5,21 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>  
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     
     <PackageId>$(PackageId).Core</PackageId>
+    <Description>$(Description) - "Core" package - just contains the managed binding code</Description>
+
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <RepositoryUrl>https://github.com/fruediger/Sdl3Sharp</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Sdl3Sharp.SourceGeneration\Sdl3Sharp.SourceGeneration.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+    <PackageReference Include="Sdl3Sharp.Ffi.Core" Version="$(Sdl3SharpFfiVersion)" />
   </ItemGroup>
 
 </Project>

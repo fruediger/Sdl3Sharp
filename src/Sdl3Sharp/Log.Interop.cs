@@ -48,65 +48,65 @@ partial class Log
 	/// Log a message with <see href="https://wiki.libsdl.org/SDL3/SDL_LOG_CATEGORY_APPLICATION">SDL_LOG_CATEGORY_APPLICATION</see> and <see href="https://wiki.libsdl.org/SDL3/SDL_LOG_PRIORITY_INFO">SDL_LOG_PRIORITY_INFO</see>
 	/// </summary>
 	/// <param name="fmt">a printf() style message format string</param>
-	/// <remarks>
-	/// NOTE: Regarding CLR-interop: Since there is currently no clean and platform-/runtime-indepent way to indirectly call external functions with variadic arguments,
-	/// those arguments are omitted from this method signature. Instead format your message on the CLR side and set <c><paramref name="fmt"/></c> to that already formatted string.
-	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_Log">SDL_Log</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
 	internal unsafe static partial void SDL_Log(byte* fmt);
+
+	/// <seealso cref="SDL_Log(byte*)"/>
+	[NativeImportSymbol<Library>("SDL_Log", Kind = NativeImportSymbolKind.Reference)]
+	internal static partial ref readonly byte SDL_Log_var();
 
 	/// <summary>
 	/// Log a message with <see href="https://wiki.libsdl.org/SDL3/SDL_LOG_PRIORITY_CRITICAL">SDL_LOG_PRIORITY_CRITICAL</see>
 	/// </summary>
 	/// <param name="category">the category of the message</param>
 	/// <param name="fmt">a printf() style message format string</param>
-	/// <remarks>
-	/// NOTE: Regarding CLR-interop: Since there is currently no clean and platform-/runtime-indepent way to indirectly call external functions with variadic arguments,
-	/// those arguments are omitted from this method signature. Instead format your message on the CLR side and set <c><paramref name="fmt"/></c> to that already formatted string.
-	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_LogCritical">SDL_LogCritical</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
 	internal unsafe static partial void SDL_LogCritical(LogCategory category, byte* fmt);
+
+	/// <seealso cref="SDL_LogCritical(LogCategory, byte*)"/>
+	[NativeImportSymbol<Library>("SDL_LogCritical", Kind = NativeImportSymbolKind.Reference)]
+	internal static partial ref readonly byte SDL_LogCritical_var();
 
 	/// <summary>
 	/// Log a message with <see href="https://wiki.libsdl.org/SDL3/SDL_LOG_PRIORITY_DEBUG">SDL_LOG_PRIORITY_DEBUG</see>
 	/// </summary>
 	/// <param name="category">the category of the message</param>
 	/// <param name="fmt">a printf() style message format string</param>
-	/// <remarks>
-	/// NOTE: Regarding CLR-interop: Since there is currently no clean and platform-/runtime-indepent way to indirectly call external functions with variadic arguments,
-	/// those arguments are omitted from this method signature. Instead format your message on the CLR side and set <c><paramref name="fmt"/></c> to that already formatted string.
-	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_LogDebug">SDL_LogDebug</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
 	internal unsafe static partial void SDL_LogDebug(LogCategory category, byte* fmt);
+
+	/// <seealso cref="SDL_LogDebug(LogCategory, byte*)"/>
+	[NativeImportSymbol<Library>("SDL_LogDebug", Kind = NativeImportSymbolKind.Reference)]
+	internal static partial ref readonly byte SDL_LogDebug_var();
 
 	/// <summary>
 	/// Log a message with <see href="https://wiki.libsdl.org/SDL3/SDL_LOG_PRIORITY_ERROR">SDL_LOG_PRIORITY_ERROR</see>
 	/// </summary>
 	/// <param name="category">the category of the message</param>
 	/// <param name="fmt">a printf() style message format string</param>
-	/// <remarks>
-	/// NOTE: Regarding CLR-interop: Since there is currently no clean and platform-/runtime-indepent way to indirectly call external functions with variadic arguments,
-	/// those arguments are omitted from this method signature. Instead format your message on the CLR side and set <c><paramref name="fmt"/></c> to that already formatted string.
-	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_LogError">SDL_LogError</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
 	internal unsafe static partial void SDL_LogError(LogCategory category, byte* fmt);
+
+	/// <seealso cref="SDL_LogError(LogCategory, byte*)"/>
+	[NativeImportSymbol<Library>("SDL_LogError", Kind = NativeImportSymbolKind.Reference)]
+	internal static partial ref readonly byte SDL_LogError_var();
 
 	/// <summary>
 	/// Log a message with <see href="https://wiki.libsdl.org/SDL3/SDL_LOG_PRIORITY_INFO">SDL_LOG_PRIORITY_INFO</see>
 	/// </summary>
 	/// <param name="category">the category of the message</param>
 	/// <param name="fmt">a printf() style message format string</param>
-	/// <remarks>
-	/// NOTE: Regarding CLR-interop: Since there is currently no clean and platform-/runtime-indepent way to indirectly call external functions with variadic arguments,
-	/// those arguments are omitted from this method signature. Instead format your message on the CLR side and set <c><paramref name="fmt"/></c> to that already formatted string.
-	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_LogInfo">SDL_LogInfo</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
 	internal unsafe static partial void SDL_LogInfo(LogCategory category, byte* fmt);
+
+	/// <seealso cref="SDL_LogInfo(LogCategory, byte*)"/>
+	[NativeImportSymbol<Library>("SDL_LogInfo", Kind = NativeImportSymbolKind.Reference)]
+	internal static partial ref readonly byte SDL_LogInfo_var();
 
 	/// <summary>
 	/// Log a message with the specified category and priority
@@ -114,39 +114,39 @@ partial class Log
 	/// <param name="category">the category of the message</param>
 	/// <param name="priority">the priority of the message</param>
 	/// <param name="fmt">a printf() style message format string</param>
-	/// <remarks>
-	/// NOTE: Regarding CLR-interop: Since there is currently no clean and platform-/runtime-indepent way to indirectly call external functions with variadic arguments,
-	/// those arguments are omitted from this method signature. Instead format your message on the CLR side and set <c><paramref name="fmt"/></c> to that already formatted string.
-	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_LogMessage">SDL_LogMessage</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
 	internal unsafe static partial void SDL_LogMessage(LogCategory category, LogPriority priority, byte* fmt);
+
+	/// <seealso cref="SDL_LogMessage(LogCategory, LogPriority, byte*)"/>
+	[NativeImportSymbol<Library>("SDL_LogMessage", Kind = NativeImportSymbolKind.Reference)]
+	internal static partial ref readonly byte SDL_LogMessage_var();
 
 	/// <summary>
 	/// Log a message with <see href="https://wiki.libsdl.org/SDL3/SDL_LOG_PRIORITY_TRACE">SDL_LOG_PRIORITY_TRACE</see>
 	/// </summary>
 	/// <param name="category">the category of the message</param>
 	/// <param name="fmt">a printf() style message format string</param>
-	/// <remarks>
-	/// NOTE: Regarding CLR-interop: Since there is currently no clean and platform-/runtime-indepent way to indirectly call external functions with variadic arguments,
-	/// those arguments are omitted from this method signature. Instead format your message on the CLR side and set <c><paramref name="fmt"/></c> to that already formatted string.
-	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_LogTrace">SDL_LogTrace</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
 	internal unsafe static partial void SDL_LogTrace(LogCategory category, byte* fmt);
+
+	/// <seealso cref="SDL_LogTrace(LogCategory, byte*)"/>
+	[NativeImportSymbol<Library>("SDL_LogTrace", Kind = NativeImportSymbolKind.Reference)]
+	internal static partial ref readonly byte SDL_LogTrace_var();
 
 	/// <summary>
 	/// Log a message with <see href="https://wiki.libsdl.org/SDL3/SDL_LOG_PRIORITY_VERBOSE">SDL_LOG_PRIORITY_VERBOSE</see>
 	/// </summary>
 	/// <param name="category">the category of the message</param>
 	/// <param name="fmt">a printf() style message format string</param>
-	/// <remarks>
-	/// NOTE: Regarding CLR-interop: Since there is currently no clean and platform-/runtime-indepent way to indirectly call external functions with variadic arguments,
-	/// those arguments are omitted from this method signature. Instead format your message on the CLR side and set <c><paramref name="fmt"/></c> to that already formatted string.
-	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_LogVerbose">SDL_LogVerbose</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
 	internal unsafe static partial void SDL_LogVerbose(LogCategory category, byte* fmt);
+
+	/// <seealso cref="SDL_LogVerbose(LogCategory, byte*)"/>
+	[NativeImportSymbol<Library>("SDL_LogVerbose", Kind = NativeImportSymbolKind.Reference)]
+	internal static partial ref readonly byte SDL_LogVerbose_var();
 
 	/// <summary>
 	/// Log a message with <see href="https://wiki.libsdl.org/SDL3/SDL_LOG_PRIORITY_WARN">SDL_LOG_PRIORITY_WARN</see>
@@ -160,6 +160,10 @@ partial class Log
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_LogWarn">SDL_LogWarn</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
 	internal unsafe static partial void SDL_LogWarn(LogCategory category, byte* fmt);
+
+	/// <seealso cref="SDL_LogWarn(LogCategory, byte*)"/>
+	[NativeImportSymbol<Library>("SDL_LogWarn", Kind = NativeImportSymbolKind.Reference)]
+	internal static partial ref readonly byte SDL_LogWarn_var();
 
 	/// <summary>
 	/// Replace the default log output function with one of your own

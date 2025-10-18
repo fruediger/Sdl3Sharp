@@ -761,7 +761,7 @@ partial class Math
 	/// </para>
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_lround">SDL_lround</seealso>
-	[NativeImportFunction<Library, Not<IsLLP64>>("SDL_lround", CallConvs = [typeof(CallConvCdecl), typeof(CallConvSuppressGCTransition)])]
+	[NativeImportFunction<Library, IsLP64>("SDL_lround", CallConvs = [typeof(CallConvCdecl), typeof(CallConvSuppressGCTransition)])]
 	internal static partial long SDL_lround_LP64(double x);
 
 	/// <summary>
@@ -785,7 +785,7 @@ partial class Math
 	/// </para>
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_lround">SDL_lround</seealso>
-	[NativeImportFunction<Library, IsLLP64>("SDL_lround", CallConvs = [typeof(CallConvCdecl), typeof(CallConvSuppressGCTransition)])]
+	[NativeImportFunction<Library, Not<IsLP64>>("SDL_lround", CallConvs = [typeof(CallConvCdecl), typeof(CallConvSuppressGCTransition)])]
 	internal static partial int SDL_lround_LLP64(double x);
 
 	/* NOTE:
@@ -823,7 +823,7 @@ partial class Math
 	/// </para>
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_lroundf">SDL_lroundf</seealso>
-	[NativeImportFunction<Library, Not<IsLLP64>>("SDL_lroundf", CallConvs = [typeof(CallConvCdecl), typeof(CallConvSuppressGCTransition)])]
+	[NativeImportFunction<Library, IsLP64>("SDL_lroundf", CallConvs = [typeof(CallConvCdecl), typeof(CallConvSuppressGCTransition)])]
 	internal static partial long SDL_lroundf_LP64(float x);
 
 	/// <summary>
@@ -847,7 +847,7 @@ partial class Math
 	/// </para>
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_lroundf">SDL_lroundf</seealso>
-	[NativeImportFunction<Library, IsLLP64>("SDL_lroundf", CallConvs = [typeof(CallConvCdecl), typeof(CallConvSuppressGCTransition)])]
+	[NativeImportFunction<Library, Not<IsLP64>>("SDL_lroundf", CallConvs = [typeof(CallConvCdecl), typeof(CallConvSuppressGCTransition)])]
 	internal static partial int SDL_lroundf_LLP64(float x);
 
 	/// <summary>

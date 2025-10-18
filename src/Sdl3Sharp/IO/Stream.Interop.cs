@@ -257,7 +257,11 @@ partial class Stream
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_IOprintf">SDL_IOprintf</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial nuint SDL_IOprintf(SDL_IOStream* context, byte* fmt/*, ...*/);
+	internal unsafe static partial nuint SDL_IOprintf(SDL_IOStream* context, byte* fmt);
+
+	/// <seealso cref="SDL_IOprintf(SDL_IOStream*, byte*)"/>
+	[NativeImportSymbol<Library>("SDL_IOprintf", Kind = NativeImportSymbolKind.Reference)]
+	internal static partial ref readonly byte SDL_IOprintf_var();
 
 	/// <summary>
 	/// Load all the data from an SDL data stream

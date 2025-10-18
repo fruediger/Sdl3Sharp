@@ -34,7 +34,7 @@ public sealed partial class DynamicMemoryStream : Stream
 		set => Properties?.TrySetNumberValue(PropertyNames.ChunkSizeNumber, value);
 	}
 
-	//TODO: doc: warn: only knowledged user ~ use 'TryGetMemoryManagerAndDispose' instead
+	//TODO: doc: warn: only knowledged users ~ use 'TryGetMemoryManagerAndDispose' instead
 	public IntPtr Memory
 	{
 		get => Properties?.TryGetPointerValue(PropertyNames.MemoryPointer, out var memory) is true

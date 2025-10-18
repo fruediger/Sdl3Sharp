@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Sdl3Sharp.Internal;
 
-internal static class Helpers
+internal static class Integral
 {
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	public static Int128 FromLittleEndianInt128(Int128 value) => BitConverter.IsLittleEndian

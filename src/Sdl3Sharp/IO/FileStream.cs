@@ -98,11 +98,12 @@ public sealed partial class FileStream : Stream
 	public static bool TryGetModeString(FileAccess access, FileMode mode, [NotNullWhen(true)] out string? modeString)
 		=> (access, mode) switch
 		{
-			(FileAccess.Read,      FileMode.Open)           => modeString = "r",
-			(FileAccess.ReadWrite, FileMode.Open)           => modeString = "r+",
-			(FileAccess.Write,     FileMode.EraseOrCreate)  => modeString = "w",
-			(FileAccess.ReadWrite, FileMode.EraseOrCreate)  => modeString = "w+",
+			(FileAccess.None,      _)                       => modeString = "",
+			(FileAccess.Read,      FileMode.Open)           => modeString = "r",			
+			(FileAccess.Write,     FileMode.EraseOrCreate)  => modeString = "w",			
 			(FileAccess.Write,     FileMode.AppendOrCreate) => modeString = "a",
+			(FileAccess.ReadWrite, FileMode.Open)           => modeString = "r+",
+			(FileAccess.ReadWrite, FileMode.EraseOrCreate)  => modeString = "w+",
 			(FileAccess.ReadWrite, FileMode.AppendOrCreate) => modeString = "a+",
 			_ => modeString = null
 		} is not null;

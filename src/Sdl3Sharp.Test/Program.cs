@@ -11,6 +11,8 @@ NativeMemory.TrySetMemoryFunctions(new LoggedMemoryFunctions());
 
 Hint.MainCallbackRate.TrySetValue("120");
 
+Log.Message(LogCategory.Application, LogPriority.Info, "%s %s from SDL version %i.%i.%i", "Hello", "World", Sdl.Version.Major, Sdl.Version.Minor, Sdl.Version.Micro);
+
 MessageBox.TryShowSimple(MessageBoxFlags.Information, "Hello World", $"...from SDL version {Sdl.Version}");
 
 using var sdl = new Sdl(builder => builder

@@ -1,5 +1,40 @@
 <Project>
     <PropertyGroup Condition="'$(MakeFlavor)' == 'rid' And '$(MakeFlavorRid)' != ''">
         <PackageId>$(PackageId).$(MakeFlavorRid)</PackageId>
+        <Description>$(Description) - "$(MakeFlavorRid)" package - just contains the native binaries for $(MakeFlavorRid) and references the "Core" package</Description>
     </PropertyGroup>
+
+    <PropertyGroup Condition="'$(MakeFlavor)' == 'meta'">
+        <Description>$(Description) - "Meta" package - just references all of the native binary packages and by transitivity the "Core" package</Description>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(MakeFlavor)' == 'rid' Or '$(MakeFlavor)' == 'meta'">
+        <!-- NU5128: these packages intentionally contain no managed code -->
+        <NoWarn>NU5128</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(MakeFlavor)' != 'rid'">        
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>        
+        <Copyright>© 2025 Felix Rüdiger</Copyright>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(MakeFlavor)' != 'rid'">
+        <None Include="../../LICENSE.md" Pack="true" PackagePath="" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(MakeFlavor)' != 'meta'">
+        <None Include="../../assets/icon_light.png" Pack="true" PackagePath="icon.png" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(MakeFlavor)' == 'meta'">
+        <None Include="../../assets/icon.png" Pack="true" PackagePath="icon.png" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(MakeFlavor)' == 'rid' And '$(MakeFlavorRid)' != ''">
+        <PackageReference Include="Sdl3Sharp.Ffi.$(MakeFlavorRid)" Version="$(Sdl3SharpFfiVersion)" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(MakeFlavor)' == 'meta'">
+        <PackageReference Include="Sdl3Sharp.Ffi" Version="$(Sdl3SharpFfiVersion)" />
+    </ItemGroup>
 </Project>

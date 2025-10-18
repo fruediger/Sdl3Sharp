@@ -1,8 +1,24 @@
 <Project>
-    <PropertyGroup>
-        <PackageId>Sdl3Sharp</PackageId>
-        <Version>0.5</Version>
-        <VersionSuffix>alpha</VersionSuffix>
+    <PropertyGroup>        
         <TargetFramework>net9.0</TargetFramework>
+
+        <PackageId>Sdl3Sharp</PackageId>
+        <VersionPrefix>0.5.0</VersionPrefix>
+        <VersionSuffix>alpha</VersionSuffix>
+        <Description>SDL3# - SDL bindings for C#/.NET</Description>
+        <Authors>Felix Rüdiger</Authors>
+
+        <PackageProjectUrl>https://github.com/fruediger/Sdl3Sharp</PackageProjectUrl>
+        <PackageTags>sdl;sdl3;sdl3sharp;sdl3#</PackageTags>
+        <PackageIcon>icon.png</PackageIcon>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+
+        <!-- -->
+
+        <Sdl3SharpFfiVersion>0.5.0-alpha</Sdl3SharpFfiVersion>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="../../README.md" Pack="true" PackagePath="" />
+    </ItemGroup>
 </Project>

@@ -12,7 +12,14 @@ internal sealed class Library : INativeImportLibrary
 
 	static void INativeImportLibrary.AfterSuccessfullyLoaded(string libraryName, DllImportSearchPath? searchPath)
 	{
-		// immediately fix the SDL logging system to use the managed bridge, so we don't miss any logs:
-		Log.SetSDLOutputCallback();
+		unsafe
+		{
+			// immediately fix the SDL logging system to use the managed bridge, so we don't miss any logs:
+			Log.SetSDLOutputCallback();
+
+			// TODO: ffi
+			Ffi.Ffi.Allocator.Alloc = &NativeMemory.Alloc;
+			Ffi.Ffi.Allocator.Free = &NativeMemory.Free;
+		}
 	}
 }
