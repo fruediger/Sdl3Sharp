@@ -1,7 +1,6 @@
 ﻿using Sdl3Sharp.Events;
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using unsafe SDL_EventFilter = delegate* unmanaged[Cdecl]<void*, Sdl3Sharp.Events.Event*, Sdl3Sharp.Internal.Interop.CBool>;
 

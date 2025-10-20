@@ -1,7 +1,6 @@
 ﻿using Sdl3Sharp.Events;
 using Sdl3Sharp.Input;
 using System.Runtime.CompilerServices;
-using static System.Net.WebRequestMethods;
 
 namespace Sdl3Sharp;
 

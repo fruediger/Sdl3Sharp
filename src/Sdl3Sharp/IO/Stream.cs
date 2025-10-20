@@ -1,5 +1,4 @@
-﻿using Sdl3Sharp.Ffi;
-using Sdl3Sharp.Internal;
+﻿using Sdl3Sharp.Internal;
 using Sdl3Sharp.Utilities;
 using System;
 using System.Diagnostics.CodeAnalysis;

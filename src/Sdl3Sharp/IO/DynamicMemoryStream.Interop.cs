@@ -1,7 +1,5 @@
-﻿using Microsoft.VisualBasic;
-using Sdl3Sharp.Internal.Interop;
+﻿using Sdl3Sharp.Internal.Interop;
 using Sdl3Sharp.SourceGeneration;
-using System;
 using System.Runtime.CompilerServices;
 
 namespace Sdl3Sharp.IO;

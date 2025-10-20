@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace Sdl3Sharp.Utilities;
+﻿namespace Sdl3Sharp.Utilities;
 
 partial class FileDialog
 {

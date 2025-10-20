@@ -1,7 +1,5 @@
-﻿using Sdl3Sharp.Ffi;
-using Sdl3Sharp.Internal;
+﻿using Sdl3Sharp.Internal;
 using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.Marshalling;
 
 namespace Sdl3Sharp;
