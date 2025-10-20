@@ -32,7 +32,7 @@ public sealed partial class ReadOnlyMemoryStream : Stream
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	private static IntPtr ValidateAndPinNativeMemory(Utilities.NativeMemory nativeMemory, out NativeMemoryPin? nativeMemoryPin)
+	private static IntPtr ValidateAndPinNativeMemory(ReadOnlyNativeMemory nativeMemory, out NativeMemoryPin? nativeMemoryPin)
 	{
 		if (!nativeMemory.IsValid)
 		{
@@ -85,7 +85,7 @@ public sealed partial class ReadOnlyMemoryStream : Stream
 		mMemoryHandle = memoryHandle;
 	}
 
-	public ReadOnlyMemoryStream(Utilities.NativeMemory nativeMemory) :
+	public ReadOnlyMemoryStream(ReadOnlyNativeMemory nativeMemory) :
 		this(ValidateAndPinNativeMemory(nativeMemory, out var nativeMemoryPin), nativeMemory.Length, default(IUnsafeConstructorDispatch?))
 	{
 		mNativeMemoryPin = nativeMemoryPin;

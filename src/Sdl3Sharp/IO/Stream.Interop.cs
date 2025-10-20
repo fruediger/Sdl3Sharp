@@ -10,6 +10,7 @@ using unsafe SDL_IOStreamInterface_write = delegate* unmanaged[Cdecl]<void*, voi
 using unsafe SDL_IOStreamInterface_flush = delegate* unmanaged[Cdecl]<void*, Sdl3Sharp.IO.StreamStatus*, Sdl3Sharp.Internal.Interop.CBool>;
 using unsafe SDL_IOStreamInterface_close = delegate* unmanaged[Cdecl]<void*, Sdl3Sharp.Internal.Interop.CBool>;
 using System.Diagnostics.CodeAnalysis;
+using Sdl3Sharp.Utilities;
 
 namespace Sdl3Sharp.IO;
 
@@ -71,6 +72,9 @@ partial class Stream
 			static void failImplementationArgumentNull() => throw new ArgumentNullException(nameof(implementation));
 		}
 
+		[ThreadStatic]
+		private static NativeMemoryManager? mMemoryManager;
+
 		[UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
 		private unsafe static long SizeImpl(void* userdata)
 		{
@@ -98,7 +102,7 @@ partial class Stream
 		{
 			if (userdata is not null && GCHandle.FromIntPtr(unchecked((IntPtr)userdata)) is { IsAllocated: true, Target: IStream stream })
 			{
-				return stream.Read(ref Unsafe.AsRef<byte>(ptr), size, ref Unsafe.AsRef<StreamStatus>(status));
+				return stream.Read(new Utilities.NativeMemory(ptr, size), ref Unsafe.AsRef<StreamStatus>(status));
 			}
 
 			*status = StreamStatus.Error;
@@ -111,7 +115,7 @@ partial class Stream
 		{
 			if (userdata is not null && GCHandle.FromIntPtr(unchecked((IntPtr)userdata)) is { IsAllocated: true, Target: IStream stream })
 			{
-				return stream.Write(ref Unsafe.AsRef<byte>(ptr), size, ref Unsafe.AsRef<StreamStatus>(status));
+				return stream.Write(new Utilities.NativeMemory(ptr, size), ref Unsafe.AsRef<StreamStatus>(status));
 			}
 
 			*status = StreamStatus.Error;

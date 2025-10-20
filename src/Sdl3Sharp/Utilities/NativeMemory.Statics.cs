@@ -424,7 +424,7 @@ partial struct NativeMemory
 	}
 
 	/// <summary>
-	/// Tries to compare two <see cref="NativeMemory">allocated memory buffers</see>
+	/// Tries to compare two <see cref="ReadOnlyNativeMemory">allocated memory buffers</see>
 	/// </summary>
 	/// <param name="firstBuffer">The first buffer to compare</param>
 	/// <param name="secondBuffer">The second buffer to compare</param>
@@ -435,16 +435,16 @@ partial struct NativeMemory
 	/// otherwise, <c>0</c>, which means <paramref name="firstBuffer"/> matches <paramref name="secondBuffer"/> exactly
 	/// </param>
 	/// <returns>
-	/// <c><see langword="true"/></c>, if <paramref name="firstBuffer"/> and <paramref name="secondBuffer"/> are both <see cref="IsValid">valid</see>
+	/// <c><see langword="true"/></c>, if <paramref name="firstBuffer"/> and <paramref name="secondBuffer"/> are both <see cref="ReadOnlyNativeMemory.IsValid">valid</see>
 	/// and have the same <see cref="Length"/>;
 	/// otherwise, <c><see langword="false"/></c>
 	/// </returns>
 	/// <remarks>
 	/// <para>
-	/// If one of <paramref name="firstBuffer"/> or <paramref name="secondBuffer"/> is <see cref="IsEmpty">empty</see> (or both are), this method returns <c><see langword="true"/></c> and <paramref name="result"/> is <c>0</c>.
+	/// If one of <paramref name="firstBuffer"/> or <paramref name="secondBuffer"/> is <see cref="ReadOnlyNativeMemory.IsEmpty">empty</see> (or both are), this method returns <c><see langword="true"/></c> and <paramref name="result"/> is <c>0</c>.
 	/// </para>
 	/// </remarks>
-	public static bool TryCompare(NativeMemory firstBuffer, NativeMemory secondBuffer, out int result)
+	public static bool TryCompare(ReadOnlyNativeMemory firstBuffer, ReadOnlyNativeMemory secondBuffer, out int result)
 	{
 		unsafe
 		{
@@ -474,21 +474,21 @@ partial struct NativeMemory
 	}
 
 	/// <summary>
-	/// Tries to copy all bytes from one <see cref="NativeMemory">allocated memory buffer</see> into another <em>non-overlapping</em> one
+	/// Tries to copy all bytes from one <see cref="ReadOnlyNativeMemory">allocated memory buffer</see> into <see cref="NativeMemory">another</see> <em>non-overlapping</em> one
 	/// </summary>
 	/// <param name="destination">The destination <see cref="NativeMemory">memory buffer</see>. Must not overlap with <paramref name="source"/>.</param>
-	/// <param name="source">The source <see cref="NativeMemory">memory buffer</see>. Must not overlap with <paramref name="destination"/>.</param>
+	/// <param name="source">The source <see cref="ReadOnlyNativeMemory">memory buffer</see>. Must not overlap with <paramref name="destination"/>.</param>
 	/// <returns>
 	/// <c><see langword="true"/></c>, if <paramref name="destination"/> and <paramref name="source"/> are both <see cref="IsValid">valid</see> and 
-	/// <paramref name="destination"/>'s <see cref="Length"/> is at least <paramref name="source"/>'s <see cref="Length"/>;
+	/// <paramref name="destination"/>'s <see cref="Length"/> is at least <paramref name="source"/>'s <see cref="ReadOnlyNativeMemory.Length"/>;
 	/// otherwise, <c><see langword="false"/></c>
 	/// </returns>
 	/// <remarks>
 	/// <para>
-	/// The memory regions must not overlap! If they might do, use <see cref="TryMove(NativeMemory, NativeMemory)"/> instead.
+	/// The memory regions must not overlap! If they might do, use <see cref="TryMove(NativeMemory, ReadOnlyNativeMemory)"/> instead.
 	/// </para>
 	/// </remarks>
-	public static bool TryCopy(NativeMemory destination, NativeMemory source)
+	public static bool TryCopy(NativeMemory destination, ReadOnlyNativeMemory source)
 	{
 		unsafe
 		{
@@ -508,21 +508,21 @@ partial struct NativeMemory
 	}
 
 	/// <summary>
-	/// Tries to copy all bytes from one <see cref="NativeMemory">allocated memory buffer</see> into another one that might overlap
+	/// Tries to copy all bytes from one <see cref="NativeMemory">allocated memory buffer</see> into <see cref="ReadOnlyNativeMemory">another</see> one that might overlap
 	/// </summary>
 	/// <param name="destination">The destination <see cref="NativeMemory">memory buffer</see></param>
-	/// <param name="source">The source <see cref="NativeMemory">memory buffer</see></param>
+	/// <param name="source">The source <see cref="ReadOnlyNativeMemory">memory buffer</see></param>
 	/// <returns>
 	/// <c><see langword="true"/></c>, if <paramref name="destination"/> and <paramref name="source"/> are both <see cref="IsValid">valid</see> and 
-	/// <paramref name="destination"/>'s <see cref="Length"/> is at least <paramref name="source"/>'s <see cref="Length"/>;
+	/// <paramref name="destination"/>'s <see cref="Length"/> is at least <paramref name="source"/>'s <see cref="ReadOnlyNativeMemory.Length"/>;
 	/// otherwise, <c><see langword="false"/></c>
 	/// </returns>
 	/// <remarks>
 	/// <para>
-	/// It is okay for the memory regions to overlap. If you are confident that the regions never overlap, you might want to use <see cref="TryCopy(NativeMemory, NativeMemory)"/> instead to improve performance.
+	/// It is okay for the memory regions to overlap. If you are confident that the regions never overlap, you might want to use <see cref="TryCopy(NativeMemory, ReadOnlyNativeMemory)"/> instead to improve performance.
 	/// </para>
 	/// </remarks>
-	public static bool TryMove(NativeMemory destination, NativeMemory source)
+	public static bool TryMove(NativeMemory destination, ReadOnlyNativeMemory source)
 	{
 		unsafe
 		{

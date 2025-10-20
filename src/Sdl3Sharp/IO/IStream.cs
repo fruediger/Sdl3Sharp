@@ -1,4 +1,6 @@
-﻿namespace Sdl3Sharp.IO;
+﻿using Sdl3Sharp.Utilities;
+
+namespace Sdl3Sharp.IO;
 
 public interface IStream
 {
@@ -6,9 +8,9 @@ public interface IStream
 
 	long Seek(long offset, StreamWhence whence);
 
-	nuint Read(ref byte data, nuint length, ref StreamStatus status);
+	nuint Read(NativeMemory data, ref StreamStatus status);
 
-	nuint Write(ref readonly byte data, nuint length, ref StreamStatus status);
+	nuint Write(ReadOnlyNativeMemory data, ref StreamStatus status);
 
 	bool Flush(ref StreamStatus status);
 

@@ -55,17 +55,17 @@ public static partial class File
 	/// Tries to save all specified data into a specified file
 	/// </summary>
 	/// <param name="fileName">The file path to the file, where to write all available data into</param>
-	/// <param name="data">The <see cref="NativeMemory">memory buffer</see> containing all the data to be written into the specified file</param>
-	/// <returns><c><see langword="true"/></c>, if the data from the specified <see cref="NativeMemory">memory buffer</see> was succesfully written into the specified file; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <param name="data">The <see cref="ReadOnlyNativeMemory">memory buffer</see> containing all the data to be written into the specified file</param>
+	/// <returns><c><see langword="true"/></c>, if the data from the specified <see cref="ReadOnlyNativeMemory">memory buffer</see> was succesfully written into the specified file; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
 	/// <remarks>
 	/// <para>
-	/// If <paramref name="data"/> is <see cref="NativeMemory">invalid</see>, no data will be written and this method returns <c><see langword="false"/></c>.
+	/// If <paramref name="data"/> is <see cref="ReadOnlyNativeMemory.IsValid">invalid</see>, no data will be written and this method returns <c><see langword="false"/></c>.
 	/// </para>
 	/// <para>
 	/// This method is not threadsafe.
 	/// </para>
 	/// </remarks>
-	public static bool TrySave(string fileName, NativeMemory data)
+	public static bool TrySave(string fileName, ReadOnlyNativeMemory data)
 	{
 		unsafe
 		{

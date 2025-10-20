@@ -1,10 +1,12 @@
-﻿using Sdl3Sharp.Internal;
+﻿using Sdl3Sharp.Ffi;
+using Sdl3Sharp.Internal;
 using Sdl3Sharp.Utilities;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
+using System.Threading;
 
 namespace Sdl3Sharp.IO;
 
@@ -219,6 +221,100 @@ public partial class Stream : IDisposable
 		{
 			return SDL_CloseIO(mContext);
 		}
+	}
+
+	/// <summary>
+	/// Tries to copy all data from the stream into a specified destination stream
+	/// </summary>
+	/// <param name="destination">The destination stream to copy data into</param>
+	/// <param name="bytesRead">The number of bytes read from the stream</param>
+	/// <param name="bytesWritten">The number of bytes written to the <paramref name="destination"/> stream</param>
+	/// <param name="bufferSize">The size of the buffer to use for copying</param>
+	/// <returns><c><see langword="true"/></c> if the data from the stream was successfully copied to the <paramref name="destination"/> stream; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method tries to copy as many bytes as possible before returning.
+	/// <paramref name="bytesRead"/> will be equal to the actual number of bytes read from the stream, while <paramref name="bytesWritten"/> will be equal to the actual number of bytes written to the <paramref name="destination"/> stream, even in the case when not all data could be copied.
+	/// You should check the stream's <see cref="Status"/> property as well as the <paramref name="destination"/>'s <see cref="Status"/> property to determine whether a shorted copy operation is recoverable or not.
+	/// </para>
+	/// <para>
+	/// This method is not threadsafe.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="ArgumentNullException"><paramref name="destination"/> is <c><see langword="null"/></c></exception>
+	/// <exception cref="ArgumentOutOfRangeException"><paramref name="bufferSize"/> is not greater than <c>0</c></exception>
+	public bool TryCopyTo(Stream destination, out nuint bytesRead, out nuint bytesWritten, nuint bufferSize = 4096)
+	{
+		if (destination is null)
+		{
+			failDestinationArgumentNull();
+		}
+
+		if (bufferSize is <= 0)
+		{
+			failBufferSizeArgumentOutOfRange();
+		}
+
+		bytesRead = 0;
+		bytesWritten = 0;
+
+		if (Utilities.NativeMemory.TryMalloc(bufferSize, out var memoryManager))
+		{
+			using (memoryManager)
+			{
+				var buffer = memoryManager.Memory;
+				var byteBuffer = (NativeMemory<byte>)buffer;
+
+				while (TryRead(buffer, out var bytesReadTmp))
+				{
+					bytesRead += bytesReadTmp;
+
+					var workingBuffer = byteBuffer.Slice(0, bytesReadTmp);
+
+					while (true)
+					{
+						var writeResult = destination.TryWrite(workingBuffer, out var bytesWrittenTmp);
+
+						bytesWritten += bytesWrittenTmp;
+
+						if (writeResult)
+						{
+							break;
+						}
+
+						var status = destination.Status;
+
+						if (status is StreamStatus.NotReady)
+						{
+							var spinWait = new SpinWait();
+							do
+							{
+								spinWait.SpinOnce();
+								status = destination.Status;
+							}
+							while (status is StreamStatus.NotReady);
+						}
+
+						if (status is not StreamStatus.Ready)
+						{
+							return false;
+						}
+
+						workingBuffer = workingBuffer.Slice(bytesWrittenTmp);
+					}
+				}
+			}
+
+			return true;
+		}
+
+		return false;
+
+		[DoesNotReturn]
+		static void failDestinationArgumentNull() => throw new ArgumentNullException(nameof(destination));
+
+		[DoesNotReturn]
+		static void failBufferSizeArgumentOutOfRange() => throw new ArgumentOutOfRangeException(nameof(bufferSize));
 	}
 
 	/// <summary>
@@ -1277,15 +1373,15 @@ public partial class Stream : IDisposable
 	/// <summary>
 	/// Tries to save specified data into the stream
 	/// </summary>
-	/// <param name="data">The <see cref="Utilities.NativeMemory">memory buffer</see> containing all the data to be saved into the stream</param>
+	/// <param name="data">The <see cref="ReadOnlyNativeMemory">memory buffer</see> containing all the data to be saved into the stream</param>
 	/// <param name="closeAfterwards">A value indicating whether the stream should be closed before this method returns (even in case of an error)</param>
-	/// <returns><c><see langword="true"></see></c> if the data from the specified <see cref="Utilities.NativeMemory">memory buffer</see> was successfully saved into the stream; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <returns><c><see langword="true"></see></c> if the data from the specified <see cref="ReadOnlyNativeMemory">memory buffer</see> was successfully saved into the stream; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
 	/// <remarks>
 	/// <para>
 	/// This method is not threadsafe.
 	/// </para>
 	/// </remarks>
-	public bool TrySave(Utilities.NativeMemory data, bool closeAfterwards = false)
+	public bool TrySave(ReadOnlyNativeMemory data, bool closeAfterwards = false)
 	{
 		unsafe
 		{
@@ -1396,9 +1492,9 @@ public partial class Stream : IDisposable
 	/// <summary>
 	/// Tries to write specified data into the stream
 	/// </summary>
-	/// <param name="data">The <see cref="Utilities.NativeMemory">memory buffer</see> containing all the data to be written into the stream</param>
+	/// <param name="data">The <see cref="ReadOnlyNativeMemory">memory buffer</see> containing all the data to be written into the stream</param>
 	/// <param name="bytesWritten">The number of bytes written to the stream</param>
-	/// <returns><c><see langword="true"/></c> if the data from the specified <see cref="Utilities.NativeMemory">memory buffer</see> was successfully written into the stream; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <returns><c><see langword="true"/></c> if the data from the specified <see cref="ReadOnlyNativeMemory">memory buffer</see> was successfully written into the stream; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
 	/// <remarks>
 	/// <para>
 	/// In case of an error, this method still attempts to write as many bytes as possible before returning.
@@ -1409,7 +1505,7 @@ public partial class Stream : IDisposable
 	/// This method is not threadsafe.
 	/// </para>
 	/// </remarks>
-	public bool TryWrite(Utilities.NativeMemory data, out nuint bytesWritten)
+	public bool TryWrite(ReadOnlyNativeMemory data, out nuint bytesWritten)
 	{
 		unsafe
 		{
@@ -1575,16 +1671,16 @@ public partial class Stream : IDisposable
 	/// This method is not threadsafe.
 	/// </para>
 	/// </remarks>
-	public bool TryWrite<T>(in T value, out int bytesWritten)
+	public bool TryWrite<T>(in T value, out nuint bytesWritten)
 		where T : unmanaged, allows ref struct
 	{
 		unsafe
 		{
 			fixed (T* ptr = &value)
 			{
-				bytesWritten = unchecked((int)SDL_WriteIO(mContext, ptr, unchecked((nuint)Unsafe.SizeOf<T>())));
+				bytesWritten = SDL_WriteIO(mContext, ptr, unchecked((nuint)Unsafe.SizeOf<T>()));
 
-				return bytesWritten == Unsafe.SizeOf<T>();
+				return bytesWritten == unchecked((nuint)Unsafe.SizeOf<T>());
 			}
 		}
 	}

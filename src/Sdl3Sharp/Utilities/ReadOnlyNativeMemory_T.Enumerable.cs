@@ -7,53 +7,30 @@ using System.Runtime.InteropServices;
 
 namespace Sdl3Sharp.Utilities;
 
-partial struct NativeMemory<T> : IEnumerable<T>
+partial struct ReadOnlyNativeMemory<T> : IEnumerable<T>
 {
 	/// <summary>
-	/// Enumerates references to the values of type <typeparamref name="T"/> in an <see cref="NativeMemory{T}">allocated memory buffer of type <typeparamref name="T"/></see>
+	/// Enumerates <em>read-only</em> references to the values of type <typeparamref name="T"/> in an <see cref="ReadOnlyNativeMemory{T}">allocated <em>read-only</em> memory buffer of type <typeparamref name="T"/></see>
 	/// </summary>
 	[StructLayout(LayoutKind.Sequential)]
 	public struct Enumerator : IEnumerator<T>
 	{
-		private unsafe T* mCurrent;
-		private unsafe readonly T* mEnd;
-		private NativeMemoryPin? mPin;
+		private NativeMemory<T>.Enumerator mEnumerator;
 
 		/// <summary>
-		/// Creates a new <see cref="Enumerator"/> for a specified <see cref="NativeMemory{T}">allocated memory buffer of type <typeparamref name="T"/></see>
+		/// Creates a new <see cref="Enumerator"/> for a specified <see cref="ReadOnlyNativeMemory{T}">allocated <em>read-only</em> memory buffer of type <typeparamref name="T"/></see>
 		/// </summary>
-		/// <param name="nativeMemory">The <see cref="NativeMemory{T}">allocated memory buffer of type <typeparamref name="T"/></see> which should be enumerated</param>
+		/// <param name="nativeMemory">The <see cref="ReadOnlyNativeMemory{T}">allocated <em>read-only</em> memory buffer of type <typeparamref name="T"/></see> which should be enumerated</param>
 		/// <remarks>
 		/// <para>
 		/// Note: This operation <see cref="Pin">pins</see> the given <paramref name="nativeMemory"/>.
 		/// </para>
 		/// </remarks> 
-		/// <inheritdoc cref="FailInvalid"/>
-		public Enumerator(NativeMemory<T> nativeMemory)
-		{
-			unsafe
-			{
-				if (!nativeMemory.IsValid)
-				{
-					FailInvalid();
-				}
-
-				mPin = nativeMemory.Pin();
-
-				if (nativeMemory.RawPointer is var start && start is not null)
-				{
-					mCurrent = start - 1;
-					mEnd = start + nativeMemory.Length;
-				}
-				else
-				{
-					mEnd = mCurrent = null;
-				}
-			}
-		}
+		/// <inheritdoc cref="NativeMemory{T}.Enumerator.Enumerator(NativeMemory{T})"/>
+		public Enumerator(ReadOnlyNativeMemory<T> nativeMemory) => mEnumerator = new(nativeMemory.NativeMemory);
 
 		/// <inheritdoc cref="IEnumerator{T}.Current"/>
-		public readonly ref T Current { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get { unsafe { return ref Unsafe.AsRef<T>(mCurrent); } } }		
+		public readonly ref readonly T Current { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => ref mEnumerator.Current; }		
 
 		/// <inheritdoc/>
 		readonly T IEnumerator<T>.Current { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => Current; }
@@ -67,30 +44,18 @@ partial struct NativeMemory<T> : IEnumerable<T>
 		/// </para>
 		/// </remarks>
 		/// <inheritdoc/>
-		public void Dispose()
-		{
-			unsafe
-			{
-				mCurrent = mEnd;
-
-				if (mPin is not null)
-				{
-					mPin.Dispose();
-					mPin = null;
-				}
-			}
-		}
+		public void Dispose() => mEnumerator.Dispose();
 
 		/// <inheritdoc/>
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public bool MoveNext() { unsafe { return ++mCurrent < mEnd; } }
+		public bool MoveNext() => mEnumerator.MoveNext();
 
 		[DoesNotReturn]
 		readonly void IEnumerator.Reset() => throw new NotSupportedException();
 	}
-		
+
 	/// <inheritdoc cref="IEnumerable{T}.GetEnumerator"/>
-	/// <inheritdoc cref="Enumerator(NativeMemory{T})"/>
+	/// <inheritdoc cref="Enumerator(ReadOnlyNativeMemory{T})"/>
 	public readonly Enumerator GetEnumerator() => new(this);
 
 	/// <inheritdoc/>

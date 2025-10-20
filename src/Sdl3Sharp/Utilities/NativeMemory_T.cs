@@ -1,6 +1,8 @@
 ﻿using Sdl3Sharp.Internal;
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -11,26 +13,36 @@ namespace Sdl3Sharp.Utilities;
 /// Represents an allocated native memory buffer of elements of type <typeparamref name="T"/>
 /// </summary>
 /// <typeparam name="T">The type of the elements in the native memory buffer</typeparam>
+[DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public readonly partial struct NativeMemory<T> :
-	INativeMemory, IEquatable<NativeMemory>, IEquatable<NativeMemory<T>>, IFormattable, ISpanFormattable, IEqualityOperators<NativeMemory<T>, NativeMemory, bool>, IEqualityOperators<NativeMemory<T>, NativeMemory<T>, bool>
+	INativeMemory<NativeMemory<T>>, IEquatable<NativeMemory<T>>, IFormattable, ISpanFormattable, IEqualityOperators<NativeMemory<T>, NativeMemory<T>, bool>
 	where T : unmanaged
 {
 	private readonly NativeMemoryManager? mMemoryManager;
-	private readonly nuint mOffset;
+	private readonly nuint mOffsetOrPointer;
 	private readonly nuint mLength;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	internal NativeMemory(NativeMemoryManager? memoryManager, nuint offset, nuint length)
 	{
 		mMemoryManager = memoryManager;
-		mOffset = offset;
+		mOffsetOrPointer = offset;
 		mLength = length;
 	}
 
-	readonly NativeMemory INativeMemory.AsNativeMemory { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => this; }
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	internal unsafe NativeMemory(T* pointer, nuint length)
+	{
+		mMemoryManager = null;
+		mOffsetOrPointer = unchecked((nuint)pointer);
+		mLength = length;
+	}
 
-	private readonly nuint ByteOffset { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => unchecked(mOffset * ((nuint)Unsafe.SizeOf<T>() switch { 0 => 1, var size => size })); }
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	private string DebuggerDisplay => ToString(CultureInfo.InvariantCulture);
+
+	private readonly nuint ByteOffset { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => unchecked(mOffsetOrPointer * ((nuint)Unsafe.SizeOf<T>() switch { 0 => 1, var size => size })); }
 
 	private readonly nuint ByteLength { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => unchecked(mLength * ((nuint)Unsafe.SizeOf<T>() switch { 0 => 1, var size => size })); }
 
@@ -49,8 +61,20 @@ public readonly partial struct NativeMemory<T> :
 	/// A value indicating whether the allocated memory buffer is empty
 	/// </value>
 	/// <seealso cref="Empty"/>
-	[MemberNotNullWhen(false, nameof(mMemoryManager), nameof(MemoryManager))]
-	public readonly bool IsEmpty { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get { unsafe { return mMemoryManager is null || mMemoryManager.RawPointer is null || mLength is 0; } } }
+	public readonly bool IsEmpty
+	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+		get
+		{
+			unsafe
+			{
+				return (mMemoryManager is not null
+					? mMemoryManager.RawPointer is null
+					: unchecked((T*)mOffsetOrPointer) is null)
+					|| mLength is 0;
+			}
+		}
+	}
 
 	/// <summary>
 	/// Gets a value indicating whether the underlying <see cref="NativeMemoryManager"/> of this allocated memory buffer is pinned
@@ -73,7 +97,19 @@ public readonly partial struct NativeMemory<T> :
 	/// A valid <see cref="NativeMemory{T}"/> might become invalid after the underlying <see cref="NativeMemoryManager"/> changed (e.g. by calling <see cref="NativeMemory.TryRealloc(ref NativeMemoryManager?, nuint)"/> on it).
 	/// </para>
 	/// </remarks>
-	public readonly bool IsValid { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => IsEmpty || (ByteOffset <= mMemoryManager.Length && ByteLength <= unchecked(mMemoryManager.Length - ByteOffset)); }
+	public readonly bool IsValid
+	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+		get
+		{
+			unsafe
+			{
+				return mMemoryManager is not null
+					? mMemoryManager.RawPointer is not null && ByteOffset <= mMemoryManager.Length && ByteLength <= unchecked(mMemoryManager.Length - ByteOffset)
+					: unchecked((T*)mOffsetOrPointer) is not null || mLength is 0;
+			}
+		}
+	}
 
 	/// <summary>
 	/// Gets a reference to the element of type <typeparamref name="T"/> at a specified index into the allocated memory buffer
@@ -83,7 +119,7 @@ public readonly partial struct NativeMemory<T> :
 	/// </value>
 	/// <param name="index">The index of the element of type <typeparamref name="T"/> into the allocated memory buffer to get a reference to</param>
 	/// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is greater or equal to <see cref="Length"/></exception>
-	/// <inheritdoc cref="Validate"/>
+	/// <inheritdoc cref="GetValidPointer"/>
 	public readonly ref T this[nuint index]
 	{
 		get
@@ -95,9 +131,7 @@ public readonly partial struct NativeMemory<T> :
 					failIndexArgumentOutOfRange();
 				}
 
-				return ref (Validate() && mMemoryManager.RawPointer is var pointer && pointer is not null
-					? ref Unsafe.AsRef<T>(unchecked((T*)pointer + mOffset + index))
-					: ref Unsafe.NullRef<T>());
+				return ref Unsafe.AsRef<T>(unchecked(GetValidPointer() + index));
 			}
 
 			[DoesNotReturn]
@@ -115,7 +149,7 @@ public readonly partial struct NativeMemory<T> :
 
 	internal readonly NativeMemoryManager? MemoryManager { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mMemoryManager; }
 
-	internal readonly nuint Offset { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mOffset; }
+	internal readonly nuint OffsetOrPointer { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mOffsetOrPointer; }
 
 	/// <summary>
 	/// Gets a pointer to the start of the allocated memory buffer
@@ -123,26 +157,16 @@ public readonly partial struct NativeMemory<T> :
 	/// <value>
 	/// A pointer to the start of the allocated memory buffer
 	/// </value>
-	/// <inheritdoc cref="Validate"/>
-	public readonly IntPtr Pointer
-	{
-		get
-		{
-			unsafe
-			{
-				return Validate() && mMemoryManager.RawPointer is var pointer && pointer is not null
-					? unchecked((IntPtr)((T*)pointer + mOffset))
-					: IntPtr.Zero;
-			}
-		}
-	}
+	public readonly IntPtr Pointer { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get { unsafe { return unchecked((IntPtr)RawPointer); } } }
 
 	internal unsafe readonly T* RawPointer
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		get => mMemoryManager is not null && mMemoryManager.RawPointer is var pointer && pointer is not null
-			? unchecked((T*)pointer + mOffset)
-			: null;
+		get => mMemoryManager is not null
+			? mMemoryManager.RawPointer is var pointer && pointer is not null
+				? unchecked((T*)pointer + mOffsetOrPointer)
+				: null
+			: unchecked((T*)mOffsetOrPointer);
 	}
 
 	/// <summary>
@@ -170,42 +194,93 @@ public readonly partial struct NativeMemory<T> :
 	/// }
 	/// </code>
 	/// </example>
-	/// <inheritdoc cref="Validate"/>
-	public readonly Span<T> Span
-	{
-		get
-		{
-			unsafe
-			{
-				return Validate() && mMemoryManager.RawPointer is var pointer && pointer is not null
-					? MemoryMarshal.CreateSpan(ref Unsafe.AsRef<T>(unchecked((T*)pointer + mOffset)), unchecked((int)System.Math.Min(mLength, int.MaxValue)))
-					: [];
-			}
-		}
-	}
+	/// <inheritdoc cref="GetValidPointer"/>
+	public readonly Span<T> Span { get { unsafe { return MemoryMarshal.CreateSpan(ref Unsafe.AsRef<T>(GetValidPointer()), unchecked((int)System.Math.Min(mLength, int.MaxValue))); } } }
 
 	/// <inheritdoc/>
 	public readonly override bool Equals([NotNullWhen(true)] object? obj) => obj switch
 	{
 		NativeMemory<T> other => Equals(other),
-		NativeMemory other => Equals(other),
-		INativeMemory { AsNativeMemory: var other } => Equals(other),
+		ReadOnlyNativeMemory other => Equals(other),
+		INativeMemory { AsReadOnlyNativeMemory: var other } => Equals(other),
 		_ => false
 	};
 
 	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public readonly bool Equals(NativeMemory other) => ((NativeMemory)this).Equals(other);
+	public readonly bool Equals(ReadOnlyNativeMemory other) => ((NativeMemory)this).Equals(other);
 
 	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	public readonly bool Equals(NativeMemory<T> other)
 		=> ReferenceEquals(mMemoryManager, other.mMemoryManager)
-		&& mOffset == other.mOffset
+		&& mOffsetOrPointer == other.mOffsetOrPointer
 		&& mLength == other.mLength;
 
 	/// <inheritdoc/>
 	public readonly override int GetHashCode() => ((NativeMemory)this).GetHashCode();
+
+	/// <exception cref="InvalidOperationException">The <see cref="NativeMemory{T}"/> instance is invalid (the underlying <see cref="NativeMemoryManager"/> might have changed)</exception>
+	[DoesNotReturn]
+	private static void FailInvalid() => throw new InvalidOperationException($"The current {nameof(NativeMemory<>)} instance is invalid. Most likely that's because the current {nameof(NativeMemory<>)} instance was invalid from the beginning or because of a change in the underlying {nameof(NativeMemoryManager)}.");
+
+	/// <inheritdoc cref="FailInvalid"/>
+	private unsafe readonly T* GetValidPointer()
+	{
+		T* pointer;
+		if (mMemoryManager is not null)
+		{
+			pointer = unchecked((T*)mMemoryManager.RawPointer);
+
+			if (pointer is null || ByteOffset > mMemoryManager.Length || ByteLength > unchecked(mMemoryManager.Length - ByteOffset))
+			{
+				FailInvalid();
+			}
+
+			pointer += mOffsetOrPointer;
+		}
+		else
+		{
+			pointer = unchecked((T*)mOffsetOrPointer);
+
+			if (pointer is null && mLength is not 0)
+			{
+				FailInvalid();
+			}
+		}
+
+		return pointer;
+	}
+
+	/// <inheritdoc cref="FailInvalid"/>
+	private unsafe readonly nuint GetValidNewOffsetOrPointer(nuint start)
+	{
+		nuint newOffsetOrPointer;
+		if (mMemoryManager is not null)
+		{
+			var pointer = unchecked((T*)mMemoryManager.RawPointer);
+
+			if (pointer is null || ByteOffset > mMemoryManager.Length || ByteLength > unchecked(mMemoryManager.Length - ByteOffset))
+			{
+				FailInvalid();
+			}
+
+			newOffsetOrPointer = unchecked(mOffsetOrPointer + start);
+		}
+		else
+		{
+			var pointer = unchecked((T*)mOffsetOrPointer);
+
+			if (pointer is null && mLength is not 0)
+			{
+				FailInvalid();
+			}
+
+			newOffsetOrPointer = unchecked((nuint)(pointer + start));
+		}
+
+		return newOffsetOrPointer;
+	}
 
 	/// <summary>
 	/// Pins the underlying <see cref="NativeMemoryManager"/>
@@ -222,7 +297,7 @@ public readonly partial struct NativeMemory<T> :
 	/// <exception cref="ArgumentOutOfRangeException">
 	/// <paramref name="start"/> is greater than <see cref="Length"/>
 	/// </exception>
-	/// <inheritdoc cref="Validate"/>
+	/// <inheritdoc cref="GetValidNewOffsetOrPointer(nuint)"/>
 	public readonly NativeMemory<T> Slice(nuint start)
 	{
 		unsafe
@@ -232,9 +307,9 @@ public readonly partial struct NativeMemory<T> :
 				failStartArgumentOutOfRange();
 			}
 
-			Validate();
+			var newOffsetOrPointer = GetValidNewOffsetOrPointer(start);
 
-			return new(mMemoryManager, unchecked(mOffset + start), unchecked(mLength - start));
+			return new(mMemoryManager, newOffsetOrPointer, unchecked(mLength - start));
 		}
 
 		[DoesNotReturn]
@@ -252,7 +327,7 @@ public readonly partial struct NativeMemory<T> :
 	/// - or -
 	/// <paramref name="start"/> + <paramref name="length"/> is greater than <see cref="Length"/>
 	/// </exception>
-	/// <inheritdoc cref="Validate"/>
+	/// <inheritdoc cref="GetValidNewOffsetOrPointer(nuint)"/>
 	public readonly NativeMemory<T> Slice(nuint start, nuint length)
 	{
 		unsafe
@@ -266,10 +341,10 @@ public readonly partial struct NativeMemory<T> :
 			{
 				failLengthArgumentOutOfRange();
 			}
+			
+			var newOffsetOrPointer = GetValidNewOffsetOrPointer(start);
 
-			Validate();			
-
-			return new(mMemoryManager, unchecked(mOffset + start), length);
+			return new(mMemoryManager, newOffsetOrPointer, length);
 		}
 
 		[DoesNotReturn]
@@ -302,37 +377,6 @@ public readonly partial struct NativeMemory<T> :
 			&& SpanFormat.TryWrite(" }", ref destination, ref charsWritten);
 	}
 
-	/// <exception cref="InvalidOperationException">The <see cref="NativeMemory{T}"/> instance is invalid (the underlying <see cref="NativeMemoryManager"/> might have changed)</exception>
-	[MemberNotNullWhen(true, nameof(mMemoryManager), nameof(MemoryManager))]
-	private readonly bool Validate()
-	{
-		if (mMemoryManager is null)
-		{
-			return false;
-		}
-
-		if (ByteOffset > mMemoryManager.Length || ByteLength > unchecked(mMemoryManager.Length - ByteOffset))
-		{
-			failInvalid();
-		}
-
-#pragma warning disable CS8775 // MemoryManager is not null iff mMemoryManager is not null
-		return true;
-#pragma warning restore CS8775
-
-		[DoesNotReturn]
-		static void failInvalid() => throw new InvalidOperationException($"The current {nameof(NativeMemory<>)} instance is invalid. Most likely that's because of a change in the underlying {nameof(NativeMemoryManager)}.");
-	}
-
-	/// <summary>
-	/// Converts an <see cref="NativeMemory{T}">allocated memory buffer of type <typeparamref name="T"/></see> to an <see cref="NativeMemory">allocated memory buffer of unspecified type</see>
-	/// </summary>
-	/// <param name="nativeMemory">The <see cref="NativeMemory{T}">allocated memory buffer of type <typeparamref name="T"/></see> to convert to an <see cref="NativeMemory">allocated memory buffer of unspecified type</see></param>
-	/// <returns>An <see cref="NativeMemory">allocated memory buffer of unspecified type</see> spanning the exact same memory region as the given <paramref name="nativeMemory"/></returns>
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static implicit operator NativeMemory(NativeMemory<T> nativeMemory)
-		=> new(nativeMemory.MemoryManager, unchecked(nativeMemory.Offset * ((nuint)Unsafe.SizeOf<T>() switch { 0 => 1, var size => size })), unchecked(nativeMemory.Length * ((nuint)Unsafe.SizeOf<T>() switch { 0 => 1, var size => size })));
-
 	/// <summary>
 	/// Converts an <see cref="NativeMemory">allocated memory buffer of unspecified type</see> to an <see cref="NativeMemory{T}">allocated memory buffer of type <typeparamref name="T"/></see> 
 	/// </summary>
@@ -347,17 +391,54 @@ public readonly partial struct NativeMemory<T> :
 	/// </para>
 	/// </remarks>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static implicit operator NativeMemory<T>(NativeMemory nativeMemory)
+	public static explicit operator NativeMemory<T>(NativeMemory nativeMemory)
 	{
-		var (q, r) = unchecked(nuint.DivRem(nativeMemory.Offset, (nuint)Unsafe.SizeOf<T>() switch { 0 => 1, var size => size }));
-		var d = unchecked((nuint)Unsafe.BitCast<bool, byte>(r is not 0));
+		unsafe
+		{
+			// what happens here is actually quite hard to explain, but I did the math on paper and triple checked it,
+			// so I'm absolutely *not* confident that everything is correct
 
-		return new(nativeMemory.MemoryManager, offset: unchecked(q + d), length: unchecked(((r + nativeMemory.Length) / ((nuint)Unsafe.SizeOf<T>() switch { 0 => 1, var size => size })) - d));
+			var size = (nuint)Unsafe.SizeOf<T>() switch { 0 => 1u, var s => s };
+			var (q, r) = unchecked(nuint.DivRem(nativeMemory.OffsetOrPointer, size));	
+			var d = unchecked((nuint)Unsafe.BitCast<bool, byte>(r is not 0));
+
+			return new(
+				nativeMemory.MemoryManager,
+				nativeMemory.MemoryManager is not null
+					? unchecked(q + d)
+					: d is not 0
+						? unchecked(size - r) switch { var a when a <= nativeMemory.Length => unchecked(nativeMemory.OffsetOrPointer + a), _ => unchecked((nuint)(void*)null) }
+						: nativeMemory.OffsetOrPointer,
+				unchecked((r + nativeMemory.Length) / size) switch { var l when l > d => unchecked(l - d), _ => 0 }
+			);
+		}
 	}
 
-	/// <inheritdoc/>
+	/// <summary>
+	/// Converts an <see cref="NativeMemory{T}">allocated memory buffer of type <typeparamref name="T"/></see> to an <see cref="NativeMemory">allocated memory buffer of unspecified type</see>
+	/// </summary>
+	/// <param name="nativeMemory">The <see cref="NativeMemory{T}">allocated memory buffer of type <typeparamref name="T"/></see> to convert to an <see cref="NativeMemory">allocated memory buffer of unspecified type</see></param>
+	/// <returns>An <see cref="NativeMemory">allocated memory buffer of unspecified type</see> spanning the exact same memory region as the given <paramref name="nativeMemory"/></returns>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static bool operator ==(NativeMemory<T> left, NativeMemory right) => (NativeMemory)left == right;
+	public static implicit operator NativeMemory(NativeMemory<T> nativeMemory)
+	{
+		var size = (nuint)Unsafe.SizeOf<T>() switch { 0 => 1u, var s => s };;
+		return new(
+			nativeMemory.MemoryManager,
+			nativeMemory.MemoryManager is not null
+				? unchecked(nativeMemory.OffsetOrPointer * size)
+				: nativeMemory.OffsetOrPointer,
+			unchecked(nativeMemory.Length * size)
+		);
+	}
+
+	/// <summary>
+	/// Converts an <see cref="NativeMemory{T}">allocated memory buffer of type <typeparamref name="T"/></see> to an <see cref="ReadOnlyNativeMemory">allocated <em>read-only</em> memory buffer of unspecified type</see>
+	/// </summary>
+	/// <param name="nativeMemory">The <see cref="NativeMemory{T}">allocated memory buffer of type <typeparamref name="T"/></see> to convert to an <see cref="ReadOnlyNativeMemory">allocated <em>read-only</em> memory buffer of unspecified type</see></param>
+	/// <returns>An <see cref="ReadOnlyNativeMemory">allocated <em>read-only</em> memory buffer of unspecified type</see> spanning the exact same memory region as the given <paramref name="nativeMemory"/></returns>
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	public static implicit operator ReadOnlyNativeMemory(NativeMemory<T> nativeMemory) => new(nativeMemory);
 
 	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -365,9 +446,13 @@ public readonly partial struct NativeMemory<T> :
 
 	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static bool operator !=(NativeMemory<T> left, NativeMemory right) => (NativeMemory)left != right;
+	public static bool operator ==(NativeMemory<T> left, ReadOnlyNativeMemory right) => left.Equals(right);
 
 	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	public static bool operator !=(NativeMemory<T> left, NativeMemory<T> right) => !(left == right);
+
+	/// <inheritdoc/>
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	public static bool operator !=(NativeMemory<T> left, ReadOnlyNativeMemory right) => !(left == right);
 }
