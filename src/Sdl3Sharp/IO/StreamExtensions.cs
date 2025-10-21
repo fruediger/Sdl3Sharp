@@ -2,6 +2,7 @@
 using Sdl3Sharp.Utilities;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Sdl3Sharp.IO;
@@ -88,6 +89,7 @@ public static class StreamExtensions
 	/// <exception cref="ArgumentNullException"><paramref name="destination"/> is <c><see langword="null"/></c></exception>
 	/// <exception cref="ArgumentOutOfRangeException"><paramref name="bufferSize"/> is not greater than <c>0</c></exception>
 	/// <exception cref="InvalidOperationException">The internal timer SDL uses may have been reset or overflowed during the execution. Only happens when <paramref name="nanosecondsTimeout"/> is neither <c><see langword="null"/></c> nor <c>0</c>.</exception>
+	[OverloadResolutionPriority(1)] // we actually want to take this overload if an user just provides a 0, null, etc. literal for nanosecondsTimeout
 	public static bool TryCopyTo(this Stream source, Stream destination, out nuint bytesRead, out nuint bytesWritten, ulong? nanosecondsTimeout = 0, nuint bufferSize = 4096)
 	{
 		if (source is null)
