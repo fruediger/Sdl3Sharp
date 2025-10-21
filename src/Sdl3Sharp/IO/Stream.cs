@@ -289,7 +289,7 @@ public partial class Stream : IDisposable
 	/// <summary>
 	/// Tries to read data from the stream
 	/// </summary>
-	/// <param name="data">The <see cref="Utilities.NativeMemory"/> to read data into</param>
+	/// <param name="data">The <see cref="Utilities.NativeMemory">memory buffer</see> to read data into</param>
 	/// <param name="bytesRead">The number of bytes read from the stream, when this method returns <c><see langword="true"/></c>; otherwise, <c>0</c></param>
 	/// <returns><c><see langword="true"/></c> if the data was successfully read into the specified <see cref="Utilities.NativeMemory">memory buffer</see>; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
 	/// <remarks>
