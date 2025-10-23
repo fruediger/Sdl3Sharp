@@ -1,6 +1,8 @@
 ﻿namespace Sdl3Sharp.IO;
 
-/// <summary>Represents the status for a <see cref="Stream"/> as a result of read or write operations</summary>
+/// <summary>
+/// Represents the status for a <see cref="Stream"/> as a result of read or write operations
+/// </summary>
 public enum StreamStatus
 {
 	/// <summary>Everything is ready (no <see cref="Error">errors</see> and not <see cref="Eof">EOF</see>)</summary>

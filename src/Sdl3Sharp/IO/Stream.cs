@@ -10,7 +10,7 @@ using System.Threading;
 namespace Sdl3Sharp.IO;
 
 /// <summary>
-/// Represents a stream for reading and writing data
+/// A base stream for reading and writing data
 /// </summary>
 public partial class Stream : IDisposable
 {

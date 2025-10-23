@@ -7,10 +7,14 @@ using System.Runtime.InteropServices;
 
 namespace Sdl3Sharp.IO;
 
+/// <summary>
+/// A stream that is backed by a provided <em>read-only</em> memory buffer
+/// </summary>
 public sealed partial class ReadOnlyMemoryStream : Stream
 {	
 	private interface IUnsafeConstructorDispatch;
 
+	/// <exception cref="InvalidOperationException"><paramref name="memory"/> could not be pinned</exception>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	private unsafe static IntPtr ValidateAndPinMemory(ReadOnlyMemory<byte> memory, out MemoryHandle memoryHandle)
 	{
@@ -31,6 +35,7 @@ public sealed partial class ReadOnlyMemoryStream : Stream
 		static void failCouldNotPinMemory() => throw new InvalidOperationException($"Could not pin the {nameof(memory)}");
 	}
 
+	/// <exception cref="ArgumentException"><paramref name="nativeMemory"/> is invalid</exception>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	private static IntPtr ValidateAndPinNativeMemory(ReadOnlyNativeMemory nativeMemory, out NativeMemoryPin? nativeMemoryPin)
 	{
@@ -57,7 +62,8 @@ public sealed partial class ReadOnlyMemoryStream : Stream
 		[DoesNotReturn]
 		static void failNativeMemoryArgumentInvalid() => throw new ArgumentException(message: $"{nameof(nativeMemory)} is invalid", paramName: nameof(nativeMemory));
 	}
-
+	
+	/// <exception cref="ArgumentNullException"><paramref name="mem"/> is <c><see langword="null"/></c></exception>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	private unsafe static IntPtr ValidateUnsafeMemory(void* mem)
 	{
@@ -79,32 +85,95 @@ public sealed partial class ReadOnlyMemoryStream : Stream
 		base(SDL_IOFromConstMem(unchecked((void*)mem), size))
 	{ }
 
+	/// <summary>
+	/// Creates a new <see cref="ReadOnlyMemoryStream"/> from a specified <see cref="ReadOnlyMemory{T}"/>
+	/// </summary>
+	/// <param name="memory">The memory to use for the stream</param>
+	/// <remarks>
+	/// <para>
+	/// This pins the specified <see cref="ReadOnlyMemory{T}"/> for the lifetime of the <see cref="ReadOnlyMemoryStream"/>.
+	/// </para>
+	/// </remarks>
+	/// <inheritdoc cref="ValidateAndPinMemory(ReadOnlyMemory{byte}, out MemoryHandle)"/>
 	public ReadOnlyMemoryStream(ReadOnlyMemory<byte> memory) :
+#pragma warning disable IDE0034 // Keep it that way for explicitness sake
 		this(ValidateAndPinMemory(memory, out var memoryHandle), unchecked((nuint)memory.Length), default(IUnsafeConstructorDispatch?))
+#pragma warning restore IDE0034
 	{
 		mMemoryHandle = memoryHandle;
 	}
 
+	/// <summary>
+	/// Creates a new <see cref="ReadOnlyMemoryStream"/> from a specified <see cref="ReadOnlyNativeMemory">allocated <em>read-only</em> memory buffer</see>
+	/// </summary>
+	/// <param name="nativeMemory">The <see cref="ReadOnlyNativeMemory">allocated <em>read-only</em> memory buffer</see> to use for the stream</param>
+	/// <remarks>
+	/// This pins the specified <see cref="ReadOnlyNativeMemory">allocated <em>read-only</em> memory buffer</see> for the lifetime of the <see cref="ReadOnlyMemoryStream"/>.
+	/// </remarks>
+	/// <inheritdoc cref="ValidateAndPinNativeMemory(ReadOnlyNativeMemory, out NativeMemoryPin?)"/>
 	public ReadOnlyMemoryStream(ReadOnlyNativeMemory nativeMemory) :
+#pragma warning disable IDE0034 // Keep it that way for explicitness sake
 		this(ValidateAndPinNativeMemory(nativeMemory, out var nativeMemoryPin), nativeMemory.Length, default(IUnsafeConstructorDispatch?))
+#pragma warning restore IDE0034
 	{
 		mNativeMemoryPin = nativeMemoryPin;
 	}
 
+	/// <summary>
+	/// Creates a new <see cref="ReadOnlyMemoryStream"/> from a specified unmanaged memory and size
+	/// </summary>
+	/// <param name="mem">A pointer to the unmanaged memory to use for the stream</param>
+	/// <param name="size">The size of the unmanaged memory</param>
+	/// <param name="freeFunc">An optional delegate that is called to free the unmanaged memory when the stream is <see cref="Stream.TryClose">closed</see> or <see cref="Stream.Dispose()">disposed</see></param>
+	/// <remarks>
+	/// <para>
+	/// If <paramref name="freeFunc"/> is unset or <c><see langword="null"/></c>, the unmanaged memory will not be freed when the stream is <see cref="Stream.TryClose">closed</see> or <see cref="Stream.Dispose()">disposed</see>.
+	/// This parameter is reflected by the <see cref="FreeFunc"/> property. Changing the value of the <see cref="FreeFunc"/> property after construction also changes the automatic freeing behavior.
+	/// </para>
+	/// </remarks>
+	/// <inheritdoc cref="ValidateUnsafeMemory(void*)"/>
 	public unsafe ReadOnlyMemoryStream(void* mem, nuint size, MemoryStreamFreeFunc? freeFunc = null) :
+#pragma warning disable IDE0034 // Keep it that way for explicitness sake
 		this(ValidateUnsafeMemory(mem), size, default(IUnsafeConstructorDispatch?))
+#pragma warning restore IDE0034
 	{
 		FreeFunc = freeFunc;
 	}
 
+	/// <summary>
+	/// Gets a pointer to the memory buffer that the <see cref="ReadOnlyMemoryStream"/> was initialized with
+	/// </summary>
+	/// <value>
+	/// A pointer to the memory buffer that the <see cref="ReadOnlyMemoryStream"/> was initialized with
+	/// </value>
+	/// <seealso cref="PropertyNames.MemoryPointer"/>
 	public IntPtr Memory => Properties?.TryGetPointerValue(PropertyNames.MemoryPointer, out var memory) is true
 		? memory
 		: default;
 
+	/// <summary>
+	/// Gets the size, in bytes, of the memory buffer that the <see cref="ReadOnlyMemoryStream"/> was initialized with
+	/// </summary>
+	/// <value>
+	/// The size, in bytes, of the memory buffer that the <see cref="ReadOnlyMemoryStream"/> was initialized with
+	/// </value>
+	/// <seealso cref="PropertyNames.SizeNumber"/>
 	public long Size => Properties?.TryGetNumberValue(PropertyNames.SizeNumber, out var size) is true
 		? size
 		: default;
 
+	/// <summary>
+	/// Gets or sets a delegate that will be called to free the memory buffer when the <see cref="ReadOnlyMemoryStream"/> is <see cref="Stream.TryClose">closed</see> or <see cref="Stream.Dispose()">disposed</see>
+	/// </summary>
+	/// <value>
+	/// A delegate that will be called to free the memory buffer when the <see cref="ReadOnlyMemoryStream"/> is <see cref="Stream.TryClose">closed</see> or <see cref="Stream.Dispose()">disposed</see>
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// If the value of this property is <c><see langword="null"/></c>, the memory buffer will not be freed when the <see cref="ReadOnlyMemoryStream"/> is <see cref="Stream.TryClose">closed</see> or <see cref="Stream.Dispose()">disposed</see>.
+	/// Changing the value of this property will also change the automatic freeing behavior.
+	/// </para>
+	/// </remarks>
 	public MemoryStreamFreeFunc? FreeFunc
 	{
 		get => Properties?.TryGetPointerValue(PropertyNames.FreeFuncPointer, out var freeFunc) is true
@@ -116,6 +185,7 @@ public sealed partial class ReadOnlyMemoryStream : Stream
 			: 0);
 	}
 
+	/// <inheritdoc/>
 	protected override void Dispose(bool disposing, bool close)
 	{
 		unsafe
