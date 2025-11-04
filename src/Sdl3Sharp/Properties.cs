@@ -18,7 +18,7 @@ namespace Sdl3Sharp;
 public sealed partial class Properties :
 	IEnumerable<string>, IDisposable, Sdl.IDisposeReceiver, IEquatable<Properties>, IFormattable, ISpanFormattable
 {
-	private static readonly ConcurrentDictionary<uint, Properties> mKnownInstances = [];
+	private static readonly ConcurrentDictionary<uint, WeakReference<Properties>> mKnownInstances = [];
 
 	/// <exception cref="ArgumentNullException"><c><paramref name="sdl"/></c> is <c><see langword="null"/></c></exception>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -92,20 +92,25 @@ public sealed partial class Properties :
 	/// <inheritdoc cref="Properties(Sdl?, uint)"/>
 	public Properties(Sdl sdl) : this(ValidateSdl(sdl), ValidateId(SDL_CreateProperties()))
 	{
-		mKnownInstances.AddOrUpdate(mId, add, update, this);
+		mKnownInstances.AddOrUpdate(mId, addRef, updateRef, this);
 
-		static Properties add(uint id, Properties newProperties) => newProperties;
+		static WeakReference<Properties> addRef(uint id, Properties newProperties) => new(newProperties);
 
-		static Properties update(uint id, Properties previousProperties, Properties newProperties)
+		static WeakReference<Properties> updateRef(uint id, WeakReference<Properties> previousPropertiesRef, Properties newProperties)
 		{
-#pragma warning disable IDE0079
-#pragma warning disable CA1816
-			GC.SuppressFinalize(previousProperties);
-#pragma warning restore CA1816
-#pragma warning restore IDE0079
-			previousProperties.Dispose(deregister: true, forget: false);
+			if (previousPropertiesRef.TryGetTarget(out var previousProperties))
+			{
+	#pragma warning disable IDE0079
+	#pragma warning disable CA1816
+				GC.SuppressFinalize(previousProperties);
+	#pragma warning restore CA1816
+	#pragma warning restore IDE0079
+				previousProperties.Dispose(deregister: true, forget: false);
+			}
 
-			return newProperties;
+			previousPropertiesRef.SetTarget(newProperties);
+
+			return previousPropertiesRef;
 		}
 	}
 
@@ -123,7 +128,16 @@ public sealed partial class Properties :
 
 	internal static Properties GetOrCreate(Sdl? sdl, uint id)
 	{
-		return mKnownInstances.GetOrAdd(id, create, sdl);
+		var propertiesRef = mKnownInstances.GetOrAdd(id, createRef, sdl);
+
+		if (!propertiesRef.TryGetTarget(out var result))
+		{
+			propertiesRef.SetTarget(result = create(id, sdl));
+		}
+
+		return result;
+
+		static WeakReference<Properties> createRef(uint id, Sdl? sdl) => new(create(id, sdl));
 
 		static Properties create(uint id, Sdl? sdl) => new(sdl, id);
 	}

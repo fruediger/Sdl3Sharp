@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
-using System.Threading;
 
 namespace Sdl3Sharp.IO;
 

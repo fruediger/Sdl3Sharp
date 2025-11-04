@@ -52,5 +52,5 @@ partial class ReadOnlyMemoryStream
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_IOFromConstMem">SDL_IOFromConstMem</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial Stream.SDL_IOStream* SDL_IOFromConstMem(void* mem, nuint size);
+	internal unsafe static partial SDL_IOStream* SDL_IOFromConstMem(void* mem, nuint size);
 }

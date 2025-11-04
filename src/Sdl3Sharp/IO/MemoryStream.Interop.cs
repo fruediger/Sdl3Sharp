@@ -48,5 +48,5 @@ partial class MemoryStream
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_IOFromMem">SDL_IOFromMem</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial Stream.SDL_IOStream* SDL_IOFromMem(void* mem, nuint size);
+	internal unsafe static partial SDL_IOStream* SDL_IOFromMem(void* mem, nuint size);
 }

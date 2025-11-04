@@ -13,7 +13,7 @@ public sealed partial class FileStream : Stream
 	private interface IUnsafeConstructorDispatch;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	private static unsafe byte* Utf8Convert(string? str, out byte* strUtf8) => strUtf8 = Utf8StringMarshaller.ConvertToUnmanaged(str);
+	private unsafe static byte* Utf8Convert(string? str, out byte* strUtf8) => strUtf8 = Utf8StringMarshaller.ConvertToUnmanaged(str);
 
 	/// <exception cref="ArgumentException">The combination of <paramref name="access"/> and <paramref name="mode"/> is invalid</exception>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -45,7 +45,7 @@ public sealed partial class FileStream : Stream
 		static void failArgumentsInvalid() => throw new ArgumentException($"Invalid combination of values for the {nameof(access)}, {nameof(mode)}, and {nameof(kind)} arguments");
 	}
 
-	/// <exception cref="SdlException">The <see cref="FileStream"/> could not be created</exception>
+	/// <exception cref="SdlException">The <see cref="FileStream"/> could not be created (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	private unsafe FileStream(string fileName, string modeString, IUnsafeConstructorDispatch? _ = default) :
 		base(SDL_IOFromFile(Utf8Convert(fileName, out var fileNameUtf8), Utf8Convert(modeString, out var modeStringUtf8))) // base(SDL_IOStream*) does neither throw nor fail
 	{
@@ -53,7 +53,7 @@ public sealed partial class FileStream : Stream
 		{
 			if (Context is null)
 			{
-				failCouldNotCreateDynamicMemoryStream();
+				failCouldNotCreateFileStream();
 			}
 		}
 		finally
@@ -63,7 +63,7 @@ public sealed partial class FileStream : Stream
 		}
 
 		[DoesNotReturn]
-		static void failCouldNotCreateDynamicMemoryStream() => throw new SdlException($"Could not create the {nameof(FileStream)}");
+		static void failCouldNotCreateFileStream() => throw new SdlException($"Could not create the {nameof(FileStream)}");
 	}
 
 	/// <summary>
@@ -204,7 +204,7 @@ public sealed partial class FileStream : Stream
 		=> (access, mode) switch
 		{
 			(FileAccess.None,      _)                  => modeString = "",
-			(FileAccess.Read,      FileMode.Open)      => modeString = "r",			
+			(FileAccess.Read,      FileMode.Open)      => modeString = "r",
 			(FileAccess.Write,     FileMode.Create)    => modeString = "w",			
 			(FileAccess.Write,     FileMode.CreateNew) => modeString = "wx",
 			(FileAccess.Write,     FileMode.Append)    => modeString = "a",

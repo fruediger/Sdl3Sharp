@@ -107,5 +107,5 @@ partial class FileStream
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_IOFromFile">SDL_IOFromFile</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial Stream.SDL_IOStream* SDL_IOFromFile(byte* file, byte* mode);
+	internal unsafe static partial SDL_IOStream* SDL_IOFromFile(byte* file, byte* mode);
 }
