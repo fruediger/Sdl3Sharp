@@ -9,8 +9,6 @@ using unsafe SDL_IOStreamInterface_read = delegate* unmanaged[Cdecl]<void*, void
 using unsafe SDL_IOStreamInterface_write = delegate* unmanaged[Cdecl]<void*, void*, nuint, Sdl3Sharp.IO.StreamStatus*, nuint>;
 using unsafe SDL_IOStreamInterface_flush = delegate* unmanaged[Cdecl]<void*, Sdl3Sharp.IO.StreamStatus*, Sdl3Sharp.Internal.Interop.CBool>;
 using unsafe SDL_IOStreamInterface_close = delegate* unmanaged[Cdecl]<void*, Sdl3Sharp.Internal.Interop.CBool>;
-using System.Diagnostics.CodeAnalysis;
-using Sdl3Sharp.Utilities;
 
 namespace Sdl3Sharp.IO;
 
@@ -40,7 +38,7 @@ partial class Stream
 			SDL_IOStreamInterface_close close
 		)
 		{
-			this = default; // make sure we're zero'd
+			this = default; // make sure we're zeroed
 
 			Version = unchecked((uint)Unsafe.SizeOf<SDL_IOStreamInterface>());
 			Size = size;
@@ -51,8 +49,7 @@ partial class Stream
 			Close = close;
 		}
 
-		/// <exception cref="ArgumentNullException"><paramref name="implementation"/> is <c><see langword="null"/></c></exception>
-		public SDL_IOStreamInterface(IStream implementation, out GCHandle implementationHandle) : this(
+		public SDL_IOStreamInterface(Stream stream, out GCHandle streamHandle) : this(
 			&SizeImpl,
 			&SeekImpl,
 			&ReadImpl,
@@ -61,26 +58,15 @@ partial class Stream
 			&CloseImpl
 		)
 		{
-			if (implementation is null)
-			{
-				failImplementationArgumentNull();
-			}
-
-			implementationHandle = GCHandle.Alloc(implementation, GCHandleType.Normal);
-
-			[DoesNotReturn]
-			static void failImplementationArgumentNull() => throw new ArgumentNullException(nameof(implementation));
+			streamHandle = GCHandle.Alloc(stream, GCHandleType.Normal);
 		}
-
-		[ThreadStatic]
-		private static NativeMemoryManager? mMemoryManager;
 
 		[UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
 		private unsafe static long SizeImpl(void* userdata)
 		{
-			if (userdata is not null && GCHandle.FromIntPtr(unchecked((IntPtr)userdata)) is { IsAllocated: true, Target: IStream stream })
+			if (userdata is not null && GCHandle.FromIntPtr(unchecked((IntPtr)userdata)) is { IsAllocated: true, Target: Stream stream })
 			{
-				return stream.Length;
+				return stream.LengthCore;
 			}
 
 			return -1; // return -1 => error
@@ -89,9 +75,9 @@ partial class Stream
 		[UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
 		private unsafe static long SeekImpl(void* userdata, long offset, StreamWhence whence)
 		{
-			if (userdata is not null && GCHandle.FromIntPtr(unchecked((IntPtr)userdata)) is { IsAllocated: true, Target: IStream stream })
+			if (userdata is not null && GCHandle.FromIntPtr(unchecked((IntPtr)userdata)) is { IsAllocated: true, Target: Stream stream })
 			{
-				return stream.Seek(offset, whence);
+				return stream.SeekCore(offset, whence);
 			}
 
 			return -1; // return -1 => error
@@ -100,9 +86,9 @@ partial class Stream
 		[UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
 		private unsafe static nuint ReadImpl(void* userdata, void* ptr, nuint size, StreamStatus* status)
 		{
-			if (userdata is not null && GCHandle.FromIntPtr(unchecked((IntPtr)userdata)) is { IsAllocated: true, Target: IStream stream })
+			if (userdata is not null && GCHandle.FromIntPtr(unchecked((IntPtr)userdata)) is { IsAllocated: true, Target: Stream stream })
 			{
-				return stream.Read(new Utilities.NativeMemory(ptr, size), ref Unsafe.AsRef<StreamStatus>(status));
+				return stream.ReadCore(new Utilities.NativeMemory(ptr, size), ref Unsafe.AsRef<StreamStatus>(status));
 			}
 
 			*status = StreamStatus.Error;
@@ -113,9 +99,9 @@ partial class Stream
 		[UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
 		private unsafe static nuint WriteImpl(void* userdata, void* ptr, nuint size, StreamStatus* status)
 		{
-			if (userdata is not null && GCHandle.FromIntPtr(unchecked((IntPtr)userdata)) is { IsAllocated: true, Target: IStream stream })
+			if (userdata is not null && GCHandle.FromIntPtr(unchecked((IntPtr)userdata)) is { IsAllocated: true, Target: Stream stream })
 			{
-				return stream.Write(new Utilities.NativeMemory(ptr, size), ref Unsafe.AsRef<StreamStatus>(status));
+				return stream.WriteCore(new Utilities.NativeMemory(ptr, size), ref Unsafe.AsRef<StreamStatus>(status));
 			}
 
 			*status = StreamStatus.Error;
@@ -126,9 +112,9 @@ partial class Stream
 		[UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
 		private unsafe static CBool FlushImpl(void* userdata, StreamStatus* status)
 		{
-			if (userdata is not null && GCHandle.FromIntPtr(unchecked((IntPtr)userdata)) is { IsAllocated: true, Target: IStream stream })
+			if (userdata is not null && GCHandle.FromIntPtr(unchecked((IntPtr)userdata)) is { IsAllocated: true, Target: Stream stream })
 			{
-				return stream.Flush(ref Unsafe.AsRef<StreamStatus>(status));
+				return stream.FlushCore(ref Unsafe.AsRef<StreamStatus>(status));
 			}
 
 			*status = StreamStatus.Error;
@@ -139,9 +125,9 @@ partial class Stream
 		[UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
 		private unsafe static CBool CloseImpl(void* userdata)
 		{
-			if (userdata is not null && GCHandle.FromIntPtr(unchecked((IntPtr)userdata)) is { IsAllocated: true, Target: IStream stream })
+			if (userdata is not null && GCHandle.FromIntPtr(unchecked((IntPtr)userdata)) is { IsAllocated: true, Target: Stream stream })
 			{
-				return stream.Close();
+				return stream.CloseCore();
 			}
 
 			return false; // return false => error

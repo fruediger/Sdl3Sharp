@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Sdl3Sharp.Utilities;
+using System;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.Marshalling;
@@ -51,7 +53,7 @@ public sealed partial class FileStream : Stream
 	{
 		try
 		{
-			if (Context is null)
+			if (Pointer is null)
 			{
 				failCouldNotCreateFileStream();
 			}
@@ -119,6 +121,76 @@ public sealed partial class FileStream : Stream
 	/// <inheritdoc cref="ValidateMode(FileAccess, FileMode, FileKind)"/>
 	public FileStream(string fileName, FileAccess access, FileMode mode, FileKind kind) : this(fileName, ValidateMode(access, mode, kind))
 	{ }
+
+	/// <summary>Calls to this property are not supported</summary>
+	/// <value>Not supported</value>
+	/// <exception cref="NotSupportedException">always</exception>
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Obsolete("Calls to this property are not supported. This property will always throw an exception. Use the Length property instead.")]
+#pragma warning disable CS0809
+	protected sealed override long LengthCore
+#pragma warning restore CS0809
+	{
+		[DoesNotReturn]
+		get => throw new NotSupportedException("Calls to this property are not supported.");
+	}
+
+	/// <summary>Calls to this method are not supported</summary>
+	/// <param name="offset">Not supported</param>
+	/// <param name="whence">Not supported</param>
+	/// <returns>Not supported</returns>
+	/// <exception cref="NotSupportedException">always</exception>	
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Obsolete("Calls to this method are not supported. This method will always throw an exception. Use the TrySeek(long, StreamWhence, out long) method instead.")]
+	[DoesNotReturn]
+#pragma warning disable CS0809
+	protected sealed override long SeekCore(long offset, StreamWhence whence) => throw new NotSupportedException("Calls to this method are not supported.");
+#pragma warning restore CS0809
+
+	/// <summary>Calls to this method are not supported</summary>
+	/// <param name="data">Not supported</param>
+	/// <param name="status">Not supported</param>
+	/// <returns>Not supported</returns>
+	/// <exception cref="NotSupportedException">always</exception>	
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Obsolete("Calls to this method are not supported. This method will always throw an exception. Use the TryRead(NativeMemory, out nuint) method instead.")]
+	[DoesNotReturn]
+#pragma warning disable CS0809
+	protected sealed override nuint ReadCore(NativeMemory data, ref StreamStatus status) => throw new NotSupportedException("Calls to this method are not supported.");
+#pragma warning restore CS0809
+
+	/// <summary>Calls to this method are not supported</summary>
+	/// <param name="data">Not supported</param>
+	/// <param name="status">Not supported</param>
+	/// <returns>Not supported</returns>
+	/// <exception cref="NotSupportedException">always</exception>	
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Obsolete("Calls to this method are not supported. This method will always throw an exception. Use the TryWrite(ReadOnlyNativeMemory, out nuint) method instead.")]
+	[DoesNotReturn]
+#pragma warning disable CS0809
+	protected sealed override nuint WriteCore(ReadOnlyNativeMemory data, ref StreamStatus status) => throw new NotSupportedException("Calls to this method are not supported.");
+#pragma warning restore CS0809
+
+	/// <summary>Calls to this method are not supported</summary>
+	/// <param name="status">Not supported</param>
+	/// <returns>Not supported</returns>
+	/// <exception cref="NotSupportedException">always</exception>	
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Obsolete("Calls to this method are not supported. This method will always throw an exception. Use the TryFlush() method instead.")]
+	[DoesNotReturn]
+#pragma warning disable CS0809
+	protected sealed override bool FlushCore(ref StreamStatus status) => throw new NotSupportedException("Calls to this method are not supported.");
+#pragma warning restore CS0809
+
+	/// <summary>Calls to this method are not supported</summary>
+	/// <returns>Not supported</returns>
+	/// <exception cref="NotSupportedException">always</exception>	
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Obsolete("Calls to this method are not supported. This method will always throw an exception. Use the TryClose() method instead.")]
+	[DoesNotReturn]
+#pragma warning disable CS0809
+	protected sealed override bool CloseCore() => throw new NotSupportedException("Calls to this method are not supported.");
+#pragma warning restore CS0809
 
 	/// <summary>
 	/// Gets the pointer to the Android NDK <c>AAsset</c> that the <see cref="FileStream"/> is using to access the filesystem

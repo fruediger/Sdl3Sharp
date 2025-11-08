@@ -11,10 +11,10 @@ namespace Sdl3Sharp.IO;
 /// <summary>
 /// A base stream for reading and writing data
 /// </summary>
-public partial class Stream : IDisposable
+public abstract partial class Stream : IDisposable
 {
 	private unsafe SDL_IOStream* mContext = null;
-	private GCHandle mImplementationHandle = default;
+	private GCHandle mSelfHandle = default;
 
 	/// <remarks>
 	/// <para>
@@ -24,23 +24,20 @@ public partial class Stream : IDisposable
 	private protected unsafe Stream(SDL_IOStream* context) => mContext = context;
 
 	/// <summary>
-	/// Creates a new <see cref="Stream"/> instance that uses a specified custom implementation
+	/// Creates a new <see cref="Stream"/> instance that uses a custom IO implementation provided by the derived class
 	/// </summary>
-	/// <param name="implementation">The custom implementation to use</param>
-	/// <exception cref="SdlException">The custom IO stream could not be created</exception>
-	/// <inheritdoc cref="SDL_IOStreamInterface(IStream, out GCHandle)"/>
-	public Stream(IStream implementation)
+	/// <exception cref="SdlException">The custom IO stream could not be created (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
+	protected Stream()
 	{
 		unsafe
 		{
-			var iface = new SDL_IOStreamInterface(implementation, out mImplementationHandle);
-
-			mContext = SDL_OpenIO(&iface, unchecked((void*)GCHandle.ToIntPtr(mImplementationHandle)));
+			var iface = new SDL_IOStreamInterface(this, out mSelfHandle);
+			mContext = SDL_OpenIO(&iface, unchecked((void*)GCHandle.ToIntPtr(mSelfHandle)));
 
 			if (mContext is null)
 			{
-				mImplementationHandle.Free();
-				mImplementationHandle = default;				
+				mSelfHandle.Free();
+				mSelfHandle = default;				
 
 				failCouldNotCreateStream();
 			}
@@ -53,7 +50,78 @@ public partial class Stream : IDisposable
 	/// <inheritdoc/>
 	~Stream() => Dispose(disposing: false, close: true);
 
-	private protected unsafe SDL_IOStream* Context { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mContext; }
+	/// <summary>
+	/// Gets the total length, in bytes, of the stream
+	/// </summary>
+	/// <value>
+	/// The total length, in bytes, of the stream, or <c>-1</c> on failure
+	/// </value>
+	/// <seealso cref="Length"/>
+	protected abstract long LengthCore { get; }
+
+	/// <summary>
+	/// Seeks within the stream
+	/// </summary>
+	/// <param name="offset">The offset to seek to</param>
+	/// <param name="whence">The reference point for the seek operation</param>
+	/// <returns>The absolute offset from the start of the stream after seeking, or <c>-1</c> on failure</returns>
+	/// <seealso cref="TrySeek(long, StreamWhence, out long)"/>
+	protected abstract long SeekCore(long offset, StreamWhence whence);
+
+	/// <summary>
+	/// Reads into specified data from the stream
+	/// </summary>
+	/// <param name="data">The <see cref="Utilities.NativeMemory">memory buffer</see> to read data into</param>
+	/// <param name="status">
+	/// The <see cref="StreamStatus"/> of the stream.
+	/// The value of the referenced <see cref="StreamStatus"/> could change on failure and should not necessarily change on success.
+	/// </param>
+	/// <returns>The number of bytes read from the stream</returns>
+	/// <seealso cref="TryRead(Utilities.NativeMemory, out nuint)"/>
+	protected abstract nuint ReadCore(Utilities.NativeMemory data, ref StreamStatus status);
+
+	/// <summary>
+	/// Writes all specified data into the stream
+	/// </summary>
+	/// <param name="data">The <see cref="ReadOnlyNativeMemory">memory buffer</see> containing all the data to be written into the stream</param>
+	/// <param name="status">
+	/// The <see cref="StreamStatus"/> of the stream.
+	/// The value of the referenced <see cref="StreamStatus"/> could change on failure and should not necessarily change on success.
+	/// </param>
+	/// <returns>The number of bytes read from the stream</returns>
+	/// <seealso cref="TryWrite(ReadOnlyNativeMemory, out nuint)"/>
+	protected abstract nuint WriteCore(ReadOnlyNativeMemory data, ref StreamStatus status);
+
+	/// <summary>
+	/// Flushes any buffered data in the stream
+	/// </summary>
+	/// <param name="status">
+	/// The <see cref="StreamStatus"/> of the stream.
+	/// The value of the referenced <see cref="StreamStatus"/> could change on failure and should not necessarily change on success.
+	/// </param>
+	/// <returns><c><see langword="true"/></c> if the flush was successful; otherwise, <c><see langword="false"/></c></returns>
+	/// <seealso cref="TryFlush"/>
+	protected abstract bool FlushCore(ref StreamStatus status);
+
+	/// <summary>
+	/// Closes the stream and release associated resources
+	/// </summary>
+	/// <returns><c><see langword="true"/></c> if the stream was closed successfully; otherwise, <c><see langword="false"/></c></returns>
+	/// <seealso cref="TryClose"/>
+	protected abstract bool CloseCore();
+
+	/// <summary>
+	/// Gets a value indicating whether the <see cref="Stream"/> is valid
+	/// </summary>
+	/// <value>
+	/// A value indicating whether the <see cref="Stream"/> is valid
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// A <see cref="Stream"/> becomes invalid after it has been <see cref="TryClose">closed</see> or <see cref="Dispose()">disposed</see>.
+	/// </para>
+	/// </remarks>
+	public bool IsValid { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get { unsafe { return mContext is not null; } } }
 
 	/// <summary>
 	/// Gets the length of the stream, in bytes
@@ -75,7 +143,9 @@ public partial class Stream : IDisposable
 				return SDL_GetIOSize(mContext);
 			}
 		}
-	}
+	}	
+
+	private protected unsafe SDL_IOStream* Pointer { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mContext; }
 
 	/// <summary>
 	/// Get the properties associated with the stream
@@ -127,6 +197,14 @@ public partial class Stream : IDisposable
 			}
 		}
 	}
+
+	/// <summary>
+	/// Gets a pointer to the underlying SDL <c>SDL_IOStream</c> that the <see cref="Stream"/> represents
+	/// </summary>
+	/// <value>
+	/// A pointer to the underlying SDL <c>SDL_IOStream</c> that the <see cref="Stream"/> represents. This can be cast to a SDL <c>SDL_IOStream*</c>.
+	/// </value>
+	public IntPtr SdlIOStream { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get { unsafe { return unchecked((IntPtr)mContext); } } }
 
 	/// <summary>
 	/// Gets the current status of the stream
@@ -189,20 +267,21 @@ public partial class Stream : IDisposable
 				mContext = null;
 			}
 
-			if (mImplementationHandle.IsAllocated)
+			if (mSelfHandle.IsAllocated)
 			{
-				mImplementationHandle.Free();
+				mSelfHandle.Free();
+				mSelfHandle = default;
 			}
 		}
 	}
 
 	/// <summary>
-	/// Tries to close the stream and release associated resources
+	/// Tries to close the stream and releases associated resources
 	/// </summary>
-	/// <returns><c><see langword="true"/></c> if the stream was closed successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <returns><c><see langword="true"/></c> if the stream was closed without failure; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
 	/// <remarks>
 	/// <para>
-	/// Note: this method returns <c><see langword="false"/></c> if the stream couldn't be <see cref="TryFlush">flushed</see> successfully before closing. The stream is still invalid when this method returns.
+	/// Note: this method returns <c><see langword="false"/></c> if the stream couldn't be <see cref="TryFlush">flushed</see> successfully before closing. The stream is still <see cref="IsValid">invalid</see> when this method returns.
 	/// </para>
 	/// <para>
 	/// A call to this method flushes any buffered writes to the operating system, but there are no guarantees that those writes have gone to physical media; they might be in the OS's file cache, waiting to go to disk later.
@@ -217,7 +296,17 @@ public partial class Stream : IDisposable
 	{
 		unsafe
 		{
-			return SDL_CloseIO(mContext);
+			bool result = SDL_CloseIO(mContext);
+
+			mContext = null;
+			
+			if (mSelfHandle.IsAllocated)
+			{
+				mSelfHandle.Free();
+				mSelfHandle = default;
+			}
+
+			return result;
 		}
 	}
 

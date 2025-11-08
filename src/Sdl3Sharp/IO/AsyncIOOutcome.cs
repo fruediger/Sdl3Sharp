@@ -220,7 +220,7 @@ public sealed partial class AsyncIOOutcome : IDisposable
 				gcHandle.Free();
 			}
 
-			Utilities.NativeMemory.Free(mOutcome.Buffer);
+			Utilities.NativeMemory.SDL_free(mOutcome.Buffer);
 
 			mOutcome = default;
 		}

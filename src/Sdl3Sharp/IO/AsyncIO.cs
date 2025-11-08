@@ -35,24 +35,11 @@ public sealed partial class AsyncIO : IDisposable
 		static void failArgumentsInvalid() => throw new ArgumentException($"Invalid combination of values for the {nameof(access)} and {nameof(mode)} arguments");
 	}
 
-	/// <exception cref="ArgumentNullException"><paramref name="queue"/> is <c><see langword="null"/></c></exception>
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	private static void ValidateQueue([NotNull] AsyncIOQueue queue)
+	private unsafe SDL_AsyncIO* mAsyncIO;
+
+	private unsafe AsyncIO(SDL_AsyncIO* asyncIO, AsyncIOQueue? closeOnDisposeQueue, bool closeOnDisposeFlush, IUnsafeConstructorDispatch? _ = default)
 	{
-		if (queue is null)
-		{
-			failQueueArgumentNull();
-		}
-
-		[DoesNotReturn]
-		static void failQueueArgumentNull() => throw new ArgumentNullException(nameof(queue));
-	}
-
-	private unsafe SDL_AsyncIO* mPtr;
-
-	private unsafe AsyncIO(SDL_AsyncIO* ptr, AsyncIOQueue? closeOnDisposeQueue, bool closeOnDisposeFlush, IUnsafeConstructorDispatch? _ = default)
-	{
-		mPtr = ptr;
+		mAsyncIO = asyncIO;
 		CloseOnDisposeQueue = closeOnDisposeQueue;
 		CloseOnDisposeFlush = closeOnDisposeFlush;
 	}
@@ -90,9 +77,9 @@ public sealed partial class AsyncIO : IDisposable
 	{
 		try
 		{
-			if (mPtr is null)
+			if (mAsyncIO is null)
 			{
-				failCouldNotAsyncIO();
+				failCouldNotCreateAsyncIO();
 			}
 		}
 		finally
@@ -102,7 +89,7 @@ public sealed partial class AsyncIO : IDisposable
 		}
 
 		[DoesNotReturn]
-		static void failCouldNotAsyncIO() => throw new SdlException($"Could not create the {nameof(AsyncIO)}");
+		static void failCouldNotCreateAsyncIO() => throw new SdlException($"Could not create the {nameof(AsyncIO)}");
 	}
 
 	/// <summary>
@@ -218,10 +205,10 @@ public sealed partial class AsyncIO : IDisposable
 	/// </value>
 	/// <remarks>
 	/// <para>
-	/// An <see cref="AsyncIO"/> becomes invalid after it has been <see cref="TryClose(bool, AsyncIOQueue, object?)">closed</see>.
+	/// An <see cref="AsyncIO"/> becomes invalid after it has been <see cref="TryClose(bool, AsyncIOQueue, object?)">closed</see> or <see cref="Dispose()">disposed</see>.
 	/// </para>
 	/// </remarks>
-	public bool IsValid { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get { unsafe { return mPtr is not null; } } }
+	public bool IsValid { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get { unsafe { return mAsyncIO is not null; } } }
 
 	/// <summary>
 	/// Gets the length, in bytes, of the underlying data stream
@@ -234,9 +221,17 @@ public sealed partial class AsyncIO : IDisposable
 	/// Obtaining the length of the underlying data stream is <em>not</em> an asynchronous operation under the assumption that it is non-blocking in most reasonable scenarios.
 	/// </para>
 	/// </remarks>
-	public long Length { get { unsafe { return SDL_GetAsyncIOSize(mPtr); } } }
+	public long Length { get { unsafe { return SDL_GetAsyncIOSize(mAsyncIO); } } }
 
-	internal unsafe SDL_AsyncIO* Pointer { get => mPtr; }
+	internal unsafe SDL_AsyncIO* Pointer { get => mAsyncIO; }
+
+	/// <summary>
+	/// Gets a pointer to the underlying SDL <c>SDL_AsyncIO</c> that the <see cref="AsyncIO"/> represents 
+	/// </summary>
+	/// <value>
+	/// A pointer to the underlying SDL <c>SDL_AsyncIO</c> that the <see cref="AsyncIO"/> represents. This can be cast to a SDL <c>SDL_AsyncIO*</c>.
+	/// </value>
+	public IntPtr SdlAsyncIO { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get { unsafe { return unchecked((IntPtr)mAsyncIO); } } }
 
 	/// <summary>
 	/// Disposes the <see cref="AsyncIO"/> and potentially <see cref="TryClose(bool, AsyncIOQueue, object?)">closes</see> it asynchronously
@@ -255,7 +250,7 @@ public sealed partial class AsyncIO : IDisposable
 
 	private unsafe void Dispose(bool forget)
 	{
-		if (mPtr is not null)
+		if (mAsyncIO is not null)
 		{
 			if (CloseOnDisposeQueue is not null)
 			{
@@ -267,10 +262,10 @@ public sealed partial class AsyncIO : IDisposable
 
 			if (forget)
 			{
-				mKnownInstances.TryRemove(unchecked((IntPtr)mPtr), out _);
+				mKnownInstances.TryRemove(unchecked((IntPtr)mAsyncIO), out _);
 			}
 
-			mPtr = null;
+			mAsyncIO = null;
 		}
 	}
 
@@ -329,23 +324,18 @@ public sealed partial class AsyncIO : IDisposable
 	/// The newly created asynchronous closing operation will be added to the specified <paramref name="queue"/>.
 	/// </para>
 	/// </remarks>
-	/// <inheritdoc cref="Validate"/>
-	/// <inheritdoc cref="ValidateQueue(AsyncIOQueue)"/>
 	public bool TryClose(bool flush, AsyncIOQueue queue, object? userdata = null)
 	{
 		unsafe
 		{
-			Validate();
-			ValidateQueue(queue);
-
 			var managed = new AsyncIOOutcome.Managed { AsyncIO = this, Userdata = userdata };
 			var gcHandle = GCHandle.Alloc(managed, GCHandleType.Normal);
 
-			bool result = SDL_CloseAsyncIO(mPtr, flush, queue.Pointer, unchecked((void*)GCHandle.ToIntPtr(gcHandle)));
+			bool result = SDL_CloseAsyncIO(mAsyncIO, flush, queue is not null ? queue.Pointer : null, unchecked((void*)GCHandle.ToIntPtr(gcHandle)));
 
 			if (result)
 			{
-				mPtr = null;
+				mAsyncIO = null;
 				CloseOnDisposeQueue = null;
 				CloseOnDisposeUserdata = null;
 
@@ -412,15 +402,10 @@ public sealed partial class AsyncIO : IDisposable
 	/// The newly created asynchronous reading operation will be added to the specified <paramref name="queue"/>.
 	/// </para>
 	/// </remarks>
-	/// <inheritdoc cref="Validate"/>
-	/// <inheritdoc cref="ValidateQueue(AsyncIOQueue)"/>
 	public bool TryRead(Utilities.NativeMemory data, ulong offset, AsyncIOQueue queue, object? userdata = null)
 	{
 		unsafe
-		{	
-			Validate();
-			ValidateQueue(queue);
-
+		{
 			if (!data.IsValid)
 			{
 				return false;
@@ -430,7 +415,7 @@ public sealed partial class AsyncIO : IDisposable
 			var managed = new AsyncIOOutcome.Managed { AsyncIO = this, NativeMemoryPin = pin, Userdata = userdata };
 			var gcHandle = GCHandle.Alloc(managed, GCHandleType.Normal);
 
-			bool result = SDL_ReadAsyncIO(mPtr, data.RawPointer, offset, data.Length, queue.Pointer, unchecked((void*)GCHandle.ToIntPtr(gcHandle)));
+			bool result = SDL_ReadAsyncIO(mAsyncIO, data.RawPointer, offset, data.Length, queue is not null ? queue.Pointer : null, unchecked((void*)GCHandle.ToIntPtr(gcHandle)));
 
 			if (!result)
 			{
@@ -475,20 +460,15 @@ public sealed partial class AsyncIO : IDisposable
 	/// The newly created asynchronous reading operation will be added to the specified <paramref name="queue"/>.
 	/// </para>
 	/// </remarks>
-	/// <inheritdoc cref="Validate"/>
-	/// <inheritdoc cref="ValidateQueue(AsyncIOQueue)"/>
 	public bool TryRead(Memory<byte> data, ulong offset, AsyncIOQueue queue, object? userdata = null)
 	{
 		unsafe
 		{
-			Validate();
-			ValidateQueue(queue);
-
 			var memHandle = data.Pin();
 			var managed = new AsyncIOOutcome.Managed { AsyncIO = this, MemoryHandle = memHandle, Userdata = userdata };
 			var gcHandle = GCHandle.Alloc(managed, GCHandleType.Normal);
 
-			bool result = SDL_ReadAsyncIO(mPtr, memHandle.Pointer, offset, unchecked((ulong)data.Length), queue.Pointer, unchecked((void*)GCHandle.ToIntPtr(gcHandle)));
+			bool result = SDL_ReadAsyncIO(mAsyncIO, memHandle.Pointer, offset, unchecked((ulong)data.Length), queue is not null ? queue.Pointer : null, unchecked((void*)GCHandle.ToIntPtr(gcHandle)));
 
 			if (!result)
 			{
@@ -534,17 +514,12 @@ public sealed partial class AsyncIO : IDisposable
 	/// The newly created asynchronous reading operation will be added to the specified <paramref name="queue"/>.
 	/// </para>
 	/// </remarks>
-	/// <inheritdoc cref="Validate"/>
-	/// <inheritdoc cref="ValidateQueue(AsyncIOQueue)"/>
 	public unsafe bool TryRead(void* data, ulong offset, ulong size, AsyncIOQueue queue, object? userdata = null)
 	{
-		Validate();
-		ValidateQueue(queue);
-
 		var managed = new AsyncIOOutcome.Managed { AsyncIO = this, Userdata = userdata };
 		var gcHandle = GCHandle.Alloc(managed, GCHandleType.Normal);
 
-		bool result = SDL_ReadAsyncIO(mPtr, data, offset, size, queue.Pointer, unchecked((void*)GCHandle.ToIntPtr(gcHandle)));
+		bool result = SDL_ReadAsyncIO(mAsyncIO, data, offset, size, queue is not null ? queue.Pointer : null, unchecked((void*)GCHandle.ToIntPtr(gcHandle)));
 
 		if (!result)
 		{
@@ -596,14 +571,9 @@ public sealed partial class AsyncIO : IDisposable
 	/// The newly created asynchronous closing operation will be added to the specified <paramref name="queue"/>.
 	/// </para>
 	/// </remarks>
-	/// <inheritdoc cref="Validate"/>
-	/// <inheritdoc cref="ValidateQueue(AsyncIOQueue)"/>
 	public unsafe bool TryUnsafeClose(bool flush, AsyncIOQueue queue, void* userdata = null)
 	{
-		Validate();
-		ValidateQueue(queue);
-
-		return SDL_CloseAsyncIO(mPtr, flush, queue.Pointer, userdata);
+		return SDL_CloseAsyncIO(mAsyncIO, flush, queue is not null ? queue.Pointer : null, userdata);
 	}
 
 	/// <summary>
@@ -634,14 +604,9 @@ public sealed partial class AsyncIO : IDisposable
 	/// The newly created asynchronous reading operation will be added to the specified <paramref name="queue"/>.
 	/// </para>
 	/// </remarks>
-	/// <inheritdoc cref="Validate"/>
-	/// <inheritdoc cref="ValidateQueue(AsyncIOQueue)"/>
 	public unsafe bool TryUnsafeRead(void* data, ulong offset, ulong size, AsyncIOQueue queue, void* userdata = null)
 	{
-		Validate();
-		ValidateQueue(queue);
-
-		return SDL_ReadAsyncIO(mPtr, data, offset, size, queue.Pointer, userdata);
+		return SDL_ReadAsyncIO(mAsyncIO, data, offset, size, queue is not null ? queue.Pointer : null, userdata);
 	}
 
 	/// <summary>
@@ -672,14 +637,9 @@ public sealed partial class AsyncIO : IDisposable
 	/// The newly created asynchronous writing operation will be added to the specified <paramref name="queue"/>.
 	/// </para>
 	/// </remarks>
-	/// <inheritdoc cref="Validate"/>
-	/// <inheritdoc cref="ValidateQueue(AsyncIOQueue)"/>
 	public unsafe bool TryUnsafeWrite(void* data, ulong offset, ulong size, AsyncIOQueue queue, void* userdata = null)
 	{
-		Validate();
-		ValidateQueue(queue);
-
-		return SDL_WriteAsyncIO(mPtr, data, offset, size, queue.Pointer, userdata);
+		return SDL_WriteAsyncIO(mAsyncIO, data, offset, size, queue is not null ? queue.Pointer : null, userdata);
 	}
 
 	/// <summary>
@@ -706,15 +666,10 @@ public sealed partial class AsyncIO : IDisposable
 	/// The newly created asynchronous writing operation will be added to the specified <paramref name="queue"/>.
 	/// </para>
 	/// </remarks>
-	/// <inheritdoc cref="Validate"/>
-	/// <inheritdoc cref="ValidateQueue(AsyncIOQueue)"/>
 	public bool TryWrite(ReadOnlyNativeMemory data, ulong offset, AsyncIOQueue queue, object? userdata = null)
 	{
 		unsafe
 		{
-			Validate();
-			ValidateQueue(queue);
-
 			if (!data.IsValid)
 			{
 				return false;
@@ -723,7 +678,7 @@ public sealed partial class AsyncIO : IDisposable
 			var managed = new AsyncIOOutcome.Managed { AsyncIO = this, NativeMemoryPin = data.Pin(), Userdata = userdata };
 			var gcHandle = GCHandle.Alloc(managed, GCHandleType.Normal);
 
-			bool result = SDL_WriteAsyncIO(mPtr, data.RawPointer, offset, data.Length, queue.Pointer, unchecked((void*)GCHandle.ToIntPtr(gcHandle)));
+			bool result = SDL_WriteAsyncIO(mAsyncIO, data.RawPointer, offset, data.Length, queue is not null ? queue.Pointer : null, unchecked((void*)GCHandle.ToIntPtr(gcHandle)));
 
 			if (!result)
 			{
@@ -768,20 +723,15 @@ public sealed partial class AsyncIO : IDisposable
 	/// The newly created asynchronous writing operation will be added to the specified <paramref name="queue"/>.
 	/// </para>
 	/// </remarks>
-	/// <inheritdoc cref="Validate"/>
-	/// <inheritdoc cref="ValidateQueue(AsyncIOQueue)"/>
 	public bool TryWrite(ReadOnlyMemory<byte> data, ulong offset, AsyncIOQueue queue, object? userdata = null)
 	{
 		unsafe
 		{
-			Validate();
-			ValidateQueue(queue);
-
 			var memHandle = data.Pin();
 			var managed = new AsyncIOOutcome.Managed { AsyncIO = this, MemoryHandle = memHandle, Userdata = userdata };
 			var gcHandle = GCHandle.Alloc(managed, GCHandleType.Normal);
 
-			bool result = SDL_WriteAsyncIO(mPtr, memHandle.Pointer, offset, unchecked((ulong)data.Length), queue.Pointer, unchecked((void*)GCHandle.ToIntPtr(gcHandle)));
+			bool result = SDL_WriteAsyncIO(mAsyncIO, memHandle.Pointer, offset, unchecked((ulong)data.Length), queue is not null ? queue.Pointer : null, unchecked((void*)GCHandle.ToIntPtr(gcHandle)));
 
 			if (!result)
 			{
@@ -827,17 +777,12 @@ public sealed partial class AsyncIO : IDisposable
 	/// The newly created asynchronous writing operation will be added to the specified <paramref name="queue"/>.
 	/// </para>
 	/// </remarks>
-	/// <inheritdoc cref="Validate"/>
-	/// <inheritdoc cref="ValidateQueue(AsyncIOQueue)"/>
 	public unsafe bool TryWrite(void* data, ulong offset, ulong size, AsyncIOQueue queue, object? userdata = null)
 	{
-		Validate();
-		ValidateQueue(queue);
-
 		var managed = new AsyncIOOutcome.Managed { AsyncIO = this, Userdata = userdata };
 		var gcHandle = GCHandle.Alloc(managed, GCHandleType.Normal);
 
-		bool result = SDL_WriteAsyncIO(mPtr, data, offset, size, queue.Pointer, unchecked((void*)GCHandle.ToIntPtr(gcHandle)));
+		bool result = SDL_WriteAsyncIO(mAsyncIO, data, offset, size, queue is not null ? queue.Pointer : null, unchecked((void*)GCHandle.ToIntPtr(gcHandle)));
 
 		if (!result)
 		{
@@ -849,19 +794,5 @@ public sealed partial class AsyncIO : IDisposable
 		}
 
 		return true;
-	}
-
-	/// <exception cref="InvalidOperationException">The <see cref="AsyncIO"/> is invalid</exception>
-	[MemberNotNull(nameof(mPtr))]
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	private unsafe void Validate()
-	{
-		if (mPtr is null)
-		{
-			failAsyncIOInvalid();
-		}
-
-		[DoesNotReturn]
-		static void failAsyncIOInvalid() => throw new InvalidOperationException(message: $"{nameof(AsyncIO)} is invalid");
 	}
 }

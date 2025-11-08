@@ -1,6 +1,7 @@
 ﻿using Sdl3Sharp.Utilities;
 using System;
 using System.Buffers;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -139,6 +140,76 @@ public sealed partial class ReadOnlyMemoryStream : Stream
 	{
 		FreeFunc = freeFunc;
 	}
+
+	/// <summary>Calls to this property are not supported</summary>
+	/// <value>Not supported</value>
+	/// <exception cref="NotSupportedException">always</exception>
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Obsolete("Calls to this property are not supported. This property will always throw an exception. Use the Length property instead.")]
+#pragma warning disable CS0809
+	protected sealed override long LengthCore
+#pragma warning restore CS0809
+	{
+		[DoesNotReturn]
+		get => throw new NotSupportedException("Calls to this property are not supported.");
+	}
+
+	/// <summary>Calls to this method are not supported</summary>
+	/// <param name="offset">Not supported</param>
+	/// <param name="whence">Not supported</param>
+	/// <returns>Not supported</returns>
+	/// <exception cref="NotSupportedException">always</exception>	
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Obsolete("Calls to this method are not supported. This method will always throw an exception. Use the TrySeek(long, StreamWhence, out long) method instead.")]
+	[DoesNotReturn]
+#pragma warning disable CS0809
+	protected sealed override long SeekCore(long offset, StreamWhence whence) => throw new NotSupportedException("Calls to this method are not supported.");
+#pragma warning restore CS0809
+
+	/// <summary>Calls to this method are not supported</summary>
+	/// <param name="data">Not supported</param>
+	/// <param name="status">Not supported</param>
+	/// <returns>Not supported</returns>
+	/// <exception cref="NotSupportedException">always</exception>	
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Obsolete("Calls to this method are not supported. This method will always throw an exception. Use the TryRead(NativeMemory, out nuint) method instead.")]
+	[DoesNotReturn]
+#pragma warning disable CS0809
+	protected sealed override nuint ReadCore(Utilities.NativeMemory data, ref StreamStatus status) => throw new NotSupportedException("Calls to this method are not supported.");
+#pragma warning restore CS0809
+
+	/// <summary>Calls to this method are not supported</summary>
+	/// <param name="data">Not supported</param>
+	/// <param name="status">Not supported</param>
+	/// <returns>Not supported</returns>
+	/// <exception cref="NotSupportedException">always</exception>	
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Obsolete("Calls to this method are not supported. This method will always throw an exception. Use the TryWrite(ReadOnlyNativeMemory, out nuint) method instead.")]
+	[DoesNotReturn]
+#pragma warning disable CS0809
+	protected sealed override nuint WriteCore(ReadOnlyNativeMemory data, ref StreamStatus status) => throw new NotSupportedException("Calls to this method are not supported.");
+#pragma warning restore CS0809
+
+	/// <summary>Calls to this method are not supported</summary>
+	/// <param name="status">Not supported</param>
+	/// <returns>Not supported</returns>
+	/// <exception cref="NotSupportedException">always</exception>	
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Obsolete("Calls to this method are not supported. This method will always throw an exception. Use the TryFlush() method instead.")]
+	[DoesNotReturn]
+#pragma warning disable CS0809
+	protected sealed override bool FlushCore(ref StreamStatus status) => throw new NotSupportedException("Calls to this method are not supported.");
+#pragma warning restore CS0809
+
+	/// <summary>Calls to this method are not supported</summary>
+	/// <returns>Not supported</returns>
+	/// <exception cref="NotSupportedException">always</exception>	
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Obsolete("Calls to this method are not supported. This method will always throw an exception. Use the TryClose() method instead.")]
+	[DoesNotReturn]
+#pragma warning disable CS0809
+	protected sealed override bool CloseCore() => throw new NotSupportedException("Calls to this method are not supported.");
+#pragma warning restore CS0809
 
 	/// <summary>
 	/// Gets a pointer to the memory buffer that the <see cref="ReadOnlyMemoryStream"/> was initialized with
