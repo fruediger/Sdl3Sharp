@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>        
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
 
         <PackageId>Sdl3Sharp</PackageId>
         <VersionPrefix>0.0.1</VersionPrefix>
@@ -15,7 +15,7 @@
 
         <!-- -->
 
-        <Sdl3SharpFfiVersion>0.5.0-alpha2</Sdl3SharpFfiVersion>
+        <Sdl3SharpFfiVersion>0.5.0-alpha3</Sdl3SharpFfiVersion>
     </PropertyGroup>
 
     <ItemGroup>
