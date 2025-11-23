@@ -157,7 +157,7 @@ public readonly partial struct PixelFormatDetails : IFormattable, ISpanFormattab
 	/// <em>not</em> (<c>0xf8</c>, <c>0xfc</c>, <c>0xf8</c>)).
 	/// </para>
 	/// </remarks>
-	public readonly void GetRgb(uint pixelValue, Palette? palette, out byte r, out byte g, out byte b)
+	public readonly void GetColor(uint pixelValue, Palette? palette, out byte r, out byte g, out byte b)
 	{
 		unsafe
 		{
@@ -188,7 +188,7 @@ public readonly partial struct PixelFormatDetails : IFormattable, ISpanFormattab
 	/// If the surface has no alpha component, the alpha component value will be returned as <c>0xff</c> (fully opaque).
 	/// </para>
 	/// </remarks>
-	public readonly void GetRgba(uint pixelValue, Palette? palette, out byte r, out byte g, out byte b, out byte a)
+	public readonly void GetColor(uint pixelValue, Palette? palette, out byte r, out byte g, out byte b, out byte a)
 	{
 		unsafe
 		{
@@ -198,6 +198,28 @@ public readonly partial struct PixelFormatDetails : IFormattable, ISpanFormattab
 
 			r = rTmp; g = gTmp; b = bTmp; a = aTmp;
 		}
+	}
+
+	/// <summary>
+	/// Gets a <see cref="Color{T}">Color</see>&lt;<see cref="byte"/>&gt; from an encoded pixel value
+	/// </summary>
+	/// <param name="pixelValue">An an encoded pixel value in the pixel format of this <see cref="PixelFormatDetails"/></param>
+	/// <param name="palette">An optional <see cref="Palette"/> to use for indexed pixel formats</param>
+	/// <param name="color">The <see cref="Color{T}">Color</see>&lt;<see cref="byte"/>&gt; of the encoded pixel value</param>
+	/// <remarks>
+	/// <para>
+	/// This method uses the entire 8-bit (<c>0</c>-<c>255</c>) range when converting color components from pixel formats with less than 8-bits per RGB component
+	/// (e.g., a completely white pixel in 16-bit <see cref="PixelFormat.Rgb565"/> format would return (<see cref="Color{T}.R"/>, <see cref="Color{T}.G"/>, <see cref="Color{T}.B"/>) = (<c>0xff</c>, <c>0xff</c>, <c>0xff</c>),
+	/// <em>not</em> (<c>0xf8</c>, <c>0xfc</c>, <c>0xf8</c>)).
+	/// </para>
+	/// <para>
+	/// If the surface has no alpha component, the <see cref="Color.A"/> value will be returned as <c>0xff</c> (fully opaque).
+	/// </para>
+	/// </remarks>
+	public readonly void GetColor(uint pixelValue, Palette? palette, out Color<byte> color)
+	{
+		GetColor(pixelValue, palette, out var r, out var g, out var b, out var a);
+		color = new(r, g, b, a);
 	}
 
 	/// <summary>
@@ -223,7 +245,7 @@ public readonly partial struct PixelFormatDetails : IFormattable, ISpanFormattab
 	/// (e.g., with a 16-bits per pixel format the returned encoded pixel value can be safely cast (truncated) to an <see cref="ushort"/> value, and similarly to a <see cref="byte"/> value for an 8-bits per pixel formats).
 	/// </para>
 	/// </remarks>
-	public readonly uint MapRgb(Palette? palette, byte r, byte g, byte b)
+	public readonly uint MapColor(Palette? palette, byte r, byte g, byte b)
 	{
 		unsafe
 		{
@@ -255,13 +277,36 @@ public readonly partial struct PixelFormatDetails : IFormattable, ISpanFormattab
 	/// (e.g., with a 16-bits per pixel format the returned encoded pixel value can be safely cast (truncated) to an <see cref="ushort"/> value, and similarly to a <see cref="byte"/> value for an 8-bits per pixel formats).
 	/// </para>
 	/// </remarks>
-	public readonly uint MapRgba(Palette? palette, byte r, byte g, byte b, byte a)
+	public readonly uint MapColor(Palette? palette, byte r, byte g, byte b, byte a)
 	{
 		unsafe
 		{
 			return SDL_MapRGBA(mFormat, palette is not null ? palette.Pointer : null, r, g, b, a);
 		}
 	}
+
+	/// <summary>
+	/// Maps a <see cref="Color{T}">Color</see>&lt;<see cref="byte"/>&gt; to an encoded pixel value
+	/// </summary>
+	/// <param name="palette">An optional <see cref="Palette"/> to use for indexed pixel formats</param>
+	/// <param name="color">The <see cref="Color{T}">Color</see>&lt;<see cref="byte"/>&gt; to encoded</param>
+	/// <returns>An encoded pixel value in the pixel format of this <see cref="PixelFormatDetails"/></returns>
+	/// <remarks>
+	/// <para>
+	/// This method maps the <see cref="Color{T}">Color</see>&lt;<see cref="byte"/>&gt; to the specified pixel format and returns the encoded pixel value best approximating the given <see cref="Color{T}">Color</see>&lt;<see cref="byte"/>&gt; for the pixel format.
+	/// </para>
+	/// <para>
+	/// If the pixel format is indexed and uses a <see cref="Palette"/> the index of the closest matching color in the palette will be returned.
+	/// </para>
+	/// <para>
+	/// If the pixel format has no alpha component, the given alpha component value will be ignored (as it will be in indexed formats with a <see cref="Palette"/>).
+	/// </para>
+	/// <para>
+	/// If the pixel format's <see cref="BitsPerPixel">bits-per-pixel</see> value (color depth) is less than 32-bits per pixel then the unused upper bits of the returned encoded pixel value can safely be ignored
+	/// (e.g., with a 16-bits per pixel format the returned encoded pixel value can be safely cast (truncated) to an <see cref="ushort"/> value, and similarly to a <see cref="byte"/> value for an 8-bits per pixel formats).
+	/// </para>
+	/// </remarks>
+	public readonly uint MapColor(Palette? palette, Color<byte> color) => MapColor(palette, color.R, color.G, color.B, color.A);
 
 	/// <inheritdoc/>
 	public readonly override string ToString() => ToString(format: default, formatProvider: default);

@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -13,6 +14,26 @@ namespace Sdl3Sharp.Video.Coloring;
 /// </summary>
 public static class Color
 {
+	/// <summary>
+	/// A fully opaque alpha component value as a <see cref="byte"/>
+	/// </summary>
+	public const byte OpaqueAlphaByte = 255;
+
+	/// <summary>
+	/// A fully opaque alpha component value as a <see cref="float"/>
+	/// </summary>
+	public const float OpaqueAlphaFloat = 1.0f;
+
+	/// <summary>
+	/// A fully transparent alpha component value as a <see cref="byte"/>
+	/// </summary>
+	public const byte TransparentAlphaByte = 0;
+	
+	/// <summary>
+	/// A fully transparent alpha component value as a <see cref="float"/>
+	/// </summary>
+	public const float TransparentAlphaFloat = 0.0f;
+	
 	/// <summary>
 	/// Creates a new <see cref="Color{T}">Color</see>&lt;<see cref="byte"/>&gt; value from the specified red, green, blue and alpha component values as <see cref="byte"/> values
 	/// </summary>
@@ -37,7 +58,7 @@ public static class Color
 	/// </para>
 	/// </remarks>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static Color<byte> From(byte r, byte g, byte b) => From(r, g, b, 255);
+	public static Color<byte> From(byte r, byte g, byte b) => From(r, g, b, OpaqueAlphaByte);
 
 	/// <summary>
 	/// Creates a new <see cref="Color{T}">Color</see>&lt;<see cref="byte"/>&gt; value from a specified <see cref="byte"/> value
@@ -88,7 +109,7 @@ public static class Color
 	/// </para>
 	/// </remarks>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static Color<float> From(float r, float g, float b) => From(r, g, b, 1);
+	public static Color<float> From(float r, float g, float b) => From(r, g, b, OpaqueAlphaFloat);
 
 	/// <summary>
 	/// Creates a new <see cref="Color{T}">Color</see>&lt;<see cref="byte"/>&gt; value from a specified <see cref="float"/> value
@@ -140,7 +161,7 @@ public readonly struct Color<T>(in T r, in T g, in T b, in T a) :
 		unmanaged, IEquatable<T>, IFormattable, ISpanFormattable, IEqualityOperators<T, T, bool>
 {	
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private readonly string DebuggerDisplay => ToString();
+	private readonly string DebuggerDisplay => ToString(formatProvider: CultureInfo.InvariantCulture);
 
 	private readonly T mR = r, mG = g, mB = b, mA = a;
 
@@ -288,4 +309,20 @@ public readonly struct Color<T>(in T r, in T g, in T b, in T a) :
 	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	static bool IEqualityOperators<Color<T>, Color<T>, bool>.operator !=(Color<T> left, Color<T> right) => left != right;
+
+	/// <summary>
+	/// Converts a tuple of red, green, blue and alpha component values to a color
+	/// </summary>
+	/// <param name="rgba">The tuple to convert</param>
+	/// <returns>A color with the specified red, green, blue and alpha component values</returns>
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	public static implicit operator Color<T>(in (T R, T G, T B, T A) rgba) => new(in rgba.R, in rgba.G, in rgba.B, rgba.A);
+
+	/// <summary>
+	/// Converts a color to a tuple of its red, green, blue and alpha component values
+	/// </summary>
+	/// <param name="color">The color to convert</param>
+	/// <returns>A tuple containing the red, green, blue and alpha component values of the color</returns>
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	public static implicit operator (T R, T G, T B, T A)(in Color<T> color) => (color.mR, color.mG, color.mB, color.mA);
 }

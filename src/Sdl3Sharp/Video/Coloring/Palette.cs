@@ -1,5 +1,6 @@
 ﻿using Sdl3Sharp.Internal;
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -14,10 +15,54 @@ namespace Sdl3Sharp.Video.Coloring;
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 public sealed partial class Palette : IDisposable, IFormattable, ISpanFormattable
 {
+	private interface IUnsafeConstructorDispatch;
+
+	private static readonly ConcurrentDictionary<IntPtr, WeakReference<Palette>> mKnownInstances = [];
+
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private string DebuggerDisplay => ToString(formatProvider: CultureInfo.InvariantCulture);
 
 	private unsafe SDL_Palette* mPalette;
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	private unsafe Palette(SDL_Palette* palette) => mPalette = palette;
+
+	private unsafe Palette(SDL_Palette* palette, IUnsafeConstructorDispatch? _ = default)
+	{
+		mKnownInstances.AddOrUpdate(unchecked((IntPtr)palette), addRef, updateRef, this);
+
+		static WeakReference<Palette> addRef(IntPtr palette, Palette newPalette) => new(newPalette);
+
+		static WeakReference<Palette> updateRef(IntPtr palette, WeakReference<Palette> previousPaletteRef, Palette newPalette)
+		{
+			if (previousPaletteRef.TryGetTarget(out var previousPalette))
+			{
+#pragma warning disable IDE0079
+#pragma warning disable CA1816
+				GC.SuppressFinalize(previousPalette);
+#pragma warning restore CA1816
+#pragma warning restore IDE0079
+				previousPalette.Dispose(forget: false);
+			}
+
+			previousPaletteRef.SetTarget(newPalette);
+
+			return previousPaletteRef;
+		}
+	}
+
+	/// <exception cref="SdlException">Couldn't create the <see cref="Palette"/> (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
+	private unsafe Palette(int length, IUnsafeConstructorDispatch? _ = default) :
+		this(SDL_CreatePalette(length))
+	{
+		if (mPalette is null)
+		{
+			failCouldNotCreatePalette();
+		}
+
+		[DoesNotReturn]
+		static void failCouldNotCreatePalette() => throw new SdlException("Could not create the palette");
+	}
 
 	/// <summary>
 	/// Creates a new <see cref="Palette"/> with a specified number of colors
@@ -28,25 +73,14 @@ public sealed partial class Palette : IDisposable, IFormattable, ISpanFormattabl
 	/// All palette entries are initialized to be fully white and fully opaque. Use <see cref="TrySetColors(ReadOnlySpan{Color{byte}}, int)"/> to change the colors in the palette.
 	/// </para>
 	/// </remarks>
-	/// <exception cref="SdlException">Couldn't create the <see cref="Palette"/> (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
-	public Palette(int length)
-	{
-		unsafe
-		{
-			mPalette = SDL_CreatePalette(length);
-
-			if (mPalette is null)
-			{
-				failCouldNotCreatePalette();
-			}
-		}
-			
-		[DoesNotReturn]
-		static void failCouldNotCreatePalette() => throw new SdlException("Could not create the palette");
-	}
+	public Palette(int length) :
+#pragma warning disable IDE0034 // Keep it that way for explicitness sake
+		this(length, default(IUnsafeConstructorDispatch?))
+#pragma warning restore
+	{ }
 
 	/// <inheritdoc/>
-	~Palette() => DisposeImpl();
+	~Palette() => Dispose(forget: true);
 
 	/// <summary>
 	/// Gets the colors in the palette
@@ -70,7 +104,7 @@ public sealed partial class Palette : IDisposable, IFormattable, ISpanFormattabl
 		}
 	}
 
-	internal unsafe SDL_Palette* Pointer { get => mPalette; }
+	internal unsafe SDL_Palette* Pointer { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mPalette; }
 
 	/// <inheritdoc/>
 	/// <remarks>
@@ -80,21 +114,39 @@ public sealed partial class Palette : IDisposable, IFormattable, ISpanFormattabl
 	/// </remarks>
 	public void Dispose()
 	{
-		DisposeImpl();
 		GC.SuppressFinalize(this);
+		Dispose(forget: true);
 	}
 
-	private void DisposeImpl()
+	private unsafe void Dispose(bool forget)
 	{
-		unsafe
+		if (mPalette is not null)
 		{
-			if (mPalette is not null)
+			if (forget)
 			{
-				SDL_DestroyPalette(mPalette);
-
-				mPalette = null;
+				mKnownInstances.TryRemove(unchecked((IntPtr)mPalette), out _);
 			}
+
+			SDL_DestroyPalette(mPalette);
+
+			mPalette = null;
 		}
+	}
+
+	internal unsafe static Palette GetOrCreate(SDL_Palette* palette)
+	{
+		var paletteRef = mKnownInstances.GetOrAdd(unchecked((IntPtr)palette), createRef);
+
+		if (!paletteRef.TryGetTarget(out var result))
+		{
+			paletteRef.SetTarget(result = create(palette));
+		}
+
+		return result;
+
+		static WeakReference<Palette> createRef(IntPtr palette) => new(create(unchecked((SDL_Palette*)palette)));
+
+		static Palette create(SDL_Palette* palette) => new(palette);
 	}
 
 	/// <inheritdoc/>
