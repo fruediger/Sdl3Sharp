@@ -3817,7 +3817,7 @@ partial struct Hint
 	/// </para>
 	/// <para>
 	/// There are other string values that have special meaning.
-	/// If set to <c>"waitevent"</c>, <see cref="AppBase.OnIterate(Sdl)"/> will not be called until new event(s) have arrived (and been processed by <see cref="AppBase.OnEvent(Sdl, ref EventsNew.Event)"/>).
+	/// If set to <c>"waitevent"</c>, <see cref="AppBase.OnIterate(Sdl)"/> will not be called until new event(s) have arrived (and been processed by <see cref="AppBase.OnEvent(Sdl, ref Events.Event)"/>).
 	/// This can be useful for apps that are completely idle except in response to input.
 	/// </para>
 	/// <para>
