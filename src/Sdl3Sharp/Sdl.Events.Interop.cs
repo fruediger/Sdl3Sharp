@@ -15,7 +15,7 @@ partial class Sdl
     {
         if (userdata is not null && GCHandle.FromIntPtr(unchecked((IntPtr)userdata)) is { IsAllocated: true, Target: EventFilter filter })
         {
-            return filter(new(ref Unsafe.AsRef<Event>(@event)));
+            return filter(ref Unsafe.AsRef<Event>(@event));
         }
 
         return true; // default to true (a.k.a. keep the event)
@@ -26,7 +26,7 @@ partial class Sdl
     {
         if (userdata is not null && GCHandle.FromIntPtr(unchecked((IntPtr)userdata)) is { IsAllocated: true, Target: EventWatch watch })
         {
-            watch(new(ref Unsafe.AsRef<Event>(@event)));
+            watch(ref Unsafe.AsRef<Event>(@event));
         }
 
         return true; // always return true, since the return doesn't matter anyways

@@ -14,8 +14,8 @@ namespace Sdl3Sharp.Windowing;
 /// the operating system will not ever attempt to change the text externally if it doesn't support a primary selection.
 /// </para>
 /// <para>
-/// For interaction with the primary selection to be available, the <see cref="SubSystem.Video"/> sub system must be initialized
-/// (either while <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing it on its own</see>).
+/// For interaction with the primary selection to be available, the <see cref="SubSystems.Video"/> sub system must be initialized
+/// (either while <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(Sdl3Sharp.SubSystems)">initializing it on its own</see>).
 /// </para>
 /// </remarks>
 public static partial class PrimarySelection

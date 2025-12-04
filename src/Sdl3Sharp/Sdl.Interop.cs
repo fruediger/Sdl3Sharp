@@ -143,7 +143,7 @@ partial class Sdl
     /// </remarks>
     /// <seealso href="https://wiki.libsdl.org/SDL3/SDL_Init">SDL_Init</seealso>
     [NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-    internal static partial CBool SDL_Init(InitFlags flags);
+    internal static partial CBool SDL_Init(SubSystems flags);
 
     /// <summary>
     /// Clean up all initialized subsystems
@@ -253,7 +253,7 @@ partial class Sdl
     /// <returns>Returns a mask of all initialized subsystems if <c><paramref name="flags"/></c> is 0, otherwise it returns the initialization status of the specified subsystems</returns>
     /// <seealso href="https://wiki.libsdl.org/SDL3/SDL_WasInit">SDL_WasInit</seealso>
     [NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-    internal static partial InitFlags SDL_WasInit(InitFlags flags);
+    internal static partial SubSystems SDL_WasInit(SubSystems flags);
 
     private unsafe int RunImpl(AppBase app, int argc, byte** argv)
     {
@@ -284,7 +284,7 @@ partial class Sdl
             {
                 try
                 {
-                    return app.OnEventInternal(sdl, new(ref Unsafe.AsRef<Event>(@event)));
+                    return app.OnEventInternal(sdl, ref Unsafe.AsRef<Event>(@event));
                 }
                 catch
                 {

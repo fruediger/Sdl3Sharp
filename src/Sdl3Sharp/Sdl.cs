@@ -1,4 +1,5 @@
 ﻿using Sdl3Sharp.Internal;
+using Sdl3Sharp.IO;
 using Sdl3Sharp.Utilities;
 using System;
 using System.Collections.Generic;
@@ -40,13 +41,13 @@ public sealed partial class Sdl : IDisposable
 	/// There can be only a single instance of <see cref="Sdl"/> at a time! Trying to create another one, while one already exist, results in an <see cref="InvalidOperationException"/>.
 	/// </para>
 	/// <para>
-	/// The file I/O (for example: <see cref="SDL_IOFromFile"/>) and threading (<see cref="SDL_CreateThread"/>) subsystems are initialized by default.
-	/// Message boxes (<see cref="MessageBox.TryShowSimple(MessageBoxFlags, string, string, Windowing.Window?)"/> and <see cref="MessageBox.TryShow(out int)"/>) also attempt to work without initializing the <see cref="SubSystem.Video">video subsystem</see>,
+	/// The file I/O (for example: <see cref="FileStream"/>) and threading (<see cref="SDL_CreateThread"/>) subsystems are initialized by default.
+	/// Message boxes (<see cref="MessageBox.TryShowSimple(MessageBoxFlags, string, string, Windowing.Window?)"/> and <see cref="MessageBox.TryShow(out int)"/>) also attempt to work without initializing the <see cref="SubSystems.Video">video sub system</see>,
 	/// in hopes of being useful in showing an error dialog even before SDL initializes correclty.
 	/// Logging (such as <see cref="Log.Info(string)"/>) works without initialization, too.
 	/// </para>
 	/// <para>
-	/// You must specifically initialize other subsystems (either by using <see cref="Builder.InitializeSubSystems(SubSystemSet)"/> or by using <see cref="InitializeSubSystems(SubSystemSet)"/>), if you use them in your application.
+	/// You must specifically initialize other subsystems (either by using <see cref="Builder.InitializeSubSystems(SubSystems)"/> or by using <see cref="InitializeSubSystems(SubSystems)"/>), if you use them in your application.
 	/// </para>
 	/// <para>
 	/// Consider reporting some basic metadata about your application inside the <paramref name="buildAction"/>, by using one of the <c>*SetMetadata</c> methods.
@@ -74,11 +75,11 @@ public sealed partial class Sdl : IDisposable
 			mLifetimeState = LifetimeState.Initializing;
 			mRunningApp = null;
 
-			var subSystems = SubSystemSet.Empty;
+			var subSystems = SubSystems.None;
 
 			buildAction?.Invoke(new(this, ref subSystems));
 
-			if (!SDL_Init(subSystems.InitFlags))
+			if (!SDL_Init(subSystems))
 			{
 				mLifetimeState = LifetimeState.Disposed;
 				mSdlExists = false;
@@ -285,19 +286,36 @@ public sealed partial class Sdl : IDisposable
 	}
 
 	/// <summary>
-	/// Gets a <see cref="SubSystemSet"/> containing the currently initialized <see cref="SubSystem"/>s
+	/// Gets a mask of currently initialized <see cref="SubSystems"/>
 	/// </summary>
-	/// <param name="subSystems"></param>
+	/// <param name="subSystems">The <see cref="SubSystems"/> to check for</param>
 	/// <returns>
-	/// A <see cref="SubSystemSet"/> containing all of the currently initialized <see cref="SubSystem"/>s, if <paramref name="subSystems"/> is empty;
-	/// otherwise, a <see cref="SubSystemSet"/> containing the currently initialized <see cref="SubSystem"/>s of the ones specified in <paramref name="subSystems"/>
+	/// A <see cref="SubSystems"/> representing all of the currently initialized <see cref="SubSystems"/>, if <paramref name="subSystems"/> is <see cref="SubSystems.None"/>;
+	/// otherwise, a <see cref="SubSystems"/> representing the currently initialized <see cref="SubSystems"/> from the ones specified in the given <paramref name="subSystems"/>
 	/// </returns>
 	/// <remarks>
-	/// If you want to check the initialization state for just a single <see cref="SubSystem"/>, you can use the <see cref="SubSystem.IsInitialized"/> property on your <see cref="SubSystem"/> instance instead
+	/// <para>
+	/// If you just want to check the initialization state <see cref="SubSystems"/>, you can use the <see cref="SubSystemsExtensions.get_IsInitialized(SubSystems)"/> extension property.
+	/// </para>
 	/// </remarks>
 #pragma warning disable IDE0079
 #pragma warning disable CA1822 // this is intentionally an instance method
-	public SubSystemSet GetInitializedSubSystems(params SubSystemSet subSystems) => new(SDL_WasInit(subSystems.InitFlags));
+	public SubSystems GetInitializedSubSystems(SubSystems subSystems) => SDL_WasInit(subSystems);
+#pragma warning restore CA1822
+#pragma warning restore IDE0079
+
+	/// <summary>
+	/// Gets the currently initialized <see cref="SubSystems"/>
+	/// </summary>
+	/// <returns>A <see cref="SubSystems"/> representing all of the currently initialized <see cref="SubSystems"/></returns>
+	/// <remarks>
+	/// <para>
+	/// If you just want to check the initialization state <see cref="SubSystems"/>, you can use the <see cref="SubSystemsExtensions.get_IsInitialized(SubSystems)"/> extension property.
+	/// </para>
+	/// </remarks>
+#pragma warning disable IDE0079
+#pragma warning disable CA1822 // this is intentionally an instance method
+	public SubSystems GetInitializedSubSystems() => SDL_WasInit(SubSystems.None);
 #pragma warning restore CA1822
 #pragma warning restore IDE0079
 
@@ -336,17 +354,17 @@ public sealed partial class Sdl : IDisposable
 	}
 
 	/// <summary>
-	/// Initializes certain <see cref="SubSystem">sub systems</see>
+	/// Initializes certain <see cref="SubSystems">sub systems</see>
 	/// </summary>
-	/// <param name="subSystems">A set of <see cref="SubSystem">sub systems</see> to initialize</param>
+	/// <param name="subSystems"><see cref="SubSystems">Sub systems</see> to initialize</param>
 	/// <returns>A <see cref="SubSystemInit"/> that handles the lifetime of the sub systems</returns>
 	/// <remarks>
 	/// <para>
-	/// <see cref="SubSystem"/>s are reference counted through <see cref="SubSystemInit"/>s.
+	/// <see cref="SubSystems"/> are reference counted through <see cref="SubSystemInit"/>s.
 	/// This method increases the reference count for the <paramref name="subSystems"/>.
 	/// </para>
 	/// <para>
-	/// A <see cref="SubSystem"/> can get shut down through <see cref="SubSystemInit.Dispose()"/> or <see cref="Dispose"/>.
+	/// <see cref="SubSystems"/> can get shut down through <see cref="SubSystemInit.Dispose()"/> or <see cref="Dispose"/>.
 	/// </para>
 	/// <para>
 	/// In contrast to most of the remaining API which uses the <c>Try</c>-method pattern, this method intentionally fails by throwing an exception.
@@ -354,8 +372,8 @@ public sealed partial class Sdl : IDisposable
 	/// and check <see cref="Error.TryGet(out string?)"/> for more information when <c><see langword="catch"/></c>ing a <see cref="SdlException"/>.
 	/// </para>
 	/// </remarks>
-	/// <inheritdoc cref="SubSystemInit(Sdl, SubSystemSet)"/>
-	public SubSystemInit InitializeSubSystems(params SubSystemSet subSystems) => new(this, subSystems);
+	/// <inheritdoc cref="SubSystemInit(Sdl, SubSystems)"/>
+	public SubSystemInit InitializeSubSystems(SubSystems subSystems) => new(this, subSystems);
 
 	/// <param name="app">The <see cref="AppBase"/> to execute</param>
 	/// <param name="args">A collection of arguments to pass to <see cref="AppBase.OnInitialize(Sdl, string[])"/></param>

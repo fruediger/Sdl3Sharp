@@ -1,8 +1,4 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
-
-/*
+﻿/*
 namespace Sdl3Sharp.Threading;
 
 //TODO: make this a reference type

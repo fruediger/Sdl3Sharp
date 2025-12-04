@@ -7,70 +7,55 @@ partial class Sdl
 {
 	private void DisposeEventHandlers()
 	{
-		if (mDidEnterBackgroundHandler is not null)
-		{
-			mDidEnterBackgroundHandler.Dispose();
-			mDidEnterBackgroundHandler = null;
-		}
+		mDidEnterBackgroundHandler?.Dispose();
+		mDidEnterBackgroundHandler = null;
 
-		if (mDidEnterForegroundHandler is not null)
-		{
-			mDidEnterForegroundHandler.Dispose();
-			mDidEnterForegroundHandler = null;
-		}
+		mDidEnterForegroundHandler?.Dispose();
+		mDidEnterForegroundHandler = null;
 
-		if (mLocaleChangedHandler is not null)
-		{
-			mLocaleChangedHandler.Dispose();
-			mLocaleChangedHandler = null;
-		}
+		mLocaleChangedHandler?.Dispose();
+		mLocaleChangedHandler = null;
 
-		if (mLowMemoryHandler is not null)
-		{
-			mLowMemoryHandler.Dispose();
-			mLowMemoryHandler = null;
-		}
+		mLowMemoryHandler?.Dispose();
+		mLowMemoryHandler = null;
 
-		if (mQuitHandler is not null)
-		{
-			mQuitHandler.Dispose();
-			mQuitHandler = null;
-		}
+		mQuitHandler?.Dispose();
+		mQuitHandler = null;
 
-		if (mSystemThemeChangedHandler is not null)
-		{
-			mSystemThemeChangedHandler.Dispose();
-			mSystemThemeChangedHandler = null;
-		}
+		mSystemThemeChangedHandler?.Dispose();
+		mSystemThemeChangedHandler = null;
 
-		if (mTerminatingHandler is not null)
-		{
-			mTerminatingHandler.Dispose();
-			mTerminatingHandler = null;
-		}
-		
-		if (mWillEnterBackgroundHandler is not null)
-		{
-			mWillEnterBackgroundHandler.Dispose();
-			mWillEnterBackgroundHandler = null;
-		}
+		mTerminatingHandler?.Dispose();
+		mTerminatingHandler = null;
 
-		if (mWillEnterForegroundHandler is not null)
-		{
-			mWillEnterForegroundHandler.Dispose();
-			mWillEnterForegroundHandler = null;
-		}
+		mWillEnterBackgroundHandler?.Dispose();
+		mWillEnterBackgroundHandler = null;
+
+		mWillEnterForegroundHandler?.Dispose();
+		mWillEnterForegroundHandler = null;
 	}
 
-	private EventWatchHandlerWithEventHandler<Sdl, Event>? mDidEnterBackgroundHandler = null;
+	private EventWatchHandler<Sdl, Event>? mDidEnterBackgroundHandler = null;
 
-	public event ReadOnlyEventHandler<Sdl, Event>? DidEnterBackground
+	/// <summary>
+	/// Occurs when the application has entered the background
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// The application may not get any CPU for some time.
+	/// </para>
+	/// <para>
+	/// Raised on iOS in <c>applicationDidEnterBackground()</c>.
+	/// Raised on Android in <c>onPause()</c>.
+	/// </para>
+	/// </remarks>
+	public event EventHandler<Sdl, Event>? DidEnterBackground
 	{
 		add
 		{
 			if (value is not null)
 			{
-				(mDidEnterBackgroundHandler ??= new(this, EventType.Application.DidEnterBackground)).EventHandler += value;
+				(mDidEnterBackgroundHandler ??= new(this, EventType.DidEnterBackground)).EventHandler += value;
 			}
 		}
 
@@ -84,15 +69,27 @@ partial class Sdl
 		}
 	}
 
-	private EventWatchHandlerWithEventHandler<Sdl, Event>? mDidEnterForegroundHandler = null;
+	private EventWatchHandler<Sdl, Event>? mDidEnterForegroundHandler = null;
 
-	public event ReadOnlyEventHandler<Sdl, Event>? DidEnterForeground
+	/// <summary>
+	/// Occurs when the application has entered the foreground
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// The application is now interactive.
+	/// </para>
+	/// <para>
+	/// Raised on iOS in <c>applicationDidBecomeActive()</c>.
+	/// Raised on Android in <c>onResume()</c>.
+	/// </para>
+	/// </remarks>
+	public event EventHandler<Sdl, Event>? DidEnterForeground
 	{
 		add
 		{
 			if (value is not null)
 			{
-				(mDidEnterForegroundHandler ??= new(this, EventType.Application.DidEnterForeground)).EventHandler += value;
+				(mDidEnterForegroundHandler ??= new(this, EventType.DidEnterForeground)).EventHandler += value;
 			}
 		}
 
@@ -106,15 +103,18 @@ partial class Sdl
 		}
 	}
 
-	private EventWatchHandlerWithEventHandler<Sdl, Event>? mLocaleChangedHandler = null;
+	private EventWatchHandler<Sdl, Event>? mLocaleChangedHandler = null;
 
-	public event ReadOnlyEventHandler<Sdl, Event>? LocaleChanged
+	/// <summary>
+	/// Occurs when the user's locale preferences have changed
+	/// </summary>
+	public event EventHandler<Sdl, Event>? LocaleChanged
 	{
 		add
 		{
 			if (value is not null)
 			{
-				(mLocaleChangedHandler ??= new(this, EventType.Application.LocaleChanged)).EventHandler += value;
+				(mLocaleChangedHandler ??= new(this, EventType.LocaleChanged)).EventHandler += value;
 			}
 		}
 
@@ -128,15 +128,27 @@ partial class Sdl
 		}
 	}
 
-	private EventWatchHandlerWithEventHandler<Sdl, Event>? mLowMemoryHandler = null;
+	private EventWatchHandler<Sdl, Event>? mLowMemoryHandler = null;
 
-	public event ReadOnlyEventHandler<Sdl, Event>? LowMemory
+	/// <summary>
+	/// Occurs when the application is running low on memory
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// Free some memory if possible.
+	/// </para>
+	/// <para>
+	/// Raised on iOS in <c>applicationDidReceiveMemoryWarning()</c>.
+	/// Raised on Android in <c>onTrimMemory()</c>.
+	/// </para>
+	/// </remarks>
+	public event EventHandler<Sdl, Event>? LowMemory
 	{
 		add
 		{
 			if (value is not null)
 			{
-				(mLowMemoryHandler ??= new(this, EventType.Application.LowMemory)).EventHandler += value;
+				(mLowMemoryHandler ??= new(this, EventType.LowMemory)).EventHandler += value;
 			}
 		}
 
@@ -150,15 +162,18 @@ partial class Sdl
 		}
 	}
 
-	private EventWatchHandlerWithEventHandler<Sdl, QuitEvent>? mQuitHandler = null;
+	private EventWatchHandler<Sdl, QuitEvent>? mQuitHandler = null;
 
-	public event ReadOnlyEventHandler<Sdl, QuitEvent>? Quit
+	/// <summary>
+	/// Occurs when the application "requests" to quit
+	/// </summary>
+	public event EventHandler<Sdl, QuitEvent>? Quit
 	{
 		add
 		{
 			if (value is not null)
 			{
-				(mQuitHandler ??= new(this, EventType.Application.Quit)).EventHandler += value;
+				(mQuitHandler ??= new(this, EventType.Quit)).EventHandler += value;
 			}
 		}
 
@@ -172,15 +187,18 @@ partial class Sdl
 		}
 	}
 
-	private EventWatchHandlerWithEventHandler<Sdl, Event>? mSystemThemeChangedHandler = null;
+	private EventWatchHandler<Sdl, Event>? mSystemThemeChangedHandler = null;
 
-	public event ReadOnlyEventHandler<Sdl, Event>? SystemThemeChanged
+	/// <summary>
+	/// Occurs when the system theme has changed
+	/// </summary>
+	public event EventHandler<Sdl, Event>? SystemThemeChanged
 	{
 		add
 		{
 			if (value is not null)
 			{
-				(mSystemThemeChangedHandler ??= new(this, EventType.Application.SystemThemeChanged)).EventHandler += value;
+				(mSystemThemeChangedHandler ??= new(this, EventType.SystemThemeChanged)).EventHandler += value;
 			}
 		}
 
@@ -194,15 +212,24 @@ partial class Sdl
 		}
 	}
 
-	private EventWatchHandlerWithEventHandler<Sdl, Event>? mTerminatingHandler = null;
+	private EventWatchHandler<Sdl, Event>? mTerminatingHandler = null;
 
-	public event ReadOnlyEventHandler<Sdl, Event>? Terminating
+	/// <summary>
+	/// Occurs when the application is being terminated by the OS
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// Raised on iOS in <c>applicationWillTerminate()</c>.
+	/// Raised on Android in <c>onDestroy()</c>.
+	/// </para>
+	/// </remarks>
+	public event EventHandler<Sdl, Event>? Terminating
 	{
 		add
 		{
 			if (value is not null)
 			{
-				(mTerminatingHandler ??= new(this, EventType.Application.Terminating)).EventHandler += value;
+				(mTerminatingHandler ??= new(this, EventType.Terminating)).EventHandler += value;
 			}
 		}
 
@@ -216,15 +243,24 @@ partial class Sdl
 		}
 	}
 
-	private EventWatchHandlerWithEventHandler<Sdl, Event>? mWillEnterBackgroundHandler = null;
+	private EventWatchHandler<Sdl, Event>? mWillEnterBackgroundHandler = null;
 
-	public event ReadOnlyEventHandler<Sdl, Event>? WillEnterBackground
+	/// <summary>
+	/// Occurs when the application is about to enter the background
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// Raised on iOS in <c>applicationWillResignActive()</c>.
+	/// Raised on Android in <c>onPause()</c>.
+	/// </para>
+	/// </remarks>
+	public event EventHandler<Sdl, Event>? WillEnterBackground
 	{
 		add
 		{
 			if (value is not null)
 			{
-				(mWillEnterBackgroundHandler ??= new(this, EventType.Application.WillEnterBackground)).EventHandler += value;
+				(mWillEnterBackgroundHandler ??= new(this, EventType.WillEnterBackground)).EventHandler += value;
 			}
 		}
 
@@ -238,15 +274,24 @@ partial class Sdl
 		}
 	}
 
-	private EventWatchHandlerWithEventHandler<Sdl, Event>? mWillEnterForegroundHandler = null;
+	private EventWatchHandler<Sdl, Event>? mWillEnterForegroundHandler = null;
 
-	public event ReadOnlyEventHandler<Sdl, Event>? WillEnterForeground
+	/// <summary>
+	/// Occurs when the application is about to enter the foreground
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// Raised on iOS in <c>applicationWillEnterForeground()</c>.
+	/// Raised on Android in <c>onResume()</c>.
+	/// </para>
+	/// </remarks>
+	public event EventHandler<Sdl, Event>? WillEnterForeground
 	{
 		add
 		{
 			if (value is not null)
 			{
-				(mWillEnterForegroundHandler ??= new(this, EventType.Application.WillEnterForeground)).EventHandler += value;
+				(mWillEnterForegroundHandler ??= new(this, EventType.WillEnterForeground)).EventHandler += value;
 			}
 		}
 

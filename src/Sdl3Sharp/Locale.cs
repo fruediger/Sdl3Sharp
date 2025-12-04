@@ -81,7 +81,7 @@ public readonly partial struct Locale(string language, string? country = null) :
 	/// This might be a "slow" call that has to query the operating system.
 	/// It's best to ask for this once and save the results.
 	/// However, this list can change, usually because the user has changed a system preference outside of your program;
-	/// SDL will send an <see cref="EventType.Application.LocaleChanged"/> event (see also <see cref="Sdl.LocaleChanged"/>) in this case, if possible, and you can call this method again to get an updated copy of preferred locales.
+	/// SDL will send an <see cref="EventType.LocaleChanged"/> event (see also <see cref="Sdl.LocaleChanged"/>) in this case, if possible, and you can call this method again to get an updated copy of preferred locales.
 	/// </para>
 	/// </remarks>
 	public static bool TryGetPreferredLocales([NotNullWhen(true)] out Locale[]? locales)

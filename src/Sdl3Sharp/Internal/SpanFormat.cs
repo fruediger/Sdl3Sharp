@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Buffers;
 using System.Runtime.CompilerServices;
+using System.Text.Unicode;
 
 namespace Sdl3Sharp.Internal;
 
@@ -38,6 +40,19 @@ internal static class SpanFormat
 		where T : ISpanFormattable, allows ref struct
 	{
 		var result = value.TryFormat(destination, out var tmpCharsWritten, format, provider);
+
+		if (result)
+		{
+			destination = destination[tmpCharsWritten..];
+			charsWritten += tmpCharsWritten;
+		}
+
+		return result;
+	}
+
+	public static bool TryWriteUtf8(ReadOnlySpan<byte> source, ref Span<char> destination, ref int charsWritten, bool replaceInvalidSequences = true, bool isFinalBlock = true)
+	{
+		var result = Utf8.ToUtf16(source, destination, out var bytesRead, out var tmpCharsWritten, replaceInvalidSequences, isFinalBlock) is OperationStatus.Done;
 
 		if (result)
 		{

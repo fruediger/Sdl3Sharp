@@ -1,174 +1,91 @@
-﻿using Sdl3Sharp.Internal;
-using System;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+﻿using System;
+using System.ComponentModel;
 
 namespace Sdl3Sharp;
 
 /// <summary>
 /// Represents a log category
 /// </summary>
-/// <seealso cref="Log"/>
-[DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
-[StructLayout(LayoutKind.Sequential)]
-public readonly partial struct LogCategory :
-	IEquatable<LogCategory>, IFormattable, ISpanFormattable, IEqualityOperators<LogCategory, LogCategory, bool>
+public enum LogCategory
 {
-	private readonly Kind mKind;
+	/// <summary>The log category <em>Application</em></summary>
+	Application,
 
-	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private readonly string DebuggerDisplay => ToString(formatProvider: CultureInfo.InvariantCulture);
+	/// <summary>The log category <em>Error</em></summary>
+	Error,
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	private LogCategory(Kind kind) => mKind = kind;
+	/// <summary>The log category <em>Assert</em></summary>
+	Assert,
 
-	/// <summary>
-	/// Resets the <see cref="Priority">priorities</see> of all <see cref="LogCategory">log categories</see> to their default value
-	/// </summary>
-	/// <remarks>
-	/// This is called by <see cref="Sdl.Dispose"/>
-	/// </remarks>
-	public static void ResetPriorityForAll() => SDL_ResetLogPriorities();
+	/// <summary>The log category <em>System</em></summary>
+	System,
 
-	/// <summary>
-	/// Sets the <see cref="Priority">priorities</see> of all <see cref="LogCategory">log categories</see> to a specific value
-	/// </summary>
-	/// <param name="priority">The priority to assign</param>
-	public static void SetPriorityForAll(LogPriority priority) => SDL_SetLogPriorities(priority);
+	/// <summary>The log category <em>Audio</em></summary>
+	Audio,
 
-	/// <summary>
-	/// Gets or sets the priority of this log category
-	/// </summary>
-	/// <value>
-	/// The priority of this log category
-	/// </value>
-	public readonly LogPriority Priority
-	{
-		get => SDL_GetLogPriority(this);
-		set => SDL_SetLogPriority(this, value);
-	}
+	/// <summary>The log category <em>Video</em></summary>
+	Video,
 
-	/// <inheritdoc/>
-	public readonly override bool Equals([NotNullWhen(true)] object? obj) => obj is LogCategory other && Equals(other);
+	/// <summary>The log category <em>Render</em></summary>
+	Render,
 
-	/// <inheritdoc/>
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public readonly bool Equals(LogCategory other) => mKind == other.mKind;
+	/// <summary>The log category <em>Input</em></summary>
+	Input,
 
-	/// <inheritdoc/>
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public readonly override int GetHashCode() => mKind.GetHashCode();
+	/// <summary>The log category <em>Test</em></summary>
+	Test,
 
-	/// <summary>
-	/// Logs a <paramref name="message"/> with this log category and <see cref="LogPriority.Critical"/>
-	/// </summary>
-	/// <param name="message">The message to be logged</param>
-	public readonly void LogCritical(string message) => Log.Critical(this, message);
+	/// <summary>The log category <em>Gpu</em></summary>
+	Gpu,
 
-	/// <summary>
-	/// Logs a <paramref name="message"/> with this log category and <see cref="LogPriority.Debug"/>
-	/// </summary>
-	/// <param name="message">The message to be logged</param>
-	public readonly void LogDebug(string message) => Log.Debug(this, message);
+	/// <summary>SDL_LOG_CATEGORY_RESERVED2</summary>
+	/// <remarks>Reserved for future SDL library use. Do not use.</remarks>
+	[Obsolete("Reserved for future SDL library use")]
+	Reserved2,
 
-	/// <summary>
-	/// Logs a <paramref name="message"/> with this log category and <see cref="LogPriority.Error"/>
-	/// </summary>
-	/// <param name="message">The message to be logged</param>
-	public readonly void LogError(string message) => Log.Error(this, message);
+	/// <summary>SDL_LOG_CATEGORY_RESERVED3</summary>
+	/// <remarks>Reserved for future SDL library use. Do not use.</remarks>
+	[Obsolete("Reserved for future SDL library use")]
+	Reserved3,
 
-	/// <summary>
-	/// Logs a <paramref name="message"/> with this log category and <see cref="LogPriority.Info"/>
-	/// </summary>
-	/// <param name="message">The message to be logged</param>
-	public readonly void LogInfo(string message) => Log.Info(this, message);
+	/// <summary>SDL_LOG_CATEGORY_RESERVED4</summary>
+	/// <remarks>Reserved for future SDL library use. Do not use.</remarks>
+	[Obsolete("Reserved for future SDL library use")]
+	Reserved4,
 
-	/// <summary>
-	/// Logs a <paramref name="message"/> with this log category and a specific <paramref name="priority"/>
-	/// </summary> 
-	/// <param name="priority">The priority of the message</param>
-	/// <param name="message">The message to be logged</param>
-	public readonly void LogMessage(LogPriority priority, string message) => Log.Message(this, priority, message);
+	/// <summary>SDL_LOG_CATEGORY_RESERVED5</summary>
+	/// <remarks>Reserved for future SDL library use. Do not use.</remarks>
+	[Obsolete("Reserved for future SDL library use")]
+	Reserved5,
 
-	/// <summary>
-	/// Logs a <paramref name="message"/> with this log category and <see cref="LogPriority.Trace"/>
-	/// </summary>
-	/// <param name="message">The message to be logged</param>
-	public readonly void LogTrace(string message) => Log.Trace(this, message);
+	/// <summary>SDL_LOG_CATEGORY_RESERVED6</summary>
+	/// <remarks>Reserved for future SDL library use. Do not use.</remarks>
+	[Obsolete("Reserved for future SDL library use")]
+	Reserved6,
 
-	/// <summary>
-	/// Logs a <paramref name="message"/> with this log category and <see cref="LogPriority.Verbose"/>
-	/// </summary>
-	/// <param name="message">The message to be logged</param>
-	public readonly void LogVerbose(string message) => Log.Verbose(this, message);
+	/// <summary>SDL_LOG_CATEGORY_RESERVED7</summary>
+	/// <remarks>Reserved for future SDL library use. Do not use.</remarks>
+	[Obsolete("Reserved for future SDL library use")]
+	Reserved7,
 
-	/// <summary>
-	/// Logs a <paramref name="message"/> with this log category and <see cref="LogPriority.Warn"/>
-	/// </summary>
-	/// <param name="message">The message to be logged</param>
-	public readonly void LogWarn(string message) => Log.Warn(this, message);
+	/// <summary>SDL_LOG_CATEGORY_RESERVED8</summary>
+	/// <remarks>Reserved for future SDL library use. Do not use.</remarks>
+	[Obsolete("Reserved for future SDL library use")]
+	Reserved8,
 
-	/// <inheritdoc/>
-	public readonly override string ToString() => ToString(format: default, formatProvider: default);
+	/// <summary>SDL_LOG_CATEGORY_RESERVED9</summary>
+	/// <remarks>Reserved for future SDL library use. Do not use.</remarks>
+	[Obsolete("Reserved for future SDL library use")]
+	Reserved9,
 
-	/// <inheritdoc cref="ToString(string?, IFormatProvider?)"/>
-	public readonly string ToString(IFormatProvider? formatProvider) => ToString(format: default, formatProvider);
+	/// <summary>SDL_LOG_CATEGORY_RESERVED10</summary>
+	/// <remarks>Reserved for future SDL library use. Do not use.</remarks>
+	[Obsolete("Reserved for future SDL library use")]
+	Reserved10,
 
-	/// <inheritdoc cref="ToString(string?, IFormatProvider?)"/>
-	public readonly string ToString(string? format) => ToString(format, formatProvider: default);
-
-	/// <inheritdoc/>
-	public readonly string ToString(string? format, IFormatProvider? formatProvider) => mKind switch
-	{
-		>= Kind.Custom => $"{nameof(Custom)}({unchecked(mKind - Kind.Custom).ToString(format, formatProvider)})",
-		_ => mKind.ToString(format)
-	};
-
-	/// <inheritdoc/>
-	public readonly bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default)
-	{
-		charsWritten = 0;
-
-		return mKind switch
-		{
-			>= Kind.Custom
-				=> SpanFormat.TryWrite($"{nameof(Custom)}(", ref destination, ref charsWritten)
-				&& SpanFormat.TryWrite(unchecked(mKind - Kind.Custom), ref destination, ref charsWritten, format, provider)
-				&& SpanFormat.TryWrite(')', ref destination, ref charsWritten),
-
-			_ => SpanFormat.TryWrite(mKind, ref destination, ref charsWritten, format)
-		};
-	}
-
-	/// <summary>
-	/// Tries to get the custom value used to identify this custom log category
-	/// </summary>
-	/// <param name="customValue">The custom value used to identify this custom log category</param>
-	/// <returns><c><see langword="true"/></c> if this instance represents a custom log category and <paramref name="customValue"/> is the custom value which identifies it; otherwise, <c><see langword="false"/></c></returns>
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public readonly bool TryGetCustomValue(out int customValue)
-	{
-		if (mKind >= Kind.Custom)
-		{
-			customValue = unchecked(mKind - Kind.Custom);
-
-			return true;
-		}
-
-		customValue = default;
-
-		return false;
-	}
-
-	/// <inheritdoc/>
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static bool operator ==(LogCategory left, LogCategory right) => left.mKind == right.mKind;
-
-	/// <inheritdoc/>
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static bool operator !=(LogCategory left, LogCategory right) => left.mKind != right.mKind;
+	/// <summary>SDL_LOG_CATEGORY_CUSTOM</summary>
+	/// <remarks>Do not use directly. Use <see cref="LogCategoryExtensions.Custom(int)"/> instead.</remarks>
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Obsolete("Do not use. Use the LogCategoryExtensions.Custom(int) extension method instead.")]
+	Custom
 }

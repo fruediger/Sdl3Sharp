@@ -9,50 +9,50 @@ namespace Sdl3Sharp.Input;
 public enum Keymod : ushort
 {
 	/// <summary>No modifier key is down</summary>
-	None         = 0x0000,
+	None = 0x0000,
 
 	/// <summary>The left <kbd>⇧</kbd> (shift) key is down</summary>
-	LeftShift    = 0x0001,
+	LeftShift = 0x0001,
 
 	/// <summary>The right <kbd>⇧</kbd> (shift) key is down</summary>
-	RightShift   = 0x0002,
+	RightShift = 0x0002,
 	
 	/// <summary>The "Level 5 Shift" key is down</summary>
-	Level5Shift  = 0x0004,
+	Level5Shift = 0x0004,
 
 	/// <summary>The left <kbd>CTRL</kbd> (left control) key is down</summary>
-	LeftControl  = 0x0040,
+	LeftControl = 0x0040,
 
 	/// <summary>The right <kbd>CTRL</kbd> (right control) key is down</summary>
 	RightControl = 0x0080,
 
 	/// <summary>The left <kbd>ALT</kbd> (left alt) key is down</summary>
-	LeftAlt      = 0x0100,
+	LeftAlt = 0x0100,
 
 	/// <summary>The right <kbd>ALT</kbd> (right alt) key, or sometimes called <kbd>ALT GR</kbd> (alt gr.) key, is down</summary>
-	RightAlt     = 0x0200,
+	RightAlt = 0x0200,
 
 	/// <summary>The left <kbd>⊞</kbd> (left Windows) key on PCs, left <kbd>⌘</kbd> (left command) key on Macs, or sometimes called left meta key, is down</summary>
-	LeftGui      = 0x0400,
+	LeftGui = 0x0400,
 
 	/// <summary>The right <kbd>⊞</kbd> (right Windows) key on PCs, right <kbd>⌘</kbd> (right command) key on Macs, or sometimes called right meta key, is down</summary>
-	RightGui     = 0x0800,
+	RightGui = 0x0800,
 
 	/// <summary>The <kbd>NUM</kbd> (num lock), may be located on an extended keypad, is down</summary>
-	NumLock      = 0x1000,
+	NumLock = 0x1000,
 
 	/// <summary>The <kbd>⇪</kbd> (caps lock) key is down</summary>
-	CapsLock     = 0x2000,
+	CapsLock = 0x2000,
 
 // TODO: document the following Keymods!
 #pragma warning disable CS1591
 
-	Mode         = 0x4000,
+	Mode = 0x4000,
 
 #pragma warning restore CS1591
 
 	/// <summary>The <kbd>SCROLL</kbd> (scroll lock) key is down</summary>
-	ScrollLock   = 0x8000,
+	ScrollLock = 0x8000,
 
 	/// <summary>Both <kbd>CTRL</kbd> (control) keys combined</summary>
 	/// <remarks>
@@ -70,7 +70,7 @@ public enum Keymod : ushort
 	///		(modifier &amp; <see cref="Control"/>) <see langword="is"/> <see cref="Control"/> // all 'CTRL' keys are down in 'modifier'
 	/// </code>
 	/// </example>
-	Control      = LeftControl | RightControl,
+	Control = LeftControl | RightControl,
 
 	/// <summary>Both <kbd>⇧</kbd> (shift) keys combined</summary>
 	/// <remarks>
@@ -88,7 +88,7 @@ public enum Keymod : ushort
 	///		(modifier &amp; <see cref="Shift"/>) <see langword="is"/> <see cref="Shift"/> // 'true' when all 'SHIFT' keys are down in 'modifier'
 	/// </code>
 	/// </example>
-	Shift        = LeftShift | RightShift,
+	Shift = LeftShift | RightShift,
 
 	/// <summary>Both <kbd>ALT</kbd> (alt) keys combined</summary>
 	/// <remarks>
@@ -106,7 +106,7 @@ public enum Keymod : ushort
 	///		(modifier &amp; <see cref="Alt"/>) <see langword="is"/> <see cref="Alt"/> // 'true' when all 'ALT' keys are down in 'modifier'
 	/// </code>
 	/// </example>
-	Alt          = LeftAlt | RightAlt,
+	Alt = LeftAlt | RightAlt,
 
 	/// <summary>Both <kbd>⊞</kbd> (Windows) key on PCs, <kbd>⌘</kbd> (command) keys on Macs, or sometimes called meta keys, combined</summary>
 	/// <remarks>
@@ -124,5 +124,5 @@ public enum Keymod : ushort
 	///		(modifier &amp; <see cref="Gui"/>) <see langword="is"/> <see cref="Gui"/> // 'true' when all 'WINDOWS' keys are down in 'modifier'
 	/// </code>
 	/// </example>
-	Gui          = LeftGui | RightGui,
+	Gui = LeftGui | RightGui,
 }

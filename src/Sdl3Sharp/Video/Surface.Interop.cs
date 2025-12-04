@@ -4,7 +4,6 @@ using Sdl3Sharp.Video.Coloring;
 using Sdl3Sharp.Video.Drawing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using static System.Net.WebRequestMethods;
 
 namespace Sdl3Sharp.Video;
 
@@ -306,7 +305,7 @@ partial class Surface
 	/// The same destination pixels should not be used from two threads at once. It is safe to use the same source pixels from multiple threads.
 	/// </para>
 	/// </remarks>
-	/// <seealso cref="https://wiki.libsdl.org/SDL3/SDL_ConvertPixelsAndColorspace">SDL_ConvertPixelsAndColorspace</seealso>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_ConvertPixelsAndColorspace">SDL_ConvertPixelsAndColorspace</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
 	internal unsafe static partial bool SDL_ConvertPixelsAndColorspace(int width, int height, PixelFormat src_format, ColorSpace src_colorspace, uint src_properties, void* src, int src_pitch, PixelFormat dst_format, ColorSpace dst_colorspace, uint dst_properties, void* dst, int dst_pitch);
 
@@ -545,7 +544,7 @@ partial class Surface
 	/// (e.g., with a 16-bpp format the return value can be assigned to a <see href="https://wiki.libsdl.org/SDL3/Uint16">Uint16</see>, and similarly a Uint8 for an 8-bpp format).
 	/// </para>
 	/// </remarks>
-	/// <seealso cref="https://wiki.libsdl.org/SDL3/SDL_MapSurfaceRGB">SDL_MapSurfaceRGB</seealso>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_MapSurfaceRGB">SDL_MapSurfaceRGB</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
 	internal unsafe static partial uint SDL_MapSurfaceRGB(SDL_Surface* surface, byte r, byte g, byte b);
 

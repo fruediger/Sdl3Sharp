@@ -10,8 +10,8 @@ namespace Sdl3Sharp.Windowing;
 /// </summary>
 /// <remarks>
 /// <para>
-/// For interaction with the clipboard to be available, the <see cref="SubSystem.Video"/> sub system must be initialized
-/// (either while <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing it on its own</see>).
+/// For interaction with the clipboard to be available, the <see cref="SubSystems.Video"/> sub system must be initialized
+/// (either while <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(Sdl3Sharp.SubSystems)">initializing it on its own</see>).
 /// </para>
 /// </remarks>
 public static partial class Clipboard

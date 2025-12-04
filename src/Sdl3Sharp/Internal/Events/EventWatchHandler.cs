@@ -13,7 +13,7 @@ internal abstract class EventWatchHandler : IDisposable
 	{
 		if (userdata is not null && GCHandle.FromIntPtr(unchecked((IntPtr)userdata)) is { IsAllocated: true, Target: EventWatchHandler handler })
 		{
-			if (!handler.TryInvoke(new(ref Unsafe.AsRef<Event>(@event))))
+			if (!handler.Invoke(ref Unsafe.AsRef<Event>(@event)))
 			{
 				handler.Dispose();
 			}
@@ -42,7 +42,7 @@ internal abstract class EventWatchHandler : IDisposable
 	protected unsafe virtual void Dispose(bool disposing)
 	{
 		if (mHandle != default)
-		{			
+		{
 			Sdl.SDL_RemoveEventWatch(&EventWatch, unchecked((void*)GCHandle.ToIntPtr(mHandle)));
 
 			mHandle.Free();
@@ -50,5 +50,5 @@ internal abstract class EventWatchHandler : IDisposable
 		}
 	}
 
-	private protected abstract bool TryInvoke(EventRef<Event> eventRef);
+	private protected abstract bool Invoke(ref Event @event);
 }

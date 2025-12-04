@@ -16,14 +16,15 @@ partial struct Event
 	/// Creates a new <see cref="Event"/> from a <see cref="CameraDeviceEvent"/>
 	/// </summary>
 	/// <param name="event">The <see cref="CameraDeviceEvent"/> to store into the newly created <see cref="Event"/></param>
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	public Event(in CameraDeviceEvent @event) :
 #pragma warning disable IDE0034 // Leave it for explicitness sake
-	public Event(in CameraDeviceEvent @event) : this(default(IUnsafeConstructorDispatch?)) => CDevice = @event;
+		this(default(IUnsafeConstructorDispatch?))
 #pragma warning restore IDE0034
+		=> CDevice = @event;
 }
 
 /// <summary>
-/// Represents an event that occurs when a camera device is being <see cref="EventType.CameraDevice.Added">added</see>, <see cref="EventType.CameraDevice.Removed">removed</see>, <see cref="EventType.CameraDevice.Approved">approved</see>, or <see cref="EventType.CameraDevice.Denied">denied</see>
+/// Represents an event that occurs when a <see cref="Camera">camera device</see> is being <see cref="EventType.CameraDeviceAdded">added</see>, <see cref="EventType.CameraDeviceRemoved">removed</see>, <see cref="EventType.CameraDeviceApproved">approved</see>, or <see cref="EventType.CameraDeviceDenied">denied</see>
 /// </summary>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
@@ -33,7 +34,7 @@ public struct CameraDeviceEvent : ICommonEvent<CameraDeviceEvent>, IFormattable,
 	private readonly string DebuggerDisplay => ToString(formatProvider: CultureInfo.InvariantCulture);
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	private static bool Accepts(EventType type) => type >= EventType.CameraDevice.Added && type <= EventType.CameraDevice.Denied;
+	private static bool Accepts(EventType type) => type is >= EventType.CameraDeviceAdded and <= EventType.CameraDeviceDenied;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	static bool ICommonEvent<CameraDeviceEvent>.Accepts(EventType type) => Accepts(type);
@@ -41,17 +42,38 @@ public struct CameraDeviceEvent : ICommonEvent<CameraDeviceEvent>, IFormattable,
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	static ref CameraDeviceEvent ICommonEvent<CameraDeviceEvent>.GetReference(ref Event @event) => ref @event.CDevice;
 
-	private CommonEvent<CameraDeviceEvent> mCommon;
+	private CommonEvent mCommon;
 	private uint mWhich;
-	
+
+	/// <remarks>
+	/// <para>
+	/// When setting this property, the value must be either <see cref="EventType.CameraDeviceAdded"/>, <see cref="EventType.CameraDeviceRemoved"/>, <see cref="EventType.CameraDeviceApproved"/>, or <see cref="EventType.CameraDeviceDenied"/>.
+	/// Otherwise, it will lead the property to throw an <see cref="ArgumentException"/>!
+	/// </para>
+	/// </remarks>
+	/// <exception cref="ArgumentException">
+	/// When setting this property, the value was neither <see cref="EventType.CameraDeviceAdded"/>, <see cref="EventType.CameraDeviceRemoved"/>, <see cref="EventType.CameraDeviceApproved"/>, nor <see cref="EventType.CameraDeviceDenied"/>
+	/// </exception>
 	/// <inheritdoc/>
-	public EventType<CameraDeviceEvent> Type
+	public EventType Type
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] readonly get => mCommon.Type;
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] set => mCommon.Type = value;
+
+		set
+		{
+			if (!Accepts(value))
+			{
+				failValueArgumentIsNotValid();
+			}
+
+			mCommon.Type = value;
+
+			[DoesNotReturn]
+			static void failValueArgumentIsNotValid() => throw new ArgumentException($"The given {nameof(value)} is not a valid value for the {nameof(Type)} of a {nameof(CameraDeviceEvent)}", paramName: nameof(value));
+		}
 	}
 
-	/// <inheritdoc/>
+	///  <inheritdoc/>
 	public ulong Timestamp
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] readonly get => mCommon.Timestamp;
@@ -59,10 +81,10 @@ public struct CameraDeviceEvent : ICommonEvent<CameraDeviceEvent>, IFormattable,
 	}
 
 	/// <summary>
-	/// Gets or sets the camera device ID for the device being <see cref="EventType.CameraDevice.Added">added</see>, <see cref="EventType.CameraDevice.Removed">removed</see>, <see cref="EventType.CameraDevice.Approved">approved</see>, or <see cref="EventType.CameraDevice.Denied">denied</see>
+	/// Gets or sets the camera device ID for the <see cref="Camera"/> being <see cref="EventType.CameraDeviceAdded">added</see>, <see cref="EventType.CameraDeviceRemoved">removed</see>, <see cref="EventType.CameraDeviceApproved">approved</see>, or <see cref="EventType.CameraDeviceDenied">denied</see>
 	/// </summary>
 	/// <value>
-	/// The camera device ID for the device being <see cref="EventType.CameraDevice.Added">added</see>, <see cref="EventType.CameraDevice.Removed">removed</see>, <see cref="EventType.CameraDevice.Approved">approved</see>, or <see cref="EventType.CameraDevice.Denied">denied</see>
+	/// The camera device ID for the <see cref="Camera"/> being <see cref="EventType.CameraDeviceAdded">added</see>, <see cref="EventType.CameraDeviceRemoved">removed</see>, <see cref="EventType.CameraDeviceApproved">approved</see>, or <see cref="EventType.CameraDeviceDenied">denied</see>
 	/// </value>
 	public uint CameraId
 	{
@@ -81,16 +103,29 @@ public struct CameraDeviceEvent : ICommonEvent<CameraDeviceEvent>, IFormattable,
 
 	/// <inheritdoc/>
 	public readonly string ToString(string? format, IFormatProvider? formatProvider)
-		=> $"{{ {ICommonEvent.PartialToString(in this, format, formatProvider)}, {
-			nameof(CameraId)}: {CameraId.ToString(format, formatProvider)} }}";
+	{
+		var builder = Shared.StringBuilder;
+		try
+		{
+			return ICommonEvent.PartiallyAppend(in this, builder.Append("{ "), format)
+							   .Append($", {nameof(CameraId)}: ")
+							   .Append(CameraId.ToString(format, formatProvider))
+							   .Append(" }")
+							   .ToString();
+		}
+		finally
+		{
+			builder.Clear();
+		}
+	}
 
 	/// <inheritdoc/>
-	public readonly bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default)
+	public readonly bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
 	{
 		charsWritten = 0;
 
 		return SpanFormat.TryWrite("{ ", ref destination, ref charsWritten)
-			&& ICommonEvent.TryPartialFormat(in this, ref destination, ref charsWritten, format, provider)
+			&& ICommonEvent.TryPartiallyFormat(in this, ref destination, ref charsWritten, format)
 			&& SpanFormat.TryWrite($", {nameof(CameraId)}: ", ref destination, ref charsWritten)
 			&& SpanFormat.TryWrite(CameraId, ref destination, ref charsWritten, format, provider)
 			&& SpanFormat.TryWrite(" }", ref destination, ref charsWritten);
@@ -102,12 +137,12 @@ public struct CameraDeviceEvent : ICommonEvent<CameraDeviceEvent>, IFormattable,
 
 	/// <remarks>
 	/// <para>
-	/// The <see cref="Event.Type"/> of the given <paramref name="event"/> must be either <see cref="EventType.CameraDevice.Added"/>, <see cref="EventType.CameraDevice.Removed"/>, <see cref="EventType.CameraDevice.Approved"/>, or <see cref="EventType.CameraDevice.Denied"/>.
+	/// The <see cref="Event.Type"/> of the given <paramref name="event"/> must be either <see cref="EventType.CameraDeviceAdded"/>, <see cref="EventType.CameraDeviceRemoved"/>, <see cref="EventType.CameraDeviceApproved"/>, or <see cref="EventType.CameraDeviceDenied"/>.
 	/// Otherwise, it will lead the method to throw an <see cref="ArgumentException"/>!
 	/// </para>
 	/// </remarks>
 	/// <exception cref="ArgumentException">
-	/// The <see cref="Event.Type"/> of the given <paramref name="event"/> was neither <see cref="EventType.CameraDevice.Added"/>, <see cref="EventType.CameraDevice.Removed"/>, <see cref="EventType.CameraDevice.Approved"/>, nor <see cref="EventType.CameraDevice.Denied"/>
+	/// The <see cref="Event.Type"/> of the given <paramref name="event"/> was neither <see cref="EventType.CameraDeviceAdded"/>, <see cref="EventType.CameraDeviceRemoved"/>, <see cref="EventType.CameraDeviceApproved"/>, nor <see cref="EventType.CameraDeviceDenied"/>
 	/// </exception>
 	/// <inheritdoc/>
 	public static explicit operator CameraDeviceEvent(in Event @event)
@@ -120,6 +155,6 @@ public struct CameraDeviceEvent : ICommonEvent<CameraDeviceEvent>, IFormattable,
 		return @event.CDevice;
 
 		[DoesNotReturn]
-		static void failEventArgumentIsNotCameraDeviceEvent() => throw new ArgumentException($"{nameof(@event)} must be an {nameof(CameraDeviceEvent)} by {nameof(Type)}", paramName: nameof(@event));
+		static void failEventArgumentIsNotCameraDeviceEvent() => throw new ArgumentException($"{nameof(@event)} must be a {nameof(CameraDeviceEvent)} by {nameof(Type)}", paramName: nameof(@event));
 	}
 }

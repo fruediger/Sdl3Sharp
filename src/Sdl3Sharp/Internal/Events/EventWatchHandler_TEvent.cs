@@ -4,8 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Sdl3Sharp.Internal.Events;
 
-internal sealed class EventWatchHandler<TSender, TEvent>(TSender sender, EventType type) : EventWatchHandler()
-	where TSender : class
+internal sealed class EventWatchHandler<TEvent>(EventType type) : EventWatchHandler()
 	where TEvent : struct, ICommonEvent<TEvent>
 {
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -16,14 +15,12 @@ internal sealed class EventWatchHandler<TSender, TEvent>(TSender sender, EventTy
 		return type;
 	}
 
-	private System.WeakReference<TSender>? mReference = new(sender);
 	private readonly EventType mType = ValidateType(type);
 
-	public EventHandler<TSender, TEvent>? EventHandler { get; set; }
+	public EventHandler<TEvent>? EventHandler { get; set; }
 
 	protected override void Dispose(bool disposing)
 	{
-		mReference = null;
 		EventHandler = null;
 
 		base.Dispose(disposing);
@@ -31,14 +28,9 @@ internal sealed class EventWatchHandler<TSender, TEvent>(TSender sender, EventTy
 
 	private protected override bool Invoke(ref Event @event)
 	{
-		if (mReference?.TryGetTarget(out var sender) is not true)
-		{
-			return false;
-		}
-
 		if (@event.Type == mType)
 		{
-			EventHandler?.Invoke(sender, ref @event.UnsafeAs<TEvent>());
+			EventHandler?.Invoke(ref @event.UnsafeAs<TEvent>());
 		}
 
 		return true;

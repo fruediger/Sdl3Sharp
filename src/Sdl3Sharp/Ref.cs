@@ -15,7 +15,7 @@ namespace Sdl3Sharp;
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 [method: MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-public readonly ref struct Ref<T>(ref T value) : IEquatable<Ref<T>>
+internal readonly ref struct Ref<T>(ref T value) : IEquatable<Ref<T>>
 {
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly string DebuggerDisplay => !Unsafe.IsNullRef(ref Value)

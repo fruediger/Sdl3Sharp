@@ -1,207 +1,1009 @@
-﻿using Sdl3Sharp.Internal;
-using System;
-using System.Diagnostics;
+﻿using System;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace Sdl3Sharp.Events;
 
 /// <summary>
 /// Represents an event type for an <see cref="Event"/>
 /// </summary>
-[DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
-[StructLayout(LayoutKind.Sequential)]
-public readonly partial struct EventType : IEventType,
-	IComparable, IComparable<EventType>, IEquatable<EventType>, IFormattable, ISpanFormattable, IComparisonOperators<EventType, EventType, bool>, IEqualityOperators<EventType, EventType, bool>
+public enum EventType : uint
 {
-	private readonly Kind mKind;
+	/// <summary>SDL_EVENT_FIRST</summary>
+	/// <remarks>Do not use.</remarks>
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Obsolete("Do not use.")]
+	First = 0,
 
-	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private readonly string DebuggerDisplay => ToString(formatProvider: CultureInfo.InvariantCulture);
+	#region Application events
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	internal EventType(Kind kind) => mKind = kind;
-
-	/// <summary>
-	/// Tries to register new user defined events
-	/// </summary>
-	/// <param name="count">The number of user defined events that should be registered. Must be greater than <c>0</c>.</param>
-	/// <param name="eventTypes">A enumeration of <see cref="EventType"/>s of length <paramref name="count"/> which represent the newly registered user defined events, when this mehtod returns <c><see langword="true"/></c>; otherwise <c><see langword="default"/>(<see cref="Enumerable"/>)</c> (has length <c>0</c>)</param>
-	/// <returns><c><see langword="true"/></c> if the requested amount of user defined events was successfully registered; otherwise, <c><see langword="false"/></c> (<paramref name="count"/> might be invalid or there weren't enough free user defined <see cref="EventType"/>s left to register <paramref name="count"/> of them)</returns>
+	/// <summary>The event type <em>Quit</em></summary>
 	/// <remarks>
-	/// Enumerate the resulting <paramref name="eventTypes"/> to get the newly registered user defined event types.
+	/// <para>
+	/// User-requested quit
+	/// </para>
 	/// </remarks>
-	public static bool TryRegister(int count, out Enumerable eventTypes)
-	{
-		var start = SDL_RegisterEvents(count);
+	Quit = 0x100,
 
-		if (start.mKind is 0)
-		{
-			eventTypes = default;
-			return false;
-		}
-
-		eventTypes = new(start, unchecked((uint)count));
-		return true;
-	}
-
-	readonly EventType IEventType.Base { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => this; }
-
-	/// <summary>
-	/// Gets or sets a value determining whether the current <see cref="EventType"/> is enabled within SDL's event system or not
-	/// </summary>
-	/// <value>
-	/// A value determining whether the current <see cref="EventType"/> is enabled within SDL's event system or not
-	/// </value>
+	/// <summary>The event type <em>Terminating</em></summary>
 	/// <remarks>
-	/// <see cref="EventType"/>s whose <see cref="Enabled"/> property is set to <c><see langword="false"/></c> won't get processed by SDL.
+	/// <para>
+	/// The application is being terminated by the OS. This event must be handled in an event handler registered with <see cref="Sdl.EventWatch"/>.
+	/// Called on iOS in <c>applicationWillTerminate()</c>.
+	/// Called on Android in <c>onDestroy()</c>.
+	/// </para>
 	/// </remarks>
-	public readonly bool Enabled
-	{
-		get => SDL_EventEnabled(this);
-		set => SDL_SetEventEnabled(this, value);
-	}
+	Terminating,
 
-	/// <inheritdoc/>
-	public int CompareTo(object? obj)
-	{
-		return obj switch
-		{
-			null => 1,
-			EventType other => CompareTo(other),
-			IEventType other => CompareTo(other),
-			_ => failObjArgumentIsNotEventType()
-		};
+	/// <summary>The event type <em>LowMemory</em></summary>
+	/// <remarks>
+	/// <para>
+	/// The application is low on memory, free memory if possible. This event must be handled in an event handler registered with <see cref="Sdl.EventWatch"/>.
+	/// Called on iOS in <c>applicationDidReceiveMemoryWarning</c>().
+	/// Called on Android in <c>onTrimMemory</c>().
+	/// </para>
+	/// </remarks>
+	LowMemory,
 
-		[DoesNotReturn]
-		static int failObjArgumentIsNotEventType() => throw new ArgumentException($"{nameof(obj)} is not of type {nameof(EventType)}", nameof(obj));
-	}
+	/// <summary>The event type <em>WillEnterBackground</em></summary>
+	/// <remarks>
+	/// <para>
+	/// The application is about to enter the background. This event must be handled in an event handler registered with <see cref="Sdl.EventWatch"/>.
+	/// Called on iOS in <c>applicationWillResignActive()</c>.
+	/// Called on Android in <c>onPause()</c>.
+	/// </para>
+	/// </remarks>
+	WillEnterBackground,
 
-	/// <inheritdoc/>
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public readonly int CompareTo(EventType other) => unchecked((uint)mKind).CompareTo(unchecked((uint)other.mKind));	
+	/// <summary>The event type <em>DidEnterBackground</em></summary>
+	/// <remarks>
+	/// <para>
+	/// The application did enter the background and may not get CPU for some time. This event must be handled in an event handler registered with <see cref="Sdl.EventWatch"/>.
+	/// Called on iOS in <c>applicationDidEnterBackground()</c>.
+	/// Called on Android in <c>onPause()</c>.
+	/// </para>
+	/// </remarks>
+	DidEnterBackground,
 
-	/// <inheritdoc cref="IComparable{IEventType}.CompareTo(IEventType)"/>
-	internal readonly int CompareTo(IEventType? other) => other switch
-	{
-		{ Base: var @base } => CompareTo(@base),
-		_ /* null */ => 1,
-	};	
+	/// <summary>The event type <em>WillEnterForeground</em></summary>
+	/// <remarks>
+	/// <para>
+	/// The application is about to enter the foreground. This event must be handled in an event handler registered with <see cref="Sdl.EventWatch"/>.
+	/// Called on iOS in <c>applicationWillEnterForeground()</c>.
+	/// Called on Android in <c>onResume()</c>.
+	/// </para>
+	/// </remarks>
+	WillEnterForeground,
 
-	/// <inheritdoc/>
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	readonly int IComparable<IEventType>.CompareTo(IEventType? other) => CompareTo(other);
+	/// <summary>The event type <em>DidEnterForeground</em></summary>
+	/// <remarks>
+	/// <para>
+	/// The application is now interactive. This event must be handled in an event handler registered with <see cref="Sdl.EventWatch"/>.
+	/// Called on iOS in <c>applicationDidBecomeActive()</c>.
+	/// Called on Android in <c>onResume()</c>.
+	/// </para>
+	/// </remarks>
+	DidEnterForeground,
 
-	/// <inheritdoc/>
-	public readonly override bool Equals([NotNullWhen(true)] object? obj) => obj switch
-	{
-		EventType other => Equals(other),
-		IEventType other => Equals(other),
-		_ => false
-	};
+	/// <summary>The event type <em>LocaleChanged</em></summary>
+	/// <remarks>
+	/// <para>
+	/// The user's locale preferences have changed.
+	/// </para>
+	/// </remarks>
+	LocaleChanged,
 
-	/// <inheritdoc/>
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public readonly bool Equals(EventType other) => mKind == other.mKind;	
+	/// <summary>The event type <em>SystemThemeChanged</em></summary>
+	/// <remarks>
+	/// <para>
+	/// The system theme changed.
+	/// </para>
+	/// </remarks>
+	SystemThemeChanged,
 
-	/// <inheritdoc cref="IEquatable{IEventType}.Equals(IEventType)"/>
-	internal readonly bool Equals([NotNullWhen(true)] IEventType? other) => other switch
-	{
-		{ Base: var @base } => Equals(@base),
-		_ /* null */ => false,
-	};
+	#endregion
 
-	/// <inheritdoc/>
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	readonly bool IEquatable<IEventType>.Equals([NotNullWhen(true)] IEventType? other) => Equals(other);
+	#region Display events
 
-	/// <inheritdoc/>
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public readonly override int GetHashCode() => mKind.GetHashCode();
+	/// <summary>The event type <em>DisplayOrientationChanged</em></summary>
+	/// <remarks>
+	/// <para>
+	/// The display orientation has changed to <see cref="DisplayEvent.Data1"/>.
+	/// </para>
+	/// </remarks>
+	DisplayOrientationChanged = 0x151,
 
-	/// <inheritdoc/>
-	public readonly override string ToString() => ToString(format: default, formatProvider: default);
+	/// <summary>The event type <em>DisplayAdded</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A display has been added to the system.
+	/// </para>
+	/// </remarks>
+	DisplayAdded,
 
-	/// <inheritdoc cref="IFormattable.ToString(string?, IFormatProvider?)"/>
-	public readonly string ToString(IFormatProvider? formatProvider) => ToString(format: default, formatProvider);
+	/// <summary>The event type <em>DisplayRemoved</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A display has been removed from the system.
+	/// </para>
+	/// </remarks>
+	DisplayRemoved,
 
-	/// <inheritdoc cref="IFormattable.ToString(string?, IFormatProvider?)"/>
-	public readonly string ToString(string? format) => ToString(format, formatProvider: default);
+	/// <summary>The event type <em>DisplayMoved</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A display has changed position.
+	/// </para>
+	/// </remarks>
+	DisplayMoved,
 
-	/// <inheritdoc/>
-	public readonly string ToString(string? format, IFormatProvider? formatProvider) => mKind switch
-	{
-		>= Kind.User and <= Kind.Last => $"{nameof(User)}({unchecked(mKind - Kind.User).ToString(format, formatProvider)})",
+	/// <summary>The event type <em>DisplayDesktopModeChanged</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A display has changed desktop mode.
+	/// </para>
+	/// </remarks>
+	DisplayDesktopModeChanged,
 
-		_ => KnownKindToString(mKind) switch
-		{
-			string knonwKind => knonwKind,
+	/// <summary>The event type <em>DisplayCurrentModeChanged</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A display has changed current mode.
+	/// </para>
+	/// </remarks>
+	DisplayCurrentModeChanged,
 
-			_ => mKind.ToString(format)
-		}
-	};
+	/// <summary>The event type <em>DisplayContentScaleChanged</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A display has changed content scale.
+	/// </para> 
+	/// </remarks>
+	DisplayContentScaleChanged,
 
-	/// <inheritdoc/>
-	public readonly bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default)
-	{
-		charsWritten = 0;
+	/// <summary>The event type <em>DisplayUsableBoundsChanged</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A display has changed usable bounds.
+	/// </para>
+	/// </remarks>
+	DisplayUsableBoundsChanged,
 
-		return mKind switch
-		{
-			>= Kind.User and < Kind.Last
-				=> SpanFormat.TryWrite($"{nameof(User)}(", ref destination, ref charsWritten)
-				&& SpanFormat.TryWrite(unchecked(mKind - Kind.User), ref destination, ref charsWritten, format, provider)
-				&& SpanFormat.TryWrite(')', ref destination, ref charsWritten),
+	#endregion
 
-			_ => KnownKindToString(mKind) switch
-			{
-				string knownKind => SpanFormat.TryWrite(knownKind, ref destination, ref charsWritten),
+	#region Window events
 
-				_ => SpanFormat.TryWrite(mKind, ref destination, ref charsWritten, format)
-			}
-		};
-	}
+	/// <summary>The event type <em>WindowShown</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A window has been shown.
+	/// </para>
+	/// </remarks>
+	WindowShown = 0x202,
 
-	/// <summary>
-	/// Tries to get the user value used to identify this user event type
-	/// </summary>
-	/// <param name="userValue">The user value used to identify this user event type</param>
-	/// <returns><c><see langword="true"/></c> if this instance represents a user event type and <paramref name="userValue"/> is the user value which identifies it; otherwise, <c><see langword="false"/></c></returns>
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public readonly bool TryGetUserValue(out int userValue)
-	{
-		if (mKind is >= Kind.User and <= Kind.Last)
-		{
-			userValue = unchecked((int)(mKind - Kind.User));
+	/// <summary>The event type <em>WindowHidden</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A window has been hidden.
+	/// </para>
+	/// </remarks>
+	WindowHidden,
 
-			return true;
-		}
+	/// <summary>The event type <em>WindowExposed</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A window has been exposed and should be redrawn, and can be redrawn directly from event watchers/handlers for this event.
+	/// </para>
+	/// </remarks>
+	WindowExposed,
 
-		userValue = default;
+	/// <summary>The event type <em>WindowMoved</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A window has been moved to <see cref="WindowEvent.Data1"/>, <see cref="WindowEvent.Data2"/>.
+	/// </para>
+	/// </remarks>
+	WindowMoved,
 
-		return false;
-	}
+	/// <summary>The event type <em>WindowResized</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A window has been resized to <see cref="WindowEvent.Data1"/>×<see cref="WindowEvent.Data2"/>.
+	/// </para>
+	/// </remarks>
+	WindowResized,
 
-	/// <inheritdoc/>
-	public static bool operator >(EventType left, EventType right) => left.mKind > right.mKind;
+	/// <summary>The event type <em>WindowPixelSizeChanged</em></summary>
+	/// <remarks>
+	/// <para>
+	/// The pixel size of a window has changed to <see cref="WindowEvent.Data1"/>×<see cref="WindowEvent.Data2"/>.
+	/// </para>
+	/// </remarks>
+	WindowPixelSizeChanged,
 
-	/// <inheritdoc/>
-	public static bool operator >=(EventType left, EventType right) => left.mKind >= right.mKind;
+	/// <summary>The event type <em>WindowMetalViewResized</em></summary>
+	/// <remarks>
+	/// <para>
+	/// The pixel size of a Metal view associated with a window has changed.
+	/// </para>
+	/// </remarks>
+	WindowMetalViewResized,
 
-	/// <inheritdoc/>
-	public static bool operator <(EventType left, EventType right) => left.mKind < right.mKind;
+	/// <summary>The event type <em>WindowMinimized</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A window has been minimized.
+	/// </para>
+	/// </remarks>
+	WindowMinimized,
 
-	/// <inheritdoc/>
-	public static bool operator <=(EventType left, EventType right) => left.mKind <= right.mKind;
+	/// <summary>The event type <em>WindowMaximized</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A window has been maximized.
+	/// </para>
+	/// </remarks>
+	WindowMaximized,
 
-	/// <inheritdoc/>
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static bool operator ==(EventType left, EventType right) => left.mKind == right.mKind;
+	/// <summary>The event type <em>WindowRestored</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A window has been restored to normal size and position.
+	/// </para>
+	/// </remarks>
+	WindowRestored,
 
-	/// <inheritdoc/>
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static bool operator !=(EventType left, EventType right) => right.mKind != left.mKind;
+	/// <summary>The event type <em>WindowMouseEnter</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A window has gained mouse focus.
+	/// </para>
+	/// </remarks>
+	WindowMouseEnter,
+
+	/// <summary>The event type <em>WindowMouseLeave</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A window has lost mouse focus.
+	/// </para>
+	/// </remarks>
+	WindowMouseLeave,
+
+	/// <summary>The event type <em>WindowFocusGained</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A window has gained keyboard focus.
+	/// </para>
+	/// </remarks>
+	WindowFocusGained,
+
+	/// <summary>The event type <em>WindowFocusLost</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A window has lost keyboard focus.
+	/// </para>
+	/// </remarks>
+	WindowFocusLost,
+
+	/// <summary>The event type <em>WindowCloseRequested</em></summary>
+	/// <remarks>
+	/// <para>
+	/// The window manager requests that a window should be closed.
+	/// </para>
+	/// </remarks>
+	WindowCloseRequested,
+
+	/// <summary>The event type <em>WindowHitTest</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A window had a hit test that wasn't <see cref="SDL_HITTEST_NORMAL"/>.
+	/// </para>
+	/// </remarks>
+	WindowHitTest,
+
+	/// <summary>The event type <em>WindowIccProfileChanged</em></summary>
+	/// <remarks>
+	/// <para>
+	/// The ICC profile of a window's display has changed.
+	/// </para>
+	/// </remarks>
+	WindowIccProfileChanged,
+
+	/// <summary>The event type <em>WindowDisplayChanged</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A window has been moved to display <see cref="WindowEvent.Data1"/>.
+	/// </para>
+	/// </remarks>
+	WindowDisplayChanged,
+
+	/// <summary>The event type <em>WindowDisplayScaleChanged</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A window's display scale has been changed.
+	/// </para>
+	/// </remarks>
+	WindowDisplayScaleChanged,
+
+	/// <summary>The event type <em>WindowSafeAreaChanged</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A window's safe area has been changed.
+	/// </para>
+	/// </remarks>
+	WindowSafeAreaChanged,
+
+	/// <summary>The event type <em>WindowOccluded</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A window has been occluded.
+	/// </para>
+	/// </remarks>
+	WindowOccluded,
+
+	/// <summary>The event type <em>WindowEnterFullscreen</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A window has entered fullscreen mode.
+	/// </para>
+	/// </remarks>
+	WindowEnterFullscreen,
+
+	/// <summary>The event type <em>WindowLeaveFullscreen</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A window has left fullscreen mode.
+	/// </para>
+	/// </remarks>
+	WindowLeaveFullscreen,
+
+	/// <summary>The event type <em>WindowDestroyed</em></summary>
+	/// <remarks>
+	/// <para>
+	/// The window with the associated ID is being or has been destroyed.
+	/// If this message is being handled in an event watcher, the window handle is still valid and can still be used to retrieve any properties associated with the window.
+	/// Otherwise, the handle has already been destroyed and all resources associated with it are invalid.
+	/// </para>
+	/// </remarks>
+	WindowDestroyed,
+
+	/// <summary>The event type <em>WindowHdrStateChanged</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A window's HDR properties have changed.
+	/// </para>
+	/// </remarks>
+	WindowHdrStateChanged,
+
+	#endregion
+
+	#region Keyboard events
+
+	/// <summary>The event type <em>KeyboardKeyDown</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Key pressed.
+	/// </para>
+	/// </remarks>
+	KeyDown = 0x300,
+
+	/// <summary>The event type <em>KeyboardKeyUp</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Key released.
+	/// </para>
+	/// </remarks>
+	KeyUp,
+
+	/// <summary>The event type <em>KeyboardTextEditing</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Keyboard text editing (composition).
+	/// </para>
+	/// </remarks>
+	TextEditing,
+
+	/// <summary>The event type <em>KeyboardTextInput</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Keyboard text input.
+	/// </para>
+	/// </remarks>
+	TextInput,
+
+	/// <summary>The event type <em>KeyboardKeymapChanged</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Keymap changed due to a system event such as an input language or keyboard layout change.
+	/// </para>
+	/// </remarks>
+	KeymapChanged,
+
+	/// <summary>The event type <em>KeyboardAdded</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A new keyboard has been inserted into the system.
+	/// </para>
+	/// </remarks>
+	KeyboardAdded,
+
+	/// <summary>The event type <em>KeyboardRemoved</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A keyboard has been removed.
+	/// </para>
+	/// </remarks>
+	KeyboardRemoved,
+
+	/// <summary>The event type <em>KeyboardTextEditingCandidates</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Keyboard text editing candidates.
+	/// </para>
+	/// </remarks>
+	TextEditingCandidates,
+
+	/// <summary>The event type <em>ScreenKeyboardShown</em></summary>
+	/// <remarks>
+	/// <para>
+	/// The on-screen keyboard has been shown.
+	/// </para>
+	/// </remarks>
+	ScreenKeyboardShown,
+
+	/// <summary>The event type <em>ScreenKeyboardHidden</em></summary>
+	/// <remarks>
+	/// <para>
+	/// The on-screen keyboard has been hidden.
+	/// </para>
+	/// </remarks>
+	ScreenKeyboardHidden,
+
+	#endregion
+
+	#region Mouse events
+
+	/// <summary>The event type <em>MouseMotion</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Mouse moved.
+	/// </para>
+	/// </remarks>
+	MouseMotion = 0x400,
+
+	/// <summary>The event type <em>MouseButtonDown</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Mouse button pressed.
+	/// </para>
+	/// </remarks>
+	MouseButtonDown,
+
+	/// <summary>The event type <em>MouseButtonUp</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Mouse button released.
+	/// </para>
+	/// </remarks>
+	MouseButtonUp,
+
+	/// <summary>The event type <em>MouseWheelMotion</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Mouse wheel motion.
+	/// </para>
+	/// </remarks>
+	MouseWheel,
+
+	/// <summary>The event type <em>MouseAdded</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A new mouse has been inserted into the system.
+	/// </para>
+	/// </remarks>
+	MouseAdded,
+
+	/// <summary>The event type <em>MouseRemoved</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A mouse has been removed.
+	/// </para>
+	/// </remarks>
+	MouseRemoved,
+
+	#endregion
+
+	#region Joystick events
+
+	/// <summary>The event type <em>JoystickAxisMotion</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Joystick axis motion.
+	/// </para>
+	/// </remarks>
+	JoystickAxisMotion = 0x600,
+
+	/// <summary>The event type <em>JoystickBallMotion</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Joystick trackball motion.
+	/// </para>
+	/// </remarks>
+	JoystickBallMotion,
+
+	/// <summary>The event type <em>JoystickHatMotion</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Joystick hat position change.
+	/// </para>
+	/// </remarks>
+	JoystickHatMotion,
+
+	/// <summary>The event type <em>JoystickButtonDown</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Joystick button pressed.
+	/// </para>
+	/// </remarks>
+	JoystickButtonDown,
+
+	/// <summary>The event type <em>JoystickButtonUp</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Joystick button released.
+	/// </para>
+	/// </remarks>
+	JoystickButtonUp,
+
+	/// <summary>The event type <em>JoystickAdded</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A new joystick has been inserted into the system.
+	/// </para>
+	/// </remarks>
+	JoystickAdded,
+
+	/// <summary>The event type <em>JoystickRemoved</em></summary>
+	/// <remarks>
+	/// <para>
+	/// An opened joystick has been removed.
+	/// </para>
+	/// </remarks>
+	JoystickRemoved,
+
+	/// <summary>The event type <em>JoystickBatteryUpdated</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Joystick battery level change.
+	/// </para>
+	/// </remarks>
+	JoystickBatteryUpdated,
+
+	/// <summary>The event type <em>JoystickUpdateCompleted</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Joystick update is complete.
+	/// </para>
+	/// </remarks>
+	JoystickUpdateCompleted,
+
+	#endregion
+
+	#region Gamepad events
+
+	/// <summary>The event type <em>GamepadAxisMotion</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Gamepad axis motion.
+	/// </para>
+	/// </remarks>
+	GamepadAxisMotion = 0x650,
+
+	/// <summary>The event type <em>GamepadButtonDown</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Gamepad button pressed.
+	/// </para>
+	/// </remarks>
+	GamepadButtonDown,
+
+	/// <summary>The event type <em>GamepadButtonUp</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Gamepad button released.
+	/// </para>
+	/// </remarks>
+	GamepadButtonUp,
+
+	/// <summary>The event type <em>GamepadAdded</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A new gamepad has been inserted into the system.
+	/// </para>
+	/// </remarks>
+	GamepadAdded,
+
+	/// <summary>The event type <em>GamepadRemoved</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A gamepad has been removed.
+	/// </para>
+	/// </remarks>
+	GamepadRemoved,
+
+	/// <summary>The event type <em>GamepadRemapped</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Gamepad mapping was updated.
+	/// </para>
+	/// </remarks>
+	GamepadRemapped,
+
+	/// <summary>The event type <em>GamepadTouchpadDown</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Gamepad touchpad was touched.
+	/// </para>
+	/// </remarks>
+	GamepadTouchpadDown,
+
+	/// <summary>The event type <em>GamepadTouchpadMotion</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Gamepad touchpad finger was moved.
+	/// </para>
+	/// </remarks>
+	GamepadTouchpadMotion,
+
+	/// <summary>The event type <em>GamepadTouchpadUp</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Gamepad touchpad finger was lifted.
+	/// </para>
+	/// </remarks>
+	GamepadTouchpadUp,
+
+	/// <summary>The event type <em>GamepadSensorUpdated</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Gamepad sensor was updated.
+	/// </para>
+	/// </remarks>
+	GamepadSensorUpdated,
+
+	/// <summary>The event type <em>GamepadUpdateCompleted</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Gamepad update is complete.
+	/// </para>
+	/// </remarks>
+	GamepadUpdateCompleted,
+
+	/// <summary>The event type <em>GamepadSteamHandleUpdated</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Gamepad Steam handle has changed.
+	/// </para>
+	/// </remarks>
+	GamepadSteamHandleUpdated,
+
+	#endregion
+
+	#region Touch events
+
+	/// <summary>The event type <em>FingerDown</em></summary>
+	FingerDown = 0x700,
+
+	/// <summary>The event type <em>FingerUp</em></summary>
+	FingerUp,
+
+	/// <summary>The event type <em>FingerMotion</em></summary>
+	FingerMotion,
+
+	/// <summary>The event type <em>FingerCanceled</em></summary>
+	FingerCanceled,
+
+	#endregion
+
+	#region Pinch events
+
+	/// <summary>The event type <em>PinchBegin</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Pinch gesture started.
+	/// </para>
+	/// </remarks>
+	PinchBegin = 0x710,
+
+	/// <summary>The event type <em>PinchUpdate</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Pinch gesture updated.
+	/// </para>
+	/// </remarks>
+	PinchUpdate,
+
+	/// <summary>The event type <em>PinchEnd</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Pinch gesture ended.
+	/// </para>
+	/// </remarks>
+	PinchEnd,
+
+	#endregion
+
+	#region Clipboard events
+
+	/// <summary>The event type <em>ClipboardUpdated</em></summary>
+	/// <remarks>
+	/// <para>
+	/// The clipboard or primary selection changed.
+	/// </para>
+	/// </remarks>
+	ClipboardUpdated = 0x900,
+
+	#endregion
+
+	#region Drag and drop events
+
+	/// <summary>The event type <em>DropFile</em></summary>
+	/// <remarks>
+	/// <para>
+	/// The system requests a file open. <see cref="DropEvent.Data"/> contains the filename.
+	/// </para>
+	/// </remarks>
+	DropFile = 0x1000,
+
+	/// <summary>The event type <em>DropText</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A plain text drag-and-drop event occured. <see cref="DropEvent.Data"/> contains the text.
+	/// </para>
+	/// </remarks>
+	DropText,
+
+	/// <summary>The event type <em>DropBegin</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A new set of drops is beginning. <see cref="DropEvent.Data"/> is <em><see langword="null" /></em>.
+	/// </para>
+	/// </remarks>
+	DropBegin,
+
+	/// <summary>The event type <em>DropCompleted</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Current set of drops is now complete. <see cref="DropEvent.Data"/> is <em><see langword="null" /></em>.
+	/// </para>
+	/// </remarks>
+	DropCompleted,
+
+	/// <summary>The event type <em>DropPosition</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Position while moving over the window.
+	/// </para>
+	/// </remarks>
+	DropPosition,
+
+	#endregion
+
+	#region Audio hotplug events
+
+	/// <summary>The event type <em>AudioDeviceAdded</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A new audio device is available.
+	/// </para>
+	/// </remarks>
+	AudioDeviceAdded = 0x1100,
+
+	/// <summary>The event type <em>AudioDeviceRemoved</em></summary>
+	/// <remarks>
+	/// <para>
+	/// An audio device has been removed.
+	/// </para>
+	/// </remarks>
+	AudioDeviceRemoved,
+
+	/// <summary>The event type <em>AudioDeviceFormatChanged</em></summary>
+	/// <remarks>
+	/// <para>
+	/// An audio device's format has been changed by the system.
+	/// </para>
+	/// </remarks>
+	AudioDeviceFormatChanged,
+
+	#endregion
+
+	#region Sensor events
+
+	/// <summary>The event type <em>SensorUpdated</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A sensor was updated.
+	/// </para>
+	/// </remarks>
+	SensorUpdated = 0x1200,
+
+	#endregion
+
+	#region Pressure-sensitive pen events
+
+	/// <summary>The event type <em>PenProximityIn</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Pressure-sensitive pen has become available.
+	/// </para>
+	/// </remarks>
+	PenProximityIn = 0x1300,
+
+	/// <summary>The event type <em>PenProximityOut</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Pressure-sensitive pen has become unavailable.
+	/// </para>
+	/// </remarks>
+	PenProximityOut,
+
+	/// <summary>The event type <em>PenDown</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Pressure-sensitive pen touched drawing surface.
+	/// </para>
+	/// </remarks>
+	PenDown,
+
+	/// <summary>The event type <em>PenUp</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Pressure-sensitive pen stopped touching drawing surface.
+	/// </para>
+	/// </remarks>
+	PenUp,
+
+	/// <summary>The event type <em>PenButtonDown</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Pressure-sensitive pen button pressed.
+	/// </para>
+	/// </remarks>
+	PenButtonDown,
+
+	/// <summary>The event type <em>PenButtonUp</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Pressure-sensitive pen button released.
+	/// </para>
+	/// </remarks>
+	PenButtonUp,
+
+	/// <summary>The event type <em>PenMotion</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Pressure-sensitive pen is moving on the tablet.
+	/// </para>
+	/// </remarks>
+	PenMotion,
+
+	/// <summary>The event type <em>PenAxisChanged</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Pressure-sensitive pen angle/pressure/etc changed.
+	/// </para>
+	/// </remarks>
+	PenAxisChanged,
+
+	#endregion
+
+	#region Camera hotplug events
+
+	/// <summary>The event type <em>CameraDeviceAdded</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A new camera device is available.
+	/// </para>
+	/// </remarks>
+	CameraDeviceAdded = 0x1400,
+
+	/// <summary>The event type <em>CameraDeviceRemoved</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A camera device has been removed.
+	/// </para>
+	/// </remarks>
+	CameraDeviceRemoved,
+
+	/// <summary>The event type <em>CameraDeviceApproved</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A camera device has been approved for use by the user.
+	/// </para>
+	/// </remarks>
+	CameraDeviceApproved,
+
+	/// <summary>The event type <em>CameraDeviceDenied</em></summary>
+	/// <remarks>
+	/// <para>
+	/// A camera device has been denied for use by the user.
+	/// </para>
+	/// </remarks>
+	CameraDeviceDenied,
+
+	#endregion
+
+	#region Render events
+
+	/// <summary>The event type <em>RenderTargetsReset</em></summary>
+	/// <remarks>
+	/// <para>
+	/// The render targets have been reset and their contents need to be updated.
+	/// </para>
+	/// </remarks>
+	RenderTargetsReset = 0x2000,
+
+	/// <summary>The event type <em>RenderDeviceReset</em></summary>
+	/// <remarks>
+	/// <para>
+	/// The device has been reset and all textures need to be recreated.
+	/// </para>
+	/// </remarks>
+	RenderDeviceReset,
+
+	/// <summary>The event type <em>RenderDeviceLost</em></summary>
+	/// <remarks>
+	/// <para>
+	/// The device has been lost and can't be recovered.
+	/// </para>
+	/// </remarks>
+	RenderDeviceLost,
+
+	#endregion
+
+	#region Reserved events for private platforms
+
+	/// <summary>SDL_EVENT_PRIVATE0</summary>
+	/// <remarks>Reserved event for private platforms. Do not use.</remarks>
+	[Experimental("SDL6010")] //TODO: make 'SDL6010' the diagnostics id for 'reserved events for private platforms'
+	Private0 = 0x4000,
+
+	/// <summary>SDL_EVENT_PRIVATE1</summary>
+	/// <remarks>Reserved event for private platforms. Do not use.</remarks>
+	[Experimental("SDL6010")] //TODO: make 'SDL6010' the diagnostics id for 'reserved events for private platforms'
+	Private1,
+
+	/// <summary>SDL_EVENT_PRIVATE2</summary>
+	/// <remarks>Reserved event for private platforms. Do not use.</remarks>
+	[Experimental("SDL6010")] //TODO: make 'SDL6010' the diagnostics id for 'reserved events for private platforms'
+	Private2,
+
+	/// <summary>SDL_EVENT_PRIVATE3</summary>
+	/// <remarks>Reserved event for private platforms. Do not use.</remarks>
+	[Experimental("SDL6010")] //TODO: make 'SDL6010' the diagnostics id for 'reserved events for private platforms'
+	Private3,
+
+	#endregion
+
+	#region Internal events
+
+	/// <summary>SDL_EVENT_POLL_SENTINEL</summary>
+	/// <remarks>Do not use. Signals the end of an event poll cycle.</remarks>
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Obsolete("Do not use.")]
+	PollSentinel = 0x7F00,
+
+	/// <summary>SDL_EVENT_USER</summary>
+	/// <remarks>Do not use directly. Use <see cref="EventTypeExtensions.TryRegister(out EventType)"/> or <see cref="EventTypeExtensions.TryRegister(Span{EventType})"/> instead.</remarks>
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Obsolete("Do not use. Use the EventTypeExtensions.TryRegister(out EventType) or EventTypeExtensions.TryRegister(Span{EventType}) extension methods instead.")]
+	User = 0x8000,
+
+	#endregion
+
+	/// <summary>SDL_EVENT_LAST</summary>
+	/// <remarks>Do not use directly. Use <see cref="EventTypeExtensions.TryRegister(out EventType)"/> or <see cref="EventTypeExtensions.TryRegister(Span{EventType})"/> instead.</remarks>
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Obsolete("Do not use. Use the EventTypeExtensions.TryRegister(out EventType) or EventTypeExtensions.TryRegister(Span{EventType}) extension methods instead.")]
+	Last = 0xFFFF,
 }

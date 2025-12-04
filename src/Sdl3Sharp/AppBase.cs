@@ -64,7 +64,7 @@ public abstract partial class AppBase
 	/// You should treat those arguments as you normally would main entry point arguments.
 	/// </para>
 	/// <para>
-	/// If this method returns <see cref="AppResult.Continue"/>, the <see cref="AppBase"/>'s execution will proceed to normal operation, and will begin receiving repeated calls to <see cref="OnIterateInternal(Sdl)"/> and <see cref="OnEvent(Sdl, EventRef{Event})"/> for the execution time of the <see cref="AppBase"/>.
+	/// If this method returns <see cref="AppResult.Continue"/>, the <see cref="AppBase"/>'s execution will proceed to normal operation, and will begin receiving repeated calls to <see cref="OnIterateInternal(Sdl)"/> and <see cref="OnEvent(Sdl, ref Event)"/> for the execution time of the <see cref="AppBase"/>.
 	/// If this method returns <see cref="AppResult.Failure"/>, <see cref="OnQuit(Sdl, AppResult)"/> will be called immediately and terminate the <see cref="AppBase"/>'s execution with a return value that can be used as an exit code for program that reports an error to the platform.
 	/// If it returns <see cref="AppResult.Success"/>, <see cref="OnQuit(Sdl, AppResult)"/> will be called immediately and terminate the <see cref="AppBase"/>'s execution with a return value that can be used as an exit code for the program that reports success to the platform.
 	/// </para>
@@ -106,13 +106,13 @@ public abstract partial class AppBase
 	/// You should use the <see cref="Timing.Timer"/> functionality (e.g. <see cref="Timing.Timer.MillisecondTicks"/>) if you need to see how much time has passed since the last iteration.
 	/// </para>
 	/// <para>
-	/// There is no need to process events during this method; events will be send to <see cref="OnEvent(Sdl, EventRef{Event})"/> as they arrive, and in most cases the event queue will be empty when this method runs anyhow.
+	/// There is no need to process events during this method; events will be send to <see cref="OnEvent(Sdl, ref Event)"/> as they arrive, and in most cases the event queue will be empty when this method runs anyhow.
 	/// </para>
 	/// <para>
 	/// This method should not go into an infinite loop; it should do one iteration of whatever it needs to do and return.
 	/// </para>
 	/// <para>
-	/// If this method returns <see cref="AppResult.Continue"/>, the <see cref="AppBase"/>'s execution will continue normal operation, receiving repeated calls to <see cref="OnIterateInternal(Sdl)"/> and <see cref="OnEvent(Sdl, EventRef{Event})"/> for the execution time of the <see cref="AppBase"/>.
+	/// If this method returns <see cref="AppResult.Continue"/>, the <see cref="AppBase"/>'s execution will continue normal operation, receiving repeated calls to <see cref="OnIterateInternal(Sdl)"/> and <see cref="OnEvent(Sdl, ref Event)"/> for the execution time of the <see cref="AppBase"/>.
 	/// If this method returns <see cref="AppResult.Failure"/>, <see cref="OnQuit(Sdl, AppResult)"/> will be called immediately and terminate the <see cref="AppBase"/>'s execution with a return value that can be used as an exit code for program that reports an error to the platform.
 	/// If it returns <see cref="AppResult.Success"/>, <see cref="OnQuit(Sdl, AppResult)"/> will be called immediately and terminate the <see cref="AppBase"/>'s execution with a return value that can be used as an exit code for the program that reports success to the platform.
 	/// </para>
@@ -126,7 +126,7 @@ public abstract partial class AppBase
 	/// The event handling entry point for an <see cref="AppBase"/>'s execution
 	/// </summary>
 	/// <param name="sdl">The <see cref="Sdl"/> instance that started the execution of this <see cref="AppBase"/></param>
-	/// <param name="eventRef">A reference to the newly arrived event to examine</param>
+	/// <param name="event">A reference to the newly arrived event to examine</param>
 	/// <returns>
 	/// How to proceed with the operation of this <see cref="AppBase"/>'s execution:
 	/// <list type="bullet">
@@ -163,7 +163,7 @@ public abstract partial class AppBase
 	/// This method should not go into an infinite loop; it should handle the provided event appropriately and return.
 	/// </para>
 	/// <para>
-	/// If this method returns <see cref="AppResult.Continue"/>, the <see cref="AppBase"/>'s execution will continue normal operation, receiving repeated calls to <see cref="OnIterateInternal(Sdl)"/> and <see cref="OnEvent(Sdl, EventRef{Event})"/> for the execution time of the <see cref="AppBase"/>.
+	/// If this method returns <see cref="AppResult.Continue"/>, the <see cref="AppBase"/>'s execution will continue normal operation, receiving repeated calls to <see cref="OnIterateInternal(Sdl)"/> and <see cref="OnEvent(Sdl, ref Event)"/> for the execution time of the <see cref="AppBase"/>.
 	/// If this method returns <see cref="AppResult.Failure"/>, <see cref="OnQuit(Sdl, AppResult)"/> will be called and terminate the <see cref="AppBase"/>'s execution with a return value that can be used as an exit code for program that reports an error to the platform.
 	/// If it returns <see cref="AppResult.Success"/>, <see cref="OnQuit(Sdl, AppResult)"/> will be called and terminate the <see cref="AppBase"/>'s execution with a return value that can be used as an exit code for the program that reports success to the platform.
 	/// </para>
@@ -171,7 +171,7 @@ public abstract partial class AppBase
 	/// This method may get called concurrently with <see cref="OnIterate(Sdl)"/> or <see cref="OnQuit(Sdl, AppResult)"/> for events not pushed from the main thread.
 	/// </para>
 	/// </remarks>
-	protected virtual AppResult OnEvent(Sdl sdl, EventRef<Event> eventRef) => Continue;
+	protected virtual AppResult OnEvent(Sdl sdl, ref Event @event) => Continue;
 
 	/// <summary>
 	/// The deinitialising entry point for an <see cref="AppBase"/>'s execution
@@ -190,11 +190,11 @@ public abstract partial class AppBase
 	/// </para>
 	/// <para>
 	/// You do not need to <see cref="Sdl.Dispose">dispose the <paramref name="sdl"/></see> instance in this method, as that will be done automatically it after this method returns,
-	/// but it is safe to do so (with an exception regarding concurrent calls to <see cref="OnEvent(Sdl, EventRef{Event})"/> which might receive the disposed <see cref="Sdl"/> instance by then).
+	/// but it is safe to do so (with an exception regarding concurrent calls to <see cref="OnEvent(Sdl, ref Event)"/> which might receive the disposed <see cref="Sdl"/> instance by then).
 	/// The <paramref name="sdl"/> instance is <see cref="Sdl.Dispose">disposed</see> after the call to this method no matter what. This is unavoidable!
 	/// </para>
 	/// <para>
-	/// This method is called by SDL on the main thread, though <see cref="OnEvent(Sdl, EventRef{Event})"/> may get called concurrently with this method if other threads that push events are still active.
+	/// This method is called by SDL on the main thread, though <see cref="OnEvent(Sdl, ref Event)"/> may get called concurrently with this method if other threads that push events are still active.
 	/// </para>
 	/// </remarks>
 	protected virtual void OnQuit(Sdl sdl, AppResult result) { }

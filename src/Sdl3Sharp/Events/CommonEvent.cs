@@ -8,45 +8,50 @@ using System.Runtime.InteropServices;
 namespace Sdl3Sharp.Events;
 
 partial struct Event
-{	
-	[FieldOffset(0)] internal CommonEvent<Event> Common;	
+{
+	[FieldOffset(0)] internal CommonEvent Common;
 
+	/// <summary>
+	/// Creates a new <see cref="Event"/> from a <see cref="CommonEvent"/>
+	/// </summary>
+	/// <param name="event">The <see cref="CommonEvent"/> to store into the newly created <see cref="Event"/></param>
+	internal Event(in CommonEvent @event) :
 #pragma warning disable IDE0034 // Leave it for explicitness sake
-	internal Event(in CommonEvent<Event> @event) : this(default(IUnsafeConstructorDispatch?)) => Common = @event;
+		this(default(IUnsafeConstructorDispatch?))
 #pragma warning restore IDE0034
+		=> Common = @event;
 }
 
+/// <summary>
+/// Represents commonly shared properties by all of SDL's *Event structures
+/// </summary>
+/// <remarks>
+/// <para>
+/// Note: This isn't real event; it's just a basic implementation of <see cref="ICommonEvent"/> used by most over *Event structures.
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
-internal struct CommonEvent<TEvent> : ICommonEvent<CommonEvent<TEvent>>, IFormattable, ISpanFormattable
-	where TEvent : struct, ICommonEvent<TEvent>
+internal struct CommonEvent : ICommonEvent<CommonEvent>, IFormattable, ISpanFormattable
 {
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly string DebuggerDisplay => ToString(formatProvider: CultureInfo.InvariantCulture);
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	static bool ICommonEvent<CommonEvent<TEvent>>.Accepts(EventType type) => true;
+	static bool ICommonEvent<CommonEvent>.Accepts(EventType type) => true; // CommonEvent accepts all EventTypes
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	static ref CommonEvent<TEvent> ICommonEvent<CommonEvent<TEvent>>.GetReference(ref Event @event) => ref Unsafe.As<CommonEvent<Event>, CommonEvent<TEvent>>(ref @event.Common);
+	static ref CommonEvent ICommonEvent<CommonEvent>.GetReference(ref Event @event) => ref @event.Common;
 
-	private EventType<TEvent> mType;
+	private EventType mType;
 	private readonly uint mReserved;
 	private ulong mTimestamp;
 
-	/// <inheritdoc cref="ICommonEvent{TSelf}.Type"/>
-	public EventType<TEvent> Type
+	/// <inheritdoc/>
+	public EventType Type
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] readonly get => mType;
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] set => mType = value;
-	}
-	
-	/// <inheritdoc/>
-	/// <inheritdoc cref="EventType{TEvent}.explicit operator EventType{TEvent}(EventType)"/>
-	EventType<CommonEvent<TEvent>> ICommonEvent<CommonEvent<TEvent>>.Type
-	{
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] readonly get => (EventType<CommonEvent<TEvent>>)(EventType)mType;
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] set => mType = (EventType<TEvent>)(EventType)value;
 	}
 
 	/// <inheritdoc/>
@@ -67,7 +72,19 @@ internal struct CommonEvent<TEvent> : ICommonEvent<CommonEvent<TEvent>>, IFormat
 
 	/// <inheritdoc/>
 	public readonly string ToString(string? format, IFormatProvider? formatProvider)
-		=> $"{{ {ICommonEvent.PartialToString(in this, format, formatProvider)} }}";
+	{
+		var builder = Shared.StringBuilder;
+		try
+		{
+			return ICommonEvent.PartiallyAppend(in this, builder.Append("{ "), format)
+							   .Append(" }")
+							   .ToString();
+		}
+		finally
+		{
+			builder.Clear();
+		}
+	}
 
 	/// <inheritdoc/>
 	public readonly bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default)
@@ -75,15 +92,15 @@ internal struct CommonEvent<TEvent> : ICommonEvent<CommonEvent<TEvent>>, IFormat
 		charsWritten = 0;
 
 		return SpanFormat.TryWrite("{ ", ref destination, ref charsWritten)
-			&& ICommonEvent.TryPartialFormat(in this, ref destination, ref charsWritten, format, provider)
+			&& ICommonEvent.TryPartiallyFormat(in this, ref destination, ref charsWritten, format)
 			&& SpanFormat.TryWrite(" }", ref destination, ref charsWritten);
 	}
 
 	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static implicit operator Event(in CommonEvent<TEvent> @event) => new(in Unsafe.As<CommonEvent<TEvent>, CommonEvent<Event>>(ref Unsafe.AsRef(in @event)));
+	public static implicit operator Event(in CommonEvent @event) => new(in @event);
 
 	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static explicit operator CommonEvent<TEvent>(in Event @event) => Unsafe.As<CommonEvent<Event>, CommonEvent<TEvent>>(ref Unsafe.AsRef(in @event.Common));
+	public static explicit operator CommonEvent(in Event @event) => @event.Common;
 }

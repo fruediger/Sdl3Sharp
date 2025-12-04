@@ -8,7 +8,7 @@ partial class AppBase
 
 	internal AppResult OnIterateInternal(Sdl sdl) => OnIterate(sdl);
 
-	internal AppResult OnEventInternal(Sdl sdl, EventRef<Event> eventRef) => OnEvent(sdl, eventRef);
+	internal AppResult OnEventInternal(Sdl sdl, ref Event @event) => OnEvent(sdl, ref @event);
 
 	internal void OnQuitInternal(Sdl sdl, AppResult appResult) => OnQuit(sdl, appResult);
 }

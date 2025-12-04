@@ -1,6 +1,4 @@
-﻿using System;
-
-/*
+﻿/*
 namespace Sdl3Sharp.Threading;
 
 public static class InitStateExtensions

@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Sdl3Sharp;
 
-partial struct LogCategory
+partial class LogCategoryExtensions
 {
 	/// <summary>
 	/// Get the priority of a particular log category
@@ -19,7 +19,9 @@ partial struct LogCategory
 	/// Reset all priorities to default
 	/// </summary>
 	/// <remarks>
+	/// <para>
 	/// This is called by <see href="https://wiki.libsdl.org/SDL3/SDL_Quit">SDL_Quit</see>()
+	/// </para>
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_ResetLogPriorities">SDL_ResetLogPriorities</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]

@@ -61,8 +61,8 @@ public static partial class Error
 	/// <summary>
 	/// Tries to retrieve a message about the last error that occurred on the current thread
 	/// </summary>
-	/// <param name="message">A message with information about the specific error that occurred, or <c><see langword="null"/></c> or an empty string if there hasn't been an error message set since the last call to <see cref="Clear"/></param>
-	/// <returns><c><see langword="true"/></c> if there was a non-<c><see langword="null"/></c> and non-empty error <paramref name="message"/>; otherwise <c><see langword="false"/></c></returns>
+	/// <param name="message">A message with information about the specific error that occurred, or <c><see langword="null"/></c> if there hasn't been an error message set since the last call to <see cref="Clear"/></param>
+	/// <returns><c><see langword="true"/></c> if there was a non-<c><see langword="null"/></c> error <paramref name="message"/>; otherwise <c><see langword="false"/></c></returns>
 	/// <remarks>
 	/// <para>
 	/// It is possible for multiple errors to occur before calling <see cref="TryGet(out string?)"/>. Only the last error is returned.
@@ -83,7 +83,7 @@ public static partial class Error
 		{
 			message = Utf8StringMarshaller.ConvertToManaged(SDL_GetError());
 
-			return !string.IsNullOrEmpty(message);
+			return message is not null;
 		}
 	}
 }

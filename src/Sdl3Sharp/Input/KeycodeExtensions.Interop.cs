@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Sdl3Sharp.Input;
 
-partial struct Keycode
+partial class KeycodeExtensions
 {
 	/// <summary>
 	/// Get a key code from a human-readable name

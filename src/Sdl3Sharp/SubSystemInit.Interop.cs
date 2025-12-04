@@ -14,7 +14,7 @@ partial class SubSystemInit
 	/// <remarks>This function and <see href="https://wiki.libsdl.org/SDL3/SDL_Init">SDL_Init</see>() are interchangeable</remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_InitSubSystem">SDL_InitSubSystem</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal static partial CBool SDL_InitSubSystem(InitFlags flags);
+	internal static partial CBool SDL_InitSubSystem(SubSystems flags);
 
 	/// <summary>
 	/// Shut down specific SDL subsystems
@@ -25,5 +25,5 @@ partial class SubSystemInit
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_QuitSubSystem">SDL_QuitSubSystem</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal static partial void SDL_QuitSubSystem(InitFlags flags);
+	internal static partial void SDL_QuitSubSystem(SubSystems flags);
 }

@@ -1,7 +1,6 @@
 ﻿using Sdl3Sharp.Internal.Interop;
 using Sdl3Sharp.SourceGeneration;
 using System.Runtime.CompilerServices;
-using static System.Net.WebRequestMethods;
 
 namespace Sdl3Sharp.Video.Drawing;
 

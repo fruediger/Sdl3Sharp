@@ -15,22 +15,22 @@ partial class Sdl
 	public readonly ref struct Builder
 	{
 		private readonly Sdl mSdl;
-		private readonly ref SubSystemSet mSubSystems;
+		private readonly ref SubSystems mSubSystems;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		internal Builder(Sdl sdl, ref SubSystemSet subSystems) { mSdl = sdl; mSubSystems = ref subSystems; }
+		internal Builder(Sdl sdl, ref SubSystems subSystems) { mSdl = sdl; mSubSystems = ref subSystems; }
 
 		/// <summary>
-		/// Sets certain <see cref="SubSystem">sub systems</see> to be <em>not</em> initialized with SDL
+		/// Sets certain <see cref="SubSystems">sub systems</see> to be <em>not</em> initialized with SDL
 		/// </summary>
-		/// <param name="subSystems">A set of <see cref="SubSystem">sub systems</see> to be <em>not</em> initialized with SDL</param>
+		/// <param name="subSystems"><see cref="SubSystems">Sub systems</see> to be <em>not</em> initialized with SDL</param>
 		/// <returns>The current <see cref="Builder"/> so that additional calls can be chained</returns>
 		/// <remarks>
-		/// NOTE: This does not prevent depend sub system from being initialized (e.g. <see cref="SubSystem.Events"/> when <see cref="SubSystem.Audio"/> should be initialized)
+		/// NOTE: This does not prevent depend sub system from being initialized (e.g. <see cref="SubSystems.Events"/> when <see cref="SubSystems.Audio"/> should be initialized)
 		/// </remarks>
 		/// <inheritdoc cref="Validate"/>
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public readonly Builder DontInitializeSubSystems(params SubSystemSet subSystems)
+		public readonly Builder DontInitializeSubSystems(SubSystems subSystems)
 		{
 			Validate();
 
@@ -40,13 +40,13 @@ partial class Sdl
 		}
 
 		/// <summary>
-		/// Sets certain <see cref="SubSystem">sub systems</see> to be initialized with SDL
+		/// Sets certain <see cref="SubSystems">sub systems</see> to be initialized with SDL
 		/// </summary>
-		/// <param name="subSystems">A set of <see cref="SubSystem">sub systems</see> to be initialized with SDL</param>
+		/// <param name="subSystems"><see cref="SubSystems">Sub systems</see> to be initialized with SDL</param>
 		/// <returns>The current <see cref="Builder"/> so that additional calls can be chained</returns>
 		/// <inheritdoc cref="Validate"/>
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public readonly Builder InitializeSubSystems(params SubSystemSet subSystems)
+		public readonly Builder InitializeSubSystems(SubSystems subSystems)
 		{
 			Validate();
 

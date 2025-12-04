@@ -1,7 +1,6 @@
 ﻿using Sdl3Sharp.Internal;
 using Sdl3Sharp.Timing;
 using System;
-using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Sdl3Sharp.Events;
@@ -38,117 +37,113 @@ public interface ICommonEvent
 	/// </remarks>
 	ulong Timestamp { get; set; }
 
-	private static string FormatTimestamp(ulong timestamp)
+	internal static StringBuilder PartiallyAppend<TEvent>(ref readonly TEvent @event, StringBuilder builder, string? format)
+		where TEvent : struct, ICommonEvent
 	{
-		var builder = Shared.StringBuilder;
+		return formatTimestamp(
+			@event.Timestamp,
+			builder.Append($"{nameof(Type)}: ")
+				   .Append(@event.Type.ToString(format))
+				   .Append($", {nameof(Timestamp)}: ")
+		);
 
-		try
+		static StringBuilder formatTimestamp(ulong timestamp, StringBuilder builder)
 		{
-			(timestamp, var ns) = Math.DivRem(timestamp, 1_000_000);
+			(timestamp, var ns) = Math.DivRem(timestamp, Time.NanosecondsPerMillisecond);
 
 			if (timestamp is > 0)
 			{
-				(timestamp, var ms) = Math.DivRem(timestamp, 1_000);
+				(timestamp, var ms) = Math.DivRem(timestamp, Time.MillisecondsPerSecond);
 
 				if (timestamp is > 0)
 				{
-					(timestamp, var s) = Math.DivRem(timestamp, 60);
+					(timestamp, var s) = Math.DivRem(timestamp, 60 /* seconds per minute */);
 
 					if (timestamp is > 0)
 					{
-						(timestamp, var min) = Math.DivRem(timestamp, 60);
+						(timestamp, var min) = Math.DivRem(timestamp, 60 /* minutes per hour */);
 
 						if (timestamp is > 0)
 						{
-							builder.Append(timestamp /* (hours) */).Append("h ");
+							builder.Append(timestamp /* hours */)
+								   .Append("h ");
 						}
 
-						builder.Append(min).Append("min ");
+						builder.Append(min)
+							   .Append("min ");
 					}
 
-					builder.Append(s).Append("s ");
+					builder.Append(s)
+						   .Append("s ");
 				}
 
-				builder.Append(ms).Append("ms ");
+				builder.Append(ms)
+					   .Append("ms ");
 			}
 
-			builder.Append(ns).Append("ns");
-
-			return builder.ToString();
-		}
-		finally
-		{
-			builder.Clear();
+			return builder.Append(ns)
+						  .Append("ns");
 		}
 	}
 
-	private static bool TryFormatTimestamp(ulong timestamp, ref Span<char> destination, ref int charsWritten)
+	internal static bool TryPartiallyFormat<TEvent>(ref readonly TEvent @event, ref Span<char> destination, ref int charsWritten, ReadOnlySpan<char> format = default)
+		where TEvent : struct, ICommonEvent
 	{
-		(timestamp, var ns) = Math.DivRem(timestamp, 1_000_000);
+		return SpanFormat.TryWrite($"{nameof(Type)}: ", ref destination, ref charsWritten)
+			&& SpanFormat.TryWrite(@event.Type, ref destination, ref charsWritten, format)
+			&& SpanFormat.TryWrite($", {nameof(Timestamp)}: ", ref destination, ref charsWritten)
+			&& tryFormatTimestamp(@event.Timestamp, ref destination, ref charsWritten);
 
-		if (timestamp is > 0)
+		static bool tryFormatTimestamp(ulong timestamp, ref Span<char> destination, ref int charsWritten)
 		{
-			(timestamp, var ms) = Math.DivRem(timestamp, 1_000);
+			(timestamp, var ns) = Math.DivRem(timestamp, Time.NanosecondsPerMillisecond);
 
 			if (timestamp is > 0)
 			{
-				(timestamp, var s) = Math.DivRem(timestamp, 60);
+				(timestamp, var ms) = Math.DivRem(timestamp, Time.MillisecondsPerSecond);
 
 				if (timestamp is > 0)
 				{
-					(timestamp, var min) = Math.DivRem(timestamp, 60);
+					(timestamp, var s) = Math.DivRem(timestamp, 60 /* seconds per minute */);
 
 					if (timestamp is > 0)
 					{
-						if ( !(SpanFormat.TryWrite(timestamp /* (hours) */, ref destination, ref charsWritten)
-							&& SpanFormat.TryWrite("h ", ref destination, ref charsWritten)))
+						(timestamp, var min) = Math.DivRem(timestamp, 60 /* minutes per hour */);
+
+						if (timestamp is > 0)
+						{
+							if (!(SpanFormat.TryWrite(timestamp /* hours */, ref destination, ref charsWritten)
+								&& SpanFormat.TryWrite("h ", ref destination, ref charsWritten)))
+							{
+								return false;
+							}
+						}
+
+						if (!(SpanFormat.TryWrite(min, ref destination, ref charsWritten)
+							&& SpanFormat.TryWrite("min ", ref destination, ref charsWritten)))
 						{
 							return false;
 						}
 					}
 
-					if ( !(SpanFormat.TryWrite(min, ref destination, ref charsWritten)
-						&& SpanFormat.TryWrite("min ", ref destination, ref charsWritten)))
+					if (!(SpanFormat.TryWrite(s, ref destination, ref charsWritten)
+						&& SpanFormat.TryWrite("s ", ref destination, ref charsWritten)))
 					{
 						return false;
 					}
 				}
 
-				if ( !(SpanFormat.TryWrite(s, ref destination, ref charsWritten)
-					&& SpanFormat.TryWrite("s ", ref destination, ref charsWritten)))
+				if (!(SpanFormat.TryWrite(ms, ref destination, ref charsWritten)
+					&& SpanFormat.TryWrite("ms ", ref destination, ref charsWritten)))
 				{
 					return false;
 				}
 			}
 
-			if ( !(SpanFormat.TryWrite(ms, ref destination, ref charsWritten)
-				&& SpanFormat.TryWrite("ms ", ref destination, ref charsWritten)))
-			{
-				return false;
-			}
+			return SpanFormat.TryWrite(ns, ref destination, ref charsWritten)
+				&& SpanFormat.TryWrite("ns ", ref destination, ref charsWritten);
 		}
-
-		return SpanFormat.TryWrite(ns, ref destination, ref charsWritten)
-			&& SpanFormat.TryWrite("ns", ref destination, ref charsWritten);
 	}
-
-	internal static StringBuilder PartialAppend<TEvent>(StringBuilder builder, ref readonly TEvent @event, string? format, IFormatProvider? formatProvider)
-		where TEvent : struct, ICommonEvent
-		=> builder.Append($"{nameof(Type)}: ")
-			.Append(@event.Type.ToString(format, formatProvider))
-			.Append($", {nameof(Timestamp)}: ")
-			.Append(FormatTimestamp(@event.Timestamp));
-
-	internal static string PartialToString<TEvent>(ref readonly TEvent @event, string? format, IFormatProvider? formatProvider)
-		where TEvent : struct, ICommonEvent
-		=> $"{nameof(Type)}: {@event.Type.ToString(format, formatProvider)}, {nameof(Timestamp)}: {FormatTimestamp(@event.Timestamp)}";
-
-	internal static bool TryPartialFormat<TEvent>(ref readonly TEvent @event, ref Span<char> destination, ref int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
-		where TEvent : struct, ICommonEvent
-		=> SpanFormat.TryWrite($"{nameof(Type)}: ", ref destination, ref charsWritten)
-		&& SpanFormat.TryWrite(@event.Type, ref destination, ref charsWritten, format, provider)
-		&& SpanFormat.TryWrite($", {nameof(Timestamp)}: ", ref destination, ref charsWritten)
-		&& TryFormatTimestamp(@event.Timestamp, ref destination, ref charsWritten);
 }
 
 /// <summary>
@@ -158,36 +153,9 @@ public interface ICommonEvent
 public interface ICommonEvent<TSelf> : ICommonEvent
 	where TSelf : struct, ICommonEvent<TSelf>
 {
-	/// <summary>
-	/// Gets or sets the <see cref="EventType{TEvent}">type</see> of the current event
-	/// </summary>
-	/// <value>
-	/// The <see cref="EventType{TEvent}">type</see> of the current event
-	/// </value>
-	new EventType<TSelf> Type { get; set; }
-
-	/// <inheritdoc/>
-	/// <inheritdoc cref="EventType{TEvent}.explicit operator EventType{TEvent}(EventType)"/>
-	EventType ICommonEvent.Type
-	{
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => Type;
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] set => Type = (EventType<TSelf>)value;
-	}
-
 	internal static abstract bool Accepts(EventType type);
 
 	internal static abstract ref TSelf GetReference(ref Event @event);
-
-	/// <summary>
-	/// Converts an event of type <typeparamref name="TSelf"/> to a general <see cref="Event"/>
-	/// </summary>
-	/// <param name="event">The event of type <typeparamref name="TSelf"/> to convert to a general <see cref="Event"/></param>
-	/// <remarks>
-	/// <para>
-	/// This conversion usually requires the <paramref name="event"/> to be copied into a new general <see cref="Event"/> structure. Note: This can impact performance!
-	/// </para>
-	/// </remarks>
-	static abstract implicit operator Event(in TSelf @event);
 
 	/// <summary>
 	/// Converts a general <see cref="Event"/> to an event of type <typeparamref name="TSelf"/>
@@ -200,4 +168,15 @@ public interface ICommonEvent<TSelf> : ICommonEvent
 	/// </para>
 	/// </remarks>
 	static abstract explicit operator TSelf(in Event @event);
+
+	/// <summary>
+	/// Converts an event of type <typeparamref name="TSelf"/> to a general <see cref="Event"/>
+	/// </summary>
+	/// <param name="event">The event of type <typeparamref name="TSelf"/> to convert to a general <see cref="Event"/></param>
+	/// <remarks>
+	/// <para>
+	/// This conversion usually requires the <paramref name="event"/> to be copied into a new general <see cref="Event"/> structure. Note: This can impact performance!
+	/// </para>
+	/// </remarks>
+	static abstract implicit operator Event(in TSelf @event);
 }

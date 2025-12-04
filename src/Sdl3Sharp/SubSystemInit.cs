@@ -8,11 +8,11 @@ using System.Runtime.CompilerServices;
 namespace Sdl3Sharp;
 
 /// <summary>
-/// Represents the lifetime of <see cref="SubSystems">a set of initialized sub systems</see>
+/// Represents the lifetime of a set of initialized <see cref="Sdl3Sharp.SubSystems">sub systems</see>
 /// </summary>
 /// <remarks>
-/// <see cref="SubSystem"/>s are reference counted through <see cref="SubSystemInit"/>s.
-/// That means the lifetime of a certain <see cref="SubSystem"/> could overlap with other <see cref="SubSystemInit"/>s.
+/// Initialized <see cref="Sdl3Sharp.SubSystems"/> are reference counted through <see cref="SubSystemInit"/>s.
+/// That means the lifetime of a certain sub sets of <see cref="Sdl3Sharp.SubSystems"/> could overlap with other <see cref="SubSystemInit"/>s.
 /// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 public sealed partial class SubSystemInit :
@@ -21,14 +21,14 @@ public sealed partial class SubSystemInit :
 	private static SimpleSpinYieldLock mLock = new();
 
 	private WeakReference<Sdl>? mSdlReference;
-	private SubSystemSet mSubSystems;
+	private SubSystems mSubSystems;
 
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private string DebuggerDisplay => ToString(formatProvider: CultureInfo.InvariantCulture);
 
 	/// <exception cref="SdlException">Couldn't initialize the specified sub systems (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	/// <exception cref="InvalidOperationException">Could not register the <see cref="SubSystemInit"/> with the <see cref="Sdl"/> instance</exception>
-	internal SubSystemInit(Sdl sdl, SubSystemSet subSystems)
+	internal SubSystemInit(Sdl sdl, SubSystems subSystems)
 	{
 		if (sdl is null)
 		{
@@ -37,7 +37,7 @@ public sealed partial class SubSystemInit :
 
 		// If 'subSystems' is empty, we don't fail;
 		// instead we create an uninitialized default instance, which kind of behaves as if it was already disposed
-		if (!subSystems.IsEmpty)
+		if (subSystems is not SubSystems.None)
 		{
 			// since we're going to check the currently initialized sub systems, before and after initializing the new ones,
 			// we need to lock, as other threads might be initializing sub systems at the same time
@@ -46,7 +46,7 @@ public sealed partial class SubSystemInit :
 			{
 				var before = sdl.GetInitializedSubSystems();
 
-				if (!SDL_InitSubSystem(subSystems.InitFlags))
+				if (!SDL_InitSubSystem(subSystems))
 				{
 					failCouldNotInitializeSubSystems();
 				}
@@ -61,9 +61,9 @@ public sealed partial class SubSystemInit :
 
 		if (!sdl.TryRegisterDisposable(this))
 		{
-			if (!subSystems.IsEmpty)
+			if (subSystems is not Sdl3Sharp.SubSystems.None)
 			{
-				SDL_QuitSubSystem(subSystems.InitFlags);
+				SDL_QuitSubSystem(subSystems);
 			}
 
 			failCouldNotRegisterWithSdl();
@@ -91,23 +91,23 @@ public sealed partial class SubSystemInit :
 	/// <value>
 	/// The sub systems the <see cref="SubSystemInit"/> was initialized with
 	/// </value>
-	public SubSystemSet SubSystems { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mSubSystems; }
+	public SubSystems SubSystems { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mSubSystems; }
 
 	/// <summary>
-	/// Disposes the <see cref="SubSystemInit"/> and potentially shuts down some of the <see cref="SubSystems">sub systems</see>
+	/// Disposes the <see cref="SubSystemInit"/> and potentially shuts down some of the <see cref="Sdl3Sharp.SubSystems">sub systems</see>
 	/// </summary>
 	/// <remarks>
 	/// <para>
-	/// <see cref="SubSystem"/>s are reference counted through <see cref="SubSystemInit"/>s.
-	/// This method decreases the reference count for the <see cref="SubSystems"/>.
+	/// <see cref="Sdl3Sharp.SubSystems"/> are reference counted through <see cref="SubSystemInit"/>s.
+	/// This method decreases the reference count for the <see cref="Sdl3Sharp.SubSystems"/>.
 	/// </para>
 	/// <para>
-	/// A <see cref="SubSystem"/> gets shut down if it's reference count reaches 0.
-	/// That means if other <see cref="SubSystemInit"/>s hold a reference to certain <see cref="SubSystem"/>s or the <see cref="Sdl"/> instance was initialized with certain <see cref="SubSystem"/>s,
+	/// <see cref="Sdl3Sharp.SubSystems"/> get shut down if their reference count reaches 0.
+	/// That means if other <see cref="SubSystemInit"/>s hold a reference to certain <see cref="Sdl3Sharp.SubSystems"/> or the <see cref="Sdl"/> instance was initialized with certain <see cref="Sdl3Sharp.SubSystems"/>,
 	/// those might not get shut down immediately.
 	/// </para>
 	/// <para>
-	/// <see cref="Sdl.Dispose"/> shuts down all <see cref="SubSystem"/>s regardless.
+	/// <see cref="Sdl.Dispose"/> shuts down all <see cref="Sdl3Sharp.SubSystems"/> regardless.
 	/// </para>
 	/// </remarks>
 	public void Dispose()
@@ -129,7 +129,7 @@ public sealed partial class SubSystemInit :
 
 	private void Dispose(bool deregister)
 	{
-		if (!mSubSystems.IsEmpty)
+		if (mSubSystems is not SubSystems.None)
 		{
 			if (mSdlReference is not null)
 			{
@@ -140,10 +140,10 @@ public sealed partial class SubSystemInit :
 
 				mSdlReference = null;
 
-				SDL_QuitSubSystem(mSubSystems.InitFlags);
+				SDL_QuitSubSystem(mSubSystems);
 			}
 
-			mSubSystems = SubSystemSet.Empty;
+			mSubSystems = SubSystems.None;
 		}
 	}
 
@@ -157,7 +157,7 @@ public sealed partial class SubSystemInit :
 	public string ToString(string? format) => ToString(format, formatProvider: default);
 
 	/// <inheritdoc/>
-	public string ToString(string? format, IFormatProvider? formatProvider) => $"{{ {nameof(SubSystems)}: [{mSubSystems.ToString(format, formatProvider)}] }}";
+	public string ToString(string? format, IFormatProvider? formatProvider) => $"{{ {nameof(SubSystems)}: [{mSubSystems.ToString(format)}] }}";
 
 	/// <inheritdoc/>
 	public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default)

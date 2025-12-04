@@ -57,7 +57,7 @@ partial class Sdl
 		{
 			if (userdata is not null && GCHandle.FromIntPtr(unchecked((IntPtr)userdata)) is { IsAllocated: true, Target: EventWatchWrapper { Watch: var watch } })
 			{
-				watch?.Invoke(new(ref Unsafe.AsRef<Event>(@event)));
+				watch?.Invoke(ref Unsafe.AsRef<Event>(@event));
 			}
 
 			return true;

@@ -1,5 +1,4 @@
-﻿using Sdl3Sharp.Events;
-using Sdl3Sharp.Input;
+﻿using Sdl3Sharp.Input;
 using System.Runtime.CompilerServices;
 
 namespace Sdl3Sharp;
@@ -120,7 +119,7 @@ partial struct Hint
 		/// </list>
 		/// </para>
 		/// <para>
-		/// This hint should be set before <see cref="SubSystem.Audio">SDL audio</see> is initialized.
+		/// This hint should be set before <see cref="SubSystems.Audio">SDL audio</see> is initialized.
 		/// </para>
 		/// </remarks>
 		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_ANDROID_LOW_LATENCY_AUDIO">SDL_HINT_ANDROID_LOW_LATENCY_AUDIO</seealso>
@@ -2181,7 +2180,7 @@ partial struct Hint
 				/// </para>
 				/// <para>
 				/// This hint should be set before initializing joysticks and gamepads
-				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 				/// </para>
 				/// </remarks>
 				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_GAMECUBE">SDL_HINT_JOYSTICK_HIDAPI_GAMECUBE</seealso>
@@ -2219,7 +2218,7 @@ partial struct Hint
 				/// </para>
 				/// <para>
 				/// This hint should be set before initializing joysticks and gamepads
-				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 				/// </para>
 				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_GIP_RESET_FOR_METADATA">SDL_HINT_JOYSTICK_HIDAPI_GIP_RESET_FOR_METADATA</seealso>
 				/// </remarks>
@@ -2250,7 +2249,7 @@ partial struct Hint
 				/// </para>
 				/// <para>
 				/// This hint should be set before initializing joysticks and gamepads
-				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 				/// </para>
 				/// </remarks>
 				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_GIP">SDL_HINT_JOYSTICK_HIDAPI_GIP</seealso>
@@ -2287,7 +2286,7 @@ partial struct Hint
 				/// </para>
 				/// <para>
 				/// This hint should be set before initializing joysticks and gamepads
-				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 				/// </para>
 				/// </remarks>
 				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_COMBINE_JOY_CONS">SDL_HINT_JOYSTICK_HIDAPI_COMBINE_JOY_CONS</seealso>
@@ -2349,7 +2348,7 @@ partial struct Hint
 				/// </para>
 				/// <para>
 				/// This hint should be set before initializing joysticks and gamepads
-				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 				/// </para>
 				/// </remarks>
 				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_JOY_CONS">SDL_HINT_JOYSTICK_HIDAPI_JOY_CONS</seealso>
@@ -2448,7 +2447,7 @@ partial struct Hint
 				/// </para>
 				/// <para>
 				/// This hint should be set before initializing joysticks and gamepads
-				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 				/// </para>
 				/// </remarks>
 				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_LUNA">SDL_HINT_JOYSTICK_HIDAPI_LUNA</seealso>
@@ -2486,7 +2485,7 @@ partial struct Hint
 				/// </para>
 				/// <para>
 				/// This hint should be set before initializing joysticks and gamepads
-				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 				/// </para>
 				/// </remarks>
 				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_NINTENDO_CLASSIC">SDL_HINT_JOYSTICK_HIDAPI_NINTENDO_CLASSIC</seealso>
@@ -2524,7 +2523,7 @@ partial struct Hint
 				/// </para>
 				/// <para>
 				/// This hint should be set before initializing joysticks and gamepads
-				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 				/// </para>
 				/// </remarks>
 				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_PS3_SIXAXIS_DRIVER">SDL_HINT_JOYSTICK_HIDAPI_PS3_SIXAXIS_DRIVER</seealso>
@@ -2558,7 +2557,7 @@ partial struct Hint
 				/// </para>
 				/// <para>
 				/// This hint should be set before initializing joysticks and gamepads
-				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 				/// </para>
 				/// </remarks>
 				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_PS3">SDL_HINT_JOYSTICK_HIDAPI_PS3</seealso>
@@ -2614,7 +2613,7 @@ partial struct Hint
 				/// </para>
 				/// <para>
 				/// This hint should be set before initializing joysticks and gamepads
-				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 				/// </para>
 				/// </remarks>
 				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_PS4">SDL_HINT_JOYSTICK_HIDAPI_PS4</seealso>
@@ -2676,7 +2675,7 @@ partial struct Hint
 				/// </para>
 				/// <para>
 				/// This hint should be set before initializing joysticks and gamepads
-				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 				/// </para>
 				/// </remarks>
 				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_PS5">SDL_HINT_JOYSTICK_HIDAPI_PS5</seealso>
@@ -2748,7 +2747,7 @@ partial struct Hint
 				/// </para>
 				/// <para>
 				/// This hint should be set before initializing joysticks and gamepads
-				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 				/// </para>
 				/// </remarks>
 				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_SHIELD">SDL_HINT_JOYSTICK_HIDAPI_SHIELD</seealso>
@@ -2786,7 +2785,7 @@ partial struct Hint
 				/// </para>
 				/// <para>
 				/// This hint should be set before initializing joysticks and gamepads
-				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 				/// </para>
 				/// </remarks>
 				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_STADIA">SDL_HINT_JOYSTICK_HIDAPI_STADIA</seealso>
@@ -2886,7 +2885,7 @@ partial struct Hint
 				/// </para>
 				/// <para>
 				/// This hint should be set before initializing joysticks and gamepads
-				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 				/// </para>
 				/// </remarks>
 				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_STEAM">SDL_HINT_JOYSTICK_HIDAPI_STEAM</seealso>
@@ -2924,7 +2923,7 @@ partial struct Hint
 				/// </para>
 				/// <para>
 				/// This hint should be set before initializing joysticks and gamepads
-				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 				/// </para>
 				/// </remarks>
 				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_STEAMDECK">SDL_HINT_JOYSTICK_HIDAPI_STEAMDECK</seealso>
@@ -3020,7 +3019,7 @@ partial struct Hint
 				/// </para>
 				/// <para>
 				/// This hint should be set before initializing joysticks and gamepads
-				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 				/// </para>
 				/// </remarks>
 				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_SWITCH">SDL_HINT_JOYSTICK_HIDAPI_SWITCH</seealso>
@@ -3085,7 +3084,7 @@ partial struct Hint
 				/// </para>
 				/// <para>
 				/// This hint should be set before initializing joysticks and gamepads
-				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 				/// </para>
 				/// </remarks>
 				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_WII">SDL_HINT_JOYSTICK_HIDAPI_WII</seealso>
@@ -3123,7 +3122,7 @@ partial struct Hint
 				/// </para>
 				/// <para>
 				/// This hint should be set before initializing joysticks and gamepads
-				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 				/// </para>
 				/// </remarks>
 				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_XBOX">SDL_HINT_JOYSTICK_HIDAPI_XBOX</seealso>
@@ -3188,7 +3187,7 @@ partial struct Hint
 				/// </para>
 				/// <para>
 				/// This hint should be set before initializing joysticks and gamepads
-				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 				/// </para>
 				/// </remarks>
 				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_XBOX_360">SDL_HINT_JOYSTICK_HIDAPI_XBOX_360</seealso>
@@ -3225,7 +3224,7 @@ partial struct Hint
 					/// </para>
 					/// <para>
 					/// This hint should be set before initializing joysticks and gamepads
-					/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+					/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 					/// </para>
 					/// </remarks>
 					/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_XBOX_360_WIRELESS">SDL_HINT_JOYSTICK_HIDAPI_XBOX_360_WIRELESS</seealso>
@@ -3296,7 +3295,7 @@ partial struct Hint
 				/// </para>
 				/// <para>
 				/// This hint should be set before initializing joysticks and gamepads
-				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+				/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 				/// </para>
 				/// </remarks>
 				/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI_XBOX_ONE">SDL_HINT_JOYSTICK_HIDAPI_XBOX_ONE</seealso>
@@ -3328,7 +3327,7 @@ partial struct Hint
 			/// </para>
 			/// <para>
 			/// This hint should be set before initializing joysticks and gamepads
-			/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystemSet)">initializing them on their own</see>).
+			/// (either by <see cref="Sdl(Sdl.BuildAction?)">initializing SDL</see> or by <see cref="Sdl.InitializeSubSystems(SubSystems)">initializing them on their own</see>).
 			/// </para>
 			/// </remarks>
 			/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_HIDAPI">SDL_HINT_JOYSTICK_HIDAPI</seealso>
@@ -3774,7 +3773,7 @@ partial struct Hint
 	///		</item>
 	///		<item>
 	///			<term><c>"hide_numpad"</c></term>
-	///			<description>The numpad keysyms will be translated into their non-numpad versions based on the current NumLock state. For example, <see cref="Keycode.Keypad._4"/> would become <see cref="Keycode._4"/> if <see cref="Keymod.NumLock"/> is set in the event modifiers, and <see cref="Keycode.Left"/> if it is unset.</description>
+	///			<description>The numpad keysyms will be translated into their non-numpad versions based on the current NumLock state. For example, <see cref="Keycode.Keypad4"/> would become <see cref="Keycode._4"/> if <see cref="Keymod.NumLock"/> is set in the event modifiers, and <see cref="Keycode.Left"/> if it is unset.</description>
 	///		</item>
 	///		<item>
 	///			<term><c>"french_numbers"</c></term>
@@ -3793,7 +3792,7 @@ partial struct Hint
 	/// Some platforms like Emscripten only provide modified keycodes and the options are not used.
 	/// </para>
 	/// <para>
-	/// These options do not affect the return value of <see cref="Keycode.TryGetFromScancode(Scancode, Keymod, out Keycode)"/>() or <see cref="Scancode.TryGetFromKeycode(Keycode, out Keymod, out Scancode)"/>(), they just apply to the keycode included in key events.
+	/// These options do not affect the return value of <see cref="KeycodeExtensions.TryGetFromScancode(Scancode, Keymod, out Keycode)"/>() or <see cref="ScancodeExtensions.TryGetFromKeycode(Keycode, out Keymod, out Scancode)"/>(), they just apply to the keycode included in key events.
 	/// </para>
 	/// <para>
 	/// This hint can be set anytime.
@@ -3818,7 +3817,7 @@ partial struct Hint
 	/// </para>
 	/// <para>
 	/// There are other string values that have special meaning.
-	/// If set to <c>"waitevent"</c>, <see cref="AppBase.OnIterate(Sdl)"/> will not be called until new event(s) have arrived (and been processed by <see cref="AppBase.OnEvent(Sdl, ref readonly Event)"/>).
+	/// If set to <c>"waitevent"</c>, <see cref="AppBase.OnIterate(Sdl)"/> will not be called until new event(s) have arrived (and been processed by <see cref="AppBase.OnEvent(Sdl, ref EventsNew.Event)"/>).
 	/// This can be useful for apps that are completely idle except in response to input.
 	/// </para>
 	/// <para>

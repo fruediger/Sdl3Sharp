@@ -1,8 +1,4 @@
-﻿using Sdl3Sharp.Internal.Interop;
-using Sdl3Sharp.SourceGeneration;
-using System.Runtime.CompilerServices;
-
-/*
+﻿/*
 namespace Sdl3Sharp.Threading;
 
 partial struct InitState

@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Sdl3Sharp.Input;
 
-partial struct Scancode
+partial class ScancodeExtensions
 {
 	/// <summary>
 	/// Get the scancode corresponding to the given key code according to the current keyboard layout
