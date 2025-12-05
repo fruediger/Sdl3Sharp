@@ -46,7 +46,7 @@ partial class ScancodeExtensions
 	/// <returns>Returns a pointer to the name for the scancode. If the scancode doesn't have a name this function returns an empty string ("")</returns>
 	/// <remarks>
 	/// <para>
-	/// <em>>Warning</em>: The returned name is by design not stable across platforms,
+	/// <em>Warning</em>: The returned name is by design not stable across platforms,
 	/// e.g. the name for <see href="https://wiki.libsdl.org/SDL3/SDL_SCANCODE_LGUI"><c>SDL_SCANCODE_LGUI</c></see> is "Left GUI" under Linux but "Left Windows" under Microsoft Windows,
 	/// and some scancodes like <see href="https://wiki.libsdl.org/SDL3/SDL_SCANCODE_NONUSBACKSLASH"><c>SDL_SCANCODE_NONUSBACKSLASH</c></see> don't have any name at all.
 	/// There are even scancodes that share names, e.g. <see href="https://wiki.libsdl.org/SDL3/SDL_SCANCODE_RETURN"><c>SDL_SCANCODE_RETURN</c></see>

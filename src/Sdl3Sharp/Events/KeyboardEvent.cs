@@ -173,11 +173,6 @@ public struct KeyboardEvent : ICommonEvent<KeyboardEvent>, IFormattable, ISpanFo
 	/// <value>
 	/// A value indicating whether the key is pressed
 	/// </value>
-	/// <remarks>
-	/// <para>
-	/// If the value of this property is <c><see langword="false"/></c>, you can assume the key to be released.
-	/// </para>
-	/// </remarks>
 	public bool IsDown
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] readonly get => mDown;

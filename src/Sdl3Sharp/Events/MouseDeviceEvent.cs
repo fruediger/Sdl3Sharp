@@ -154,12 +154,12 @@ public struct MouseDeviceEvent : ICommonEvent<MouseDeviceEvent>, IFormattable, I
 	{
 		if (!Accepts(@event.Type))
 		{
-			failEventArgumentIsNotKeyboardDeviceEvent();
+			failEventArgumentIsNotMouseDeviceEvent();
 		}
 
 		return @event.MDevice;
 
 		[DoesNotReturn]
-		static void failEventArgumentIsNotKeyboardDeviceEvent() => throw new ArgumentException($"{nameof(@event)} must be a {nameof(MouseDeviceEvent)} by {nameof(Type)}", paramName: nameof(@event));
+		static void failEventArgumentIsNotMouseDeviceEvent() => throw new ArgumentException($"{nameof(@event)} must be a {nameof(MouseDeviceEvent)} by {nameof(Type)}", paramName: nameof(@event));
 	}
 }
