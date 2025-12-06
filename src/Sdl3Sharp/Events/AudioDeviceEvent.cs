@@ -30,7 +30,7 @@ partial struct Event
 /// <remarks>
 /// <para>
 /// SDL will send an <see cref="AudioDeviceEvent"/> with <see cref="Type"/> <see cref="EventType.AudioDeviceAdded"/> for every audio device it discovers during initialization.
-/// After that, <see cref="AudioDeviceEvent"/>s with <see cref="Type"/> <see cref="EventType.AudioDeviceAdded"/> will only arrive when an audio device is hotplugged during the program's run.
+/// After that, <see cref="AudioDeviceEvent"/>s with <see cref="Type"/> <see cref="EventType.AudioDeviceAdded"/> will only arrive when an audio device is hotplugged during the application's runtime.
 /// </para>
 /// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]

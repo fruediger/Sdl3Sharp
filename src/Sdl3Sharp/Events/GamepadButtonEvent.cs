@@ -1,4 +1,5 @@
 ﻿using Sdl3Sharp.Internal;
+using Sdl3Sharp.Internal.Interop;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -10,55 +11,52 @@ namespace Sdl3Sharp.Events;
 
 partial struct Event
 {
-	[FieldOffset(0)] internal JoyDeviceEvent JDevice;
+	[FieldOffset(0)] internal GamepadButtonEvent GButton;
 
 	/// <summary>
-	/// Creates a new <see cref="Event"/> from a <see cref="JoyDeviceEvent"/>
+	/// Creates a new <see cref="Event"/> from a <see cref="GamepadButtonEvent"/>
 	/// </summary>
-	/// <param name="event">The <see cref="JoyDeviceEvent"/> to store into the newly created <see cref="Event"/></param>
-	public Event(in JoyDeviceEvent @event) :
+	/// <param name="event">The <see cref="GamepadButtonEvent"/> to store into the newly created <see cref="Event"/></param>
+	public Event(in GamepadButtonEvent @event) :
 #pragma warning disable IDE0034 // Leave it for explicitness sake
 		this(default(IUnsafeConstructorDispatch?))
 #pragma warning restore IDE0034
-		=> JDevice = @event;
+		=> GButton = @event;
 }
 
 /// <summary>
-/// Represents an event that occurs when a <see cref="Joystick">joystick device</see> is being <see cref="EventType.JoystickAdded">added</see> into the system, <see cref="EventType.JoystickRemoved">removed</see> from the system, or <see cref="EventType.JoystickUpdateCompleted">updated</see>
+/// Represents an event that occurs when a gamepad button is being <see cref="EventType.GamepadButtonDown">pressed</see> or <see cref="EventType.GamepadButtonUp">released</see>
 /// </summary>
-/// <remarks>
-/// <para>
-/// SDL will send a <see cref="JoyDeviceEvent"/> with <see cref="Type"/> <see cref="EventType.JoystickAdded"/> for every joystick device it discovers during initialization.
-/// After that, <see cref="JoyDeviceEvent"/>s with <see cref="Type"/> <see cref="EventType.JoystickAdded"/> will only arrive when a joystick device is hotplugged during the application's runtime.
-/// </para>
-/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
-public struct JoyDeviceEvent : ICommonEvent<JoyDeviceEvent>, IFormattable, ISpanFormattable
+public struct GamepadButtonEvent : ICommonEvent<GamepadButtonEvent>, IFormattable, ISpanFormattable
 {
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly string DebuggerDisplay => ToString(formatProvider: CultureInfo.InvariantCulture);
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	private static bool Accepts(EventType type) => type is EventType.JoystickAdded or EventType.JoystickRemoved or EventType.JoystickUpdateCompleted;
+	private static bool Accepts(EventType type) => type is EventType.GamepadButtonDown or EventType.GamepadButtonUp;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	static bool ICommonEvent<JoyDeviceEvent>.Accepts(EventType type) => Accepts(type);
+	static bool ICommonEvent<GamepadButtonEvent>.Accepts(EventType type) => Accepts(type);
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	static ref JoyDeviceEvent ICommonEvent<JoyDeviceEvent>.GetReference(ref Event @event) => ref @event.JDevice;
+	static ref GamepadButtonEvent ICommonEvent<GamepadButtonEvent>.GetReference(ref Event @event) => ref @event.GButton;
 
 	private CommonEvent mCommon;
 	private uint mWhich;
+	private byte mButton;
+	private CBool mDown;
+	private readonly byte mPadding1, mPadding2;
 
 	/// <remarks>
 	/// <para>
-	/// When setting this property, the value must be either <see cref="EventType.JoystickAdded"/>, <see cref="EventType.JoystickRemoved"/>, or <see cref="EventType.JoystickUpdateCompleted"/>.
+	/// When setting this property, the value must be either <see cref="EventType.GamepadButtonDown"/> or <see cref="EventType.GamepadButtonUp"/>.
 	/// Otherwise, it will lead the property to throw an <see cref="ArgumentException"/>!
 	/// </para>
 	/// </remarks>
 	/// <exception cref="ArgumentException">
-	/// When setting this property, the value was neither <see cref="EventType.JoystickAdded"/>, <see cref="EventType.JoystickRemoved"/>, nor <see cref="EventType.JoystickUpdateCompleted"/>
+	/// When setting this property, the value was neither <see cref="EventType.GamepadButtonDown"/> nor <see cref="EventType.GamepadButtonUp"/>
 	/// </exception>
 	/// <inheritdoc/>
 	public EventType Type
@@ -75,7 +73,7 @@ public struct JoyDeviceEvent : ICommonEvent<JoyDeviceEvent>, IFormattable, ISpan
 			mCommon.Type = value;
 
 			[DoesNotReturn]
-			static void failValueArgumentIsNotValid() => throw new ArgumentException($"The given {nameof(value)} is not a valid value for the {nameof(Type)} of a {nameof(JoyDeviceEvent)}", paramName: nameof(value));
+			static void failValueArgumentIsNotValid() => throw new ArgumentException($"The given {nameof(value)} is not a valid value for the {nameof(Type)} of a {nameof(GamepadButtonEvent)}", paramName: nameof(value));
 		}
 	}
 
@@ -87,15 +85,39 @@ public struct JoyDeviceEvent : ICommonEvent<JoyDeviceEvent>, IFormattable, ISpan
 	}
 
 	/// <summary>
-	/// Gets or sets the joystick device ID for the <see cref="Joystick"/> being <see cref="EventType.JoystickAdded">added</see>, <see cref="EventType.JoystickRemoved">removed</see>, or <see cref="EventType.JoystickUpdateCompleted">updated</see>
+	/// Gets or sets the joystick device ID for the <see cref="Gamepad"/> associated with the event
 	/// </summary>
 	/// <value>
-	/// The joystick device ID for the <see cref="Joystick"/> being <see cref="EventType.JoystickAdded">added</see>, <see cref="EventType.JoystickRemoved">removed</see>, or <see cref="EventType.JoystickUpdateCompleted">updated</see>
+	/// The joystick device ID for the <see cref="Gamepad"/> associated with the event
 	/// </value>
 	public uint JoystickId
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] readonly get => mWhich;
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] set => mWhich = value;
+	}
+
+	/// <summary>
+	/// Gets or sets the button index for the button that was <see cref="EventType.GamepadButtonDown">pressed</see> or <see cref="EventType.GamepadButtonUp">released</see>
+	/// </summary>
+	/// <value>
+	/// The button index for the button that was <see cref="EventType.GamepadButtonDown">pressed</see> or <see cref="EventType.GamepadButtonUp">released</see>
+	/// </value>
+	public byte Button
+	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] readonly get => mButton;
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] set => mButton = value;
+	}
+
+	/// <summary>
+	/// Gets or sets a value indicating whether the button is pressed
+	/// </summary>
+	/// <value>
+	/// A value indicating whether the button is pressed
+	/// </value>
+	public bool IsDown
+	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] readonly get => mDown;
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] set => mDown = value;
 	}
 
 	/// <inheritdoc/>
@@ -114,8 +136,12 @@ public struct JoyDeviceEvent : ICommonEvent<JoyDeviceEvent>, IFormattable, ISpan
 		try
 		{
 			return ICommonEvent.PartiallyAppend(in this, builder.Append("{ "), format)
-							   .Append($", {nameof(JoystickId)}: ")
+							   .Append($", {JoystickId}: ")
 							   .Append(JoystickId.ToString(format, formatProvider))
+							   .Append($", {Button}: ")
+							   .Append(Button.ToString(format, formatProvider))
+							   .Append($", {nameof(IsDown)}: ")
+							   .Append(IsDown)
 							   .Append(" }")
 							   .ToString();
 		}
@@ -134,33 +160,37 @@ public struct JoyDeviceEvent : ICommonEvent<JoyDeviceEvent>, IFormattable, ISpan
 			&& ICommonEvent.TryPartiallyFormat(in this, ref destination, ref charsWritten, format)
 			&& SpanFormat.TryWrite($", {nameof(JoystickId)}: ", ref destination, ref charsWritten)
 			&& SpanFormat.TryWrite(JoystickId, ref destination, ref charsWritten, format, provider)
+			&& SpanFormat.TryWrite($", {nameof(Button)}: ", ref destination, ref charsWritten)
+			&& SpanFormat.TryWrite(Button, ref destination, ref charsWritten, format, provider)
+			&& SpanFormat.TryWrite($", {nameof(IsDown)}: ", ref destination, ref charsWritten)
+			&& SpanFormat.TryWrite(IsDown, ref destination, ref charsWritten)
 			&& SpanFormat.TryWrite(" }", ref destination, ref charsWritten);
 	}
 
 	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static implicit operator Event(in JoyDeviceEvent @event) => new(in @event);
+	public static implicit operator Event(in GamepadButtonEvent @event) => new(in @event);
 
 	/// <remarks>
 	/// <para>
-	/// The <see cref="Event.Type"/> of the given <paramref name="event"/> must be either <see cref="EventType.JoystickAdded"/>, <see cref="EventType.JoystickRemoved"/>, or <see cref="EventType.JoystickUpdateCompleted"/>.
+	/// The <see cref="Event.Type"/> of the given <paramref name="event"/> must be either <see cref="EventType.GamepadButtonDown"/> or <see cref="EventType.GamepadButtonUp"/>.
 	/// Otherwise, it will lead the method to throw an <see cref="ArgumentException"/>!
 	/// </para>
 	/// </remarks>
 	/// <exception cref="ArgumentException">
-	/// The <see cref="Event.Type"/> of the given <paramref name="event"/> was neither <see cref="EventType.JoystickAdded"/>, <see cref="EventType.JoystickRemoved"/>, nor <see cref="EventType.JoystickUpdateCompleted"/>
+	/// The <see cref="Event.Type"/> of the given <paramref name="event"/> was neither <see cref="EventType.GamepadButtonDown"/> nor <see cref="EventType.GamepadButtonUp"/>
 	/// </exception>
 	/// <inheritdoc/>
-	public static explicit operator JoyDeviceEvent(in Event @event)
+	public static explicit operator GamepadButtonEvent(in Event @event)
 	{
 		if (!Accepts(@event.Type))
 		{
-			failEventArgumentIsNotJoyDeviceEvent();
+			failEventArgumentIsNotGamepadButtonEvent();
 		}
 
-		return @event.JDevice;
+		return @event.GButton;
 
 		[DoesNotReturn]
-		static void failEventArgumentIsNotJoyDeviceEvent() => throw new ArgumentException($"{nameof(@event)} must be a {nameof(JoyDeviceEvent)} by {nameof(Type)}", paramName: nameof(@event));
+		static void failEventArgumentIsNotGamepadButtonEvent() => throw new ArgumentException($"{nameof(@event)} must be a {nameof(GamepadButtonEvent)} by {nameof(Type)}", paramName: nameof(@event));
 	}
 }

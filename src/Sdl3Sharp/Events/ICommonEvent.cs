@@ -27,63 +27,113 @@ public interface ICommonEvent
 	/// Gets or sets the timestamp of the current event
 	/// </summary>
 	/// <value>
-	/// The timestamp of the current event
+	/// The timestamp of the current event, in nanoseconds in nanoseconds since the <see cref="Sdl(Sdl.BuildAction?)">initialization of SDL</see>
 	/// </value>
 	/// <remarks>
 	/// <para>
-	/// The value of this property usually describes the time passed, in nanoseconds, since the <see cref="Sdl(Sdl.BuildAction?)">initialization of SDL</see>.
+	/// The value of this property usually describes the time passed, in nanoseconds since the <see cref="Sdl(Sdl.BuildAction?)">initialization of SDL</see>.
 	/// It can be properly populated by using <see cref="Timer.NanosecondTicks"/>.
 	/// </para>
 	/// </remarks>
 	ulong Timestamp { get; set; }
 
+	internal static StringBuilder AppendTimestamp(ulong timestamp, StringBuilder builder)
+	{
+		(timestamp, var ns) = Math.DivRem(timestamp, Time.NanosecondsPerMillisecond);
+
+		if (timestamp is > 0)
+		{
+			(timestamp, var ms) = Math.DivRem(timestamp, Time.MillisecondsPerSecond);
+
+			if (timestamp is > 0)
+			{
+				(timestamp, var s) = Math.DivRem(timestamp, 60 /* seconds per minute */);
+
+				if (timestamp is > 0)
+				{
+					(timestamp, var min) = Math.DivRem(timestamp, 60 /* minutes per hour */);
+
+					if (timestamp is > 0)
+					{
+						builder.Append(timestamp /* hours */)
+							   .Append("h ");
+					}
+
+					builder.Append(min)
+						   .Append("min ");
+				}
+
+				builder.Append(s)
+					   .Append("s ");
+			}
+
+			builder.Append(ms)
+				   .Append("ms ");
+		}
+
+		return builder.Append(ns)
+					  .Append("ns");
+	}
+
 	internal static StringBuilder PartiallyAppend<TEvent>(ref readonly TEvent @event, StringBuilder builder, string? format)
 		where TEvent : struct, ICommonEvent
 	{
-		return formatTimestamp(
+		return AppendTimestamp(
 			@event.Timestamp,
 			builder.Append($"{nameof(Type)}: ")
 				   .Append(@event.Type.ToString(format))
 				   .Append($", {nameof(Timestamp)}: ")
-		);
+		);		
+	}
 
-		static StringBuilder formatTimestamp(ulong timestamp, StringBuilder builder)
+	internal static bool TryFormatTimestamp(ulong timestamp, ref Span<char> destination, ref int charsWritten)
+	{
+		(timestamp, var ns) = Math.DivRem(timestamp, Time.NanosecondsPerMillisecond);
+
+		if (timestamp is > 0)
 		{
-			(timestamp, var ns) = Math.DivRem(timestamp, Time.NanosecondsPerMillisecond);
+			(timestamp, var ms) = Math.DivRem(timestamp, Time.MillisecondsPerSecond);
 
 			if (timestamp is > 0)
 			{
-				(timestamp, var ms) = Math.DivRem(timestamp, Time.MillisecondsPerSecond);
+				(timestamp, var s) = Math.DivRem(timestamp, 60 /* seconds per minute */);
 
 				if (timestamp is > 0)
 				{
-					(timestamp, var s) = Math.DivRem(timestamp, 60 /* seconds per minute */);
+					(timestamp, var min) = Math.DivRem(timestamp, 60 /* minutes per hour */);
 
 					if (timestamp is > 0)
 					{
-						(timestamp, var min) = Math.DivRem(timestamp, 60 /* minutes per hour */);
-
-						if (timestamp is > 0)
+						if (!(SpanFormat.TryWrite(timestamp /* hours */, ref destination, ref charsWritten)
+							&& SpanFormat.TryWrite("h ", ref destination, ref charsWritten)))
 						{
-							builder.Append(timestamp /* hours */)
-								   .Append("h ");
+							return false;
 						}
-
-						builder.Append(min)
-							   .Append("min ");
 					}
 
-					builder.Append(s)
-						   .Append("s ");
+					if (!(SpanFormat.TryWrite(min, ref destination, ref charsWritten)
+						&& SpanFormat.TryWrite("min ", ref destination, ref charsWritten)))
+					{
+						return false;
+					}
 				}
 
-				builder.Append(ms)
-					   .Append("ms ");
+				if (!(SpanFormat.TryWrite(s, ref destination, ref charsWritten)
+					&& SpanFormat.TryWrite("s ", ref destination, ref charsWritten)))
+				{
+					return false;
+				}
 			}
 
-			return builder.Append(ns)
-						  .Append("ns");
+			if (!(SpanFormat.TryWrite(ms, ref destination, ref charsWritten)
+				&& SpanFormat.TryWrite("ms ", ref destination, ref charsWritten)))
+			{
+				return false;
+			}
 		}
+
+		return SpanFormat.TryWrite(ns, ref destination, ref charsWritten)
+			&& SpanFormat.TryWrite("ns ", ref destination, ref charsWritten);
 	}
 
 	internal static bool TryPartiallyFormat<TEvent>(ref readonly TEvent @event, ref Span<char> destination, ref int charsWritten, ReadOnlySpan<char> format = default)
@@ -92,57 +142,7 @@ public interface ICommonEvent
 		return SpanFormat.TryWrite($"{nameof(Type)}: ", ref destination, ref charsWritten)
 			&& SpanFormat.TryWrite(@event.Type, ref destination, ref charsWritten, format)
 			&& SpanFormat.TryWrite($", {nameof(Timestamp)}: ", ref destination, ref charsWritten)
-			&& tryFormatTimestamp(@event.Timestamp, ref destination, ref charsWritten);
-
-		static bool tryFormatTimestamp(ulong timestamp, ref Span<char> destination, ref int charsWritten)
-		{
-			(timestamp, var ns) = Math.DivRem(timestamp, Time.NanosecondsPerMillisecond);
-
-			if (timestamp is > 0)
-			{
-				(timestamp, var ms) = Math.DivRem(timestamp, Time.MillisecondsPerSecond);
-
-				if (timestamp is > 0)
-				{
-					(timestamp, var s) = Math.DivRem(timestamp, 60 /* seconds per minute */);
-
-					if (timestamp is > 0)
-					{
-						(timestamp, var min) = Math.DivRem(timestamp, 60 /* minutes per hour */);
-
-						if (timestamp is > 0)
-						{
-							if (!(SpanFormat.TryWrite(timestamp /* hours */, ref destination, ref charsWritten)
-								&& SpanFormat.TryWrite("h ", ref destination, ref charsWritten)))
-							{
-								return false;
-							}
-						}
-
-						if (!(SpanFormat.TryWrite(min, ref destination, ref charsWritten)
-							&& SpanFormat.TryWrite("min ", ref destination, ref charsWritten)))
-						{
-							return false;
-						}
-					}
-
-					if (!(SpanFormat.TryWrite(s, ref destination, ref charsWritten)
-						&& SpanFormat.TryWrite("s ", ref destination, ref charsWritten)))
-					{
-						return false;
-					}
-				}
-
-				if (!(SpanFormat.TryWrite(ms, ref destination, ref charsWritten)
-					&& SpanFormat.TryWrite("ms ", ref destination, ref charsWritten)))
-				{
-					return false;
-				}
-			}
-
-			return SpanFormat.TryWrite(ns, ref destination, ref charsWritten)
-				&& SpanFormat.TryWrite("ns ", ref destination, ref charsWritten);
-		}
+			&& TryFormatTimestamp(@event.Timestamp, ref destination, ref charsWritten);		
 	}
 }
 

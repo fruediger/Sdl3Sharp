@@ -10,55 +10,53 @@ namespace Sdl3Sharp.Events;
 
 partial struct Event
 {
-	[FieldOffset(0)] internal JoyDeviceEvent JDevice;
+	[FieldOffset(0)] internal GamepadAxisEvent GAxis;
 
 	/// <summary>
-	/// Creates a new <see cref="Event"/> from a <see cref="JoyDeviceEvent"/>
+	/// Creates a new <see cref="Event"/> from a <see cref="GamepadAxisEvent"/>
 	/// </summary>
-	/// <param name="event">The <see cref="JoyDeviceEvent"/> to store into the newly created <see cref="Event"/></param>
-	public Event(in JoyDeviceEvent @event) :
+	/// <param name="event">The <see cref="GamepadAxisEvent"/> to store into the newly created <see cref="Event"/></param>
+	public Event(in GamepadAxisEvent @event) :
 #pragma warning disable IDE0034 // Leave it for explicitness sake
 		this(default(IUnsafeConstructorDispatch?))
 #pragma warning restore IDE0034
-		=> JDevice = @event;
+		=> GAxis = @event;
 }
 
 /// <summary>
-/// Represents an event that occurs when a <see cref="Joystick">joystick device</see> is being <see cref="EventType.JoystickAdded">added</see> into the system, <see cref="EventType.JoystickRemoved">removed</see> from the system, or <see cref="EventType.JoystickUpdateCompleted">updated</see>
+/// Represents an event that occurs when a gamepad axis changes position
 /// </summary>
-/// <remarks>
-/// <para>
-/// SDL will send a <see cref="JoyDeviceEvent"/> with <see cref="Type"/> <see cref="EventType.JoystickAdded"/> for every joystick device it discovers during initialization.
-/// After that, <see cref="JoyDeviceEvent"/>s with <see cref="Type"/> <see cref="EventType.JoystickAdded"/> will only arrive when a joystick device is hotplugged during the application's runtime.
-/// </para>
-/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
-public struct JoyDeviceEvent : ICommonEvent<JoyDeviceEvent>, IFormattable, ISpanFormattable
+public struct GamepadAxisEvent : ICommonEvent<GamepadAxisEvent>, IFormattable, ISpanFormattable
 {
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly string DebuggerDisplay => ToString(formatProvider: CultureInfo.InvariantCulture);
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	private static bool Accepts(EventType type) => type is EventType.JoystickAdded or EventType.JoystickRemoved or EventType.JoystickUpdateCompleted;
+	private static bool Accepts(EventType type) => type is EventType.GamepadAxisMotion;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	static bool ICommonEvent<JoyDeviceEvent>.Accepts(EventType type) => Accepts(type);
+	static bool ICommonEvent<GamepadAxisEvent>.Accepts(EventType type) => Accepts(type);
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	static ref JoyDeviceEvent ICommonEvent<JoyDeviceEvent>.GetReference(ref Event @event) => ref @event.JDevice;
+	static ref GamepadAxisEvent ICommonEvent<GamepadAxisEvent>.GetReference(ref Event @event) => ref @event.GAxis;
 
 	private CommonEvent mCommon;
 	private uint mWhich;
+	private byte mAxis;
+	private readonly byte mPadding1, mPadding2, mPadding3;
+	private short mValue;
+	private readonly ushort mPadding4;
 
 	/// <remarks>
 	/// <para>
-	/// When setting this property, the value must be either <see cref="EventType.JoystickAdded"/>, <see cref="EventType.JoystickRemoved"/>, or <see cref="EventType.JoystickUpdateCompleted"/>.
+	/// When setting this property, the value must be <see cref="EventType.GamepadAxisMotion"/>.
 	/// Otherwise, it will lead the property to throw an <see cref="ArgumentException"/>!
 	/// </para>
 	/// </remarks>
 	/// <exception cref="ArgumentException">
-	/// When setting this property, the value was neither <see cref="EventType.JoystickAdded"/>, <see cref="EventType.JoystickRemoved"/>, nor <see cref="EventType.JoystickUpdateCompleted"/>
+	/// When setting this property, the value was not <see cref="EventType.GamepadAxisMotion"/>
 	/// </exception>
 	/// <inheritdoc/>
 	public EventType Type
@@ -75,7 +73,7 @@ public struct JoyDeviceEvent : ICommonEvent<JoyDeviceEvent>, IFormattable, ISpan
 			mCommon.Type = value;
 
 			[DoesNotReturn]
-			static void failValueArgumentIsNotValid() => throw new ArgumentException($"The given {nameof(value)} is not a valid value for the {nameof(Type)} of a {nameof(JoyDeviceEvent)}", paramName: nameof(value));
+			static void failValueArgumentIsNotValid() => throw new ArgumentException($"The given {nameof(value)} is not a valid value for the {nameof(Type)} of a {nameof(GamepadAxisEvent)}", paramName: nameof(value));
 		}
 	}
 
@@ -87,15 +85,39 @@ public struct JoyDeviceEvent : ICommonEvent<JoyDeviceEvent>, IFormattable, ISpan
 	}
 
 	/// <summary>
-	/// Gets or sets the joystick device ID for the <see cref="Joystick"/> being <see cref="EventType.JoystickAdded">added</see>, <see cref="EventType.JoystickRemoved">removed</see>, or <see cref="EventType.JoystickUpdateCompleted">updated</see>
+	/// Gets or sets the joystick device ID for the <see cref="Gamepad"/> associated with the event
 	/// </summary>
 	/// <value>
-	/// The joystick device ID for the <see cref="Joystick"/> being <see cref="EventType.JoystickAdded">added</see>, <see cref="EventType.JoystickRemoved">removed</see>, or <see cref="EventType.JoystickUpdateCompleted">updated</see>
+	/// The joystick device ID for the <see cref="Gamepad"/> associated with the event
 	/// </value>
 	public uint JoystickId
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] readonly get => mWhich;
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] set => mWhich = value;
+	}
+
+	/// <summary>
+	/// Gets or sets the axis index for the gamepad axis that changed
+	/// </summary>
+	/// <value>
+	/// The axis index for the gamepad axis that changed
+	/// </value>
+	public byte Axis
+	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] readonly get => mAxis;
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] set => mAxis = value;
+	}
+
+	/// <summary>
+	/// Gets or sets the value for the axis that changed
+	/// </summary>
+	/// <value>
+	/// The value for the axis that changed, in the range from <see cref="short.MinValue"/> to <see cref="short.MaxValue"/>
+	/// </value>
+	public short Value
+	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] readonly get => mValue;
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] set => mValue = value;
 	}
 
 	/// <inheritdoc/>
@@ -116,6 +138,10 @@ public struct JoyDeviceEvent : ICommonEvent<JoyDeviceEvent>, IFormattable, ISpan
 			return ICommonEvent.PartiallyAppend(in this, builder.Append("{ "), format)
 							   .Append($", {nameof(JoystickId)}: ")
 							   .Append(JoystickId.ToString(format, formatProvider))
+							   .Append($", {nameof(Axis)}: ")
+							   .Append(Axis.ToString(format, formatProvider))
+							   .Append($", {nameof(Value)}: ")
+							   .Append(Value.ToString(format, formatProvider))
 							   .Append(" }")
 							   .ToString();
 		}
@@ -134,33 +160,37 @@ public struct JoyDeviceEvent : ICommonEvent<JoyDeviceEvent>, IFormattable, ISpan
 			&& ICommonEvent.TryPartiallyFormat(in this, ref destination, ref charsWritten, format)
 			&& SpanFormat.TryWrite($", {nameof(JoystickId)}: ", ref destination, ref charsWritten)
 			&& SpanFormat.TryWrite(JoystickId, ref destination, ref charsWritten, format, provider)
+			&& SpanFormat.TryWrite($", {nameof(Axis)}: ", ref destination, ref charsWritten)
+			&& SpanFormat.TryWrite(Axis, ref destination, ref charsWritten, format, provider)
+			&& SpanFormat.TryWrite($", {nameof(Value)}: ", ref destination, ref charsWritten)
+			&& SpanFormat.TryWrite(Value, ref destination, ref charsWritten, format, provider)
 			&& SpanFormat.TryWrite(" }", ref destination, ref charsWritten);
 	}
 
 	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static implicit operator Event(in JoyDeviceEvent @event) => new(in @event);
+	public static implicit operator Event(in GamepadAxisEvent @event) => new(in @event);
 
 	/// <remarks>
 	/// <para>
-	/// The <see cref="Event.Type"/> of the given <paramref name="event"/> must be either <see cref="EventType.JoystickAdded"/>, <see cref="EventType.JoystickRemoved"/>, or <see cref="EventType.JoystickUpdateCompleted"/>.
+	/// The <see cref="Event.Type"/> of the given <paramref name="event"/> must be <see cref="EventType.GamepadAxisMotion"/>.
 	/// Otherwise, it will lead the method to throw an <see cref="ArgumentException"/>!
 	/// </para>
 	/// </remarks>
 	/// <exception cref="ArgumentException">
-	/// The <see cref="Event.Type"/> of the given <paramref name="event"/> was neither <see cref="EventType.JoystickAdded"/>, <see cref="EventType.JoystickRemoved"/>, nor <see cref="EventType.JoystickUpdateCompleted"/>
+	/// The <see cref="Event.Type"/> of the given <paramref name="event"/> was not <see cref="EventType.GamepadAxisMotion"/>
 	/// </exception>
 	/// <inheritdoc/>
-	public static explicit operator JoyDeviceEvent(in Event @event)
+	public static explicit operator GamepadAxisEvent(in Event @event)
 	{
 		if (!Accepts(@event.Type))
 		{
-			failEventArgumentIsNotJoyDeviceEvent();
+			failEventArgumentIsNotGamepadAxisEvent();
 		}
 
-		return @event.JDevice;
+		return @event.GAxis;
 
 		[DoesNotReturn]
-		static void failEventArgumentIsNotJoyDeviceEvent() => throw new ArgumentException($"{nameof(@event)} must be a {nameof(JoyDeviceEvent)} by {nameof(Type)}", paramName: nameof(@event));
+		static void failEventArgumentIsNotGamepadAxisEvent() => throw new ArgumentException($"{nameof(@event)} must be a {nameof(GamepadAxisEvent)} by {nameof(Type)}", paramName: nameof(@event));
 	}
 }
