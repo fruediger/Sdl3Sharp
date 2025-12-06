@@ -130,7 +130,7 @@ public struct GamepadTouchpadEvent : ICommonEvent<GamepadTouchpadEvent>, IFormat
 	public float X
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] readonly get => mX;
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] set => mX = float.Clamp(value, 0, 1);
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] set => mX = value;
 	}
 
 	/// <summary>
@@ -142,7 +142,7 @@ public struct GamepadTouchpadEvent : ICommonEvent<GamepadTouchpadEvent>, IFormat
 	public float Y
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] readonly get => mY;
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] set => mY = float.Clamp(value, 0, 1);
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] set => mY = value;
 	}
 
 	/// <summary>
@@ -154,7 +154,7 @@ public struct GamepadTouchpadEvent : ICommonEvent<GamepadTouchpadEvent>, IFormat
 	public float Pressure
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] readonly get => mPressure;
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] set => mPressure = float.Clamp(value, 0, 1);
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] set => mPressure = value;
 	}
 
 	/// <inheritdoc/>
