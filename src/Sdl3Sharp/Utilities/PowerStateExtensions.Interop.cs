@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Sdl3Sharp.Utilities;
 
-partial struct PowerState
+partial class PowerStateExtensions
 {
 	/// <summary>
 	/// Get the current power supply details
@@ -30,5 +30,5 @@ partial struct PowerState
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetPowerInfo">SDL_GetPowerInfo</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial Kind SDL_GetPowerInfo(int* seconds, int* percent);
+	internal unsafe static partial PowerState SDL_GetPowerInfo(int* seconds, int* percent);
 }
