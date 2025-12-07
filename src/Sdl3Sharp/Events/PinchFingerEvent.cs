@@ -137,7 +137,6 @@ public struct PinchFingerEvent : ICommonEvent<PinchFingerEvent>, IFormattable, I
 	/// <inheritdoc/>
 	public readonly bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default)
 	{
-
 		charsWritten = 0;
 
 		return SpanFormat.TryWrite("{ ", ref destination, ref charsWritten)
@@ -167,12 +166,12 @@ public struct PinchFingerEvent : ICommonEvent<PinchFingerEvent>, IFormattable, I
 	{
 		if (!Accepts(@event.Type))
 		{
-			failEventArgumentIsNotAudioDeviceEvent();
+			failEventArgumentIsNotPinchFingerEvent();
 		}
 
 		return @event.Pinch;
 
 		[DoesNotReturn]
-		static void failEventArgumentIsNotAudioDeviceEvent() => throw new ArgumentException($"{nameof(@event)} must be a {nameof(PinchFingerEvent)} by {nameof(Type)}", paramName: nameof(@event));
+		static void failEventArgumentIsNotPinchFingerEvent() => throw new ArgumentException($"{nameof(@event)} must be a {nameof(PinchFingerEvent)} by {nameof(Type)}", paramName: nameof(@event));
 	}
 }

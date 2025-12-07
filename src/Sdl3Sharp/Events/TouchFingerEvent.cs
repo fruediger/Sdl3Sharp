@@ -3,10 +3,8 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using static Sdl3Sharp.Hint;
 
 namespace Sdl3Sharp.Events;
 
