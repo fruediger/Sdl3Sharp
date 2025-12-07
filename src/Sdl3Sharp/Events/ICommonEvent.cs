@@ -133,7 +133,7 @@ public interface ICommonEvent
 		}
 
 		return SpanFormat.TryWrite(ns, ref destination, ref charsWritten)
-			&& SpanFormat.TryWrite("ns ", ref destination, ref charsWritten);
+			&& SpanFormat.TryWrite("ns", ref destination, ref charsWritten);
 	}
 
 	internal static bool TryPartiallyFormat<TEvent>(ref readonly TEvent @event, ref Span<char> destination, ref int charsWritten, ReadOnlySpan<char> format = default)
