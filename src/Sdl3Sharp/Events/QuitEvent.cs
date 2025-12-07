@@ -117,7 +117,7 @@ public struct QuitEvent : ICommonEvent<QuitEvent>, IFormattable, ISpanFormattabl
 	{
 		charsWritten = 0;
 
-		return SpanFormat.TryWrite(" {", ref destination, ref charsWritten)
+		return SpanFormat.TryWrite("{ ", ref destination, ref charsWritten)
 			&& ICommonEvent.TryPartiallyFormat(in this, ref destination, ref charsWritten, format)
 			&& SpanFormat.TryWrite(" }", ref destination, ref charsWritten);
 	}
