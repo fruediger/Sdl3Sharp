@@ -1,6 +1,5 @@
 ﻿using Sdl3Sharp.Input;
 using Sdl3Sharp.Internal;
-using Sdl3Sharp.Internal.Interop;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -28,6 +27,11 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when a pen axis changes
 /// </summary>
+/// <remarks>
+/// <para>
+/// You might get some of these events even if the pen isn't touching the tablet.
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct PenAxisEvent : ICommonEvent<PenAxisEvent>, IFormattable, ISpanFormattable
