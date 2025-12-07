@@ -159,7 +159,7 @@ public struct AudioDeviceEvent : ICommonEvent<AudioDeviceEvent>, IFormattable, I
 			&& ICommonEvent.TryPartiallyFormat(in this, ref destination, ref charsWritten, format)
 			&& SpanFormat.TryWrite($", {nameof(AudioDeviceId)}: ", ref destination, ref charsWritten)
 			&& SpanFormat.TryWrite(AudioDeviceId, ref destination, ref charsWritten, format, provider)
-			&& SpanFormat.TryWrite($", {nameof(IsRecordingDevice)}", ref destination, ref charsWritten)
+			&& SpanFormat.TryWrite($", {nameof(IsRecordingDevice)}: ", ref destination, ref charsWritten)
 			&& SpanFormat.TryWrite(IsRecordingDevice, ref destination, ref charsWritten)
 			&& SpanFormat.TryWrite(" }", ref destination, ref charsWritten);
 	}
