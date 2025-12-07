@@ -32,6 +32,13 @@ partial struct Event
 /// <para>
 /// This event is for buttons on the pen itself that the user might click. The pen itself pressing down to draw triggers a <see cref="EventType.PenDown"/> event (<see cref="PenTouchEvent"/>) instead.
 /// </para>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.PenButtonDown"/></description></item>
+/// <item><description><see cref="EventType.PenButtonUp"/></description></item>
+/// </list>
+/// </para>
 /// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]

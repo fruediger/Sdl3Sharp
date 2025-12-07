@@ -43,6 +43,9 @@ partial struct Event
 /// Note: You shouldn't access the any of the <em>raw</em> user defined data slots when you use the corresponding <em>managed</em> user defined data slots.
 /// E.g., overwriting the value of <see cref="RawData1"/> will lead to a loss of data in <see cref="Data1"/> and <see cref="Data1"/> won't be accessable anymore.
 /// </para>
+/// <para>
+/// Associated <see cref="EventType"/>s: User defined <see cref="EventType"/>s registered using <see cref="EventTypeExtensions.TryRegister(out EventType)"/> or <see cref="EventTypeExtensions.TryRegister(Span{EventType})"/>.
+/// </para>
 /// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]

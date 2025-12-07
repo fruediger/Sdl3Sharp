@@ -26,6 +26,38 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when a <see cref="Window"/> changes its state
 /// </summary>
+/// <remarks>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.WindowShown"/></description></item>
+/// <item><description><see cref="EventType.WindowHidden"/></description></item>
+/// <item><description><see cref="EventType.WindowExposed"/></description></item>
+/// <item><description><see cref="EventType.WindowMoved"/></description></item>
+/// <item><description><see cref="EventType.WindowResized"/></description></item>
+/// <item><description><see cref="EventType.WindowPixelSizeChanged"/></description></item>
+/// <item><description><see cref="EventType.WindowMetalViewResized"/></description></item>
+/// <item><description><see cref="EventType.WindowMinimized"/></description></item>
+/// <item><description><see cref="EventType.WindowMaximized"/></description></item>
+/// <item><description><see cref="EventType.WindowRestored"/></description></item>
+/// <item><description><see cref="EventType.WindowMouseEnter"/></description></item>
+/// <item><description><see cref="EventType.WindowMouseLeave"/></description></item>
+/// <item><description><see cref="EventType.WindowFocusGained"/></description></item>
+/// <item><description><see cref="EventType.WindowFocusLost"/></description></item>
+/// <item><description><see cref="EventType.WindowCloseRequested"/></description></item>
+/// <item><description><see cref="EventType.WindowHitTest"/></description></item>
+/// <item><description><see cref="EventType.WindowIccProfileChanged"/></description></item>
+/// <item><description><see cref="EventType.WindowDisplayChanged"/></description></item>
+/// <item><description><see cref="EventType.WindowDisplayScaleChanged"/></description></item>
+/// <item><description><see cref="EventType.WindowSafeAreaChanged"/></description></item>
+/// <item><description><see cref="EventType.WindowOccluded"/></description></item>
+/// <item><description><see cref="EventType.WindowEnterFullscreen"/></description></item>
+/// <item><description><see cref="EventType.WindowLeaveFullscreen"/></description></item>
+/// <item><description><see cref="EventType.WindowDestroyed"/></description></item>
+/// <item><description><see cref="EventType.WindowHdrStateChanged"/></description></item>
+/// </list>
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct WindowEvent : ICommonEvent<WindowEvent>, IFormattable, ISpanFormattable

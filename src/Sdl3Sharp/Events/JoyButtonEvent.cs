@@ -27,6 +27,15 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when a joystick button is being <see cref="EventType.JoystickButtonDown">pressed</see> or <see cref="EventType.JoystickButtonUp">released</see>
 /// </summary>
+/// <remarks>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.JoystickButtonDown"/></description></item>
+/// <item><description><see cref="EventType.JoystickButtonUp"/></description></item>
+/// </list>
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct JoyButtonEvent : ICommonEvent<JoyButtonEvent>, IFormattable, ISpanFormattable

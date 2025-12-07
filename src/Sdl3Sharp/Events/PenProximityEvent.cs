@@ -40,6 +40,13 @@ partial struct Event
 /// Notice that not all platforms have a window associated with the pen during proximity events.
 /// Some wait until <see cref="PenMotionEvent">motion</see>/<see cref="PenButtonEvent">button</see>/etc. events to offer this info.
 /// </para>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.PenProximityIn"/></description></item>
+/// <item><description><see cref="EventType.PenProximityOut"/></description></item>
+/// </list>
+/// </para>
 /// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]

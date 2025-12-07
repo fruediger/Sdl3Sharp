@@ -27,6 +27,14 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when a gamepad sensor value changes
 /// </summary>
+/// <remarks>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.GamepadSensorUpdated"/></description></item>
+/// </list>
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct GamepadSensorEvent : ICommonEvent<GamepadSensorEvent>, IFormattable, ISpanFormattable

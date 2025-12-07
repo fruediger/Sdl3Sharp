@@ -26,6 +26,14 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when a joystick trackball changes position
 /// </summary>
+/// <remarks>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.JoystickBallMotion"/></description></item>
+/// </list>
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct JoyBallEvent : ICommonEvent<JoyBallEvent>, IFormattable, ISpanFormattable

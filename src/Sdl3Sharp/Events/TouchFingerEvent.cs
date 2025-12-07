@@ -26,6 +26,17 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when a finger is <see cref="EventType.FingerDown">placed on</see>, <see cref="EventType.FingerMotion">moved on</see>, <see cref="EventType.FingerUp">lifted from</see>, or <see cref="EventType.FingerCanceled">canceled</see> on a touch device
 /// </summary>
+/// <remarks>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.FingerDown"/></description></item>
+/// <item><description><see cref="EventType.FingerUp"/></description></item>
+/// <item><description><see cref="EventType.FingerMotion"/></description></item>
+/// <item><description><see cref="EventType.FingerCanceled"/></description></item>
+/// </list>
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct TouchFingerEvent : ICommonEvent<TouchFingerEvent>, IFormattable, ISpanFormattable

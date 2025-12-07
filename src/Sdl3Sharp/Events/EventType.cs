@@ -22,6 +22,9 @@ public enum EventType : uint
 	/// <para>
 	/// User-requested quit
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="QuitEvent"/>.
+	/// </para>
 	/// </remarks>
 	Quit = 0x100,
 
@@ -31,6 +34,9 @@ public enum EventType : uint
 	/// The application is being terminated by the OS. This event must be handled in an event handler registered with <see cref="Sdl.EventWatch"/>.
 	/// Called on iOS in <c>applicationWillTerminate()</c>.
 	/// Called on Android in <c>onDestroy()</c>.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="Event"/>.
 	/// </para>
 	/// </remarks>
 	Terminating,
@@ -42,6 +48,9 @@ public enum EventType : uint
 	/// Called on iOS in <c>applicationDidReceiveMemoryWarning</c>().
 	/// Called on Android in <c>onTrimMemory</c>().
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="Event"/>.
+	/// </para>
 	/// </remarks>
 	LowMemory,
 
@@ -51,6 +60,9 @@ public enum EventType : uint
 	/// The application is about to enter the background. This event must be handled in an event handler registered with <see cref="Sdl.EventWatch"/>.
 	/// Called on iOS in <c>applicationWillResignActive()</c>.
 	/// Called on Android in <c>onPause()</c>.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="Event"/>.
 	/// </para>
 	/// </remarks>
 	WillEnterBackground,
@@ -62,6 +74,9 @@ public enum EventType : uint
 	/// Called on iOS in <c>applicationDidEnterBackground()</c>.
 	/// Called on Android in <c>onPause()</c>.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="Event"/>.
+	/// </para>
 	/// </remarks>
 	DidEnterBackground,
 
@@ -71,6 +86,9 @@ public enum EventType : uint
 	/// The application is about to enter the foreground. This event must be handled in an event handler registered with <see cref="Sdl.EventWatch"/>.
 	/// Called on iOS in <c>applicationWillEnterForeground()</c>.
 	/// Called on Android in <c>onResume()</c>.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="Event"/>.
 	/// </para>
 	/// </remarks>
 	WillEnterForeground,
@@ -82,6 +100,9 @@ public enum EventType : uint
 	/// Called on iOS in <c>applicationDidBecomeActive()</c>.
 	/// Called on Android in <c>onResume()</c>.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="Event"/>.
+	/// </para>
 	/// </remarks>
 	DidEnterForeground,
 
@@ -90,6 +111,9 @@ public enum EventType : uint
 	/// <para>
 	/// The user's locale preferences have changed.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="Event"/>.
+	/// </para>
 	/// </remarks>
 	LocaleChanged,
 
@@ -97,6 +121,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// The system theme changed.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="Event"/>.
 	/// </para>
 	/// </remarks>
 	SystemThemeChanged,
@@ -110,6 +137,9 @@ public enum EventType : uint
 	/// <para>
 	/// The display orientation has changed to <see cref="DisplayEvent.Data1"/>.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="DisplayEvent"/>.
+	/// </para>
 	/// </remarks>
 	DisplayOrientationChanged = 0x151,
 
@@ -117,6 +147,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A display has been added to the system.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="DisplayEvent"/>.
 	/// </para>
 	/// </remarks>
 	DisplayAdded,
@@ -126,6 +159,9 @@ public enum EventType : uint
 	/// <para>
 	/// A display has been removed from the system.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="DisplayEvent"/>.
+	/// </para>
 	/// </remarks>
 	DisplayRemoved,
 
@@ -133,6 +169,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A display has changed position.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="DisplayEvent"/>.
 	/// </para>
 	/// </remarks>
 	DisplayMoved,
@@ -142,6 +181,9 @@ public enum EventType : uint
 	/// <para>
 	/// A display has changed desktop mode.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="DisplayEvent"/>.
+	/// </para>
 	/// </remarks>
 	DisplayDesktopModeChanged,
 
@@ -149,6 +191,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A display has changed current mode.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="DisplayEvent"/>.
 	/// </para>
 	/// </remarks>
 	DisplayCurrentModeChanged,
@@ -158,6 +203,9 @@ public enum EventType : uint
 	/// <para>
 	/// A display has changed content scale.
 	/// </para> 
+	/// <para>
+	/// Associated event structure: <see cref="DisplayEvent"/>.
+	/// </para>
 	/// </remarks>
 	DisplayContentScaleChanged,
 
@@ -165,6 +213,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A display has changed usable bounds.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="DisplayEvent"/>.
 	/// </para>
 	/// </remarks>
 	DisplayUsableBoundsChanged,
@@ -178,6 +229,9 @@ public enum EventType : uint
 	/// <para>
 	/// A window has been shown.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
+	/// </para>
 	/// </remarks>
 	WindowShown = 0x202,
 
@@ -185,6 +239,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A window has been hidden.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
 	/// </para>
 	/// </remarks>
 	WindowHidden,
@@ -194,6 +251,9 @@ public enum EventType : uint
 	/// <para>
 	/// A window has been exposed and should be redrawn, and can be redrawn directly from event watchers/handlers for this event.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
+	/// </para>
 	/// </remarks>
 	WindowExposed,
 
@@ -201,6 +261,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A window has been moved to <see cref="WindowEvent.Data1"/>, <see cref="WindowEvent.Data2"/>.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
 	/// </para>
 	/// </remarks>
 	WindowMoved,
@@ -210,6 +273,9 @@ public enum EventType : uint
 	/// <para>
 	/// A window has been resized to <see cref="WindowEvent.Data1"/>×<see cref="WindowEvent.Data2"/>.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
+	/// </para>
 	/// </remarks>
 	WindowResized,
 
@@ -217,6 +283,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// The pixel size of a window has changed to <see cref="WindowEvent.Data1"/>×<see cref="WindowEvent.Data2"/>.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
 	/// </para>
 	/// </remarks>
 	WindowPixelSizeChanged,
@@ -226,6 +295,9 @@ public enum EventType : uint
 	/// <para>
 	/// The pixel size of a Metal view associated with a window has changed.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
+	/// </para>
 	/// </remarks>
 	WindowMetalViewResized,
 
@@ -233,6 +305,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A window has been minimized.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
 	/// </para>
 	/// </remarks>
 	WindowMinimized,
@@ -242,6 +317,9 @@ public enum EventType : uint
 	/// <para>
 	/// A window has been maximized.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
+	/// </para>
 	/// </remarks>
 	WindowMaximized,
 
@@ -249,6 +327,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A window has been restored to normal size and position.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
 	/// </para>
 	/// </remarks>
 	WindowRestored,
@@ -258,6 +339,9 @@ public enum EventType : uint
 	/// <para>
 	/// A window has gained mouse focus.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
+	/// </para>
 	/// </remarks>
 	WindowMouseEnter,
 
@@ -265,6 +349,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A window has lost mouse focus.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
 	/// </para>
 	/// </remarks>
 	WindowMouseLeave,
@@ -274,6 +361,9 @@ public enum EventType : uint
 	/// <para>
 	/// A window has gained keyboard focus.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
+	/// </para>
 	/// </remarks>
 	WindowFocusGained,
 
@@ -281,6 +371,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A window has lost keyboard focus.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
 	/// </para>
 	/// </remarks>
 	WindowFocusLost,
@@ -290,6 +383,9 @@ public enum EventType : uint
 	/// <para>
 	/// The window manager requests that a window should be closed.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
+	/// </para>
 	/// </remarks>
 	WindowCloseRequested,
 
@@ -297,6 +393,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A window had a hit test that wasn't <see cref="SDL_HITTEST_NORMAL"/>.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
 	/// </para>
 	/// </remarks>
 	WindowHitTest,
@@ -306,6 +405,9 @@ public enum EventType : uint
 	/// <para>
 	/// The ICC profile of a window's display has changed.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
+	/// </para>
 	/// </remarks>
 	WindowIccProfileChanged,
 
@@ -313,6 +415,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A window has been moved to display <see cref="WindowEvent.Data1"/>.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
 	/// </para>
 	/// </remarks>
 	WindowDisplayChanged,
@@ -322,6 +427,9 @@ public enum EventType : uint
 	/// <para>
 	/// A window's display scale has been changed.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
+	/// </para>
 	/// </remarks>
 	WindowDisplayScaleChanged,
 
@@ -329,6 +437,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A window's safe area has been changed.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
 	/// </para>
 	/// </remarks>
 	WindowSafeAreaChanged,
@@ -338,6 +449,9 @@ public enum EventType : uint
 	/// <para>
 	/// A window has been occluded.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
+	/// </para>
 	/// </remarks>
 	WindowOccluded,
 
@@ -346,6 +460,9 @@ public enum EventType : uint
 	/// <para>
 	/// A window has entered fullscreen mode.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
+	/// </para>
 	/// </remarks>
 	WindowEnterFullscreen,
 
@@ -353,6 +470,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A window has left fullscreen mode.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
 	/// </para>
 	/// </remarks>
 	WindowLeaveFullscreen,
@@ -364,6 +484,9 @@ public enum EventType : uint
 	/// If this message is being handled in an event watcher, the window handle is still valid and can still be used to retrieve any properties associated with the window.
 	/// Otherwise, the handle has already been destroyed and all resources associated with it are invalid.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
+	/// </para>
 	/// </remarks>
 	WindowDestroyed,
 
@@ -371,6 +494,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A window's HDR properties have changed.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="WindowEvent"/>.
 	/// </para>
 	/// </remarks>
 	WindowHdrStateChanged,
@@ -384,6 +510,9 @@ public enum EventType : uint
 	/// <para>
 	/// Key pressed.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="KeyboardEvent"/>.
+	/// </para>
 	/// </remarks>
 	KeyDown = 0x300,
 
@@ -391,6 +520,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// Key released.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="KeyboardEvent"/>.
 	/// </para>
 	/// </remarks>
 	KeyUp,
@@ -400,6 +532,9 @@ public enum EventType : uint
 	/// <para>
 	/// Keyboard text editing (composition).
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="TextEditingEvent"/>.
+	/// </para>
 	/// </remarks>
 	TextEditing,
 
@@ -407,6 +542,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// Keyboard text input.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="TextInputEvent"/>.
 	/// </para>
 	/// </remarks>
 	TextInput,
@@ -416,6 +554,9 @@ public enum EventType : uint
 	/// <para>
 	/// Keymap changed due to a system event such as an input language or keyboard layout change.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="Event"/>.
+	/// </para>
 	/// </remarks>
 	KeymapChanged,
 
@@ -423,6 +564,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A new keyboard has been inserted into the system.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="KeyboardDeviceEvent"/>.
 	/// </para>
 	/// </remarks>
 	KeyboardAdded,
@@ -432,6 +576,9 @@ public enum EventType : uint
 	/// <para>
 	/// A keyboard has been removed.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="KeyboardDeviceEvent"/>.
+	/// </para>
 	/// </remarks>
 	KeyboardRemoved,
 
@@ -439,6 +586,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// Keyboard text editing candidates.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="TextEditingCandidatesEvent"/>.
 	/// </para>
 	/// </remarks>
 	TextEditingCandidates,
@@ -448,6 +598,9 @@ public enum EventType : uint
 	/// <para>
 	/// The on-screen keyboard has been shown.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="Event"/>.
+	/// </para>
 	/// </remarks>
 	ScreenKeyboardShown,
 
@@ -455,6 +608,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// The on-screen keyboard has been hidden.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="Event"/>.
 	/// </para>
 	/// </remarks>
 	ScreenKeyboardHidden,
@@ -468,6 +624,9 @@ public enum EventType : uint
 	/// <para>
 	/// Mouse moved.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="MouseMotionEvent"/>.
+	/// </para>
 	/// </remarks>
 	MouseMotion = 0x400,
 
@@ -475,6 +634,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// Mouse button pressed.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="MouseButtonEvent"/>.
 	/// </para>
 	/// </remarks>
 	MouseButtonDown,
@@ -484,6 +646,9 @@ public enum EventType : uint
 	/// <para>
 	/// Mouse button released.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="MouseButtonEvent"/>.
+	/// </para>
 	/// </remarks>
 	MouseButtonUp,
 
@@ -491,6 +656,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// Mouse wheel motion.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="MouseWheelEvent"/>.
 	/// </para>
 	/// </remarks>
 	MouseWheel,
@@ -500,6 +668,9 @@ public enum EventType : uint
 	/// <para>
 	/// A new mouse has been inserted into the system.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="MouseDeviceEvent"/>.
+	/// </para>
 	/// </remarks>
 	MouseAdded,
 
@@ -507,6 +678,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A mouse has been removed.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="MouseDeviceEvent"/>.
 	/// </para>
 	/// </remarks>
 	MouseRemoved,
@@ -520,6 +694,9 @@ public enum EventType : uint
 	/// <para>
 	/// Joystick axis motion.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="JoyAxisEvent"/>.
+	/// </para>
 	/// </remarks>
 	JoystickAxisMotion = 0x600,
 
@@ -527,6 +704,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// Joystick trackball motion.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="JoyBallEvent"/>.
 	/// </para>
 	/// </remarks>
 	JoystickBallMotion,
@@ -536,6 +716,9 @@ public enum EventType : uint
 	/// <para>
 	/// Joystick hat position change.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="JoyHatEvent"/>.
+	/// </para>
 	/// </remarks>
 	JoystickHatMotion,
 
@@ -543,6 +726,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// Joystick button pressed.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="JoyButtonEvent"/>.
 	/// </para>
 	/// </remarks>
 	JoystickButtonDown,
@@ -552,6 +738,9 @@ public enum EventType : uint
 	/// <para>
 	/// Joystick button released.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="JoyButtonEvent"/>.
+	/// </para>
 	/// </remarks>
 	JoystickButtonUp,
 
@@ -559,6 +748,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A new joystick has been inserted into the system.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="JoyDeviceEvent"/>.
 	/// </para>
 	/// </remarks>
 	JoystickAdded,
@@ -568,6 +760,9 @@ public enum EventType : uint
 	/// <para>
 	/// An opened joystick has been removed.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="JoyDeviceEvent"/>.
+	/// </para>
 	/// </remarks>
 	JoystickRemoved,
 
@@ -576,6 +771,9 @@ public enum EventType : uint
 	/// <para>
 	/// Joystick battery level change.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="JoyBatteryEvent"/>.
+	/// </para>
 	/// </remarks>
 	JoystickBatteryUpdated,
 
@@ -583,6 +781,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// Joystick update is complete.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="JoyDeviceEvent"/>.
 	/// </para>
 	/// </remarks>
 	JoystickUpdateCompleted,
@@ -596,6 +797,9 @@ public enum EventType : uint
 	/// <para>
 	/// Gamepad axis motion.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="GamepadAxisEvent"/>.
+	/// </para>
 	/// </remarks>
 	GamepadAxisMotion = 0x650,
 
@@ -603,6 +807,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// Gamepad button pressed.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="GamepadButtonEvent"/>.
 	/// </para>
 	/// </remarks>
 	GamepadButtonDown,
@@ -612,6 +819,9 @@ public enum EventType : uint
 	/// <para>
 	/// Gamepad button released.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="GamepadButtonEvent"/>.
+	/// </para>
 	/// </remarks>
 	GamepadButtonUp,
 
@@ -619,6 +829,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A new gamepad has been inserted into the system.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="GamepadDeviceEvent"/>.
 	/// </para>
 	/// </remarks>
 	GamepadAdded,
@@ -628,6 +841,9 @@ public enum EventType : uint
 	/// <para>
 	/// A gamepad has been removed.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="GamepadDeviceEvent"/>.
+	/// </para>
 	/// </remarks>
 	GamepadRemoved,
 
@@ -635,6 +851,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// Gamepad mapping was updated.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="GamepadDeviceEvent"/>.
 	/// </para>
 	/// </remarks>
 	GamepadRemapped,
@@ -644,6 +863,9 @@ public enum EventType : uint
 	/// <para>
 	/// Gamepad touchpad was touched.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="GamepadTouchpadEvent"/>.
+	/// </para>
 	/// </remarks>
 	GamepadTouchpadDown,
 
@@ -651,6 +873,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// Gamepad touchpad finger was moved.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="GamepadTouchpadEvent"/>.
 	/// </para>
 	/// </remarks>
 	GamepadTouchpadMotion,
@@ -660,6 +885,9 @@ public enum EventType : uint
 	/// <para>
 	/// Gamepad touchpad finger was lifted.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="GamepadTouchpadEvent"/>.
+	/// </para>
 	/// </remarks>
 	GamepadTouchpadUp,
 
@@ -667,6 +895,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// Gamepad sensor was updated.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="GamepadSensorEvent"/>.
 	/// </para>
 	/// </remarks>
 	GamepadSensorUpdated,
@@ -676,6 +907,9 @@ public enum EventType : uint
 	/// <para>
 	/// Gamepad update is complete.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="GamepadDeviceEvent"/>.
+	/// </para>
 	/// </remarks>
 	GamepadUpdateCompleted,
 
@@ -683,6 +917,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// Gamepad Steam handle has changed.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="GamepadDeviceEvent"/>.
 	/// </para>
 	/// </remarks>
 	GamepadSteamHandleUpdated,
@@ -692,15 +929,35 @@ public enum EventType : uint
 	#region Touch events
 
 	/// <summary>The event type <em>FingerDown</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Associated event structure: <see cref="TouchFingerEvent"/>.
+	/// </para>
+	/// </remarks>
 	FingerDown = 0x700,
 
 	/// <summary>The event type <em>FingerUp</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Associated event structure: <see cref="TouchFingerEvent"/>.
+	/// </para>
+	/// </remarks>
 	FingerUp,
 
 	/// <summary>The event type <em>FingerMotion</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Associated event structure: <see cref="TouchFingerEvent"/>.
+	/// </para>
+	/// </remarks>
 	FingerMotion,
 
 	/// <summary>The event type <em>FingerCanceled</em></summary>
+	/// <remarks>
+	/// <para>
+	/// Associated event structure: <see cref="TouchFingerEvent"/>.
+	/// </para>
+	/// </remarks>
 	FingerCanceled,
 
 	#endregion
@@ -712,6 +969,9 @@ public enum EventType : uint
 	/// <para>
 	/// Pinch gesture started.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="PinchFingerEvent"/>.
+	/// </para>
 	/// </remarks>
 	PinchBegin = 0x710,
 
@@ -720,13 +980,19 @@ public enum EventType : uint
 	/// <para>
 	/// Pinch gesture updated.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="PinchFingerEvent"/>.
+	/// </para>
 	/// </remarks>
-	PinchUpdate,
+	PinchUpdated,
 
 	/// <summary>The event type <em>PinchEnd</em></summary>
 	/// <remarks>
 	/// <para>
 	/// Pinch gesture ended.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="PinchFingerEvent"/>.
 	/// </para>
 	/// </remarks>
 	PinchEnd,
@@ -740,6 +1006,9 @@ public enum EventType : uint
 	/// <para>
 	/// The clipboard or primary selection changed.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="ClipboardEvent"/>.
+	/// </para>
 	/// </remarks>
 	ClipboardUpdated = 0x900,
 
@@ -752,6 +1021,9 @@ public enum EventType : uint
 	/// <para>
 	/// The system requests a file open. <see cref="DropEvent.Data"/> contains the filename.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="DropEvent"/>.
+	/// </para>
 	/// </remarks>
 	DropFile = 0x1000,
 
@@ -759,6 +1031,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A plain text drag-and-drop event occured. <see cref="DropEvent.Data"/> contains the text.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="DropEvent"/>.
 	/// </para>
 	/// </remarks>
 	DropText,
@@ -768,6 +1043,9 @@ public enum EventType : uint
 	/// <para>
 	/// A new set of drops is beginning. <see cref="DropEvent.Data"/> is <em><see langword="null" /></em>.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="DropEvent"/>.
+	/// </para>
 	/// </remarks>
 	DropBegin,
 
@@ -776,6 +1054,9 @@ public enum EventType : uint
 	/// <para>
 	/// Current set of drops is now complete. <see cref="DropEvent.Data"/> is <em><see langword="null" /></em>.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="DropEvent"/>.
+	/// </para>
 	/// </remarks>
 	DropCompleted,
 
@@ -783,6 +1064,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// Position while moving over the window.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="DropEvent"/>.
 	/// </para>
 	/// </remarks>
 	DropPosition,
@@ -796,6 +1080,9 @@ public enum EventType : uint
 	/// <para>
 	/// A new audio device is available.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="AudioDeviceEvent"/>.
+	/// </para>
 	/// </remarks>
 	AudioDeviceAdded = 0x1100,
 
@@ -804,6 +1091,9 @@ public enum EventType : uint
 	/// <para>
 	/// An audio device has been removed.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="AudioDeviceEvent"/>.
+	/// </para>
 	/// </remarks>
 	AudioDeviceRemoved,
 
@@ -811,6 +1101,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// An audio device's format has been changed by the system.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="AudioDeviceEvent"/>.
 	/// </para>
 	/// </remarks>
 	AudioDeviceFormatChanged,
@@ -824,6 +1117,9 @@ public enum EventType : uint
 	/// <para>
 	/// A sensor was updated.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="SensorEvent"/>.
+	/// </para>
 	/// </remarks>
 	SensorUpdated = 0x1200,
 
@@ -836,6 +1132,9 @@ public enum EventType : uint
 	/// <para>
 	/// Pressure-sensitive pen has become available.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="PenProximityEvent"/>.
+	/// </para>
 	/// </remarks>
 	PenProximityIn = 0x1300,
 
@@ -843,6 +1142,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// Pressure-sensitive pen has become unavailable.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="PenProximityEvent"/>.
 	/// </para>
 	/// </remarks>
 	PenProximityOut,
@@ -852,6 +1154,9 @@ public enum EventType : uint
 	/// <para>
 	/// Pressure-sensitive pen touched drawing surface.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="PenTouchEvent"/>.
+	/// </para>
 	/// </remarks>
 	PenDown,
 
@@ -859,6 +1164,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// Pressure-sensitive pen stopped touching drawing surface.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="PenTouchEvent"/>.
 	/// </para>
 	/// </remarks>
 	PenUp,
@@ -868,6 +1176,9 @@ public enum EventType : uint
 	/// <para>
 	/// Pressure-sensitive pen button pressed.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="PenButtonEvent"/>.
+	/// </para>
 	/// </remarks>
 	PenButtonDown,
 
@@ -875,6 +1186,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// Pressure-sensitive pen button released.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="PenButtonEvent"/>.
 	/// </para>
 	/// </remarks>
 	PenButtonUp,
@@ -884,13 +1198,19 @@ public enum EventType : uint
 	/// <para>
 	/// Pressure-sensitive pen is moving on the tablet.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="PenMotionEvent"/>.
+	/// </para>
 	/// </remarks>
 	PenMotion,
 
 	/// <summary>The event type <em>PenAxisChanged</em></summary>
 	/// <remarks>
 	/// <para>
-	/// Pressure-sensitive pen angle/pressure/etc changed.
+	/// Pressure-sensitive pen angle/pressure/etc. changed.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="PenAxisEvent"/>.
 	/// </para>
 	/// </remarks>
 	PenAxisChanged,
@@ -904,6 +1224,9 @@ public enum EventType : uint
 	/// <para>
 	/// A new camera device is available.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="CameraDeviceEvent"/>.
+	/// </para>
 	/// </remarks>
 	CameraDeviceAdded = 0x1400,
 
@@ -911,6 +1234,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A camera device has been removed.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="CameraDeviceEvent"/>.
 	/// </para>
 	/// </remarks>
 	CameraDeviceRemoved,
@@ -920,6 +1246,9 @@ public enum EventType : uint
 	/// <para>
 	/// A camera device has been approved for use by the user.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="CameraDeviceEvent"/>.
+	/// </para>
 	/// </remarks>
 	CameraDeviceApproved,
 
@@ -927,6 +1256,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// A camera device has been denied for use by the user.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="CameraDeviceEvent"/>.
 	/// </para>
 	/// </remarks>
 	CameraDeviceDenied,
@@ -940,6 +1272,9 @@ public enum EventType : uint
 	/// <para>
 	/// The render targets have been reset and their contents need to be updated.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="RenderEvent"/>.
+	/// </para>
 	/// </remarks>
 	RenderTargetsReset = 0x2000,
 
@@ -948,6 +1283,9 @@ public enum EventType : uint
 	/// <para>
 	/// The device has been reset and all textures need to be recreated.
 	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="RenderEvent"/>.
+	/// </para>
 	/// </remarks>
 	RenderDeviceReset,
 
@@ -955,6 +1293,9 @@ public enum EventType : uint
 	/// <remarks>
 	/// <para>
 	/// The device has been lost and can't be recovered.
+	/// </para>
+	/// <para>
+	/// Associated event structure: <see cref="RenderEvent"/>.
 	/// </para>
 	/// </remarks>
 	RenderDeviceLost,

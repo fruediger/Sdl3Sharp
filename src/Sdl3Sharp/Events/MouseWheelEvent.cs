@@ -27,6 +27,14 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when a mouse wheel is scrolled
 /// </summary>
+/// <remarks>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.MouseWheel"/></description></item>
+/// </list>
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct MouseWheelEvent : ICommonEvent<MouseWheelEvent>, IFormattable, ISpanFormattable

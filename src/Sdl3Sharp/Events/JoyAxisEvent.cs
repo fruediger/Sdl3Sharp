@@ -26,6 +26,14 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when a joystick axis changes position
 /// </summary>
+/// <remarks>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.JoystickAxisMotion"/></description></item>
+/// </list>
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct JoyAxisEvent : ICommonEvent<JoyAxisEvent>, IFormattable, ISpanFormattable

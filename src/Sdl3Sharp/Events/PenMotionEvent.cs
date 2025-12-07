@@ -33,6 +33,12 @@ partial struct Event
 /// You should listen for <see cref="EventType.PenDown"/> and <see cref="EventType.PenUp"/> events (<see cref="PenTouchEvent"/>),
 /// or check the <see cref="PenInputFlags.Down"/> flag of the value of the <see cref="PenState"/> property to decide whether a pen is "drawing" or not when dealing with pen motion.
 /// </para>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.PenMotion"/></description></item>
+/// </list>
+/// </para>
 /// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]

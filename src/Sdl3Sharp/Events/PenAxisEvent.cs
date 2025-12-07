@@ -31,6 +31,12 @@ partial struct Event
 /// <para>
 /// You might get some of these events even if the pen isn't touching the tablet.
 /// </para>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.PenAxisChanged"/></description></item>
+/// </list>
+/// </para>
 /// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]

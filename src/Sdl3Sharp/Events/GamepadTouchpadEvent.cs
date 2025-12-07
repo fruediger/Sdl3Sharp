@@ -26,6 +26,16 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when a finger interacts with a gamepad touchpad
 /// </summary>
+/// <remarks>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.GamepadTouchpadDown"/></description></item>
+/// <item><description><see cref="EventType.GamepadTouchpadMotion"/></description></item>
+/// <item><description><see cref="EventType.GamepadTouchpadUp"/></description></item>
+/// </list>
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct GamepadTouchpadEvent : ICommonEvent<GamepadTouchpadEvent>, IFormattable, ISpanFormattable

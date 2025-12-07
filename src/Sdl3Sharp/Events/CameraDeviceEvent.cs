@@ -26,6 +26,17 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when a <see cref="Camera">camera device</see> is being <see cref="EventType.CameraDeviceAdded">added</see>, <see cref="EventType.CameraDeviceRemoved">removed</see>, <see cref="EventType.CameraDeviceApproved">approved</see>, or <see cref="EventType.CameraDeviceDenied">denied</see>
 /// </summary>
+/// <remarks>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.CameraDeviceAdded"/></description></item> 
+/// <item><description><see cref="EventType.CameraDeviceRemoved"/></description></item> 
+/// <item><description><see cref="EventType.CameraDeviceApproved"/></description></item>
+/// <item><description><see cref="EventType.CameraDeviceDenied"/></description></item>
+/// </list>
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct CameraDeviceEvent : ICommonEvent<CameraDeviceEvent>, IFormattable, ISpanFormattable

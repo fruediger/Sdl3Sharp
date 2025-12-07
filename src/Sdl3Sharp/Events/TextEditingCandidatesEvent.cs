@@ -28,6 +28,14 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when the list of keyboard IME candidates is displayed, shall be displayed, or changes
 /// </summary>
+/// <remarks>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.TextEditingCandidates"/></description></item>
+/// </list>
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct TextEditingCandidatesEvent : ICommonEvent<TextEditingCandidatesEvent>, IFormattable, ISpanFormattable

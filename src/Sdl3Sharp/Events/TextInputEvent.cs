@@ -28,7 +28,15 @@ partial struct Event
 /// Represents an event that occurs when <see cref="EventType.TextInput">text input</see> is happening
 /// </summary>
 /// <remarks>
+/// <para>
 /// This event will never be delivered unless text input is enabled by calling <see cref="SDL_StartTextInput"/>. Text input is disabled by default!
+/// </para>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.TextInput"/></description></item>
+/// </list>
+/// </para>
 /// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]

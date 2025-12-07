@@ -27,6 +27,14 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when a <see cref="Sensor">sensor</see> is being <see cref="EventType.SensorUpdated">updated</see>
 /// </summary>
+/// <remarks>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.SensorUpdated"/></description></item>
+/// </list>
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct SensorEvent : ICommonEvent<SensorEvent>, IFormattable, ISpanFormattable

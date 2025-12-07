@@ -28,6 +28,15 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when a keyboard key is being <see cref="EventType.KeyDown">pressed</see> or <see cref="EventType.KeyUp">released</see>
 /// </summary>
+/// <remarks>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.KeyDown"/></description></item>
+/// <item><description><see cref="EventType.KeyUp"/></description></item>
+/// </list>
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct KeyboardEvent : ICommonEvent<KeyboardEvent>, IFormattable, ISpanFormattable

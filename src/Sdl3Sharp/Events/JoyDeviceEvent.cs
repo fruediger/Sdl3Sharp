@@ -31,6 +31,14 @@ partial struct Event
 /// SDL will send a <see cref="JoyDeviceEvent"/> with <see cref="Type"/> <see cref="EventType.JoystickAdded"/> for every joystick device it discovers during initialization.
 /// After that, <see cref="JoyDeviceEvent"/>s with <see cref="Type"/> <see cref="EventType.JoystickAdded"/> will only arrive when a joystick device is hotplugged during the application's runtime.
 /// </para>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.JoystickAdded"/></description></item>
+/// <item><description><see cref="EventType.JoystickRemoved"/></description></item>
+/// <item><description><see cref="EventType.JoystickUpdateCompleted"/></description></item>
+/// </list>
+/// </para>
 /// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]

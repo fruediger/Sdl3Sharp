@@ -28,6 +28,15 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when a pen <see cref="EventType.PenDown">touches</see> or <see cref="EventType.PenUp">lifts</see> from a touch surface
 /// </summary>
+/// <remarks>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.PenDown"/></description></item>
+/// <item><description><see cref="EventType.PenUp"/></description></item>
+/// </list>
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct PenTouchEvent : ICommonEvent<PenTouchEvent>, IFormattable, ISpanFormattable

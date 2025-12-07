@@ -29,6 +29,14 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when <see cref="EventType.TextEditing">text editing</see> happens
 /// </summary>
+/// <remarks>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.TextEditing"/></description></item>
+/// </list>
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct TextEditingEvent : ICommonEvent<TextEditingEvent>, IFormattable, ISpanFormattable

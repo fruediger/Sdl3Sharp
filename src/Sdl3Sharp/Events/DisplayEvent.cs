@@ -26,6 +26,21 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when a <see cref="Display"/> changes its state
 /// </summary>
+/// <remarks>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.DisplayOrientationChanged"/></description></item> 
+/// <item><description><see cref="EventType.DisplayAdded"/></description></item> 
+/// <item><description><see cref="EventType.DisplayRemoved"/></description></item>
+/// <item><description><see cref="EventType.DisplayMoved"/></description></item>
+/// <item><description><see cref="EventType.DisplayDesktopModeChanged"/></description></item>
+/// <item><description><see cref="EventType.DisplayCurrentModeChanged"/></description></item>
+/// <item><description><see cref="EventType.DisplayContentScaleChanged"/></description></item>
+/// <item><description><see cref="EventType.DisplayUsableBoundsChanged"/></description></item>
+/// </list>
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct DisplayEvent : ICommonEvent<DisplayEvent>, IFormattable, ISpanFormattable

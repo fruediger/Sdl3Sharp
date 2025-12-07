@@ -26,6 +26,16 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when a pinch gesture is detected on a touch device
 /// </summary>
+/// <remarks>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.PinchBegin"/></description></item>
+/// <item><description><see cref="EventType.PinchUpdated"/></description></item>
+/// <item><description><see cref="EventType.PinchEnd"/></description></item>
+/// </list>
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct PinchFingerEvent : ICommonEvent<PinchFingerEvent>, IFormattable, ISpanFormattable
@@ -48,12 +58,12 @@ public struct PinchFingerEvent : ICommonEvent<PinchFingerEvent>, IFormattable, I
 
 	/// <remarks>
 	/// <para>
-	/// When setting this property, the value must be either <see cref="EventType.PinchBegin"/>, <see cref="EventType.PinchUpdate"/>, or <see cref="EventType.PinchEnd"/>.
+	/// When setting this property, the value must be either <see cref="EventType.PinchBegin"/>, <see cref="EventType.PinchUpdated"/>, or <see cref="EventType.PinchEnd"/>.
 	/// Otherwise, it will lead the property to throw an <see cref="ArgumentException"/>!
 	/// </para>
 	/// </remarks>
 	/// <exception cref="ArgumentException">
-	/// When setting this property, the value was neither <see cref="EventType.PinchBegin"/>, <see cref="EventType.PinchUpdate"/>, nor <see cref="EventType.PinchEnd"/>
+	/// When setting this property, the value was neither <see cref="EventType.PinchBegin"/>, <see cref="EventType.PinchUpdated"/>, nor <see cref="EventType.PinchEnd"/>
 	/// </exception>
 	/// <inheritdoc/>
 	public EventType Type
@@ -82,10 +92,10 @@ public struct PinchFingerEvent : ICommonEvent<PinchFingerEvent>, IFormattable, I
 	}
 
 	/// <summary>
-	/// Gets or sets the scale <em>change</em> since the last <see cref="EventType.PinchUpdate"/> event
+	/// Gets or sets the scale <em>change</em> since the last <see cref="EventType.PinchUpdated"/> event
 	/// </summary>
 	/// <value>
-	/// The scale <em>change</em> since the last <see cref="EventType.PinchUpdate"/> event, where values less than <c>1</c> mean "zoom-out" and values greater than <c>1</c> mean a "zoom-in"
+	/// The scale <em>change</em> since the last <see cref="EventType.PinchUpdated"/> event, where values less than <c>1</c> mean "zoom-out" and values greater than <c>1</c> mean a "zoom-in"
 	/// </value>
 	public float Scale
 	{
@@ -154,12 +164,12 @@ public struct PinchFingerEvent : ICommonEvent<PinchFingerEvent>, IFormattable, I
 
 	/// <remarks>
 	/// <para>
-	/// The <see cref="Event.Type"/> of the given <paramref name="event"/> must be either <see cref="EventType.PinchBegin"/>, <see cref="EventType.PinchUpdate"/>, or <see cref="EventType.PinchEnd"/>.
+	/// The <see cref="Event.Type"/> of the given <paramref name="event"/> must be either <see cref="EventType.PinchBegin"/>, <see cref="EventType.PinchUpdated"/>, or <see cref="EventType.PinchEnd"/>.
 	/// Otherwise, it will lead the method to throw an <see cref="ArgumentException"/>!
 	/// </para>
 	/// </remarks>
 	/// <exception cref="ArgumentException">
-	/// The <see cref="Event.Type"/> of the given <paramref name="event"/> was neither <see cref="EventType.PinchBegin"/>, <see cref="EventType.PinchUpdate"/>, nor <see cref="EventType.PinchEnd"/>
+	/// The <see cref="Event.Type"/> of the given <paramref name="event"/> was neither <see cref="EventType.PinchBegin"/>, <see cref="EventType.PinchUpdated"/>, nor <see cref="EventType.PinchEnd"/>
 	/// </exception>
 	/// <inheritdoc/>
 	public static explicit operator PinchFingerEvent(in Event @event)

@@ -28,6 +28,14 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when the contents of the clipboard have changed
 /// </summary>
+/// <remarks>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.ClipboardUpdated"/></description></item>
+/// </list>
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct ClipboardEvent : ICommonEvent<ClipboardEvent>, IFormattable, ISpanFormattable

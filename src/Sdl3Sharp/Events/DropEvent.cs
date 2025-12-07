@@ -27,6 +27,18 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when text data or a file is being drag'n'dropped onto the application
 /// </summary>
+/// <remarks>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.DropFile"/></description></item> 
+/// <item><description><see cref="EventType.DropText"/></description></item> 
+/// <item><description><see cref="EventType.DropBegin"/></description></item>
+/// <item><description><see cref="EventType.DropCompleted"/></description></item>
+/// <item><description><see cref="EventType.DropPosition"/></description></item>
+/// </list>
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct DropEvent : ICommonEvent<DropEvent>, IFormattable, ISpanFormattable

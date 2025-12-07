@@ -27,6 +27,14 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when a joystick hat changes position
 /// </summary>
+/// <remarks>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.JoystickHatMotion"/></description></item>
+/// </list>
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct JoyHatEvent : ICommonEvent<JoyHatEvent>, IFormattable, ISpanFormattable

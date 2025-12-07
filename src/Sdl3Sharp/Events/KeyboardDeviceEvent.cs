@@ -26,6 +26,15 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when a <see cref="Keyboard">keyboard device</see> is being <see cref="EventType.KeyboardAdded">added</see> into the system or <see cref="EventType.KeyboardRemoved">removed</see> from the system
 /// </summary>
+/// <remarks>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.KeyboardAdded"/></description></item>
+/// <item><description><see cref="EventType.KeyboardRemoved"/></description></item>
+/// </list>
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct KeyboardDeviceEvent : ICommonEvent<KeyboardDeviceEvent>, IFormattable, ISpanFormattable

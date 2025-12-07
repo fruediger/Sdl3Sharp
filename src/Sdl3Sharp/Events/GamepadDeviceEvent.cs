@@ -26,7 +26,7 @@ partial struct Event
 }
 
 /// <summary>
-/// Represents an event that occurs when a <see cref="Gamepad">gamepad device</see> is being <see cref="EventType.GamepadRemoved">added</see> into the system, <see cref="EventType.GamepadRemoved">removed</see> from the system, <see cref="EventType.GamepadRemapped">remapped</see>, or <see cref="EventType.GamepadUpdateCompleted">updated</see> or that gets it's <see cref="EventType.GamepadSteamHandleUpdated">Steam handle updated</see>
+/// Represents an event that occurs when a <see cref="Gamepad">gamepad device</see> is being <see cref="EventType.GamepadAdded">added</see> into the system, <see cref="EventType.GamepadRemoved">removed</see> from the system, <see cref="EventType.GamepadRemapped">remapped</see>, or <see cref="EventType.GamepadUpdateCompleted">updated</see> or that gets it's <see cref="EventType.GamepadSteamHandleUpdated">Steam handle updated</see>
 /// </summary>
 /// <remarks>
 /// <para>
@@ -35,6 +35,16 @@ partial struct Event
 /// <para>
 /// SDL will send a <see cref="GamepadDeviceEvent"/> with <see cref="Type"/> <see cref="EventType.GamepadAdded"/> for every gamepad device it discovers during initialization.
 /// After that, <see cref="GamepadDeviceEvent"/>s with <see cref="Type"/> <see cref="EventType.GamepadAdded"/> will only arrive when a gamepad device is hotplugged or a <see cref="Joystick">joystick device</see> gets a <see cref="Gamepad">gamepad</see> mapping during the application's runtime.
+/// </para>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.GamepadAdded"/></description></item>
+/// <item><description><see cref="EventType.GamepadRemoved"/></description></item>
+/// <item><description><see cref="EventType.GamepadRemapped"/></description></item>
+/// <item><description><see cref="EventType.GamepadUpdateCompleted"/></description></item>
+/// <item><description><see cref="EventType.GamepadSteamHandleUpdated"/></description></item>
+/// </list>
 /// </para>
 /// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]

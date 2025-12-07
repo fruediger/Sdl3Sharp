@@ -26,6 +26,15 @@ partial struct Event
 /// <summary>
 /// Represents an event that occurs when a <see cref="Mouse">mouse device</see> is being <see cref="EventType.MouseAdded">added</see> or <see cref="EventType.MouseRemoved">removed</see>
 /// </summary>
+/// <remarks>
+/// <para>
+/// Associated <see cref="EventType"/>s:
+/// <list type="bullet">
+/// <item><description><see cref="EventType.MouseAdded"/></description></item>
+/// <item><description><see cref="EventType.MouseRemoved"/></description></item>
+/// </list>
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public struct MouseDeviceEvent : ICommonEvent<MouseDeviceEvent>, IFormattable, ISpanFormattable
