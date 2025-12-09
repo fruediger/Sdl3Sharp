@@ -1,4 +1,5 @@
 ﻿using Sdl3Sharp.Utilities;
+using Sdl3Sharp.Video.Blending;
 using Sdl3Sharp.Video.Coloring;
 using Sdl3Sharp.Video.Drawing;
 using System;
@@ -166,6 +167,17 @@ public partial class Surface : ICloneable, IDisposable
 		}
 	}
 
+	public bool HasColorKey
+	{
+		get
+		{
+			unsafe
+			{
+				return SDL_SurfaceHasColorKey(SurfacePointer);
+			}
+		}
+	}
+
 	public int Height
 	{
 		get
@@ -176,24 +188,6 @@ public partial class Surface : ICloneable, IDisposable
 					&& surface is not null
 						? surface->H
 						: default;
-			}
-		}
-	}
-
-	public Palette? Palette
-	{
-		get
-		{
-			unsafe
-			{
-				var palette = SDL_GetSurfacePalette(SurfacePointer);
-
-				if (palette is null)
-				{
-					return null;
-				}
-
-				return Palette.GetOrCreate(palette);
 			}
 		}
 	}
@@ -335,6 +329,33 @@ public partial class Surface : ICloneable, IDisposable
 	}
 
 	public uint MapColor(Color<byte> color) => MapColor(color.R, color.G, color.B, color.A);
+
+	public void ResetClippingRect()
+	{
+		unsafe
+		{
+			SDL_SetSurfaceClipRect(SurfacePointer, rect: null);
+		}
+	}
+
+	public void ResetColorKey()
+	{
+		unsafe
+		{
+			SDL_SetSurfaceColorKey(SurfacePointer, enabled: false, key: 0);
+		}
+	}
+
+	public bool SetClippingRect(in Rect<int> rect)
+	{
+		unsafe
+		{
+			fixed (Rect<int>* rectPtr = &rect)
+			{
+				return SDL_SetSurfaceClipRect(SurfacePointer, rectPtr);
+			}
+		}
+	}
 
 	public bool TryAddAlternateImage(Surface image)
 	{
@@ -805,7 +826,7 @@ public partial class Surface : ICloneable, IDisposable
 		}
 	}
 
-	public bool TryGetAlphaMod(out byte alpha)
+	public bool TryGetAlphaModulator(out byte alpha)
 	{
 		unsafe
 		{
@@ -819,11 +840,146 @@ public partial class Surface : ICloneable, IDisposable
 		}
 	}
 
-	public bool TrySetAlphaMod(byte alpha)
+	public bool TryGetBlendMode(out BlendMode blendMode)
+	{
+		unsafe
+		{
+			BlendMode blendModeTmp;
+
+			bool result = SDL_GetSurfaceBlendMode(SurfacePointer, &blendModeTmp);
+
+			blendMode = blendModeTmp;
+
+			return result;
+		}
+	}
+
+	// TODO: see SetClippingRect and ResetClippingRect; there's not TrySetClippingRect!
+	public bool TryGetClippingRect(out Rect<int> rect)
+	{
+		unsafe
+		{
+			fixed (Rect<int>* rectPtr = &rect)
+			{
+				return SDL_GetSurfaceClipRect(SurfacePointer, rectPtr);
+			}
+		}
+	}
+
+	// TODO: see ResetColorKey too!
+	public bool TryGetColorKey(out uint keyValue)
+	{
+		unsafe
+		{
+			uint keyTmp;
+
+			bool result = SDL_GetSurfaceColorKey(SurfacePointer, &keyTmp);
+
+			keyValue = keyTmp;
+
+			return result;
+		}
+	}
+
+	// TODO: see ResetColorKey too!
+	public bool TryGetColorKey(out byte r, out byte g, out byte b)
+	{
+		unsafe
+		{
+			if (TryGetColorKey(out uint keyValue)
+				&& SurfacePointer->Format.TryGetPixelFormatDetails(out var details) // SurfacePointer is here non-null because of 'TryGetColorKey'
+			)
+			{
+				TryGetPalette(out var palette); // We don't care for the return value: either 'palette' is non-null if we do have one or it's null if we don't
+				details.GetColor(keyValue, palette, out r, out g, out b);
+				return true;
+			}
+
+			r = default; g = default; b = default;
+			return false;
+		}
+	}
+
+	// TODO: see ResetColorKey too!
+	public bool TryGetColorKey(out Color<byte> keyColor)
+	{
+		if (TryGetColorKey(out var r, out var g, out var b))
+		{
+			keyColor = Color.From(r, g, b);
+			return true;
+		}
+
+		keyColor = default;
+		return false;
+	}
+
+	public bool TryGetColorModulator(out byte r, out byte g, out byte b)
+	{
+		unsafe
+		{
+			byte rTmp, gTmp, bTmp;
+
+			bool result = SDL_GetSurfaceColorMod(SurfacePointer, &rTmp, &gTmp, &bTmp);
+
+			r = rTmp; g = gTmp; b = bTmp;
+			
+			return result;
+		}
+	}
+
+	public bool TryGetPalette([NotNullWhen(true)] out Palette? palette)
+	{
+		unsafe
+		{
+			var palettePtr = SDL_GetSurfacePalette(SurfacePointer);
+
+			if (palettePtr is null)
+			{
+				palette = null;
+				return false;
+			}
+
+			palette = Palette.GetOrCreate(palettePtr);
+			return true;
+		}
+	}
+
+	public bool TrySetAlphaModulator(byte alpha)
 	{
 		unsafe
 		{
 			return SDL_SetSurfaceAlphaMod(SurfacePointer, alpha);
+		}
+	}
+
+	public bool TrySetBlendMode(BlendMode blendMode)
+	{
+		unsafe
+		{
+			return SDL_SetSurfaceBlendMode(SurfacePointer, blendMode);
+		}
+	}
+
+	// TODO: see ResetColorKey too!
+	public bool TrySetColorKey(uint keyValue)
+	{
+		unsafe
+		{
+			return SDL_SetSurfaceColorKey(SurfacePointer, enabled: true, keyValue);
+		}
+	}
+
+	// TODO: see ResetColorKey too!
+	public bool TrySetColorKey(byte r, byte g, byte b) => TrySetColorKey(MapColor(r, g, b));
+
+	// TODO: see ResetColorKey too!
+	public bool TrySetColorKey(Color<byte> keyColor) => TrySetColorKey(MapColor(keyColor));
+
+	public bool TrySetColorModulator(byte r, byte g, byte b)
+	{
+		unsafe
+		{
+			return SDL_SetSurfaceColorMod(SurfacePointer, r, g, b);
 		}
 	}
 }
