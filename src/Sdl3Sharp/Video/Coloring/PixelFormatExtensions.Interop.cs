@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Sdl3Sharp.Video.Coloring;
 
-partial struct PixelFormat
+partial class PixelFormatExtensions
 {
 	/// <summary>
 	/// Convert one of the enumerated pixel formats to a bpp value and RGBA masks
