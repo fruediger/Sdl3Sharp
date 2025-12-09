@@ -1,18 +1,18 @@
 ﻿namespace Sdl3Sharp.Video.Coloring;
 
 /// <summary>
-/// Represents a colorspace
+/// Represents a color space
 /// </summary>
-public enum Colorspace : uint
+public enum ColorSpace : uint
 {
 #pragma warning disable IDE0079 // Leave this here to remind ourselves in case we want to document these in the future
 #pragma warning disable CS1591 // Not sure if it's actually necessary and reasonable to document all of these predefined colorspaces
 
-	/// <summary>The unknown <see cref="Colorspace"/></summary>
+	/// <summary>The unknown <see cref="ColorSpace"/></summary>
 	Unknown = 0,
 
 	/// <summary>
-	/// <see cref="Srgb">sRGB</see> is a gamma corrected colorspace, and the default colorspace for SDL rendering and 8-bit RGB surface
+	/// <see cref="Srgb">sRGB</see> is a gamma corrected color space, and the default color space for SDL rendering and 8-bit RGB surface
 	/// </summary>
 	/// <remarks>
 	/// <para>
@@ -27,8 +27,8 @@ public enum Colorspace : uint
 		 | ((uint)MatrixCoefficients.Identity  << 0),
 
 	/// <summary>
-	/// <see cref="SrgbLinear">sRGB linear</see> is a linear colorspace and the default colorspace for floating point surfaces.
-	/// On Windows this is the scRGB colorspace, and on Apple platforms this is kCGColorSpaceExtendedLinearSRGB for EDR content.
+	/// <see cref="SrgbLinear">sRGB linear</see> is a linear colorspace and the default color space for floating point surfaces.
+	/// On Windows this is the scRGB color space, and on Apple platforms this is kCGColorSpaceExtendedLinearSRGB for EDR content.
 	/// </summary>
 	/// <remarks>
 	/// <para>
