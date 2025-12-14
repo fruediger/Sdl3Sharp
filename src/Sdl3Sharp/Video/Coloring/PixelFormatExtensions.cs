@@ -463,13 +463,19 @@ public static partial class PixelFormatExtensions
 		{
 			unsafe
 			{
-				int bpp;
-				uint rmask, gmask, bmask, amask;
+				Unsafe.SkipInit(out int bpp);
+				Unsafe.SkipInit(out uint rmask);
+				Unsafe.SkipInit(out uint gmask);
+				Unsafe.SkipInit(out uint bmask);
+				Unsafe.SkipInit(out uint amask);
 
 				bool result = SDL_GetMasksForPixelFormat(format, &bpp, &rmask, &gmask, &bmask, &amask);
 
 				bitsPerPixel = bpp;
-				rMask = rmask; gMask = gmask; bMask = bmask; aMask = amask;
+				rMask = rmask;
+				gMask = gmask;
+				bMask = bmask;
+				aMask = amask;
 
 				return result;
 			}

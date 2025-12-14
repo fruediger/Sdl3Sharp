@@ -145,7 +145,7 @@ public abstract partial class Stream : IDisposable
 		}
 	}	
 
-	private protected unsafe SDL_IOStream* Pointer { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mContext; }
+	internal unsafe SDL_IOStream* Pointer { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mContext; }
 
 	/// <summary>
 	/// Get the properties associated with the stream
@@ -236,10 +236,16 @@ public abstract partial class Stream : IDisposable
 	}
 
 	/// <inheritdoc/>
-	public void Dispose()
+#pragma warning disable CA1816 // We do that in Dispose(bool)
+	public void Dispose() => Dispose(close: true);
+#pragma warning restore CA1816
+
+	internal void Dispose(bool close)
 	{
-		Dispose(disposing: true, close: true);
+#pragma warning disable CA1816 // The containing method is essentially our central dipose logic
+		Dispose(disposing: true, close);
 		GC.SuppressFinalize(this);
+#pragma warning restore CA1816
 	}
 
 	/// <summary>
@@ -339,7 +345,7 @@ public abstract partial class Stream : IDisposable
 	/// <returns><c><see langword="true"/></c>, if all available data from the stream was succesfully read; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
 	/// <remarks>
 	/// <para>
-	/// The resulting <see cref="NativeMemoryManager"/> should be <see cref="NativeMemoryManager.Dispose()">disposed</see> if the memory it's managing is no longer needed. That also frees the allocated memory.
+	/// The resulting <see cref="NativeMemoryManager"/> should be <see cref="NativeMemoryManagerBase.Dispose()">disposed</see> if the memory it's managing is no longer needed. That also frees the allocated memory.
 	/// </para>
 	/// <para>
 	/// This method is not threadsafe.

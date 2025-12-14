@@ -24,12 +24,12 @@ namespace Sdl3Sharp.Utilities;
 public readonly partial struct NativeMemory :
 	INativeMemory<NativeMemory>, IEquatable<NativeMemory>, IFormattable, ISpanFormattable, IEqualityOperators<NativeMemory, NativeMemory, bool>
 {
-	private readonly NativeMemoryManager? mMemoryManager;
+	private readonly NativeMemoryManagerBase? mMemoryManager;
 	private readonly nuint mOffsetOrPointer;
 	private readonly nuint mLength;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	internal NativeMemory(NativeMemoryManager? memoryManager, nuint offset, nuint length)
+	internal NativeMemory(NativeMemoryManagerBase? memoryManager, nuint offset, nuint length)
 	{
 		mMemoryManager = memoryManager;
 		mOffsetOrPointer = offset;
@@ -78,10 +78,10 @@ public readonly partial struct NativeMemory :
 	}
 
 	/// <summary>
-	/// Gets a value indicating whether the underlying <see cref="NativeMemoryManager"/> of this allocated memory buffer is pinned
+	/// Gets a value indicating whether the underlying <see cref="NativeMemoryManagerBase"/> of this allocated memory buffer is pinned
 	/// </summary>
 	/// <value>
-	/// A value indicating whether the underlying <see cref="NativeMemoryManager"/> of this allocated memory buffer is pinned
+	/// A value indicating whether the underlying <see cref="NativeMemoryManagerBase"/> of this allocated memory buffer is pinned
 	/// </value>
 	/// <seealso cref="Pin"/>
 	[MemberNotNullWhen(true, nameof(mMemoryManager), nameof(MemoryManager))]
@@ -120,7 +120,7 @@ public readonly partial struct NativeMemory :
 	/// </value>
 	public readonly nuint Length { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mLength; }
 
-	internal readonly NativeMemoryManager? MemoryManager { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mMemoryManager; }
+	internal readonly NativeMemoryManagerBase? MemoryManager { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mMemoryManager; }
 
 	internal readonly nuint OffsetOrPointer { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mOffsetOrPointer; }
 

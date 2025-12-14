@@ -1,17 +1,22 @@
-﻿using Sdl3Sharp.Utilities;
+﻿using Sdl3Sharp.IO;
+using Sdl3Sharp.Utilities;
 using Sdl3Sharp.Video.Blending;
 using Sdl3Sharp.Video.Coloring;
 using Sdl3Sharp.Video.Drawing;
 using System;
 using System.Buffers;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.Marshalling;
 
 namespace Sdl3Sharp.Video;
 
-public partial class Surface : ICloneable, IDisposable
+public partial class Surface : IDisposable
 {
 	private interface IUnsafeConstructorDispatch;
+
+	private static readonly ConcurrentDictionary<IntPtr, WeakReference<Surface>> mKnownInstances = [];
 
 	/// <exception cref="ArgumentException">
 	/// <paramref name="pixels"/> is <see cref="NativeMemory.IsValid">invalid</see>
@@ -63,22 +68,54 @@ public partial class Surface : ICloneable, IDisposable
 		static void failPixelsArgumentTooSmall(nuint required) => throw new ArgumentException(message: $"{nameof(pixels)} is too small. The buffer must be at least {required} in size.", paramName: nameof(pixels));
 	}
 
-	private protected unsafe SDL_Surface* SurfacePointer; // make the SurfacePointer field accessible from derived types inside this assembly,
-														  // so that they can manipulate it in their own Dispose mechanism without relying on the base implementation
-														  // (e.g. 'VulkanSurface' ('VulkanSurface's should call 'SDL_Vulkan_DestroySurface' instead of 'SDL_DestroySurface',
-														  // and therefore shouldn't call the 'base.Dispose'))
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	private unsafe static byte* Utf8Convert(string? str, out byte* strUtf8) => strUtf8 = Utf8StringMarshaller.ConvertToUnmanaged(str);
+
+	private unsafe SDL_Surface* mSurface;
 	private NativeMemory mNativeMemory = default;
 	private NativeMemoryPin? mNativeMemoryPin = null;
 	private Memory<byte> mMemory = default;
 	private MemoryHandle mMemoryHandle = default;
+	private Palette? mPalette = null; // Use this to keep the managed Palette alive
 
-	private protected unsafe Surface(SDL_Surface* surface) => SurfacePointer = surface;
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	private unsafe Surface(SDL_Surface* surface, IUnsafeConstructorDispatch? _ = default) => mSurface = surface;
+
+	private protected unsafe Surface(SDL_Surface* surface) :
+#pragma warning disable IDE0034 // Keep it that way for explicitness sake
+		this(surface, default(IUnsafeConstructorDispatch?))
+#pragma warning restore IDE0034
+	{
+		if (mSurface is not null)
+		{
+			mKnownInstances.AddOrUpdate(unchecked((IntPtr)mSurface), addRef, updateRef, this);
+		}
+
+		static WeakReference<Surface> addRef(IntPtr surface, Surface newSurface) => new(newSurface);
+
+		static WeakReference<Surface> updateRef(IntPtr surface, WeakReference<Surface> previousSurfaceRef, Surface newSurface)
+		{
+			if (previousSurfaceRef.TryGetTarget(out var previousSurface))
+			{
+#pragma warning disable IDE0079
+#pragma warning disable CA1816
+				GC.SuppressFinalize(previousSurface);
+#pragma warning restore CA1816
+#pragma warning restore IDE0079
+				previousSurface.Dispose(disposing: true, forget: true);
+			}
+
+			previousSurfaceRef.SetTarget(newSurface);
+
+			return previousSurfaceRef;
+		}
+	}
 
 	/// <exception cref="SdlException">The <see cref="Surface"/> could not be created (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	private unsafe Surface(int width, int height, PixelFormat format, IUnsafeConstructorDispatch? _ = default) :
 		this(SDL_CreateSurface(width, height, format))
 	{
-		if (SurfacePointer is null)
+		if (mSurface is null)
 		{
 			failCouldNotCreateSurface();
 		}
@@ -128,7 +165,7 @@ public partial class Surface : ICloneable, IDisposable
 	public unsafe Surface(int width, int height, PixelFormat format, void* pixels, int pitch) :
 		this(SDL_CreateSurfaceFrom(width, height, format, pixels, pitch))
 	{
-		if (SurfacePointer is null)
+		if (mSurface is null)
 		{
 			failCouldNotCreateSurface();
 		}
@@ -137,7 +174,68 @@ public partial class Surface : ICloneable, IDisposable
 		static void failCouldNotCreateSurface() => throw new SdlException($"Could not create the {nameof(Surface)}");
 	}
 
-	~Surface() => Dispose(disposing: false);
+#if SDL3_4_0_OR_GREATER
+	/// <exception cref="SdlException">The <see cref="Surface"/> could not be created (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
+	private unsafe Surface(string file, IUnsafeConstructorDispatch? _ = default) :
+		this(SDL_LoadSurface(Utf8Convert(file, out var fileUtf8)))
+	{
+		try
+		{
+			if (mSurface is null)
+			{
+				failCouldNotCreateSurface();
+			}
+		}
+		finally
+		{
+			Utf8StringMarshaller.Free(fileUtf8);
+		}
+
+		[DoesNotReturn]
+		static void failCouldNotCreateSurface() => throw new SdlException($"Could not create the {nameof(Surface)}");
+	}
+
+	// /// <inheritdoc cref="Surface(string, IUnsafeConstructorDispatch?)"/>
+	public Surface(string file) :
+#pragma warning disable IDE0034 // Keep it that way for explicitness sake
+		this(file, default(IUnsafeConstructorDispatch?))
+#pragma warning restore IDE0034
+	{ }
+#endif
+
+#if SDL3_4_0_OR_GREATER
+	/// <exception cref="SdlException">The <see cref="Surface"/> could not be created (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
+	private unsafe Surface(Stream source, bool closeAfterwards, IUnsafeConstructorDispatch? _ = default) :
+		this(SDL_LoadSurface_IO(source is not null ? source.Pointer : null, closeAfterwards))
+	{
+		try
+		{
+			if (mSurface is null)
+			{
+				failCouldNotCreateSurface();
+			}
+		}
+		finally
+		{
+			if (closeAfterwards)
+			{
+				source?.Dispose(close: false /* SDL_LoadSurface_IO already closed the stream */);
+			}
+		}
+
+		[DoesNotReturn]
+		static void failCouldNotCreateSurface() => throw new SdlException($"Could not create the {nameof(Surface)}");
+	}
+
+	// /// <inheritdoc cref="Surface.Surface(Stream, bool, IUnsafeConstructorDispatch?)"/>
+	public Surface(Stream source, bool closeAfterwards = false) :
+#pragma warning disable IDE0034 // Keep it that way for explicitness sake
+		this(source, closeAfterwards, default(IUnsafeConstructorDispatch?))
+#pragma warning restore IDE0034
+	{ }
+#endif
+
+	~Surface() => Dispose(disposing: false, forget: true);
 
 	public SurfaceFlags Flags
 	{
@@ -145,7 +243,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			unsafe
 			{
-				return SurfacePointer is var surface
+				return mSurface is var surface
 					&& surface is not null
 						? surface->Flags
 						: default;
@@ -159,10 +257,21 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			unsafe
 			{
-				return SurfacePointer is var surface
+				return mSurface is var surface
 					&& surface is not null
 						? surface->Format
 						: default;
+			}
+		}
+	}
+
+	public bool HasAlternateImages
+	{
+		get
+		{
+			unsafe
+			{
+				return SDL_SurfaceHasAlternateImages(mSurface);
 			}
 		}
 	}
@@ -173,9 +282,18 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			unsafe
 			{
-				return SDL_SurfaceHasColorKey(SurfacePointer);
+				return SDL_SurfaceHasColorKey(mSurface);
 			}
 		}
+	}
+
+	public float HdrHeadroom
+	{
+		get => Properties?.TryGetFloatValue(PropertyNames.HdrHeadroomFloat, out var hdrHeadroom) is true
+			? hdrHeadroom
+			: default;
+
+		set => Properties?.TrySetFloatValue(PropertyNames.HdrHeadroomFloat, value);
 	}
 
 	public int Height
@@ -184,10 +302,142 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			unsafe
 			{
-				return SurfacePointer is var surface
+				return mSurface is var surface
 					&& surface is not null
 						? surface->H
 						: default;
+			}
+		}
+	}
+
+	public long HotspotX
+	{
+		get => Properties?.TryGetNumberValue(PropertyNames.HotspotXNumber, out var hotspotX) is true
+			? hotspotX
+			: default;
+
+		set => Properties?.TrySetNumberValue(PropertyNames.HotspotXNumber, value);
+	}
+
+	public long HotspotY
+	{
+		get => Properties?.TryGetNumberValue(PropertyNames.HotspotYNumber, out var hotspotY) is true
+			? hotspotY
+			: default;
+
+		set => Properties?.TrySetNumberValue(PropertyNames.HotspotYNumber, value);
+	}
+
+	public Surface[] Images
+	{
+		get
+		{
+			unsafe
+			{
+				if (mSurface is var surface
+					&& surface is null)
+				{
+					return [];
+				}
+
+				Unsafe.SkipInit(out int count);
+
+				var images = SDL_GetSurfaceImages(mSurface, &count);
+
+				var result = GC.AllocateUninitializedArray<Surface>(count);
+
+				foreach (ref var image in result.AsSpan())
+				{
+					TryGetOrCreate(*images++, out image!);
+				}
+
+				Utilities.NativeMemory.SDL_free(images);
+
+				return result;
+			}
+		}
+	}
+
+	public bool IsLocked
+	{
+		get
+		{
+			unsafe
+			{
+#pragma warning disable IDE0075 // It's more readable that way
+				return mSurface is var surface
+					&& surface is not null
+					? (surface->Flags & SurfaceFlags.Locked) is SurfaceFlags.Locked
+					: default;
+#pragma warning restore IDE0075
+			}
+		}
+	}
+
+	public bool IsPreallocated
+	{
+		get
+		{
+			unsafe
+			{
+#pragma warning disable IDE0075 // It's more readable that way
+				return mSurface is var surface
+					&& surface is not null
+					? (surface->Flags & SurfaceFlags.PreAllocated) is SurfaceFlags.PreAllocated
+					: default;
+#pragma warning restore IDE0075
+			}
+		}
+	}
+
+	public bool IsRle
+	{
+		get
+		{
+			unsafe
+			{
+				return SDL_SurfaceHasRLE(mSurface);
+			}
+		}
+
+		// TODO: doc: silent error if pixel format is FourCC
+		set
+		{
+			unsafe
+			{
+				SDL_SetSurfaceRLE(mSurface, value);
+			}
+		}
+	}
+
+	public bool IsSimdAligned
+	{
+		get
+		{
+			unsafe
+			{
+#pragma warning disable IDE0075 // It's more readable that way
+				return mSurface is var surface
+					&& surface is not null
+					? (surface->Flags & SurfaceFlags.SimdAligned) is SurfaceFlags.SimdAligned
+					: default;
+#pragma warning restore IDE0075
+			}
+		}
+	}
+
+	public bool MustLock
+	{
+		get
+		{
+			unsafe
+			{
+#pragma warning disable IDE0075 // It's more readable that way
+				return mSurface is var surface
+					&& surface is not null
+					? (surface->Flags & SurfaceFlags.LockNeeded) is SurfaceFlags.LockNeeded
+					: default;
+#pragma warning restore IDE0075
 			}
 		}
 	}
@@ -198,7 +448,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			unsafe
 			{
-				return SurfacePointer is var surface
+				return mSurface is var surface
 					&& surface is not null
 					? surface->Pitch
 					: default;
@@ -206,13 +456,60 @@ public partial class Surface : ICloneable, IDisposable
 		}
 	}
 
-	public Utilities.NativeMemory Pixels
+	internal unsafe SDL_Surface* Pointer { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mSurface; }
+
+	public Properties? Properties
 	{
 		get
 		{
 			unsafe
 			{
-				return SurfacePointer is var surface
+				return SDL_GetSurfaceProperties(mSurface) switch
+				{
+					0 => null,
+					var id => Properties.GetOrCreate(sdl: null, id)
+				};
+			}
+		}
+	}
+
+#if SDL3_4_0_OR_GREATER
+	public float Rotation
+	{
+		get => Properties?.TryGetFloatValue(PropertyNames.RotationFloat, out var rotation) is true
+			? rotation
+			: default;
+
+		set => Properties?.TrySetFloatValue(PropertyNames.RotationFloat, value);
+	}
+#endif
+
+	public float SdrWhitePoint
+	{
+		get => Properties?.TryGetFloatValue(PropertyNames.SdrWhitePointFloat, out var sdrWhitePoint) is true
+			? sdrWhitePoint
+			: default;
+
+		set => Properties?.TrySetFloatValue(PropertyNames.SdrWhitePointFloat, value);
+	}
+
+	public string TonemapOperator
+	{
+		get => Properties?.TryGetStringValue(PropertyNames.TonemapOperatorString, out var tonemapOperator) is true
+			&& tonemapOperator is not null
+			? tonemapOperator
+			: string.Empty;
+
+		set => Properties?.TrySetStringValue(PropertyNames.TonemapOperatorString, value);
+	}
+
+	public Utilities.NativeMemory UnsafePixels
+	{
+		get
+		{
+			unsafe
+			{
+				return mSurface is var surface
 					&& surface is not null
 					&& surface->Pixels is var pixels
 					&& pixels is not null
@@ -228,7 +525,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			unsafe
 			{
-				return SurfacePointer is var surface
+				return mSurface is var surface
 					&& surface is not null
 						? surface->W
 						: default;
@@ -236,62 +533,35 @@ public partial class Surface : ICloneable, IDisposable
 		}
 	}
 
-	/// <summary>
-	/// Clones the <see cref="Surface"/>
-	/// </summary>
-	/// <returns>An identical clone of the <see cref="Surface"/>. This can be safely cast to the actual type of the calling class.</returns>
-	/// <remarks>
-	/// <para>
-	/// If the <see cref="Surface"/> has alternate images, the resulting clone will have a reference to them as well.
-	/// </para>
-	/// <para>
-	/// The return value of this method can be safely cast to the actual type of the calling class.
-	/// </para>
-	/// </remarks>
-	/// <exception cref="SdlException">Couldn't duplicate the <see cref="Surface"/> (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
-	public virtual Surface Clone()
+	public void ClearAlternateImages()
 	{
 		unsafe
 		{
-			var clonePtr = SDL_DuplicateSurface(SurfacePointer);
-			if (clonePtr is null)
-			{
-				failCouldNotDuplicateSurface();
-			}
+			SDL_RemoveSurfaceAlternateImages(mSurface);
 
-			var clone = Unsafe.As<Surface>(RuntimeHelpers.GetUninitializedObject(GetType()));
-			clone.SurfacePointer = clonePtr;
-
-			clone.mNativeMemory = mNativeMemory;
-			clone.mNativeMemoryPin = mNativeMemoryPin is not null ? clone.mNativeMemory.Pin() : null;
-
-			clone.mMemory = mMemory;
-			clone.mMemoryHandle = mMemoryHandle.Pointer is not null ? clone.mMemory.Pin() : default;
-
-			return clone;
+			// TODO: do we need to consider implicit surface destruction on the SDL-side?
 		}
-
-		[DoesNotReturn]
-		static void failCouldNotDuplicateSurface() => throw new SdlException($"Could not duplicate the {nameof(Surface)}");
 	}
-
-	/// <inheritdoc/>
-	object ICloneable.Clone() => Clone();
 
 	public void Dispose()
 	{
-		Dispose(disposing: true);
 		GC.SuppressFinalize(this);
+		Dispose(disposing: true, forget: true);
 	}
 
-	protected virtual void Dispose(bool disposing)
+	protected virtual void Dispose(bool disposing, bool forget)
 	{
 		unsafe
 		{
-			if (SurfacePointer is not null)
+			if (mSurface is not null)
 			{
-				SDL_DestroySurface(SurfacePointer);
-				SurfacePointer = null;
+				if (forget)
+				{
+					mKnownInstances.TryRemove(unchecked((IntPtr)mSurface), out _);
+				}
+
+				SDL_DestroySurface(mSurface);
+				mSurface = null;
 			}
 
 			mNativeMemory = default;
@@ -316,7 +586,7 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			return SDL_MapSurfaceRGB(SurfacePointer, r, g, b);
+			return SDL_MapSurfaceRGB(mSurface, r, g, b);
 		}
 	}
 
@@ -324,7 +594,7 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			return SDL_MapSurfaceRGBA(SurfacePointer, r, g, b, a);
+			return SDL_MapSurfaceRGBA(mSurface, r, g, b, a);
 		}
 	}
 
@@ -334,7 +604,7 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			SDL_SetSurfaceClipRect(SurfacePointer, rect: null);
+			SDL_SetSurfaceClipRect(mSurface, rect: null);
 		}
 	}
 
@@ -342,7 +612,7 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			SDL_SetSurfaceColorKey(SurfacePointer, enabled: false, key: 0);
+			SDL_SetSurfaceColorKey(mSurface, enabled: false, key: 0);
 		}
 	}
 
@@ -352,7 +622,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			fixed (Rect<int>* rectPtr = &rect)
 			{
-				return SDL_SetSurfaceClipRect(SurfacePointer, rectPtr);
+				return SDL_SetSurfaceClipRect(mSurface, rectPtr);
 			}
 		}
 	}
@@ -361,7 +631,7 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			return SDL_AddSurfaceAlternateImage(SurfacePointer, image is not null ? image.SurfacePointer : null);
+			return SDL_AddSurfaceAlternateImage(mSurface, image is not null ? image.mSurface : null);
 
 			// TODO: what about SDL_DestroySurface on the image?
 		}
@@ -373,7 +643,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			fixed (Rect<int>* dstrect = &destinationRect, srcrect = &sourceRect)
 			{
-				return SDL_BlitSurface(source is not null ? source.SurfacePointer : null, srcrect, SurfacePointer, dstrect);
+				return SDL_BlitSurface(source is not null ? source.mSurface : null, srcrect, mSurface, dstrect);
 			}
 		}
 	}
@@ -384,7 +654,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			fixed (Rect<int>* dstrect = &destinationRect)
 			{
-				return SDL_BlitSurface(source is not null ? source.SurfacePointer : null, srcrect: null, SurfacePointer, dstrect);
+				return SDL_BlitSurface(source is not null ? source.mSurface : null, srcrect: null, mSurface, dstrect);
 			}
 		}
 	}
@@ -395,7 +665,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			fixed (Rect<int>* srcrect = &sourceRect)
 			{
-				return SDL_BlitSurface(source is not null ? source.SurfacePointer : null, srcrect, SurfacePointer, dstrect: null);
+				return SDL_BlitSurface(source is not null ? source.mSurface : null, srcrect, mSurface, dstrect: null);
 			}
 		}
 	}
@@ -404,7 +674,7 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			return SDL_BlitSurface(source is not null ? source.SurfacePointer : null, srcrect: null, SurfacePointer, dstrect: null);
+			return SDL_BlitSurface(source is not null ? source.mSurface : null, srcrect: null, mSurface, dstrect: null);
 		}
 	}
 
@@ -414,7 +684,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			fixed (Rect<int>* dstrect = &destinationRect, srcrect = &sourceRect)
 			{
-				return SDL_BlitSurface9Grid(source is not null ? source.SurfacePointer : null, srcrect, leftWidth, rightWidth, topHeight, bottomHeight, scale, scaleMode, SurfacePointer, dstrect);
+				return SDL_BlitSurface9Grid(source is not null ? source.mSurface : null, srcrect, leftWidth, rightWidth, topHeight, bottomHeight, scale, scaleMode, mSurface, dstrect);
 			}
 		}
 	}
@@ -425,7 +695,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			fixed (Rect<int>* dstrect = &destinationRect)
 			{
-				return SDL_BlitSurface9Grid(source is not null ? source.SurfacePointer : null, srcrect: null, leftWidth, rightWidth, topHeight, bottomHeight, scale, scaleMode, SurfacePointer, dstrect);
+				return SDL_BlitSurface9Grid(source is not null ? source.mSurface : null, srcrect: null, leftWidth, rightWidth, topHeight, bottomHeight, scale, scaleMode, mSurface, dstrect);
 			}
 		}
 	}
@@ -436,7 +706,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			fixed (Rect<int>* srcrect = &sourceRect)
 			{
-				return SDL_BlitSurface9Grid(source is not null ? source.SurfacePointer : null, srcrect, leftWidth, rightWidth, topHeight, bottomHeight, scale, scaleMode, SurfacePointer, dstrect: null);
+				return SDL_BlitSurface9Grid(source is not null ? source.mSurface : null, srcrect, leftWidth, rightWidth, topHeight, bottomHeight, scale, scaleMode, mSurface, dstrect: null);
 			}
 		}
 	}
@@ -445,7 +715,7 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			return SDL_BlitSurface9Grid(source is not null ? source.SurfacePointer : null, srcrect: null, leftWidth, rightWidth, topHeight, bottomHeight, scale, scaleMode, SurfacePointer, dstrect: null);
+			return SDL_BlitSurface9Grid(source is not null ? source.mSurface : null, srcrect: null, leftWidth, rightWidth, topHeight, bottomHeight, scale, scaleMode, mSurface, dstrect: null);
 		}
 	}
 
@@ -455,7 +725,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			fixed (Rect<int>* dstrect = &destinationRect, srcrect = &sourceRect)
 			{
-				return SDL_BlitSurfaceScaled(source is not null ? source.SurfacePointer : null, srcrect, SurfacePointer, dstrect, scaleMode);
+				return SDL_BlitSurfaceScaled(source is not null ? source.mSurface : null, srcrect, mSurface, dstrect, scaleMode);
 			}
 		}
 	}
@@ -466,7 +736,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			fixed (Rect<int>* dstrect = &destinationRect)
 			{
-				return SDL_BlitSurfaceScaled(source is not null ? source.SurfacePointer : null, srcrect: null, SurfacePointer, dstrect, scaleMode);
+				return SDL_BlitSurfaceScaled(source is not null ? source.mSurface : null, srcrect: null, mSurface, dstrect, scaleMode);
 			}
 		}
 	}
@@ -477,7 +747,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			fixed (Rect<int>* srcrect = &sourceRect)
 			{
-				return SDL_BlitSurfaceScaled(source is not null ? source.SurfacePointer : null, srcrect, SurfacePointer, dstrect: null, scaleMode);
+				return SDL_BlitSurfaceScaled(source is not null ? source.mSurface : null, srcrect, mSurface, dstrect: null, scaleMode);
 			}
 		}
 	}
@@ -486,9 +756,52 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			return SDL_BlitSurfaceScaled(source is not null ? source.SurfacePointer : null, srcrect: null, SurfacePointer, dstrect: null, scaleMode);
+			return SDL_BlitSurfaceScaled(source is not null ? source.mSurface : null, srcrect: null, mSurface, dstrect: null, scaleMode);
 		}
 	}
+
+#if SDL3_4_0_GREATER
+	public bool TryBlitStretched(in Rect<int> destinationRect, Surface source, in Rect<int> sourceRect, ScaleMode scaleMode)
+	{
+		unsafe
+		{
+			fixed (Rect<int>* dstrect = &destinationRect, srcrect = &sourceRect)
+			{
+				return SDL_StretchSurface(source is not null ? source.mSurface : null, srcrect, mSurface, dstrect, scaleMode);
+			}
+		}
+	}
+
+	public bool TryBlitStretched(in Rect<int> destinationRect, Surface source, ScaleMode scaleMode)
+	{
+		unsafe
+		{
+			fixed (Rect<int>* dstrect = &destinationRect)
+			{
+				return SDL_StretchSurface(source is not null ? source.mSurface : null, srcrect: null, mSurface, dstrect, scaleMode);
+			}
+		}
+	}
+
+	public bool TryBlitStretched(Surface source, in Rect<int> sourceRect, ScaleMode scaleMode)
+	{
+		unsafe
+		{
+			fixed (Rect<int>* srcrect = &sourceRect)
+			{
+				return SDL_StretchSurface(source is not null ? source.mSurface : null, srcrect, mSurface, dstrect: null, scaleMode);
+			}
+		}
+	}
+
+	public bool TryBlitStretched(Surface source, ScaleMode scaleMode)
+	{
+		unsafe
+		{
+			return SDL_StretchSurface(source is not null ? source.mSurface : null, srcrect: null, mSurface, dstrect: null, scaleMode);
+		}
+	}
+#endif
 
 	public bool TryBlitTiled(in Rect<int> destinationRect, Surface source, in Rect<int> sourceRect)
 	{
@@ -496,7 +809,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			fixed (Rect<int>* dstrect = &destinationRect, srcrect = &sourceRect)
 			{
-				return SDL_BlitSurfaceTiled(source is not null ? source.SurfacePointer : null, srcrect, SurfacePointer, dstrect);
+				return SDL_BlitSurfaceTiled(source is not null ? source.mSurface : null, srcrect, mSurface, dstrect);
 			}
 		}
 	}
@@ -507,7 +820,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			fixed (Rect<int>* dstrect = &destinationRect)
 			{
-				return SDL_BlitSurfaceTiled(source is not null ? source.SurfacePointer : null, srcrect: null, SurfacePointer, dstrect);
+				return SDL_BlitSurfaceTiled(source is not null ? source.mSurface : null, srcrect: null, mSurface, dstrect);
 			}
 		}
 	}
@@ -518,7 +831,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			fixed (Rect<int>* srcrect = &sourceRect)
 			{
-				return SDL_BlitSurfaceTiled(source is not null ? source.SurfacePointer : null, srcrect, SurfacePointer, dstrect: null);
+				return SDL_BlitSurfaceTiled(source is not null ? source.mSurface : null, srcrect, mSurface, dstrect: null);
 			}
 		}
 	}
@@ -526,7 +839,7 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			return SDL_BlitSurfaceTiled(source is not null ? source.SurfacePointer : null, srcrect: null, SurfacePointer, dstrect: null);
+			return SDL_BlitSurfaceTiled(source is not null ? source.mSurface : null, srcrect: null, mSurface, dstrect: null);
 		}
 	}
 
@@ -536,7 +849,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			fixed (Rect<int>* dstrect = &destinationRect, srcrect = &sourceRect)
 			{
-				return SDL_BlitSurfaceTiledWithScale(source is not null ? source.SurfacePointer : null, srcrect, scale, scaleMode, SurfacePointer, dstrect);
+				return SDL_BlitSurfaceTiledWithScale(source is not null ? source.mSurface : null, srcrect, scale, scaleMode, mSurface, dstrect);
 			}
 		}
 	}
@@ -547,7 +860,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			fixed (Rect<int>* dstrect = &destinationRect)
 			{
-				return SDL_BlitSurfaceTiledWithScale(source is not null ? source.SurfacePointer : null, srcrect: null, scale, scaleMode, SurfacePointer, dstrect);
+				return SDL_BlitSurfaceTiledWithScale(source is not null ? source.mSurface : null, srcrect: null, scale, scaleMode, mSurface, dstrect);
 			}
 		}
 	}
@@ -558,7 +871,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			fixed (Rect<int>* srcrect = &sourceRect)
 			{
-				return SDL_BlitSurfaceTiledWithScale(source is not null ? source.SurfacePointer : null, srcrect, scale, scaleMode, SurfacePointer, dstrect: null);
+				return SDL_BlitSurfaceTiledWithScale(source is not null ? source.mSurface : null, srcrect, scale, scaleMode, mSurface, dstrect: null);
 			}
 		}
 	}
@@ -567,7 +880,7 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			return SDL_BlitSurfaceTiledWithScale(source is not null ? source.SurfacePointer : null, srcrect: null, scale, scaleMode, SurfacePointer, dstrect: null);
+			return SDL_BlitSurfaceTiledWithScale(source is not null ? source.mSurface : null, srcrect: null, scale, scaleMode, mSurface, dstrect: null);
 		}
 	}
 
@@ -577,7 +890,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			fixed (Rect<int>* dstrect = &destinationRect, srcrect = &sourceRect)
 			{
-				return SDL_BlitSurfaceUnchecked(source is not null ? source.SurfacePointer : null, srcrect, SurfacePointer, dstrect);
+				return SDL_BlitSurfaceUnchecked(source is not null ? source.mSurface : null, srcrect, mSurface, dstrect);
 			}
 		}
 	}
@@ -588,7 +901,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			fixed (Rect<int>* dstrect = &destinationRect, srcrect = &sourceRect)
 			{
-				return SDL_BlitSurfaceUncheckedScaled(source is not null ? source.SurfacePointer : null, srcrect, SurfacePointer, dstrect, scaleMode);
+				return SDL_BlitSurfaceUncheckedScaled(source is not null ? source.mSurface : null, srcrect, mSurface, dstrect, scaleMode);
 			}
 		}
 	}
@@ -597,19 +910,17 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			return SDL_ClearSurface(SurfacePointer, r, g, b, a);
+			return SDL_ClearSurface(mSurface, r, g, b, a);
 		}
 	}
 
 	public bool TryClear(Color<float> color) => TryClear(color.R, color.G, color.B, color.A);
 
-
-
 	public bool TryConvert(PixelFormat format, [NotNullWhen(true)] out Surface? result)
 	{
 		unsafe
 		{
-			var surface = SDL_ConvertSurface(SurfacePointer, format);
+			var surface = SDL_ConvertSurface(mSurface, format);
 
 			if (surface is null)
 			{
@@ -626,7 +937,7 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			var surface = SDL_ConvertSurfaceAndColorspace(SurfacePointer, format, palette is not null ? palette.Pointer : null, colorSpace, properties?.Id ?? 0);
+			var surface = SDL_ConvertSurfaceAndColorspace(mSurface, format, palette is not null ? palette.Pointer : null, colorSpace, properties?.Id ?? 0);
 
 			if (surface is null)
 			{
@@ -639,7 +950,7 @@ public partial class Surface : ICloneable, IDisposable
 		}
 	}
 
-	public static bool TryConvertPixels(int width, int height, PixelFormat sourceFormat, ReadOnlyNativeMemory source, int sourcePitch, PixelFormat destinationFormat, NativeMemory destination, int destinationPitch)
+	public static bool TryConvert(int width, int height, PixelFormat sourceFormat, ReadOnlyNativeMemory source, int sourcePitch, PixelFormat destinationFormat, NativeMemory destination, int destinationPitch)
 	{
 		unsafe
 		{
@@ -666,7 +977,7 @@ public partial class Surface : ICloneable, IDisposable
 		}
 	}
 
-	public static bool TryConvertPixels(int width, int height, PixelFormat sourceFormat, ReadOnlySpan<byte> source, int sourcePitch, PixelFormat destinationFormat, Span<byte> destination, int destinationPitch)
+	public static bool TryConvert(int width, int height, PixelFormat sourceFormat, ReadOnlySpan<byte> source, int sourcePitch, PixelFormat destinationFormat, Span<byte> destination, int destinationPitch)
 	{
 		unsafe
 		{
@@ -691,12 +1002,12 @@ public partial class Surface : ICloneable, IDisposable
 		}
 	}
 
-	public unsafe static bool TryConvertPixels(int width, int height, PixelFormat sourceFormat, void* source, int sourcePitch, PixelFormat destinationFormat, void* destination, int destinationPitch)
+	public unsafe static bool TryConvert(int width, int height, PixelFormat sourceFormat, void* source, int sourcePitch, PixelFormat destinationFormat, void* destination, int destinationPitch)
 	{
 		return SDL_ConvertPixels(width, height, sourceFormat, source, sourcePitch, destinationFormat, destination, destinationPitch);
 	}
 
-	public static bool TryConvertPixels(int width, int height, PixelFormat sourceFormat, ColorSpace sourceColorSpace, Properties? sourceProperties, ReadOnlyNativeMemory source, int sourcePitch, PixelFormat destinationFormat, ColorSpace destinationColorSpace, Properties? destinationProperties, NativeMemory destination, int destinationPitch)
+	public static bool TryConvert(int width, int height, PixelFormat sourceFormat, ColorSpace sourceColorSpace, Properties? sourceProperties, ReadOnlyNativeMemory source, int sourcePitch, PixelFormat destinationFormat, ColorSpace destinationColorSpace, Properties? destinationProperties, NativeMemory destination, int destinationPitch)
 	{
 		unsafe
 		{
@@ -723,7 +1034,7 @@ public partial class Surface : ICloneable, IDisposable
 		}
 	}
 
-	public static bool TryConvertPixels(int width, int height, PixelFormat sourceFormat, ColorSpace sourceColorSpace, Properties? sourceProperties, ReadOnlySpan<byte> source, int sourcePitch, PixelFormat destinationFormat, ColorSpace destinationColorSpace, Properties? destinationProperties, Span<byte> destination, int destinationPitch)
+	public static bool TryConvert(int width, int height, PixelFormat sourceFormat, ColorSpace sourceColorSpace, Properties? sourceProperties, ReadOnlySpan<byte> source, int sourcePitch, PixelFormat destinationFormat, ColorSpace destinationColorSpace, Properties? destinationProperties, Span<byte> destination, int destinationPitch)
 	{
 		unsafe
 		{
@@ -748,7 +1059,7 @@ public partial class Surface : ICloneable, IDisposable
 		}
 	}
 
-	public unsafe static bool TryConvertPixels(int width, int height, PixelFormat sourceFormat, ColorSpace sourceColorSpace, Properties? sourceProperties, void* source, int sourcePitch, PixelFormat destinationFormat, ColorSpace destinationColorSpace, Properties? destinationProperties, void* destination, int destinationPitch)
+	public unsafe static bool TryConvert(int width, int height, PixelFormat sourceFormat, ColorSpace sourceColorSpace, Properties? sourceProperties, void* source, int sourcePitch, PixelFormat destinationFormat, ColorSpace destinationColorSpace, Properties? destinationProperties, void* destination, int destinationPitch)
 	{
 		return SDL_ConvertPixelsAndColorspace(width, height, sourceFormat, sourceColorSpace, sourceProperties?.Id ?? 0, source, sourcePitch, destinationFormat, destinationColorSpace, destinationProperties?.Id ?? 0, destination, destinationPitch);
 	}
@@ -757,7 +1068,7 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			var result = SDL_CreateSurfacePalette(SurfacePointer);
+			var result = SDL_CreateSurfacePalette(mSurface);
 
 			if (result is null)
 			{
@@ -765,7 +1076,32 @@ public partial class Surface : ICloneable, IDisposable
 				return false;
 			}
 
-			palette = Palette.GetOrCreate(result);
+			mPalette = palette =  new Palette(result); // we actually want to override any existing managed Palette here
+			return true;
+		}
+	}
+
+	public bool TryDuplicate([NotNullWhen(true)] out Surface? duplicate)
+	{
+		unsafe
+		{
+			var duplicatePtr = SDL_DuplicateSurface(mSurface);
+
+			if (duplicatePtr is null)
+			{
+				duplicate = null;
+
+				return false;
+			}
+
+			duplicate = new(duplicatePtr)
+			{
+				mNativeMemory = mNativeMemory,
+				mNativeMemoryPin = mNativeMemoryPin is not null ? mNativeMemory.Pin() : null,
+				mMemory = mMemory,
+				mMemoryHandle = mMemoryHandle.Pointer is not null ? mMemory.Pin() : default
+			};
+
 			return true;
 		}
 	}
@@ -776,7 +1112,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			fixed (Rect<int>* rect = &destinationRect)
 			{
-				return SDL_FillSurfaceRect(SurfacePointer, rect, pixelValue);
+				return SDL_FillSurfaceRect(mSurface, rect, pixelValue);
 			}
 		}
 	}
@@ -793,7 +1129,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			fixed (Rect<int>* rects = destinationRects)
 			{
-				return SDL_FillSurfaceRects(SurfacePointer, rects, destinationRects.Length, pixelValue);
+				return SDL_FillSurfaceRects(mSurface, rects, destinationRects.Length, pixelValue);
 			}
 		}
 	}
@@ -808,7 +1144,7 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			return SDL_FillSurfaceRect(SurfacePointer, rect: null, pixelValue);
+			return SDL_FillSurfaceRect(mSurface, rect: null, pixelValue);
 		}
 	}
 
@@ -822,7 +1158,7 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			return SDL_FlipSurface(SurfacePointer, flipMode);
+			return SDL_FlipSurface(mSurface, flipMode);
 		}
 	}
 
@@ -830,9 +1166,9 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			byte alphaTmp;
+			Unsafe.SkipInit(out byte alphaTmp);
 
-			bool result = SDL_GetSurfaceAlphaMod(SurfacePointer, &alphaTmp);
+			bool result = SDL_GetSurfaceAlphaMod(mSurface, &alphaTmp);
 
 			alpha = alphaTmp;
 
@@ -844,9 +1180,9 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			BlendMode blendModeTmp;
+			Unsafe.SkipInit(out BlendMode blendModeTmp);
 
-			bool result = SDL_GetSurfaceBlendMode(SurfacePointer, &blendModeTmp);
+			bool result = SDL_GetSurfaceBlendMode(mSurface, &blendModeTmp);
 
 			blendMode = blendModeTmp;
 
@@ -861,7 +1197,7 @@ public partial class Surface : ICloneable, IDisposable
 		{
 			fixed (Rect<int>* rectPtr = &rect)
 			{
-				return SDL_GetSurfaceClipRect(SurfacePointer, rectPtr);
+				return SDL_GetSurfaceClipRect(mSurface, rectPtr);
 			}
 		}
 	}
@@ -871,9 +1207,9 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			uint keyTmp;
+			Unsafe.SkipInit(out uint keyTmp);
 
-			bool result = SDL_GetSurfaceColorKey(SurfacePointer, &keyTmp);
+			bool result = SDL_GetSurfaceColorKey(mSurface, &keyTmp);
 
 			keyValue = keyTmp;
 
@@ -887,7 +1223,7 @@ public partial class Surface : ICloneable, IDisposable
 		unsafe
 		{
 			if (TryGetColorKey(out uint keyValue)
-				&& SurfacePointer->Format.TryGetPixelFormatDetails(out var details) // SurfacePointer is here non-null because of 'TryGetColorKey'
+				&& mSurface->Format.TryGetPixelFormatDetails(out var details) // SurfacePointer is here non-null because of 'TryGetColorKey'
 			)
 			{
 				TryGetPalette(out var palette); // We don't care for the return value: either 'palette' is non-null if we do have one or it's null if we don't
@@ -917,29 +1253,420 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			byte rTmp, gTmp, bTmp;
+			Unsafe.SkipInit(out byte rTmp);
+			Unsafe.SkipInit(out byte gTmp);
+			Unsafe.SkipInit(out byte bTmp);
 
-			bool result = SDL_GetSurfaceColorMod(SurfacePointer, &rTmp, &gTmp, &bTmp);
+			bool result = SDL_GetSurfaceColorMod(mSurface, &rTmp, &gTmp, &bTmp);
 
-			r = rTmp; g = gTmp; b = bTmp;
+			r = rTmp;
+			g = gTmp;
+			b = bTmp;
 			
 			return result;
 		}
+	}
+
+	public bool TryGetColorSpace(out ColorSpace colorSpace)
+	{
+		unsafe
+		{
+			colorSpace = SDL_GetSurfaceColorspace(mSurface);
+
+			return colorSpace is not ColorSpace.Unknown;
+		}
+	}
+
+	internal unsafe static bool TryGetOrCreate(SDL_Surface* surface, [NotNullWhen(true)] out Surface? result)
+	{
+		if (surface is null)
+		{
+			result = null;
+			return false;
+		}
+
+		var surfaceRef = mKnownInstances.GetOrAdd(unchecked((IntPtr)surface), createRef);
+
+		if (!surfaceRef.TryGetTarget(out result))
+		{
+			surfaceRef.SetTarget(result = create(surface));
+		}
+
+		return true;
+
+		static WeakReference<Surface> createRef(IntPtr surface) => new(create(unchecked((SDL_Surface*)surface)));
+
+		static Surface create(SDL_Surface* surface) => new(surface,
+#pragma warning disable IDE0034 // Keep it that way for explicitness sake
+			default(IUnsafeConstructorDispatch)
+#pragma warning restore IDE0034
+		);
 	}
 
 	public bool TryGetPalette([NotNullWhen(true)] out Palette? palette)
 	{
 		unsafe
 		{
-			var palettePtr = SDL_GetSurfacePalette(SurfacePointer);
+			var palettePtr = SDL_GetSurfacePalette(mSurface);
 
-			if (palettePtr is null)
+			bool result = Palette.TryGetOrCreate(palettePtr, out palette);
+
+			if (mPalette is null || mPalette.Pointer != palettePtr)
 			{
-				palette = null;
+				mPalette = palette;
+			}
+
+			return result;
+		}
+	}
+
+	public static bool TryLoadBmp(string file, [NotNullWhen(true)] out Surface? surface)
+	{
+		unsafe
+		{
+			var fileUtf8 = Utf8StringMarshaller.ConvertToUnmanaged(file);
+
+			try
+			{
+				var surfacePtr = SDL_LoadBMP(fileUtf8);
+
+				if (surfacePtr is null)
+				{
+					surface = null;
+					return false;
+				}
+
+				surface = new(surfacePtr);
+				return true;
+			}
+			finally
+			{
+				Utf8StringMarshaller.Free(fileUtf8);
+			}
+		}
+	}
+
+	public static bool TryLoadBmp(Stream source, [NotNullWhen(true)] out Surface? surface, bool closeAfterwards = false)
+	{
+		unsafe
+		{
+			try
+			{
+				var surfacePtr = SDL_LoadBMP_IO(source is not null ? source.Pointer : null, closeAfterwards);
+
+				if (surfacePtr is null)
+				{
+					surface = null;
+					return false;
+				}
+
+				surface = new(surfacePtr);
+				return true;
+			}
+			finally
+			{
+				if (closeAfterwards)
+				{
+					source?.Dispose(close: false /* SDL_LoadBMP_IO already closed the stream */);
+				}
+			}
+		}
+	}
+
+#if SDL3_4_0_OR_GREATER
+	public static bool TryLoadPng(string file, [NotNullWhen(true)] out Surface? surface)
+	{
+		unsafe
+		{
+			var fileUtf8 = Utf8StringMarshaller.ConvertToUnmanaged(file);
+
+			try
+			{
+				var surfacePtr = SDL_LoadPNG(fileUtf8);
+
+				if (surfacePtr is null)
+				{
+					surface = null;
+					return false;
+				}
+
+				surface = new(surfacePtr);
+				return true;
+			}
+			finally
+			{
+				Utf8StringMarshaller.Free(fileUtf8);
+			}
+		}
+	}
+#endif
+
+#if SDL3_4_0_OR_GREATER
+	public static bool TryLoadPng(Stream source, [NotNullWhen(true)] out Surface? surface, bool closeAfterwards = false)
+	{
+		unsafe
+		{
+			try
+			{
+				var surfacePtr = SDL_LoadPNG_IO(source is not null ? source.Pointer : null, closeAfterwards);
+
+				if (surfacePtr is null)
+				{
+					surface = null;
+					return false;
+				}
+
+				surface = new(surfacePtr);
+				return true;
+			}
+			finally
+			{
+				if (closeAfterwards)
+				{
+					source?.Dispose(close: false /* SDL_LoadPNG_IO already closed the stream */);
+				}
+			}
+		}
+	}
+#endif
+
+	public bool TryLock([NotNullWhen(true)] out SurfacePixelMemoryManager? pixelManager) => SurfacePixelMemoryManager.TryCreate(this, out pixelManager);
+
+	public bool TryPremultiplyAlpha(bool linear)
+	{
+		unsafe
+		{
+			return SDL_PremultiplySurfaceAlpha(mSurface, linear);
+		}
+	}
+
+	public static bool TryPremultiplyAlpha(int width, int height, PixelFormat sourceFormat, ReadOnlyNativeMemory source, int sourcePitch, PixelFormat destinationFormat, NativeMemory destination, int destinationPitch, bool linear)
+	{
+		unsafe
+		{
+			if (source.IsValid || destination.IsValid)
+			{
 				return false;
 			}
 
-			palette = Palette.GetOrCreate(palettePtr);
+			var sourceRequired = unchecked((height is > 0 ? (nuint)height : 0) * (sourcePitch is > 0 ? (nuint)sourcePitch : 0));
+
+			if (source.Length < sourceRequired)
+			{
+				return false;
+			}
+
+			var destinationRequired = unchecked((height is > 0 ? (nuint)height : 0) * (destinationPitch is > 0 ? (nuint)destinationPitch : 0));
+
+			if (destination.Length < destinationRequired)
+			{
+				return false;
+			}
+
+			return SDL_PremultiplyAlpha(width, height, sourceFormat, source.RawPointer, sourcePitch, destinationFormat, destination.RawPointer, destinationPitch, linear);
+		}
+	}
+
+	public static bool TryPremultiplyAlpha(int width, int height, PixelFormat sourceFormat, ReadOnlySpan<byte> source, int sourcePitch, PixelFormat destinationFormat, Span<byte> destination, int destinationPitch, bool linear)
+	{
+		unsafe
+		{
+			var sourceRequired = unchecked((height is > 0 ? (nuint)height : 0) * (sourcePitch is > 0 ? (nuint)sourcePitch : 0));
+
+			if (unchecked((nuint)source.Length) < sourceRequired)
+			{
+				return false;
+			}
+
+			var destinationRequired = unchecked((height is > 0 ? (nuint)height : 0) * (destinationPitch is > 0 ? (nuint)destinationPitch : 0));
+
+			if (unchecked((nuint)destination.Length) < destinationRequired)
+			{
+				return false;
+			}
+
+			fixed (byte* src = source, dst = destination)
+			{
+				return SDL_PremultiplyAlpha(width, height, sourceFormat, src, sourcePitch, destinationFormat, dst, destinationPitch, linear);
+			}
+		}
+	}
+
+	public unsafe static bool TryPremultiplyAlpha(int width, int height, PixelFormat sourceFormat, void* source, int sourcePitch, PixelFormat destinationFormat, void* destination, int destinationPitch, bool linear)
+	{
+		return SDL_PremultiplyAlpha(width, height, sourceFormat, source, sourcePitch, destinationFormat, destination, destinationPitch, linear);
+	}
+
+	[OverloadResolutionPriority(1)] // To choose TryReadPixel(int, int, out byte, out byte, out byte, out byte) over TryReadPixel(int, int, out float, out float, out float, out float) when using 'out var'
+	public bool TryReadPixel(int x, int y, out byte r, out byte g, out byte b, out byte a)
+	{
+		unsafe
+		{
+			Unsafe.SkipInit(out byte rTmp);
+			Unsafe.SkipInit(out byte gTmp);
+			Unsafe.SkipInit(out byte bTmp);
+			Unsafe.SkipInit(out byte aTmp);
+
+			bool result = SDL_ReadSurfacePixel(mSurface, x, y, &rTmp, &gTmp, &bTmp, &aTmp);
+
+			r = rTmp;
+			g = gTmp;
+			b = bTmp;
+			a = aTmp;
+
+			return result;
+		}
+	}
+
+	[OverloadResolutionPriority(1)] // To choose TryReadPixel(int, int, out Color<byte>) over TryReadPixel(int, int, out Color<float>) when using 'out var'
+	public bool TryReadPixel(int x, int y, out Color<byte> color)
+	{
+		if (TryReadPixel(x, y, out byte r, out byte g, out byte b, out byte a))
+		{
+			color = new(r, g, b, a);
+			return true;
+		}
+
+		color = default;
+		return false;
+	}
+
+	public bool TryReadPixel(int x, int y, out float r, out float g, out float b, out float a)
+	{
+		unsafe
+		{
+			Unsafe.SkipInit(out float rTmp);
+			Unsafe.SkipInit(out float gTmp);
+			Unsafe.SkipInit(out float bTmp);
+			Unsafe.SkipInit(out float aTmp);
+
+			bool result = SDL_ReadSurfacePixelFloat(mSurface, x, y, &rTmp, &gTmp, &bTmp, &aTmp);
+
+			r = rTmp;
+			g = gTmp;
+			b = bTmp;
+			a = aTmp;
+
+			return result;
+		}
+	}
+
+	public bool TryReadPixel(int x, int y, out Color<float> color)
+	{
+		if (TryReadPixel(x, y, out float r, out float g, out float b, out float a))
+		{
+			color = new(r, g, b, a);
+			return true;
+		}
+
+		color = default;
+		return false;
+	}
+
+#if SDL3_4_0_OR_GREATER
+	public bool TryRotate(float angle, [NotNullWhen(true)] out Surface? rotatedSurface)
+	{
+		unsafe
+		{
+			var rotatedPtr = SDL_RotateSurface(mSurface, angle);
+
+			if (rotatedPtr is null)
+			{
+				rotatedSurface = null;
+				return false;
+			}
+
+			rotatedSurface = new(rotatedPtr);
+			return true;
+		}
+	}
+#endif
+
+	public bool TrySaveBmp(string file)
+	{
+		unsafe
+		{
+			var fileUtf8 = Utf8StringMarshaller.ConvertToUnmanaged(file);
+			try
+			{
+				return SDL_SaveBMP(mSurface, fileUtf8);
+			}
+			finally
+			{
+				Utf8StringMarshaller.Free(fileUtf8);
+			}
+		}
+	}
+
+	public bool TrySaveBmp(Stream destination, bool closeAfterwards = false)
+	{
+		unsafe
+		{
+			try
+			{
+				return SDL_SaveBMP_IO(mSurface, destination is not null ? destination.Pointer : null, closeAfterwards);
+			}
+			finally
+			{
+				if (closeAfterwards)
+				{
+					destination?.Dispose(close: false /* SDL_SaveBMP_IO already closed the stream */);
+				}
+			}
+		}
+	}
+
+#if SDL3_4_0_OR_GREATER
+	public bool TrySavePng(string file)
+	{
+		unsafe
+		{
+			var fileUtf8 = Utf8StringMarshaller.ConvertToUnmanaged(file);
+			try
+			{
+				return SDL_SavePNG(mSurface, fileUtf8);
+			}
+			finally
+			{
+				Utf8StringMarshaller.Free(fileUtf8);
+			}
+		}
+	}
+#endif
+
+#if SDL3_4_0_OR_GREATER
+	public bool TrySavePng(Stream destination, bool closeAfterwards = false)
+	{
+		unsafe
+		{
+			try
+			{
+				return SDL_SavePNG_IO(mSurface, destination is not null ? destination.Pointer : null, closeAfterwards);
+			}
+			finally
+			{
+				if (closeAfterwards)
+				{
+					destination?.Dispose(close: false /* SDL_SavePNG_IO already closed the stream */);
+				}
+			}
+		}
+	}
+#endif
+
+	public bool TryScale(int width, int height, ScaleMode scaleMode, [NotNullWhen(true)] out Surface? scaledSurface)
+	{
+		unsafe
+		{
+			var scaledPtr = SDL_ScaleSurface(mSurface, width, height, scaleMode);
+
+			if (scaledPtr is null)
+			{
+				scaledSurface = null;
+				return false;
+			}
+
+			scaledSurface = new(scaledPtr);
 			return true;
 		}
 	}
@@ -948,7 +1675,7 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			return SDL_SetSurfaceAlphaMod(SurfacePointer, alpha);
+			return SDL_SetSurfaceAlphaMod(mSurface, alpha);
 		}
 	}
 
@@ -956,7 +1683,7 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			return SDL_SetSurfaceBlendMode(SurfacePointer, blendMode);
+			return SDL_SetSurfaceBlendMode(mSurface, blendMode);
 		}
 	}
 
@@ -965,7 +1692,7 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			return SDL_SetSurfaceColorKey(SurfacePointer, enabled: true, keyValue);
+			return SDL_SetSurfaceColorKey(mSurface, enabled: true, keyValue);
 		}
 	}
 
@@ -979,7 +1706,69 @@ public partial class Surface : ICloneable, IDisposable
 	{
 		unsafe
 		{
-			return SDL_SetSurfaceColorMod(SurfacePointer, r, g, b);
+			return SDL_SetSurfaceColorMod(mSurface, r, g, b);
+		}
+	}
+
+	public bool TrySetColorSpace(ColorSpace colorSpace)
+	{
+		unsafe
+		{
+			return SDL_SetSurfaceColorspace(mSurface, colorSpace);
+		}
+	}
+
+	public bool TrySetPalette(Palette palette)
+	{
+		unsafe
+		{
+			if (SDL_SetSurfacePalette(mSurface, palette is not null ? palette.Pointer : null))
+			{
+				mPalette = palette;
+				return true;
+			}
+
+			return false;
+		}
+	}
+
+	public bool TryUnsafeLock()
+	{
+		unsafe
+		{
+			return SDL_LockSurface(mSurface);
+		}
+	}
+
+	[OverloadResolutionPriority(1)] // Actually, that shouldn't be an issue since C# doesn't now byte literals aside from the ambiguous 'default', but we do that for symmetry with 'TryReadPixel'
+	public bool TryWritePixel(int x, int y, byte r, byte g, byte b, byte a)
+	{
+		unsafe
+		{
+			return SDL_WriteSurfacePixel(mSurface, x, y, r, g, b, a);
+		}
+	}
+
+	[OverloadResolutionPriority(1)] // Actually, that shouldn't be an issue since C# doesn't now literal of custom struct types aside from the ambiguous 'default', but we do that for symmetry with 'TryReadPixel'
+	public bool TryWritePixel(int x, int y, Color<byte> color)
+		=> TryWritePixel(x, y, color.R, color.G, color.B, color.A);
+
+	public bool TryWritePixel(int x, int y, float r, float g, float b, float a)
+	{
+		unsafe
+		{
+			return SDL_WriteSurfacePixelFloat(mSurface, x, y, r, g, b, a);
+		}
+	}
+
+	public bool TryWritePixel(int x, int y, Color<float> color)
+		=> TryWritePixel(x, y, color.R, color.G, color.B, color.A);
+
+	public void UnsafeUnlock()
+	{
+		unsafe
+		{
+			SDL_UnlockSurface(mSurface);
 		}
 	}
 }

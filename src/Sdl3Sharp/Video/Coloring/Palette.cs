@@ -25,11 +25,17 @@ public sealed partial class Palette : IDisposable, IFormattable, ISpanFormattabl
 	private unsafe SDL_Palette* mPalette;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	private unsafe Palette(SDL_Palette* palette) => mPalette = palette;
+	private unsafe Palette(SDL_Palette* palette, IUnsafeConstructorDispatch? _ = default) => mPalette = palette;
 
-	private unsafe Palette(SDL_Palette* palette, IUnsafeConstructorDispatch? _ = default)
+	internal unsafe Palette(SDL_Palette* palette) :
+#pragma warning disable IDE0034 // Keep it that way for explicitness sake
+		this(palette, default(IUnsafeConstructorDispatch?))
+#pragma warning restore IDE0034
 	{
-		mKnownInstances.AddOrUpdate(unchecked((IntPtr)palette), addRef, updateRef, this);
+		if (palette is not null)
+		{
+			mKnownInstances.AddOrUpdate(unchecked((IntPtr)palette), addRef, updateRef, this);
+		}
 
 		static WeakReference<Palette> addRef(IntPtr palette, Palette newPalette) => new(newPalette);
 
@@ -133,22 +139,6 @@ public sealed partial class Palette : IDisposable, IFormattable, ISpanFormattabl
 		}
 	}
 
-	internal unsafe static Palette GetOrCreate(SDL_Palette* palette)
-	{
-		var paletteRef = mKnownInstances.GetOrAdd(unchecked((IntPtr)palette), createRef);
-
-		if (!paletteRef.TryGetTarget(out var result))
-		{
-			paletteRef.SetTarget(result = create(palette));
-		}
-
-		return result;
-
-		static WeakReference<Palette> createRef(IntPtr palette) => new(create(unchecked((SDL_Palette*)palette)));
-
-		static Palette create(SDL_Palette* palette) => new(palette);
-	}
-
 	/// <inheritdoc/>
 	public override string ToString() => ToString(format: default, formatProvider: default);
 
@@ -178,6 +168,32 @@ public sealed partial class Palette : IDisposable, IFormattable, ISpanFormattabl
 				&& SpanFormat.TryWrite(mPalette is not null && mPalette->Colors is not null ? mPalette->NColors : 0, ref destination, ref charsWritten, format, provider)
 				&& SpanFormat.TryWrite(" }", ref destination, ref charsWritten);
 		}
+	}
+
+	internal unsafe static bool TryGetOrCreate(SDL_Palette* palette, [NotNullWhen(true)] out Palette? result)
+	{
+		if (palette is null)
+		{
+			result = null;
+			return false;
+		}
+
+		var paletteRef = mKnownInstances.GetOrAdd(unchecked((IntPtr)palette), createRef);
+
+		if (!paletteRef.TryGetTarget(out result))
+		{
+			paletteRef.SetTarget(result = create(palette));
+		}
+
+		return true;
+
+		static WeakReference<Palette> createRef(IntPtr palette) => new(create(unchecked((SDL_Palette*)palette)));
+
+		static Palette create(SDL_Palette* palette) => new(palette,
+#pragma warning disable IDE0034 // Keep it that way for explicitness sake
+			default(IUnsafeConstructorDispatch?)
+#pragma warning restore
+		);
 	}
 
 	/// <summary>

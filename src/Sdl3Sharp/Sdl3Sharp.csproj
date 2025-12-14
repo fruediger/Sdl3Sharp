@@ -6,6 +6,8 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <DefineConstants>$(DefineConstants);SDL3_2_0_OR_GREATER</DefineConstants>
     
     <PackageId>$(PackageId).Core</PackageId>
     <Description>$(Description) - "Core" package - just contains the managed binding code</Description>

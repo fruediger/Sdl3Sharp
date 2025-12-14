@@ -49,7 +49,10 @@ public sealed partial class AsyncIO : IDisposable
 		this(asyncIO, closeOnDisposeQueue, closeOnDisposeFlush, default(IUnsafeConstructorDispatch?))
 #pragma warning restore
 	{
-		mKnownInstances.AddOrUpdate(unchecked((IntPtr)asyncIO), addRef, updateRef, this);
+		if (asyncIO is not null)
+		{
+			mKnownInstances.AddOrUpdate(unchecked((IntPtr)asyncIO), addRef, updateRef, this);
+		}
 
 		static WeakReference<AsyncIO> addRef(IntPtr asyncIO, AsyncIO newAsyncIO) => new(newAsyncIO);
 
@@ -269,26 +272,6 @@ public sealed partial class AsyncIO : IDisposable
 		}
 	}
 
-	internal unsafe static AsyncIO GetOrCreate(SDL_AsyncIO* asyncIO, AsyncIOQueue? closeOnDisposeQueue = null, bool closeOnDisposeFlush = true)
-	{
-		var asyncIORef = mKnownInstances.GetOrAdd(unchecked((IntPtr)asyncIO), createRef, (closeOnDisposeQueue, closeOnDisposeFlush));
-
-		if (!asyncIORef.TryGetTarget(out var result))
-		{
-			asyncIORef.SetTarget(result = create(asyncIO, closeOnDisposeQueue, closeOnDisposeFlush));
-		}
-
-		return result;
-
-		static WeakReference<AsyncIO> createRef(IntPtr asyncIO, (AsyncIOQueue? closeOnDisposeQueue, bool closeOnDisposeFlush) arg) => new(create(unchecked((SDL_AsyncIO*)asyncIO), arg.closeOnDisposeQueue, arg.closeOnDisposeFlush));
-
-		static AsyncIO create(SDL_AsyncIO* asyncIO, AsyncIOQueue? closeOnDisposeQueue, bool closeOnDisposeFlush) => new(asyncIO, closeOnDisposeQueue, closeOnDisposeFlush,
-#pragma warning disable IDE0034 // Keep it that way for explicitness sake
-			default(IUnsafeConstructorDispatch?)
-#pragma warning restore
-		);
-	}
-
 	/// <summary>
 	/// Tries to asynchronously close the <see cref="AsyncIO"/>
 	/// </summary>
@@ -377,6 +360,32 @@ public sealed partial class AsyncIO : IDisposable
 			(FileAccess.ReadWrite, FileMode.CreateNew) => modeString = "w+x",
 			_ => modeString = null
 		} is not null;
+
+	internal unsafe static bool TryGetOrCreate(SDL_AsyncIO* asyncIO, [NotNullWhen(true)] out AsyncIO? result, AsyncIOQueue? closeOnDisposeQueue = null, bool closeOnDisposeFlush = true)
+	{
+		if (asyncIO is null)
+		{
+			result = null;
+			return false;
+		}
+
+		var asyncIORef = mKnownInstances.GetOrAdd(unchecked((IntPtr)asyncIO), createRef, (closeOnDisposeQueue, closeOnDisposeFlush));
+
+		if (!asyncIORef.TryGetTarget(out result))
+		{
+			asyncIORef.SetTarget(result = create(asyncIO, closeOnDisposeQueue, closeOnDisposeFlush));
+		}
+
+		return true;
+
+		static WeakReference<AsyncIO> createRef(IntPtr asyncIO, (AsyncIOQueue? closeOnDisposeQueue, bool closeOnDisposeFlush) arg) => new(create(unchecked((SDL_AsyncIO*)asyncIO), arg.closeOnDisposeQueue, arg.closeOnDisposeFlush));
+
+		static AsyncIO create(SDL_AsyncIO* asyncIO, AsyncIOQueue? closeOnDisposeQueue, bool closeOnDisposeFlush) => new(asyncIO, closeOnDisposeQueue, closeOnDisposeFlush,
+#pragma warning disable IDE0034 // Keep it that way for explicitness sake
+			default(IUnsafeConstructorDispatch?)
+#pragma warning restore
+		);
+	}
 
 	/// <summary>
 	/// Tries to asynchronously read data from the <see cref="AsyncIO"/>

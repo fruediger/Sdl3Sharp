@@ -49,16 +49,21 @@ public sealed partial class AsyncIOOutcome : IDisposable
 				if (mOutcome.Userdata is not null
 					&& GCHandle.FromIntPtr(unchecked((IntPtr)mOutcome.Userdata)) is { IsAllocated: true, Target: Managed managed })
 				{
-					if (managed.AsyncIO is { Pointer: var asyncIOPtr } asyncIO
-						&& asyncIOPtr == mOutcome.AsyncIO)
+					if (managed.AsyncIO is not { Pointer: var asyncIOPtr } asyncIO
+						|| asyncIOPtr != mOutcome.AsyncIO)
 					{
-						return asyncIO;
+						AsyncIO.TryGetOrCreate(mOutcome.AsyncIO, out asyncIO);
+						managed.AsyncIO = asyncIO;
 					}
 
-					return managed.AsyncIO = AsyncIO.GetOrCreate(mOutcome.AsyncIO);
+					return asyncIO;
 				}
+				else
+				{
+					AsyncIO.TryGetOrCreate(mOutcome.AsyncIO, out var asyncIO);
 
-				return AsyncIO.GetOrCreate(mOutcome.AsyncIO);
+					return asyncIO;
+				}
 			}
 		}
 	}

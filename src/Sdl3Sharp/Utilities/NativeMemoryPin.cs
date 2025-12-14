@@ -7,21 +7,21 @@ namespace Sdl3Sharp.Utilities;
 /// </summary>
 public sealed class NativeMemoryPin : IDisposable
 {
-	private NativeMemoryManager? mMemoryManager;
+	private NativeMemoryManagerBase? mMemoryManager;
 
-	internal NativeMemoryPin(NativeMemoryManager? memoryManager)
+	internal NativeMemoryPin(NativeMemoryManagerBase? memoryManager)
 	{
 		mMemoryManager = memoryManager;
-		memoryManager?.IncreasePinCounter();
+		memoryManager?.PinOnce();
 	}
 
 	/// <inheritdoc/>
 	~NativeMemoryPin() => DisposeImpl();
 
-	/// <summary>Unpins the referenced <see cref="NativeMemoryManager"/></summary>
+	/// <summary>Unpins the referenced <see cref="NativeMemoryManagerBase"/></summary>
 	/// <remarks>
 	/// <para>
-	/// If there are still active pins on the referenced <see cref="NativeMemoryManager"/>, it will remain pinned until all pins are disposed.
+	/// If there are still active pins on the referenced <see cref="NativeMemoryManagerBase"/>, it will remain pinned until all pins are disposed.
 	/// </para>
 	/// </remarks>
 	public void Dispose()
@@ -34,7 +34,7 @@ public sealed class NativeMemoryPin : IDisposable
 	{
 		if (mMemoryManager is not null)
 		{
-			mMemoryManager.DecreasePinCounter();
+			mMemoryManager.UnpinOnce();
 			mMemoryManager = null;
 		}
 	}

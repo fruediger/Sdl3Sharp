@@ -42,10 +42,10 @@ public readonly partial struct ReadOnlyNativeMemory :
 	public readonly bool IsEmpty { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mNativeMemory.IsEmpty; }
 
 	/// <summary>
-	/// Gets a value indicating whether the underlying <see cref="NativeMemoryManager"/> of this allocated memory buffer is pinned
+	/// Gets a value indicating whether the underlying <see cref="NativeMemoryManagerBase"/> of this allocated memory buffer is pinned
 	/// </summary>
 	/// <value>
-	/// A value indicating whether the underlying <see cref="NativeMemoryManager"/> of this allocated memory buffer is pinned
+	/// A value indicating whether the underlying <see cref="NativeMemoryManagerBase"/> of this allocated memory buffer is pinned
 	/// </value>
 	/// <seealso cref="Pin"/>
 	public readonly bool IsPinned { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mNativeMemory.IsPinned; }
@@ -71,7 +71,7 @@ public readonly partial struct ReadOnlyNativeMemory :
 	/// </value>
 	public readonly nuint Length { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mNativeMemory.Length; }
 
-	internal readonly NativeMemoryManager? MemoryManager { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mNativeMemory.MemoryManager; }
+	internal readonly NativeMemoryManagerBase? MemoryManager { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mNativeMemory.MemoryManager; }
 
 	internal readonly NativeMemory NativeMemory { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mNativeMemory; }
 

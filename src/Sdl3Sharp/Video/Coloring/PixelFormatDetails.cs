@@ -161,11 +161,15 @@ public readonly partial struct PixelFormatDetails : IFormattable, ISpanFormattab
 	{
 		unsafe
 		{
-			byte rTmp, gTmp, bTmp;
+			Unsafe.SkipInit(out byte rTmp);
+			Unsafe.SkipInit(out byte gTmp);
+			Unsafe.SkipInit(out byte bTmp);
 
 			SDL_GetRGB(pixelValue, mFormat, palette is not null ? palette.Pointer : null, &rTmp, &gTmp, &bTmp);
 
-			r = rTmp; g = gTmp; b = bTmp;
+			r = rTmp;
+			g = gTmp;
+			b = bTmp;
 		}
 	}
 
@@ -192,11 +196,17 @@ public readonly partial struct PixelFormatDetails : IFormattable, ISpanFormattab
 	{
 		unsafe
 		{
-			byte rTmp, gTmp, bTmp, aTmp;
+			Unsafe.SkipInit(out byte rTmp);
+			Unsafe.SkipInit(out byte gTmp);
+			Unsafe.SkipInit(out byte bTmp);
+			Unsafe.SkipInit(out byte aTmp);
 
 			SDL_GetRGBA(pixelValue, mFormat, palette is not null ? palette.Pointer : null, &rTmp, &gTmp, &bTmp, &aTmp);
 
-			r = rTmp; g = gTmp; b = bTmp; a = aTmp;
+			r = rTmp;
+			g = gTmp;
+			b = bTmp;
+			a = aTmp;
 		}
 	}
 

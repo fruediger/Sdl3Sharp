@@ -360,14 +360,14 @@ partial struct NativeMemory
 	/// <returns><c><see langword="true"/></c>, if the uninitialized aligned memory could be successfull allocated; otherwise, <c><see langword="false"/></c></returns>
 	/// <remarks>
 	/// <para>
-	/// The resulting <see cref="NativeMemoryManager"/> should be <see cref="NativeMemoryManager.Dispose()">disposed</see> when the memory it's managing is no longer needed. That also frees the allocated memory.
+	/// The resulting <see cref="NativeMemoryManager"/> should be <see cref="NativeMemoryManagerBase.Dispose()">disposed</see> when the memory it's managing is no longer needed. That also frees the allocated memory.
 	/// </para>
 	/// <para>
 	/// If the <paramref name="alignment"/> is less than <c><see langword="sizeof"/>(<see langword="void"/>*)</c>, it will be increased to match that instead.
 	/// </para>
 	/// <para>
-	/// The value of the resulting <see cref="NativeMemoryManager"/>'s <see cref="NativeMemoryManager.Pointer"/> property will be a multiple of the <paramref name="alignment"/>,
-	/// and the actual size of the memory allocated (not necessarily identical to <see cref="NativeMemoryManager.Length"/>) will be a multiple of the <paramref name="alignment"/> too.
+	/// The value of the resulting <see cref="NativeMemoryManager"/>'s <see cref="NativeMemoryManagerBase.Pointer"/> property will be a multiple of the <paramref name="alignment"/>,
+	/// and the actual size of the memory allocated (not necessarily identical to <see cref="NativeMemoryManagerBase.Length"/>) will be a multiple of the <paramref name="alignment"/> too.
 	/// </para>
 	/// </remarks>
 	public static bool TryAlignedAlloc(nuint alignment, nuint length, [NotNullWhen(true)] out NativeMemoryManager? memoryManager)
@@ -396,13 +396,13 @@ partial struct NativeMemory
 	/// <returns><c><see langword="true"/></c>, if the zero-initialized memory could be successfull allocated; otherwise, <c><see langword="false"/></c></returns>
 	/// <remarks>
 	/// <para>
-	/// The resulting <see cref="NativeMemoryManager"/> should be <see cref="NativeMemoryManager.Dispose()">disposed</see> when the memory it's managing is no longer needed. That also frees the allocated memory.
+	/// The resulting <see cref="NativeMemoryManager"/> should be <see cref="NativeMemoryManagerBase.Dispose()">disposed</see> when the memory it's managing is no longer needed. That also frees the allocated memory.
 	/// </para>
 	/// <para>
 	/// If either of <paramref name="elementCount"/> or <paramref name="elementSize"/> are <c>0</c>, they will both be set to <c>1</c> instead.
 	/// </para>
 	/// <para>
-	/// The value of the resulting <see cref="NativeMemoryManager"/>'s <see cref="NativeMemoryManager.Pointer"/> property is guaranteed to be aligned to
+	/// The value of the resulting <see cref="NativeMemoryManager"/>'s <see cref="NativeMemoryManagerBase.Pointer"/> property is guaranteed to be aligned to
 	/// either the <em>fundamental alignment</em> (<c>alignof(max_align_t)</c> in C11 and later) or <c>2 * <see langword="sizeof"/>(<see langword="void"/>*)</c>, whichever is smaller.
 	/// </para>
 	/// </remarks>
@@ -584,13 +584,13 @@ partial struct NativeMemory
 	/// <returns><c><see langword="true"/></c>, if the uninitialized memory could be successfull allocated; otherwise, <c><see langword="false"/></c></returns>
 	/// <remarks>
 	/// <para>
-	/// The resulting <see cref="NativeMemoryManager"/> should be <see cref="NativeMemoryManager.Dispose()">disposed</see> when the memory it's managing is no longer needed. That also frees the allocated memory.
+	/// The resulting <see cref="NativeMemoryManager"/> should be <see cref="NativeMemoryManagerBase.Dispose()">disposed</see> when the memory it's managing is no longer needed. That also frees the allocated memory.
 	/// </para>
 	/// <para>
 	/// If <paramref name="length"/> is <c>0</c>, it will be set to <c>1</c> instead.
 	/// </para>
 	/// <para>
-	/// The value of the resulting <see cref="NativeMemoryManager"/>'s <see cref="NativeMemoryManager.Pointer"/> property is guaranteed to be aligned to
+	/// The value of the resulting <see cref="NativeMemoryManager"/>'s <see cref="NativeMemoryManagerBase.Pointer"/> property is guaranteed to be aligned to
 	/// either the <em>fundamental alignment</em> (<c>alignof(max_align_t)</c> in C11 and later) or <c>2 * <see langword="sizeof"/>(<see langword="void"/>*)</c>, whichever is smaller.
 	/// Use <see cref="TryAlignedAlloc(nuint, nuint, out NativeMemoryManager?)"/> if you need to allocate memory aligned to an alignment greater than this guarantee.
 	/// </para>
@@ -623,14 +623,14 @@ partial struct NativeMemory
 	/// <returns><c><see langword="true"/></c>, if the memory could be successfull reallocated; otherwise, <c><see langword="false"/></c></returns>
 	/// <remarks>
 	/// <para>
-	/// The resulting <see cref="NativeMemoryManager"/> should be still <see cref="NativeMemoryManager.Dispose()">disposed</see> when the memory it's managing is no longer needed. That also frees the allocated memory.
+	/// The resulting <see cref="NativeMemoryManager"/> should be still <see cref="NativeMemoryManagerBase.Dispose()">disposed</see> when the memory it's managing is no longer needed. That also frees the allocated memory.
 	/// </para>
 	/// <para>
 	/// The referenced <see cref="NativeMemoryManager"/> cannot be <see cref="NativeMemoryManager.IsPinned">pinned</see>. Trying to reallocated a pinned memory buffer results in failure.
 	/// </para>
 	/// <para>
 	/// If <paramref name="newLength"/> is <c>0</c>, it will be set to <c>1</c> instead.
-	/// Note that this is unlike some other C runtime <c>realloc</c> implementations, which may treat <c><see cref="TryRealloc(ref NativeMemoryManager?, nuint)">TryRealloc</see>(<see langword="ref"/> <paramref name="memoryManager"/>, 0)</c> the same way as <c><paramref name="memoryManager"/>.<see cref="NativeMemoryManager.Dispose()">Dispose</see>()</c>.
+	/// Note that this is unlike some other C runtime <c>realloc</c> implementations, which may treat <c><see cref="TryRealloc(ref NativeMemoryManager?, nuint)">TryRealloc</see>(<see langword="ref"/> <paramref name="memoryManager"/>, 0)</c> the same way as <c><paramref name="memoryManager"/>.<see cref="NativeMemoryManagerBase.Dispose()">Dispose</see>()</c>.
 	/// </para>
 	/// <para>
 	/// If the reference to <paramref name="memoryManager"/> is referencing a <c><see langword="null"/></c> value, the behavior of this method is equivalent to <c><see cref="TryMalloc(nuint, out NativeMemoryManager?)">TryMalloc</see>(<paramref name="newLength"/>, <see langword="out"/> <paramref name="memoryManager"/>)</c>.
@@ -638,13 +638,13 @@ partial struct NativeMemory
 	/// <list type="bullet">
 	///		<item>
 	///			<description>
-	///				If the result of the call to this method is <c><see langword="true"/></c> and the values of <paramref name="memoryManager"/>'s <see cref="NativeMemoryManager.Pointer"/>, before and after this operation, are the same,
+	///				If the result of the call to this method is <c><see langword="true"/></c> and the values of <paramref name="memoryManager"/>'s <see cref="NativeMemoryManagerBase.Pointer"/>, before and after this operation, are the same,
 	///				it means that the original memory was resized in place without freeing
 	///			</description>
 	///		</item>
 	///		<item>
 	///			<description>
-	///				If the result of the call to this method is <c><see langword="true"/></c> and the values of <paramref name="memoryManager"/>'s <see cref="NativeMemoryManager.Pointer"/>, before and after this operation, are different,
+	///				If the result of the call to this method is <c><see langword="true"/></c> and the values of <paramref name="memoryManager"/>'s <see cref="NativeMemoryManagerBase.Pointer"/>, before and after this operation, are different,
 	///				it means that the original memory was freed and all <em>active</em> references to it (e.g. lasting <see cref="Span{T}"/>s) are invalid and cannot be dereferenced anymore
 	///				(<see cref="NativeMemory"/> and <see cref="NativeMemory{T}"/> instances are safe though)
 	///			</description>
@@ -652,13 +652,13 @@ partial struct NativeMemory
 	///		<item>
 	///			<description>
 	///				The result of the call to this method is <c><see langword="false"/></c> (indicating failure),
-	///				then the given <paramref name="memoryManager"/> will remain valid (if it was non-<c><see langword="null"/></c>) and should be still <see cref="NativeMemoryManager.Dispose()">disposed</see> when it's no longer needed
+	///				then the given <paramref name="memoryManager"/> will remain valid (if it was non-<c><see langword="null"/></c>) and should be still <see cref="NativeMemoryManagerBase.Dispose()">disposed</see> when it's no longer needed
 	///			</description>
 	///		</item>
 	/// </list>
 	/// </para>
 	/// <para>
-	/// The value of the resulting <see cref="NativeMemoryManager"/>'s <see cref="NativeMemoryManager.Pointer"/> property is guaranteed to be aligned to
+	/// The value of the resulting <see cref="NativeMemoryManager"/>'s <see cref="NativeMemoryManagerBase.Pointer"/> property is guaranteed to be aligned to
 	/// either the <em>fundamental alignment</em> (<c>alignof(max_align_t)</c> in C11 and later) or <c>2 * <see langword="sizeof"/>(<see langword="void"/>*)</c>, whichever is smaller.
 	/// </para>
 	/// </remarks>
@@ -685,11 +685,11 @@ partial struct NativeMemory
 
 			if (ptr != memoryManager.RawPointer)
 			{
-				memoryManager.RawPointer = ptr;
-				memoryManager.Free = &SDL_free;
+				memoryManager.SetRawPointer(ptr);
+				memoryManager.SetFree(&SDL_free);
 			}
 
-			memoryManager.Length = newLength is > 0 ? newLength : 1;
+			memoryManager.SetLength(newLength is > 0 ? newLength : 1);
 			return true;
 		}
 	}
