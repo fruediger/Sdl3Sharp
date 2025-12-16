@@ -189,7 +189,7 @@ public readonly partial struct PixelFormatDetails : IFormattable, ISpanFormattab
 	/// <em>not</em> (<c>0xf8</c>, <c>0xfc</c>, <c>0xf8</c>)).
 	/// </para>
 	/// <para>
-	/// If the surface has no alpha component, the alpha component value will be returned as <c>0xff</c> (fully opaque).
+	/// If the surface has no alpha component, the <paramref name="a"/>lpha component value will be returned as <c>0xff</c> (fully opaque).
 	/// </para>
 	/// </remarks>
 	public readonly void GetColor(uint pixelValue, Palette? palette, out byte r, out byte g, out byte b, out byte a)
@@ -223,7 +223,7 @@ public readonly partial struct PixelFormatDetails : IFormattable, ISpanFormattab
 	/// <em>not</em> (<c>0xf8</c>, <c>0xfc</c>, <c>0xf8</c>)).
 	/// </para>
 	/// <para>
-	/// If the surface has no alpha component, the <see cref="Color.A"/> value will be returned as <c>0xff</c> (fully opaque).
+	/// If the surface has no alpha component, the <see cref="Color{T}.A"/> value will be returned as <c>0xff</c> (fully opaque).
 	/// </para>
 	/// </remarks>
 	public readonly void GetColor(uint pixelValue, Palette? palette, out Color<byte> color)

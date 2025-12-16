@@ -1644,7 +1644,7 @@ public abstract partial class Stream : IDisposable
 	{
 		unsafe
 		{
-			Variadic.Invoke(in SDL_IOprintf_var(), 2, out bytesWritten, [unchecked((IntPtr)mContext), format, ..args]);
+			bytesWritten = Variadic.Invoke<nuint>(in SDL_IOprintf_var(), 2, [unchecked((IntPtr)mContext), format, ..args]);
 
 			return bytesWritten is not 0 || string.IsNullOrEmpty(format);
 		}

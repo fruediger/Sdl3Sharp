@@ -1,5 +1,4 @@
-﻿using Sdl3Sharp.Internal.Interop.NativeImportConditions;
-using Sdl3Sharp.IO;
+﻿using Sdl3Sharp.IO;
 using Sdl3Sharp.Utilities;
 using Sdl3Sharp.Video.Blending;
 using Sdl3Sharp.Video.Coloring;
@@ -126,7 +125,18 @@ public partial class Surface : IDisposable
 		static void failCouldNotCreateSurface() => throw new SdlException($"Could not create the {nameof(Surface)}");
 	}
 
-	// /// <inheritdoc cref="Surface(int, int, PixelFormat, IUnsafeConstructorDispatch?)"/>
+	/// <summary>
+	/// Creates a new <see cref="Surface"/> with the specified width, height and pixel format
+	/// </summary>
+	/// <param name="width">The width of the surface</param>
+	/// <param name="height">The height of the surface</param>
+	/// <param name="format">The pixel format of the surface</param>
+	/// <remarks>
+	/// <para>
+	/// The pixel memory of the newly created surface is initialized to all zeroes.
+	/// </para>
+	/// </remarks>
+	/// <inheritdoc cref="Surface(int, int, PixelFormat, IUnsafeConstructorDispatch?)"/>
 	public Surface(int width, int height, PixelFormat format) :
 #pragma warning disable IDE0034 // Keep it that way for explicitness sake
 		this(width, height, format, default(IUnsafeConstructorDispatch?))
@@ -141,7 +151,24 @@ public partial class Surface : IDisposable
 		mNativeMemoryPin = nativeMemoryPin;
 	}
 
-	// /// <inheritdoc cref="Surface(int, int, PixelFormat, Utilities.NativeMemory, int, IUnsafeConstructorDispatch?)"/>
+	/// <summary>
+	/// Creates a new <see cref="Surface"/> with the specified width, height, pixel format and pre-allocated pixel memory
+	/// </summary>
+	/// <param name="width">The width of the surface</param>
+	/// <param name="height">The height of the surface</param>
+	/// <param name="format">The pixel format of the surface</param>
+	/// <param name="pixels">The pre-allocated pixel memory</param>
+	/// <param name="pitch">The pitch of the surface, in bytes</param>
+	/// <remarks>
+	/// <para>
+	/// No copy is made of the <paramref name="pixels"/>, instead it's referenced directly as the pixel memory of the newly created surface.
+	/// That also means that <paramref name="pixels"/> must remain valid and alive for the lifetime of the surface. This is not handled automatically for you!
+	/// </para>
+	/// <para>
+	/// The <paramref name="pitch"/> is the offset in bytes between each vertical pixel row in the <paramref name="pixels"/> memory, e.g. <c>4 * <paramref name="width"/></c> for a <see cref="PixelFormat.Rgba8888"/> <paramref name="format"/>.
+	/// </para>
+	/// </remarks>
+	/// <inheritdoc cref="Surface(int, int, PixelFormat, Utilities.NativeMemory, int, IUnsafeConstructorDispatch?)"/>
 	public Surface(int width, int height, PixelFormat format, Utilities.NativeMemory pixels, int pitch) :
 #pragma warning disable IDE0034 // Keep it that way for explicitness sake
 		this(width, height, format, pixels, pitch, default(IUnsafeConstructorDispatch?))
@@ -156,14 +183,48 @@ public partial class Surface : IDisposable
 		mMemoryHandle = memoryHandle;
 	}
 
-	// /// <inheritdoc cref="Surface(int, int, PixelFormat, Memory{byte}, int, IUnsafeConstructorDispatch?)"/>
+	/// <summary>
+	/// Creates a new <see cref="Surface"/> with the specified width, height, pixel format and pre-allocated pixel memory
+	/// </summary>
+	/// <param name="width">The width of the surface</param>
+	/// <param name="height">The height of the surface</param>
+	/// <param name="format">The pixel format of the surface</param>
+	/// <param name="pixels">The pre-allocated pixel memory</param>
+	/// <param name="pitch">The pitch of the surface, in bytes</param>
+	/// <remarks>
+	/// <para>
+	/// No copy is made of the <paramref name="pixels"/>, instead it's referenced directly as the pixel memory of the newly created surface.
+	/// That also means that <paramref name="pixels"/> must remain valid and alive for the lifetime of the surface. This is not handled automatically for you!
+	/// </para>
+	/// <para>
+	/// The <paramref name="pitch"/> is the offset in bytes between each vertical pixel row in the <paramref name="pixels"/> memory, e.g. <c>4 * <paramref name="width"/></c> for a <see cref="PixelFormat.Rgba8888"/> <paramref name="format"/>.
+	/// </para>
+	/// </remarks>
+	/// <inheritdoc cref="Surface(int, int, PixelFormat, Memory{byte}, int, IUnsafeConstructorDispatch?)"/>
 	public Surface(int width, int height, PixelFormat format, Memory<byte> pixels, int pitch) :
 #pragma warning disable IDE0034 // Keep it that way for explicitness sake
 		this(width, height, format, pixels, pitch, default(IUnsafeConstructorDispatch?))
 #pragma warning restore IDE0034
 	{ }
 
-	// /// <exception cref="SdlException">The <see cref="Surface"/> could not be created (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
+	/// <summary>
+	/// Creates a new <see cref="Surface"/> with the specified width, height, pixel format and pre-allocated pixel memory
+	/// </summary>
+	/// <param name="width">The width of the surface</param>
+	/// <param name="height">The height of the surface</param>
+	/// <param name="format">The pixel format of the surface</param>
+	/// <param name="pixels">A pointer to the pre-allocated pixel memory</param>
+	/// <param name="pitch">The pitch of the surface, in bytes</param>
+	/// <remarks>
+	/// <para>
+	/// No copy is made of the <paramref name="pixels"/>, instead it's referenced directly as the pixel memory of the newly created surface.
+	/// That also means that <paramref name="pixels"/> must remain valid and alive for the lifetime of the surface. This is not handled automatically for you!
+	/// </para>
+	/// <para>
+	/// The <paramref name="pitch"/> is the offset in bytes between each vertical pixel row in the <paramref name="pixels"/> memory, e.g. <c>4 * <paramref name="width"/></c> for a <see cref="PixelFormat.Rgba8888"/> <paramref name="format"/>.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">The <see cref="Surface"/> could not be created (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	public unsafe Surface(int width, int height, PixelFormat format, void* pixels, int pitch) :
 		this(SDL_CreateSurfaceFrom(width, height, format, pixels, pitch))
 	{
@@ -197,7 +258,19 @@ public partial class Surface : IDisposable
 		static void failCouldNotCreateSurface() => throw new SdlException($"Could not create the {nameof(Surface)}");
 	}
 
-	// /// <inheritdoc cref="Surface(string, IUnsafeConstructorDispatch?)"/>
+	/// <summary>
+	/// Creates a new <see cref="Surface"/> by loading a BMP or PNG image from the specified file
+	/// </summary>
+	/// <param name="file">A file path to the image</param>
+	/// <remarks>
+	/// <para>
+	/// The format of the file must be BMP or PNG, otherwise this constructor will fail.
+	/// </para>
+	/// <para>
+	/// Remember to <see cref="Dispose()">dispose</see> of the resulting surface when you are done with it. Not doing so will result in a memory leak.
+	/// </para>
+	/// </remarks>
+	/// <inheritdoc cref="Surface(string, IUnsafeConstructorDispatch?)"/>
 	public Surface(string file) :
 #pragma warning disable IDE0034 // Keep it that way for explicitness sake
 		this(file, default(IUnsafeConstructorDispatch?))
@@ -229,7 +302,20 @@ public partial class Surface : IDisposable
 		static void failCouldNotCreateSurface() => throw new SdlException($"Could not create the {nameof(Surface)}");
 	}
 
-	// /// <inheritdoc cref="Surface.Surface(Stream, bool, IUnsafeConstructorDispatch?)"/>
+	/// <summary>
+	/// Creates a new <see cref="Surface"/> by loading a BMP or PNG image from the specified stream
+	/// </summary>
+	/// <param name="source">The stream to load the image from</param>
+	/// <param name="closeAfterwards">A value indicating whether the <paramref name="source"/> stream should be closed before this method returns (even in case of an error)</param>
+	/// <remarks>
+	/// <para>
+	/// The format of the data in the <paramref name="source"/> stream must be BMP or PNG, otherwise this constructor will fail.
+	/// </para>
+	/// <para>
+	/// Remember to <see cref="Dispose()">dispose</see> of the resulting surface when you are done with it. Not doing so will result in a memory leak.
+	/// </para>
+	/// </remarks>
+	/// <inheritdoc cref="Surface.Surface(Stream, bool, IUnsafeConstructorDispatch?)"/>
 	public Surface(Stream source, bool closeAfterwards = false) :
 #pragma warning disable IDE0034 // Keep it that way for explicitness sake
 		this(source, closeAfterwards, default(IUnsafeConstructorDispatch?))
@@ -712,7 +798,7 @@ public partial class Surface : IDisposable
 	/// It's safe to access <see cref="UnsafePixels"/> only if this property is <c><see langword="true"/></c>.
 	/// </para>
 	/// <para>
-	/// This property is meant to use as part of the <see cref="MustLock"/> - <see cref="IsLocked"/> - <see cref="TryUnsafeLock"/> - <see cref="UnsafePixels"/> - <see cref="UnsafeUnlock"/> pattern,
+	/// This property is meant to be used as part of the <see cref="MustLock"/> - <see cref="IsLocked"/> - <see cref="TryUnsafeLock"/> - <see cref="UnsafePixels"/> - <see cref="UnsafeUnlock"/> pattern,
 	/// if you want to access the surface's pixel memory directly in a faster and more efficient way.
 	/// If you're looking for a simpler and safer way to access the pixel memory, consider using <see cref="TryLock(out SurfacePixelMemoryManager?)"/> instead.
 	/// </para>
@@ -823,11 +909,32 @@ public partial class Surface : IDisposable
 	/// </value>
 	/// <remarks>
 	/// <para>
-	/// This property is meant to use as part of the <see cref="MustLock"/> - <see cref="IsLocked"/> - <see cref="TryUnsafeLock"/> - <see cref="UnsafePixels"/> - <see cref="UnsafeUnlock"/> pattern,
+	/// This property is meant to be used as part of the <see cref="MustLock"/> - <see cref="IsLocked"/> - <see cref="TryUnsafeLock"/> - <see cref="UnsafePixels"/> - <see cref="UnsafeUnlock"/> pattern,
 	/// if you want to access the surface's pixel memory directly in a faster and more efficient way.
 	/// If you're looking for a simpler and safer way to access the pixel memory, consider using <see cref="TryLock(out SurfacePixelMemoryManager?)"/> instead.
 	/// </para>
+	/// <para>
+	/// Not all surfaces require locking. If the value of this property is <c><see langword="false"/></c>,
+	/// then you can read and write to the surface at any time, and the pixel format of the surface will not change.
+	/// </para>
 	/// </remarks>
+	/// <example>
+	/// Example usage:
+	/// <code>
+	/// Surface surface;
+	/// 
+	/// ...
+	/// 
+	/// if (surface.MustLock &amp;&amp; surface.TryUnsafeLock())
+	/// {
+	///		// It's safe to access surface.UnsafePixels here
+	///		
+	///		...
+	///		
+	///		surface.UnsafeUnlock(); 
+	/// }
+	/// </code>
+	/// </example>
 	public bool MustLock
 	{
 		get
@@ -1084,11 +1191,28 @@ public partial class Surface : IDisposable
 	/// It's unsafe to access this property for surfaces that <see cref="MustLock">must be locked</see> and are not currently <see cref="IsLocked">locked</see>.
 	/// </para>
 	/// <para>
-	/// This property is meant to use as part of the <see cref="MustLock"/> - <see cref="IsLocked"/> - <see cref="TryUnsafeLock"/> - <see cref="UnsafePixels"/> - <see cref="UnsafeUnlock"/> pattern,
+	/// This property is meant to be used as part of the <see cref="MustLock"/> - <see cref="IsLocked"/> - <see cref="TryUnsafeLock"/> - <see cref="UnsafePixels"/> - <see cref="UnsafeUnlock"/> pattern,
 	/// if you want to access the surface's pixel memory directly in a faster and more efficient way.
 	/// If you're looking for a simpler and safer way to access the pixel memory, consider using <see cref="TryLock(out SurfacePixelMemoryManager?)"/> instead.
 	/// </para>
 	/// </remarks>
+	/// <example>
+	/// Example usage:
+	/// <code>
+	/// Surface surface;
+	/// 
+	/// ...
+	/// 
+	/// if (surface.MustLock &amp;&amp; surface.TryUnsafeLock())
+	/// {
+	///		// It's safe to access surface.UnsafePixels here
+	///		
+	///		...
+	///		
+	///		surface.UnsafeUnlock(); 
+	/// }
+	/// </code>
+	/// </example>
 	public Utilities.NativeMemory UnsafePixels
 	{
 		get
@@ -1138,12 +1262,23 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <inheritdoc/>
 	public void Dispose()
 	{
 		GC.SuppressFinalize(this);
 		Dispose(disposing: true, forget: true);
 	}
 
+	/// <summary>
+	/// Disposes the surface
+	/// </summary>
+	/// <param name="disposing">A value indicating whether the call came from a call to <see cref="Dispose()"/> or from the finalizer</param>
+	/// <param name="forget">A value indicating whether to forget the managed surface</param>
+	/// <remarks>
+	/// <para>
+	/// This unpins any <see cref="Utilities.NativeMemory"/> instances or <see cref="Memory{T}"/> instances used to create the surface.
+	/// </para>
+	/// </remarks>
 	protected virtual void Dispose(bool disposing, bool forget)
 	{
 		unsafe
@@ -1969,49 +2104,18 @@ public partial class Surface : IDisposable
 		}
 	}
 
-#if SDL3_4_0_GREATER
-	public bool TryBlitStretched(in Rect<int> destinationRect, Surface source, in Rect<int> sourceRect, ScaleMode scaleMode)
-	{
-		unsafe
-		{
-			fixed (Rect<int>* dstrect = &destinationRect, srcrect = &sourceRect)
-			{
-				return SDL_StretchSurface(source is not null ? source.mSurface : null, srcrect, mSurface, dstrect, scaleMode);
-			}
-		}
-	}
-
-	public bool TryBlitStretched(in Rect<int> destinationRect, Surface source, ScaleMode scaleMode)
-	{
-		unsafe
-		{
-			fixed (Rect<int>* dstrect = &destinationRect)
-			{
-				return SDL_StretchSurface(source is not null ? source.mSurface : null, srcrect: null, mSurface, dstrect, scaleMode);
-			}
-		}
-	}
-
-	public bool TryBlitStretched(Surface source, in Rect<int> sourceRect, ScaleMode scaleMode)
-	{
-		unsafe
-		{
-			fixed (Rect<int>* srcrect = &sourceRect)
-			{
-				return SDL_StretchSurface(source is not null ? source.mSurface : null, srcrect, mSurface, dstrect: null, scaleMode);
-			}
-		}
-	}
-
-	public bool TryBlitStretched(Surface source, ScaleMode scaleMode)
-	{
-		unsafe
-		{
-			return SDL_StretchSurface(source is not null ? source.mSurface : null, srcrect: null, mSurface, dstrect: null, scaleMode);
-		}
-	}
-#endif
-
+	/// <summary>
+	/// Tries to perform a tiled blit from a specified source surface to this surface, which maybe of a different format
+	/// </summary>
+	/// <param name="destinationRect">The destination rectangle on this surface to blit onto</param>
+	/// <param name="source">The source surface to blit from</param>
+	/// <param name="sourceRect">The source rectangle on the source surface to blit from</param>
+	/// <returns><c><see langword="true"/></c>, if the blit was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks> 
+	/// <para>
+	/// The region specified by <paramref name="sourceRect"/> from the <paramref name="source"/> surface is used and repeated as many times as needed to completely fill the region specified by <paramref name="destinationRect"/> on this surface.
+	/// </para>
+	/// </remarks>
 	public bool TryBlitTiled(in Rect<int> destinationRect, Surface source, in Rect<int> sourceRect)
 	{
 		unsafe
@@ -2023,6 +2127,17 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to perform a tiled blit from a specified source surface to this surface, which maybe of a different format
+	/// </summary>
+	/// <param name="destinationRect">The destination rectangle on this surface to blit onto</param>
+	/// <param name="source">The source surface to blit from</param>
+	/// <returns><c><see langword="true"/></c>, if the blit was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks> 
+	/// <para>
+	/// The entire <paramref name="source"/> surface is used and repeated as many times as needed to completely fill the region specified by <paramref name="destinationRect"/> on this surface.
+	/// </para>
+	/// </remarks>
 	public bool TryBlitTiled(in Rect<int> destinationRect, Surface source)
 	{
 		unsafe
@@ -2034,6 +2149,17 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to perform a tiled blit from a specified source surface to this surface, which maybe of a different format
+	/// </summary>
+	/// <param name="source">The source surface to blit from</param>
+	/// <param name="sourceRect">The source rectangle on the source surface to blit from</param>
+	/// <returns><c><see langword="true"/></c>, if the blit was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks> 
+	/// <para>
+	/// The region specified by <paramref name="sourceRect"/> from the <paramref name="source"/> surface is used and repeated as many times as needed to completely fill the entire area of this surface.
+	/// </para>
+	/// </remarks>
 	public bool TryBlitTiled(Surface source, in Rect<int> sourceRect)
 	{
 		unsafe
@@ -2044,6 +2170,17 @@ public partial class Surface : IDisposable
 			}
 		}
 	}
+
+	/// <summary>
+	/// Tries to perform a tiled blit from a specified source surface to this surface, which maybe of a different format
+	/// </summary>
+	/// <param name="source">The source surface to blit from</param>
+	/// <returns><c><see langword="true"/></c>, if the blit was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks> 
+	/// <para>
+	/// The entire <paramref name="source"/> surface is used and repeated as many times as needed to completely fill the entire area of this surface.
+	/// </para>
+	/// </remarks>
 	public bool TryBlitTiled(Surface source)
 	{
 		unsafe
@@ -2052,6 +2189,21 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to perform a tiled and scaled blit from a specified source surface to this surface with scaling, which maybe of a different format
+	/// </summary>
+	/// <param name="destinationRect">The destination rectangle on this surface to blit onto</param>
+	/// <param name="source">The source surface to blit from</param>
+	/// <param name="sourceRect">The source rectangle on the source surface to blit from</param>
+	/// <param name="scale">The scale to transform the <paramref name="sourceRect"/> into the <paramref name="destinationRect"/></param>
+	/// <param name="scaleMode">The scale mode to use</param>
+	/// <returns><c><see langword="true"/></c>, if the blit was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The <paramref name="scale"/> is applied to the region specified by <paramref name="sourceRect"/> from the <paramref name="source"/> surface, e.g. a 32⨯32 region with a scale of <c>2</c> would become a 64⨯64 region.
+	/// That scaled region is then used and repeated as many times as needed to completely fill the region specified by <paramref name="destinationRect"/> on this surface.
+	/// </para>
+	/// </remarks>
 	public bool TryBlitTiledWithScale(in Rect<int> destinationRect, Surface source, in Rect<int> sourceRect, float scale, ScaleMode scaleMode)
 	{
 		unsafe
@@ -2063,6 +2215,20 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to perform a tiled and scaled blit from a specified source surface to this surface with scaling, which maybe of a different format
+	/// </summary>
+	/// <param name="destinationRect">The destination rectangle on this surface to blit onto</param>
+	/// <param name="source">The source surface to blit from</param>
+	/// <param name="scale">The scale to transform the <paramref name="source"/> into the <paramref name="destinationRect"/></param>
+	/// <param name="scaleMode">The scale mode to use</param>
+	/// <returns><c><see langword="true"/></c>, if the blit was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The <paramref name="scale"/> is applied to the entire <paramref name="source"/> surface, e.g. a 32⨯32 surface with a scale of <c>2</c> would become a 64⨯64 region.
+	/// That scaled region is then used and repeated as many times as needed to completely fill the region specified by <paramref name="destinationRect"/> on this surface.
+	/// </para>
+	/// </remarks>
 	public bool TryBlitTiledWithScale(in Rect<int> destinationRect, Surface source, float scale, ScaleMode scaleMode)
 	{
 		unsafe
@@ -2074,6 +2240,20 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to perform a tiled and scaled blit from a specified source surface to this surface with scaling, which maybe of a different format
+	/// </summary>
+	/// <param name="source">The source surface to blit from</param>
+	/// <param name="sourceRect">The source rectangle on the source surface to blit from</param>
+	/// <param name="scale">The scale to transform the <paramref name="sourceRect"/> into this surface</param>
+	/// <param name="scaleMode">The scale mode to use</param>
+	/// <returns><c><see langword="true"/></c>, if the blit was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The <paramref name="scale"/> is applied to the region specified by <paramref name="sourceRect"/> from the <paramref name="source"/> surface, e.g. a 32⨯32 region with a scale of <c>2</c> would become a 64⨯64 region.
+	/// That scaled region is then used and repeated as many times as needed to completely fill the entire area of this surface.
+	/// </para>
+	/// </remarks>
 	public bool TryBlitTiledWithScale(Surface source, in Rect<int> sourceRect, float scale, ScaleMode scaleMode)
 	{
 		unsafe
@@ -2085,6 +2265,19 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to perform a tiled and scaled blit from a specified source surface to this surface with scaling, which maybe of a different format
+	/// </summary>
+	/// <param name="source">The source surface to blit from</param>
+	/// <param name="scale">The scale to transform the <paramref name="source"/> into this surface</param>
+	/// <param name="scaleMode">The scale mode to use</param>
+	/// <returns><c><see langword="true"/></c>, if the blit was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The <paramref name="scale"/> is applied to the entire <paramref name="source"/> surface, e.g. a 32⨯32 surface with a scale of <c>2</c> would become a 64⨯64 region.
+	/// That scaled region is then used and repeated as many times as needed to completely fill the entire area of this surface.
+	/// </para>
+	/// </remarks>
 	public bool TryBlitTiledWithScale(Surface source, float scale, ScaleMode scaleMode)
 	{
 		unsafe
@@ -2093,6 +2286,18 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to perform a low-level blit from a specified source surface to this surface
+	/// </summary>
+	/// <param name="destinationRect">The destination rectangle on this surface to blit onto</param>
+	/// <param name="source">The source surface to blit from</param>
+	/// <param name="sourceRect">The source rectangle on the source surface to blit from</param>
+	/// <returns><c><see langword="true"/></c>, if the blit was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This is a semi-private blit method and it performs low-level surface blitting, assuming the input rectangles have already been clipped.
+	/// </para>
+	/// </remarks>
 	public bool TryBlitUnchecked(in Rect<int> destinationRect, Surface source, in Rect<int> sourceRect)
 	{
 		unsafe
@@ -2104,6 +2309,19 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to perform a low-level scaled blit from a specified source surface to this surface
+	/// </summary>
+	/// <param name="destinationRect">The destination rectangle on this surface to blit onto</param>
+	/// <param name="source">The source surface to blit from</param>
+	/// <param name="sourceRect">The source rectangle on the source surface to blit from</param>
+	/// <param name="scaleMode">The scale mode to use</param>
+	/// <returns><c><see langword="true"/></c>, if the blit was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This is a semi-private method and it performs low-level surface blitting, assuming the input rectangles have already been clipped.
+	/// </para>
+	/// </remarks>
 	public bool TryBlitUncheckedScaled(in Rect<int> destinationRect, Surface source, in Rect<int> sourceRect, ScaleMode scaleMode)
 	{
 		unsafe
@@ -2115,6 +2333,22 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to clear the entire surface to the specified color
+	/// </summary>
+	/// <param name="r">The red component value of the color to clear to surface to. Usually in the range from <c>0</c> to <c>1</c>.</param>
+	/// <param name="g">The green component value of the color to clear to surface to. Usually in the range from <c>0</c> to <c>1</c>.</param>
+	/// <param name="b">The blue component value of the color to clear to surface to. Usually in the range from <c>0</c> to <c>1</c>.</param>
+	/// <param name="a">The alpha component value of the color to clear to surface to. Usually in the range from <c>0</c> to <c>1</c>.</param>
+	/// <returns><c><see langword="true"/></c>, if the surface was successfully cleared; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method handles all surface formats, and ignores any <see cref="ClippingRect"/>.
+	/// </para>
+	/// <para>
+	/// If the surface is YUV, the color is assumed to be in the sRGB colorspace, otherwise the color is assumed to be in the colorspace of the suface.
+	/// </para>
+	/// </remarks>
 	public bool TryClear(float r, float g, float b, float a)
 	{
 		unsafe
@@ -2123,8 +2357,40 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to clear the entire surface to the specified color
+	/// </summary>
+	/// <param name="color">The color to clear the surface to. Usually the range for each component is from <c>0</c> to <c>1</c>.</param>
+	/// <returns><c><see langword="true"/></c>, if the surface was successfully cleared; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method handles all surface formats, and ignores any <see cref="ClippingRect"/>.
+	/// </para>
+	/// <para>
+	/// If the surface is YUV, the color is assumed to be in the sRGB colorspace, otherwise the color is assumed to be in the colorspace of the suface.
+	/// </para>
+	/// </remarks>
 	public bool TryClear(Color<float> color) => TryClear(color.R, color.G, color.B, color.A);
 
+	/// <summary>
+	/// Tries to create a copy of this surface converted to the specified format
+	/// </summary>
+	/// <param name="format">The pixel format to convert the surface to</param>
+	/// <param name="result">The converted surface, if this method returns <c><see langword="true"/></c>; otherwise, <c><see langword="null"/></c></param>
+	/// <returns><c><see langword="true"/></c>, if the surface was successfully converted; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method is used to optimize images for faster <em>repeat</em> blitting.
+	/// This is accomplished by converting the original and storing the result as a new surface.
+	/// The new, optimized surface can then be used as the source for future blits, making them faster.
+	/// </para>
+	/// <para>
+	/// If you are converting to an indexed surface and want to map colors to a palette, you can use <see cref="TryConvert(PixelFormat, Palette?, ColorSpace, Properties?, out Surface?)"/> instead.
+	/// </para>
+	/// <para>
+	/// If the original surface has alternate images, the duplicated surface will have a reference to them as well.
+	/// </para>
+	/// </remarks>
 	public bool TryConvert(PixelFormat format, [NotNullWhen(true)] out Surface? result)
 	{
 		unsafe
@@ -2142,6 +2408,23 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to create a copy of this surface converted to the specified format, using the specified palette, color space, and properties
+	/// </summary>
+	/// <param name="format">The pixel format to convert the surface to</param>
+	/// <param name="palette">An optional palette used for indexed surfaces, or <c><see langword="null"/></c></param>
+	/// <param name="colorSpace">The color space to convert the surface to</param>
+	/// <param name="properties">Additional color properties to use for the converted surface, or <c><see langword="null"/></c></param>
+	/// <param name="result">The converted surface, if this method returns <c><see langword="true"/></c>; otherwise, <c><see langword="null"/></c></param>
+	/// <returns><c><see langword="true"/></c>, if the surface was successfully converted; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method converts an existing surface to a new format and color space and returns the new surface. This will perform any pixel format and color space conversions as needed.
+	/// </para>
+	/// <para>
+	/// If the original surface has alternate images, the duplicated surface will have a reference to them as well.
+	/// </para>
+	/// </remarks>
 	public bool TryConvert(PixelFormat format, Palette? palette, ColorSpace colorSpace, Properties? properties, [NotNullWhen(true)] out Surface? result)
 	{
 		unsafe
@@ -2159,6 +2442,25 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to convert a block of pixels to a specified format
+	/// </summary>
+	/// <param name="width">The width of the block to convert, in pixels</param>
+	/// <param name="height">The height of the block to convert, in pixels</param>
+	/// <param name="sourceFormat">The pixel format of the source data</param>
+	/// <param name="source">The source pixel data</param>
+	/// <param name="sourcePitch">The pitch of the source pixel data, in bytes</param>
+	/// <param name="destinationFormat">The desired pixel format of the destination data</param>
+	/// <param name="destination">The destination pixel data</param>
+	/// <param name="destinationPitch">The pitch of the destination pixel data, in bytes</param>
+	/// <returns><c><see langword="true"/></c>, if the pixel data was successfully converted; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method additionally returns <c><see langword="false"/></c> if either <paramref name="source"/> or <paramref name="destination"/> are <see cref="Utilities.NativeMemory.IsValid">invalid</see>,
+	/// <c><paramref name="source"/>.<see cref="ReadOnlyNativeMemory.Length">Length</see></c> is less than; <c><paramref name="height"/> * <paramref name="sourcePitch"/></c>,
+	/// or <c><paramref name="destination"/>.<see cref="Utilities.NativeMemory.Length">Length</see></c> is less than <c><paramref name="height"/> * <paramref name="destinationPitch"/></c>.
+	/// </para>
+	/// </remarks>
 	public static bool TryConvert(int width, int height, PixelFormat sourceFormat, ReadOnlyNativeMemory source, int sourcePitch, PixelFormat destinationFormat, Utilities.NativeMemory destination, int destinationPitch)
 	{
 		unsafe
@@ -2186,6 +2488,24 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to convert a block of pixels to a specified format
+	/// </summary>
+	/// <param name="width">The width of the block to convert, in pixels</param>
+	/// <param name="height">The height of the block to convert, in pixels</param>
+	/// <param name="sourceFormat">The pixel format of the source data</param>
+	/// <param name="source">The source pixel data</param>
+	/// <param name="sourcePitch">The pitch of the source pixel data, in bytes</param>
+	/// <param name="destinationFormat">The desired pixel format of the destination data</param>
+	/// <param name="destination">The destination pixel data</param>
+	/// <param name="destinationPitch">The pitch of the destination pixel data, in bytes</param>
+	/// <returns><c><see langword="true"/></c>, if the pixel data was successfully converted; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method additionally returns <c><see langword="false"/></c> if <c><paramref name="source"/>.<see cref="ReadOnlySpan{T}.Length">Length</see></c> is less than; <c><paramref name="height"/> * <paramref name="sourcePitch"/></c>,
+	/// or <c><paramref name="destination"/>.<see cref="Span{T}.Length">Length</see></c> is less than <c><paramref name="height"/> * <paramref name="destinationPitch"/></c>.
+	/// </para>
+	/// </remarks>
 	public static bool TryConvert(int width, int height, PixelFormat sourceFormat, ReadOnlySpan<byte> source, int sourcePitch, PixelFormat destinationFormat, Span<byte> destination, int destinationPitch)
 	{
 		unsafe
@@ -2211,11 +2531,46 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to convert a block of pixels to a specified format
+	/// </summary>
+	/// <param name="width">The width of the block to convert, in pixels</param>
+	/// <param name="height">The height of the block to convert, in pixels</param>
+	/// <param name="sourceFormat">The pixel format of the source data</param>
+	/// <param name="source">A pointer to the source pixel data</param>
+	/// <param name="sourcePitch">The pitch of the source pixel data, in bytes</param>
+	/// <param name="destinationFormat">The desired pixel format of the destination data</param>
+	/// <param name="destination">A pointer to the destination pixel data</param>
+	/// <param name="destinationPitch">The pitch of the destination pixel data, in bytes</param>
+	/// <returns><c><see langword="true"/></c>, if the pixel data was successfully converted; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
 	public unsafe static bool TryConvert(int width, int height, PixelFormat sourceFormat, void* source, int sourcePitch, PixelFormat destinationFormat, void* destination, int destinationPitch)
 	{
 		return SDL_ConvertPixels(width, height, sourceFormat, source, sourcePitch, destinationFormat, destination, destinationPitch);
 	}
 
+	/// <summary>
+	/// Tries to convert a block of pixels to a specified format, using the specified palette, color space, and properties
+	/// </summary>
+	/// <param name="width">The width of the block to convert, in pixels</param>
+	/// <param name="height">The height of the block to convert, in pixels</param>
+	/// <param name="sourceFormat">The pixel format of the source data</param>
+	/// <param name="sourceColorSpace">The color space of the source data</param>
+	/// <param name="sourceProperties">Additional color properties to use for the source data, or <c><see langword="null"/></c></param>
+	/// <param name="source">The source pixel data</param>
+	/// <param name="sourcePitch">The pitch of the source pixel data, in bytes</param>
+	/// <param name="destinationFormat">The desired pixel format of the destination data</param>
+	/// <param name="destinationColorSpace">The color space of the destination data</param>
+	/// <param name="destinationProperties">Additional color properties to use for the destination data, or <c><see langword="null"/></c></param>
+	/// <param name="destination">The destination pixel data</param>
+	/// <param name="destinationPitch">The pitch of the destination pixel data, in bytes</param>
+	/// <returns><c><see langword="true"/></c>, if the pixel data was successfully converted; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method additionally returns <c><see langword="false"/></c> if either <paramref name="source"/> or <paramref name="destination"/> are <see cref="Utilities.NativeMemory.IsValid">invalid</see>,
+	/// <c><paramref name="source"/>.<see cref="ReadOnlyNativeMemory.Length">Length</see></c> is less than; <c><paramref name="height"/> * <paramref name="sourcePitch"/></c>,
+	/// or <c><paramref name="destination"/>.<see cref="Utilities.NativeMemory.Length">Length</see></c> is less than <c><paramref name="height"/> * <paramref name="destinationPitch"/></c>.
+	/// </para>
+	/// </remarks>
 	public static bool TryConvert(int width, int height, PixelFormat sourceFormat, ColorSpace sourceColorSpace, Properties? sourceProperties, ReadOnlyNativeMemory source, int sourcePitch, PixelFormat destinationFormat, ColorSpace destinationColorSpace, Properties? destinationProperties, Utilities.NativeMemory destination, int destinationPitch)
 	{
 		unsafe
@@ -2243,6 +2598,28 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to convert a block of pixels to a specified format, using the specified palette, color space, and properties
+	/// </summary>
+	/// <param name="width">The width of the block to convert, in pixels</param>
+	/// <param name="height">The height of the block to convert, in pixels</param>
+	/// <param name="sourceFormat">The pixel format of the source data</param>
+	/// <param name="sourceColorSpace">The color space of the source data</param>
+	/// <param name="sourceProperties">Additional color properties to use for the source data, or <c><see langword="null"/></c></param>
+	/// <param name="source">The source pixel data</param>
+	/// <param name="sourcePitch">The pitch of the source pixel data, in bytes</param>
+	/// <param name="destinationFormat">The desired pixel format of the destination data</param>
+	/// <param name="destinationColorSpace">The color space of the destination data</param>
+	/// <param name="destinationProperties">Additional color properties to use for the destination data, or <c><see langword="null"/></c></param>
+	/// <param name="destination">The destination pixel data</param>
+	/// <param name="destinationPitch">The pitch of the destination pixel data, in bytes</param>
+	/// <returns><c><see langword="true"/></c>, if the pixel data was successfully converted; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method additionally returns <c><see langword="false"/></c> if <c><paramref name="source"/>.<see cref="ReadOnlySpan{T}.Length">Length</see></c> is less than; <c><paramref name="height"/> * <paramref name="sourcePitch"/></c>,
+	/// or <c><paramref name="destination"/>.<see cref="Span{T}.Length">Length</see></c> is less than <c><paramref name="height"/> * <paramref name="destinationPitch"/></c>.
+	/// </para>
+	/// </remarks>
 	public static bool TryConvert(int width, int height, PixelFormat sourceFormat, ColorSpace sourceColorSpace, Properties? sourceProperties, ReadOnlySpan<byte> source, int sourcePitch, PixelFormat destinationFormat, ColorSpace destinationColorSpace, Properties? destinationProperties, Span<byte> destination, int destinationPitch)
 	{
 		unsafe
@@ -2268,15 +2645,142 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to convert a block of pixels to a specified format, using the specified palette, color space, and properties
+	/// </summary>
+	/// <param name="width">The width of the block to convert, in pixels</param>
+	/// <param name="height">The height of the block to convert, in pixels</param>
+	/// <param name="sourceFormat">The pixel format of the source data</param>
+	/// <param name="sourceColorSpace">The color space of the source data</param>
+	/// <param name="sourceProperties">Additional color properties to use for the source data, or <c><see langword="null"/></c></param>
+	/// <param name="source">A pointer to the source pixel data</param>
+	/// <param name="sourcePitch">The pitch of the source pixel data, in bytes</param>
+	/// <param name="destinationFormat">The desired pixel format of the destination data</param>
+	/// <param name="destinationColorSpace">The color space of the destination data</param>
+	/// <param name="destinationProperties">Additional color properties to use for the destination data, or <c><see langword="null"/></c></param>
+	/// <param name="destination">A pointer to the destination pixel data</param>
+	/// <param name="destinationPitch">The pitch of the destination pixel data, in bytes</param>
+	/// <returns><c><see langword="true"/></c>, if the pixel data was successfully converted; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
 	public unsafe static bool TryConvert(int width, int height, PixelFormat sourceFormat, ColorSpace sourceColorSpace, Properties? sourceProperties, void* source, int sourcePitch, PixelFormat destinationFormat, ColorSpace destinationColorSpace, Properties? destinationProperties, void* destination, int destinationPitch)
 	{
 		return SDL_ConvertPixelsAndColorspace(width, height, sourceFormat, sourceColorSpace, sourceProperties?.Id ?? 0, source, sourcePitch, destinationFormat, destinationColorSpace, destinationProperties?.Id ?? 0, destination, destinationPitch);
 	}
 
+#if SDL3_4_0_GREATER
+	/// <summary>
+	/// Tries to perform a stretched pixel copy from a specified source surface onto this surface
+	/// </summary>
+	/// <param name="destinationRect">The destination rectangle on this surface to copy onto</param>
+	/// <param name="source">The source surface to copy from</param>
+	/// <param name="sourceRect">The source rectangle on the source surface to copy</param>
+	/// <param name="scaleMode">The scale mode to use for the copy</param>
+	/// <returns><c><see langword="true"/></c>, if the copy was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The region specified by <paramref name="sourceRect"/> from the <paramref name="source"/> surface is copied and stretched to fit into the region specified by <paramref name="destinationRect"/> on this surface.
+	/// </para>
+	/// </remarks>
+	public bool TryCopyStretched(in Rect<int> destinationRect, Surface source, in Rect<int> sourceRect, ScaleMode scaleMode)
+	{
+		unsafe
+		{
+			fixed (Rect<int>* dstrect = &destinationRect, srcrect = &sourceRect)
+			{
+				return SDL_StretchSurface(source is not null ? source.mSurface : null, srcrect, mSurface, dstrect, scaleMode);
+			}
+		}
+	}
+
+	/// <summary>
+	/// Tries to perform a stretched pixel copy from a specified source surface onto this surface
+	/// </summary>
+	/// <param name="destinationRect">The destination rectangle on this surface to copy onto</param>
+	/// <param name="source">The source surface to copy from</param>
+	/// <param name="scaleMode">The scale mode to use for the copy</param>
+	/// <returns><c><see langword="true"/></c>, if the copy was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The entire <paramref name="source"/> surface is copied and stretched to fit into the region specified by <paramref name="destinationRect"/> on this surface.
+	/// </para>
+	/// </remarks>
+	public bool TryCopyStretched(in Rect<int> destinationRect, Surface source, ScaleMode scaleMode)
+	{
+		unsafe
+		{
+			fixed (Rect<int>* dstrect = &destinationRect)
+			{
+				return SDL_StretchSurface(source is not null ? source.mSurface : null, srcrect: null, mSurface, dstrect, scaleMode);
+			}
+		}
+	}
+
+	/// <summary>
+	/// Tries to perform a stretched pixel copy from a specified source surface onto this surface
+	/// </summary>
+	/// <param name="source">The source surface to copy from</param>
+	/// <param name="sourceRect">The source rectangle on the source surface to copy</param>
+	/// <param name="scaleMode">The scale mode to use for the copy</param>
+	/// <returns><c><see langword="true"/></c>, if the copy was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The region specified by <paramref name="sourceRect"/> from the <paramref name="source"/> surface is copied and stretched to fit into the entire area of this surface.
+	/// </para>
+	/// </remarks>
+	public bool TryCopyStretched(Surface source, in Rect<int> sourceRect, ScaleMode scaleMode)
+	{
+		unsafe
+		{
+			fixed (Rect<int>* srcrect = &sourceRect)
+			{
+				return SDL_StretchSurface(source is not null ? source.mSurface : null, srcrect, mSurface, dstrect: null, scaleMode);
+			}
+		}
+	}
+
+	/// <summary>
+	/// Tries to perform a stretched pixel copy from a specified source surface onto this surface
+	/// </summary>
+	/// <param name="source">The source surface to copy from</param>
+	/// <param name="scaleMode">The scale mode to use for the copy</param>
+	/// <returns><c><see langword="true"/></c>, if the copy was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The entire <paramref name="source"/> surface is copied and stretched to fit into the entire area of this surface.
+	/// </para>
+	/// </remarks>
+	public bool TryCopyStretched(Surface source, ScaleMode scaleMode)
+	{
+		unsafe
+		{
+			return SDL_StretchSurface(source is not null ? source.mSurface : null, srcrect: null, mSurface, dstrect: null, scaleMode);
+		}
+	}
+#endif
+
+	/// <summary>
+	/// Tries to create a new <see cref="Palette"/> for this surface
+	/// </summary>
+	/// <param name="palette">The newly created palette, if this method returns <c><see langword="true"/></c>; otherwise, <c><see langword="null"/></c></param>
+	/// <returns><c><see langword="true"/></c>, if the palette was created successfully; otherwise, <c><see langword="false"/></c> (e.g. if the surface didn't have an index format, check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This function creates a palette compatible with the surface.
+	/// The palette is then returned for you to modify, and the surface will automatically use the new palette in future operations.
+	/// </para>
+	/// <para>
+	/// Bitmap surfaces (with format <see cref="PixelFormat.Index1Lsb"/> or <see cref="PixelFormat.Index1Msb"/>) will have the palette initialized with <c>0</c> as white and <c>1</c> as black.
+	/// Other surfaces will get a palette initialized with white in every entry.
+	/// </para>
+	/// <para>
+	/// If this method is called for on surface that already has a palette, a new palette will be created to replace it.
+	/// </para>
+	/// </remarks>
 	public bool TryCreateNewPalette([NotNullWhen(true)] out Palette? palette)
 	{
 		unsafe
 		{
+			// TODO: what to do with this sentence from the SDL docs: "You do not need to destroy the returned palette, it will be freed when the reference count reaches 0, usually when the surface is destroyed."?
+
 			// SDL_CreateSurfacePalette calls SDL_SetSurfacePalette, so we need to do the same kind of "reference rescuing" shenanigans 
 
 			var oldPaletteRefCount = int.MaxValue;
@@ -2306,6 +2810,16 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to duplicate this surface
+	/// </summary>
+	/// <param name="duplicate">The duplicated surface, if this method returns <c><see langword="true"/></c>; otherwise, <c><see langword="null"/></c></param>
+	/// <returns><c><see langword="true"/></c>, if the surface was duplicated successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// If the original surface has alternate images, the duplicated surface will have a reference to them as well.
+	/// </para>
+	/// </remarks>
 	public bool TryDuplicate([NotNullWhen(true)] out Surface? duplicate)
 	{
 		unsafe
@@ -2331,6 +2845,98 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to perform a fast fill of the entire surface with the specified pixel value
+	/// </summary>
+	/// <param name="pixelValue">The pixel value to fill the surface with</param>
+	/// <returns><c><see langword="true"/></c>, if the fill operation was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The <paramref name="pixelValue"/> argument should be a pixel value of the format used by the surface, and can be generated by <see cref="MapColor(byte, byte, byte)"/>, <see cref="MapColor(byte, byte, byte, byte)"/>, or <see cref="MapColor(Color{byte})"/>.
+	/// Alternatively, you can use the <see cref="TryFill(byte, byte, byte)"/>, <see cref="TryFill(byte, byte, byte, byte)"/>, or <see cref="TryFill(Color{byte})"/> overloads which will do the mapping for you.
+	/// </para>
+	/// <para>
+	/// If the color value contains an alpha component then the surface is simply filled with that alpha information, no blending takes place.
+	/// </para>
+	/// <para>
+	/// If there is a <see cref="ClippingRect"/> set, then this method will fill based on the <see cref="ClippingRect"/>.
+	/// </para>
+	/// </remarks>
+	public bool TryFill(uint pixelValue)
+	{
+		unsafe
+		{
+			return SDL_FillSurfaceRect(mSurface, rect: null, pixelValue);
+		}
+	}
+
+	/// <summary>
+	/// Tries to perform a fast fill of the entire surface with the specified color
+	/// </summary>
+	/// <param name="r">The red component value of the color to fill the surface with</param>
+	/// <param name="g">The green component value of the color to fill the surface with</param>
+	/// <param name="b">The blue component value of the color to fill the surface with</param>
+	/// <returns><c><see langword="true"/></c>, if the fill operation was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The surface is simply filled fully opaque, no blending takes place.
+	/// </para>
+	/// <para>
+	/// If there is a <see cref="ClippingRect"/> set, then this method will fill based on the <see cref="ClippingRect"/>.
+	/// </para>
+	/// </remarks>
+	public bool TryFill(byte r, byte g, byte b) => TryFill(MapColor(r, g, b));
+
+	/// <summary>
+	/// Tries to perform a fast fill of the entire surface with the specified color
+	/// </summary>
+	/// <param name="r">The red component value of the color to fill the surface with</param>
+	/// <param name="g">The green component value of the color to fill the surface with</param>
+	/// <param name="b">The blue component value of the color to fill the surface with</param>
+	/// <param name="a">The alpha component value of the color to fill the surface with</param>
+	/// <returns><c><see langword="true"/></c>, if the fill operation was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The surface is simply filled with the <paramref name="a"/>lpha information, no blending takes place.
+	/// </para>
+	/// <para>
+	/// If there is a <see cref="ClippingRect"/> set, then this method will fill based on the <see cref="ClippingRect"/>.
+	/// </para>
+	/// </remarks>
+	public bool TryFill(byte r, byte g, byte b, byte a) => TryFill(MapColor(r, g, b, a));
+
+	/// <summary>
+	/// Tries to perform a fast fill of the entire surface with the specified color
+	/// </summary>
+	/// <param name="color">The color to fill the rectangle with</param>
+	/// <returns><c><see langword="true"/></c>, if the fill operation was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>surface is simply filled with the <see cref="Color{T}.A"/> information, no blending takes place.
+	/// </para>
+	/// <para>
+	/// If there is a <see cref="ClippingRect"/> set, then this method will fill based on the <see cref="ClippingRect"/>.
+	/// </para>
+	/// </remarks>
+	public bool TryFill(Color<byte> color) => TryFill(MapColor(color));
+
+	/// <summary>
+	/// Tries to perform a fast fill of a rectangle on this surface with the specified pixel value
+	/// </summary>
+	/// <param name="destinationRect">The rectangle to fill</param>
+	/// <param name="pixelValue">The pixel value to fill the rectangle with</param>
+	/// <returns><c><see langword="true"/></c>, if the fill operation was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The <paramref name="pixelValue"/> argument should be a pixel value of the format used by the surface, and can be generated by <see cref="MapColor(byte, byte, byte)"/>, <see cref="MapColor(byte, byte, byte, byte)"/>, or <see cref="MapColor(Color{byte})"/>.
+	/// Alternatively, you can use the <see cref="TryFill(in Rect{int}, byte, byte, byte)"/>, <see cref="TryFill(in Rect{int}, byte, byte, byte, byte)"/>, or <see cref="TryFill(in Rect{int}, Color{byte})"/> overloads which will do the mapping for you.
+	/// </para>
+	/// <para>
+	/// If the color value contains an alpha component then the <paramref name="destinationRect"/> is simply filled with that alpha information, no blending takes place.
+	/// </para>
+	/// <para>
+	/// If there is a <see cref="ClippingRect"/> set, then this method will fill based on the intersection of the <see cref="ClippingRect"/> and the <paramref name="destinationRect"/>.
+	/// </para>
+	/// </remarks>
 	public bool TryFill(in Rect<int> destinationRect, uint pixelValue)
 	{
 		unsafe
@@ -2342,12 +2948,77 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to perform a fast fill of a rectangle on this surface with the specified color
+	/// </summary>
+	/// <param name="destinationRect">The rectangle to fill</param>
+	/// <param name="r">The red component value of the color to fill the rectangle with</param>
+	/// <param name="g">The green component value of the color to fill the rectangle with</param>
+	/// <param name="b">The blue component value of the color to fill the rectangle with</param>
+	/// <returns><c><see langword="true"/></c>, if the fill operation was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The <paramref name="destinationRect"/> is simply filled fully opaque, no blending takes place.
+	/// </para>
+	/// <para>
+	/// If there is a <see cref="ClippingRect"/> set, then this method will fill based on the intersection of the <see cref="ClippingRect"/> and the <paramref name="destinationRect"/>.
+	/// </para>
+	/// </remarks>
 	public bool TryFill(in Rect<int> destinationRect, byte r, byte g, byte b) => TryFill(in destinationRect, MapColor(r, g, b));
 
+	/// <summary>
+	/// Tries to perform a fast fill of a rectangle on this surface with the specified color
+	/// </summary>
+	/// <param name="destinationRect">The rectangle to fill</param>
+	/// <param name="r">The red component value of the color to fill the rectangle with</param>
+	/// <param name="g">The green component value of the color to fill the rectangle with</param>
+	/// <param name="b">The blue component value of the color to fill the rectangle with</param>
+	/// <param name="a">The alpha component value of the color to fill the rectangle with</param>
+	/// <returns><c><see langword="true"/></c>, if the fill operation was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The <paramref name="destinationRect"/> is simply filled with the <paramref name="a"/>lpha information, no blending takes place.
+	/// </para>
+	/// <para>
+	/// If there is a <see cref="ClippingRect"/> set, then this method will fill based on the intersection of the <see cref="ClippingRect"/> and the <paramref name="destinationRect"/>.
+	/// </para>
+	/// </remarks>
 	public bool TryFill(in Rect<int> destinationRect, byte r, byte g, byte b, byte a) => TryFill(in destinationRect, MapColor(r, g, b, a));
 
+	/// <summary>
+	/// Tries to perform a fast fill of a rectangle on this surface with the specified color
+	/// </summary>
+	/// <param name="destinationRect">The rectangle to fill</param>
+	/// <param name="color">The color to fill the rectangle with</param>
+	/// <returns><c><see langword="true"/></c>, if the fill operation was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The <paramref name="destinationRect"/> is simply filled with the <see cref="Color{T}.A"/> information, no blending takes place.
+	/// </para>
+	/// <para>
+	/// If there is a <see cref="ClippingRect"/> set, then this method will fill based on the intersection of the <see cref="ClippingRect"/> and the <paramref name="destinationRect"/>.
+	/// </para>
+	/// </remarks>
 	public bool TryFill(in Rect<int> destinationRect, Color<byte> color) => TryFill(in destinationRect, MapColor(color));
 
+	/// <summary>
+	/// Tries to perform a fast fill of multiple rectangles on this surface with the specified pixel value
+	/// </summary>
+	/// <param name="destinationRects">The list of rectangles to fill</param>
+	/// <param name="pixelValue">The pixel value to fill the rectangles with</param>
+	/// <returns><c><see langword="true"/></c>, if the fill operation was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The <paramref name="pixelValue"/> argument should be a pixel value of the format used by the surface, and can be generated by <see cref="MapColor(byte, byte, byte)"/>, <see cref="MapColor(byte, byte, byte, byte)"/>, or <see cref="MapColor(Color{byte})"/>.
+	/// Alternatively, you can use the <see cref="TryFill(ReadOnlySpan{Rect{int}}, byte, byte, byte)"/>, <see cref="TryFill(ReadOnlySpan{Rect{int}}, byte, byte, byte, byte)"/>, or <see cref="TryFill(ReadOnlySpan{Rect{int}}, Color{byte})"/> overloads which will do the mapping for you.
+	/// </para>
+	/// <para>
+	/// If the color value contains an alpha component then the rectangles in <paramref name="destinationRects"/> are simply filled with that alpha information, no blending takes place.
+	/// </para>
+	/// <para>
+	/// If there is a <see cref="ClippingRect"/> set, then this method will fill based on the intersections of the <see cref="ClippingRect"/> and each rectangle in <paramref name="destinationRects"/>.
+	/// </para>
+	/// </remarks>
 	public bool TryFill(ReadOnlySpan<Rect<int>> destinationRects, uint pixelValue)
 	{
 		unsafe
@@ -2359,146 +3030,69 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to perform a fast fill of multiple rectangles on this surface with the specified color
+	/// </summary>
+	/// <param name="destinationRects">The list of rectangles to fill</param>
+	/// <param name="r">The red component value of the color to fill the rectangle with</param>
+	/// <param name="g">The green component value of the color to fill the rectangle with</param>
+	/// <param name="b">The blue component value of the color to fill the rectangle with</param>
+	/// <returns><c><see langword="true"/></c>, if the fill operation was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The rectangles in <paramref name="destinationRects"/> are simply filled fully opaque, no blending takes place.
+	/// </para>
+	/// <para>
+	/// If there is a <see cref="ClippingRect"/> set, then this method will fill based on the intersections of the <see cref="ClippingRect"/> and each rectangle in <paramref name="destinationRects"/>.
+	/// </para>
+	/// </remarks>
 	public bool TryFill(ReadOnlySpan<Rect<int>> destinationRects, byte r, byte g, byte b) => TryFill(destinationRects, MapColor(r, g, b));
 
+	/// <summary>
+	/// Tries to perform a fast fill of multiple rectangles on this surface with the specified color
+	/// </summary>
+	/// <param name="destinationRects">The list of rectangles to fill</param>
+	/// <param name="r">The red component value of the color to fill the rectangles with</param>
+	/// <param name="g">The green component value of the color to fill the rectangles with</param>
+	/// <param name="b">The blue component value of the color to fill the rectangles with</param>
+	/// <param name="a">The alpha component value of the color to fill the rectangles with</param>
+	/// <returns><c><see langword="true"/></c>, if the fill operation was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The rectangles in <paramref name="destinationRects"/> are simply filled with the <paramref name="a"/>lpha information, no blending takes place.
+	/// </para>
+	/// <para>
+	/// If there is a <see cref="ClippingRect"/> set, then this method will fill based on the intersections of the <see cref="ClippingRect"/> and each rectangle in <paramref name="destinationRects"/>.
+	/// </para>
+	/// </remarks>
 	public bool TryFill(ReadOnlySpan<Rect<int>> destinationRects, byte r, byte g, byte b, byte a) => TryFill(destinationRects, MapColor(r, g, b, a));
 
+	/// <summary>
+	/// Tries to perform a fast fill of multiple rectangles on this surface with the specified color
+	/// </summary>
+	/// <param name="destinationRects">The list of rectangles to fill</param>
+	/// <param name="color">The color to fill the rectangles with</param>
+	/// <returns><c><see langword="true"/></c>, if the fill operation was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The rectangles in <paramref name="destinationRects"/> are simply filled with the <see cref="Color{T}.A"/> information, no blending takes place.
+	/// </para>
+	/// <para>
+	/// If there is a <see cref="ClippingRect"/> set, then this method will fill based on the intersections of the <see cref="ClippingRect"/> and each rectangle in <paramref name="destinationRects"/>.
+	/// </para>
+	/// </remarks>
 	public bool TryFill(ReadOnlySpan<Rect<int>> destinationRects, Color<byte> color) => TryFill(destinationRects, MapColor(color));
 
-	public bool TryFill(uint pixelValue)
-	{
-		unsafe
-		{
-			return SDL_FillSurfaceRect(mSurface, rect: null, pixelValue);
-		}
-	}
-
-	public bool TryFill(byte r, byte g, byte b) => TryFill(MapColor(r, g, b));
-
-	public bool TryFill(byte r, byte g, byte b, byte a) => TryFill(MapColor(r, g, b, a));
-
-	public bool TryFill(Color<byte> color) => TryFill(MapColor(color));
-
+	/// <summary>
+	/// Tries to flip the surface according to the specified flip mode
+	/// </summary>
+	/// <param name="flipMode">The direction to flip the surface</param>
+	/// <returns><c><see langword="true"/></c>, if the surface was flipped successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
 	public bool TryFlip(FlipMode flipMode)
 	{
 		unsafe
 		{
 			return SDL_FlipSurface(mSurface, flipMode);
-		}
-	}
-
-	public bool TryGetAlphaModulator(out byte alpha)
-	{
-		unsafe
-		{
-			Unsafe.SkipInit(out byte alphaTmp);
-
-			bool result = SDL_GetSurfaceAlphaMod(mSurface, &alphaTmp);
-
-			alpha = alphaTmp;
-
-			return result;
-		}
-	}
-
-	public bool TryGetBlendMode(out BlendMode blendMode)
-	{
-		unsafe
-		{
-			Unsafe.SkipInit(out BlendMode blendModeTmp);
-
-			bool result = SDL_GetSurfaceBlendMode(mSurface, &blendModeTmp);
-
-			blendMode = blendModeTmp;
-
-			return result;
-		}
-	}
-
-	// TODO: see SetClippingRect and ResetClippingRect; there's not TrySetClippingRect!
-	public bool TryGetClippingRect(out Rect<int> rect)
-	{
-		unsafe
-		{
-			fixed (Rect<int>* rectPtr = &rect)
-			{
-				return SDL_GetSurfaceClipRect(mSurface, rectPtr);
-			}
-		}
-	}
-
-	// TODO: see ResetColorKey too!
-	public bool TryGetColorKey(out uint keyValue)
-	{
-		unsafe
-		{
-			Unsafe.SkipInit(out uint keyTmp);
-
-			bool result = SDL_GetSurfaceColorKey(mSurface, &keyTmp);
-
-			keyValue = keyTmp;
-
-			return result;
-		}
-	}
-
-	// TODO: see ResetColorKey too!
-	public bool TryGetColorKey(out byte r, out byte g, out byte b)
-	{
-		unsafe
-		{
-			if (TryGetColorKey(out uint keyValue)
-				&& mSurface->Format.TryGetPixelFormatDetails(out var details) // SurfacePointer is here non-null because of 'TryGetColorKey'
-			)
-			{
-				TryGetPalette(out var palette); // We don't care for the return value: either 'palette' is non-null if we do have one or it's null if we don't
-				details.GetColor(keyValue, palette, out r, out g, out b);
-				return true;
-			}
-
-			r = default; g = default; b = default;
-			return false;
-		}
-	}
-
-	// TODO: see ResetColorKey too!
-	public bool TryGetColorKey(out Color<byte> keyColor)
-	{
-		if (TryGetColorKey(out var r, out var g, out var b))
-		{
-			keyColor = Color.From(r, g, b);
-			return true;
-		}
-
-		keyColor = default;
-		return false;
-	}
-
-	public bool TryGetColorModulator(out byte r, out byte g, out byte b)
-	{
-		unsafe
-		{
-			Unsafe.SkipInit(out byte rTmp);
-			Unsafe.SkipInit(out byte gTmp);
-			Unsafe.SkipInit(out byte bTmp);
-
-			bool result = SDL_GetSurfaceColorMod(mSurface, &rTmp, &gTmp, &bTmp);
-
-			r = rTmp;
-			g = gTmp;
-			b = bTmp;
-			
-			return result;
-		}
-	}
-
-	public bool TryGetColorSpace(out ColorSpace colorSpace)
-	{
-		unsafe
-		{
-			colorSpace = SDL_GetSurfaceColorspace(mSurface);
-
-			return colorSpace is not ColorSpace.Unknown;
 		}
 	}
 
@@ -2528,23 +3122,20 @@ public partial class Surface : IDisposable
 		);
 	}
 
-	public bool TryGetPalette([NotNullWhen(true)] out Palette? palette)
-	{
-		unsafe
-		{
-			var palettePtr = SDL_GetSurfacePalette(mSurface);
-
-			bool result = Palette.TryGetOrCreate(palettePtr, out palette);
-
-			if (mPalette is null || mPalette.Pointer != palettePtr)
-			{
-				mPalette = palette;
-			}
-
-			return result;
-		}
-	}
-
+	/// <summary>
+	/// Tries to load a BMP image from a specified file into a new surface
+	/// </summary>
+	/// <param name="file">A file path to the BMP image to load</param>
+	/// <param name="surface">The loaded surface, if this method returns <c><see langword="true"/></c>; otherwise, <c><see langword="null"/></c></param>
+	/// <returns><c><see langword="true"/></c>, if the BMP image was loaded successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The format of the file must be BMP, otherwise this method will fail.
+	/// </para>
+	/// <para>
+	/// Remember to <see cref="Dispose()">dispose</see> of the resulting surface when you are done with it. Not doing so will result in a memory leak.
+	/// </para>
+	/// </remarks>
 	public static bool TryLoadBmp(string file, [NotNullWhen(true)] out Surface? surface)
 	{
 		unsafe
@@ -2571,6 +3162,21 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to load a BMP image from a specified stream into a new surface
+	/// </summary>
+	/// <param name="source">The stream to load the BMP image from</param>
+	/// <param name="surface">The loaded surface, if this method returns <c><see langword="true"/></c>; otherwise, <c><see langword="null"/></c></param>
+	/// <param name="closeAfterwards">A value indicating whether the <paramref name="source"/> stream should be closed before this method returns (even in case of an error)</param>
+	/// <returns><c><see langword="true"/></c>, if the BMP image was loaded successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The format of the data in the <paramref name="source"/> stream must be BMP, otherwise this method will fail.
+	/// </para>
+	/// <para>
+	/// Remember to <see cref="Dispose()">dispose</see> of the resulting surface when you are done with it. Not doing so will result in a memory leak.
+	/// </para>
+	/// </remarks>
 	public static bool TryLoadBmp(Stream source, [NotNullWhen(true)] out Surface? surface, bool closeAfterwards = false)
 	{
 		unsafe
@@ -2599,6 +3205,24 @@ public partial class Surface : IDisposable
 	}
 
 #if SDL3_4_0_OR_GREATER
+	/// <summary>
+	/// Tries to load a PNG image from a specified file into a new surface
+	/// </summary>
+	/// <param name="file">A file path to the PNG image to load</param>
+	/// <param name="surface">The loaded surface, if this method returns <c><see langword="true"/></c>; otherwise, <c><see langword="null"/></c></param>
+	/// <returns><c><see langword="true"/></c>, if the PNG image was loaded successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The format of the file must be PNG, otherwise this method will fail.
+	/// </para>
+	/// <para>
+	/// This method is intended as a convenience method for loading images from trusted sources.
+	/// If you want to load arbitrary images you should use an image loading library designed with security in mind.
+	/// </para>
+	/// <para>
+	/// Remember to <see cref="Dispose()">dispose</see> of the resulting surface when you are done with it. Not doing so will result in a memory leak.
+	/// </para>
+	/// </remarks>
 	public static bool TryLoadPng(string file, [NotNullWhen(true)] out Surface? surface)
 	{
 		unsafe
@@ -2627,6 +3251,25 @@ public partial class Surface : IDisposable
 #endif
 
 #if SDL3_4_0_OR_GREATER
+	/// <summary>
+	/// Tries to load a PNG image from a specified stream into a new surface
+	/// </summary>
+	/// <param name="source">The stream to load the PNG image from</param>
+	/// <param name="surface">The loaded surface, if this method returns <c><see langword="true"/></c>; otherwise, <c><see langword="null"/></c></param>
+	/// <param name="closeAfterwards">A value indicating whether the <paramref name="source"/> stream should be closed before this method returns (even in case of an error)</param>
+	/// <returns><c><see langword="true"/></c>, if the PNG image was loaded successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The format of the data in the <paramref name="source"/> stream must be PNG, otherwise this method will fail.
+	/// </para>
+	/// <para>
+	/// This method is intended as a convenience method for loading images from trusted sources.
+	/// If you want to load arbitrary images you should use an image loading library designed with security in mind.
+	/// </para>
+	/// <para>
+	/// Remember to <see cref="Dispose()">dispose</see> of the resulting surface when you are done with it. Not doing so will result in a memory leak.
+	/// </para>
+	/// </remarks>
 	public static bool TryLoadPng(Stream source, [NotNullWhen(true)] out Surface? surface, bool closeAfterwards = false)
 	{
 		unsafe
@@ -2655,8 +3298,45 @@ public partial class Surface : IDisposable
 	}
 #endif
 
+	/// <summary>
+	/// Tries to set up a pixel memory manager for direct pixel access
+	/// </summary>
+	/// <param name="pixelManager">The pixel memory manager meant to be used to access the surface's pixel memory, if this method returns <c><see langword="true"/></c>; otherwise, <c><see langword="null"/></c></param>
+	/// <returns><c><see langword="true"/></c>, if the surface was locked successfully and the <paramref name="pixelManager"/> was created; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method is meant to be used as a simpler and safer alternative to the <see cref="MustLock"/> - <see cref="IsLocked"/> - <see cref="TryUnsafeLock"/> - <see cref="UnsafePixels"/> - <see cref="UnsafeUnlock"/> pattern.
+	/// </para>
+	/// <para>
+	/// If the <paramref name="pixelManager"/> was created successfully, you can use it's <see cref="SurfacePixelMemoryManager.Memory"/> property to read and write the pixel memory of this surface, using this surface's <see cref="Format"/>.
+	/// Once you are done accessing the pixel memory, you should <see cref="NativeMemoryManagerBase.Dispose()">dispose</see> the <paramref name="pixelManager"/> to release the surface.
+	/// </para>
+	/// </remarks>
+	/// <example>
+	/// Example usage:
+	/// <code>
+	/// Surface surface;
+	/// 
+	/// ...
+	/// 
+	/// if (surface.TryLock(out var pixelManager))
+	/// {
+	///		using (pixelManager)
+	///		{
+	///			// You can use pixelManager.Memory here to access the surface's pixel memory here
+	///			
+	///			...
+	///		}
+	/// }
+	/// </code>
+	/// </example>
 	public bool TryLock([NotNullWhen(true)] out SurfacePixelMemoryManager? pixelManager) => SurfacePixelMemoryManager.TryCreate(this, out pixelManager);
 
+	/// <summary>
+	/// Tries to premultiply the alpha channel into the color channels of this surface
+	/// </summary>
+	/// <param name="linear">A value indicating whether to convert from sRGB into linear space to do the alpha multiplication, or to do the multiplication in sRGB space</param>
+	/// <returns><c><see langword="true"/></c>, if the operation was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
 	public bool TryPremultiplyAlpha(bool linear)
 	{
 		unsafe
@@ -2665,6 +3345,29 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to premultiply the alpha channel into the color channels on a block of pixels
+	/// </summary>
+	/// <param name="width">The width of the block to convert, in pixels</param>
+	/// <param name="height">The height of the block to convert, in pixels</param>
+	/// <param name="sourceFormat">The pixel format of the source data</param>
+	/// <param name="source">The source pixel data</param>
+	/// <param name="sourcePitch">The pitch of the source pixel data, in bytes</param>
+	/// <param name="destinationFormat">The pixel format of the destination data</param>
+	/// <param name="destination">The destination pixel data</param>
+	/// <param name="destinationPitch">The pitch of the destination pixel data, in bytes</param>
+	/// <param name="linear">A value indicating whether to convert from sRGB into linear space to do the alpha multiplication, or to do the multiplication in sRGB space</param>
+	/// <returns><c><see langword="true"/></c>, if the operation was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method is safe to use when the <paramref name="source"/> pixel data and the <paramref name="destination"/> pixel data start at the same memory location, but they cannot overlap otherwise.
+	/// </para>
+	/// <para>
+	/// This method additionally returns <c><see langword="false"/></c> if either <paramref name="source"/> or <paramref name="destination"/> are <see cref="Utilities.NativeMemory.IsValid">invalid</see>,
+	/// <c><paramref name="source"/>.<see cref="ReadOnlyNativeMemory.Length">Length</see></c> is less than; <c><paramref name="height"/> * <paramref name="sourcePitch"/></c>,
+	/// or <c><paramref name="destination"/>.<see cref="Utilities.NativeMemory.Length">Length</see></c> is less than <c><paramref name="height"/> * <paramref name="destinationPitch"/></c>.
+	/// </para>
+	/// </remarks>
 	public static bool TryPremultiplyAlpha(int width, int height, PixelFormat sourceFormat, ReadOnlyNativeMemory source, int sourcePitch, PixelFormat destinationFormat, Utilities.NativeMemory destination, int destinationPitch, bool linear)
 	{
 		unsafe
@@ -2692,6 +3395,28 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to premultiply the alpha channel into the color channels on a block of pixels
+	/// </summary>
+	/// <param name="width">The width of the block to convert, in pixels</param>
+	/// <param name="height">The height of the block to convert, in pixels</param>
+	/// <param name="sourceFormat">The pixel format of the source data</param>
+	/// <param name="source">The source pixel data</param>
+	/// <param name="sourcePitch">The pitch of the source pixel data, in bytes</param>
+	/// <param name="destinationFormat">The pixel format of the destination data</param>
+	/// <param name="destination">The destination pixel data</param>
+	/// <param name="destinationPitch">The pitch of the destination pixel data, in bytes</param>
+	/// <param name="linear">A value indicating whether to convert from sRGB into linear space to do the alpha multiplication, or to do the multiplication in sRGB space</param>
+	/// <returns><c><see langword="true"/></c>, if the operation was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method is safe to use when the <paramref name="source"/> pixel data and the <paramref name="destination"/> pixel data start at the same memory location, but they cannot overlap otherwise.
+	/// </para>
+	/// <para>
+	/// This method additionally returns <c><see langword="false"/></c> if <c><paramref name="source"/>.<see cref="ReadOnlySpan{T}.Length">Length</see></c> is less than; <c><paramref name="height"/> * <paramref name="sourcePitch"/></c>,
+	/// or <c><paramref name="destination"/>.<see cref="Span{T}.Length">Length</see></c> is less than <c><paramref name="height"/> * <paramref name="destinationPitch"/></c>.
+	/// </para>
+	/// </remarks>
 	public static bool TryPremultiplyAlpha(int width, int height, PixelFormat sourceFormat, ReadOnlySpan<byte> source, int sourcePitch, PixelFormat destinationFormat, Span<byte> destination, int destinationPitch, bool linear)
 	{
 		unsafe
@@ -2717,11 +3442,52 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to premultiply the alpha channel into the color channels on a block of pixels
+	/// </summary>
+	/// <param name="width">The width of the block to convert, in pixels</param>
+	/// <param name="height">The height of the block to convert, in pixels</param>
+	/// <param name="sourceFormat">The pixel format of the source data</param>
+	/// <param name="source">A pointer to the source pixel data</param>
+	/// <param name="sourcePitch">The pitch of the source pixel data, in bytes</param>
+	/// <param name="destinationFormat">The pixel format of the destination data</param>
+	/// <param name="destination">A pointer to the destination pixel data</param>
+	/// <param name="destinationPitch">The pitch of the destination pixel data, in bytes</param>
+	/// <param name="linear">A value indicating whether to convert from sRGB into linear space to do the alpha multiplication, or to do the multiplication in sRGB space</param>
+	/// <returns><c><see langword="true"/></c>, if the operation was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method is safe to use when the <paramref name="source"/> pixel data and the <paramref name="destination"/> pixel data start at the same memory location, but they cannot overlap otherwise.
+	/// </para>
+	/// </remarks>
 	public unsafe static bool TryPremultiplyAlpha(int width, int height, PixelFormat sourceFormat, void* source, int sourcePitch, PixelFormat destinationFormat, void* destination, int destinationPitch, bool linear)
 	{
 		return SDL_PremultiplyAlpha(width, height, sourceFormat, source, sourcePitch, destinationFormat, destination, destinationPitch, linear);
 	}
 
+	/// <summary>
+	/// Tries to read a single pixel from the surface at the specified coordinates
+	/// </summary>
+	/// <param name="x">The X coordinate. Must be <c>0</c> ≤ <paramref name="x"/> &lt; <see cref="Width"/>.</param>
+	/// <param name="y">The Y coordinate. Must be <c>0</c> ≤ <paramref name="y"/> &lt; <see cref="Height"/>.</param>
+	/// <param name="r">The red component value of the pixel, if this method returns <c><see langword="true"/></c>. Uses the entire range from <c>0</c> to <c>255</c>.</param>
+	/// <param name="g">The green component value of the pixel, if this method returns <c><see langword="true"/></c>. Uses the entire range from <c>0</c> to <c>255</c>.</param>
+	/// <param name="b">The blue component value of the pixel, if this method returns <c><see langword="true"/></c>. Uses the entire range from <c>0</c> to <c>255</c>.</param>
+	/// <param name="a">The alpha component value of the pixel, if this method returns <c><see langword="true"/></c>. Uses the entire range from <c>0</c> to <c>255</c>.</param>
+	/// <returns><c><see langword="true"/></c>, if the pixel was read successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method prioritizes correctness over speed: it is suitable for unit tests, but is not intended to be used in game engines.
+	/// </para>
+	/// <para>
+	/// Like <see cref="PixelFormatDetails.GetColor(uint, Palette?, out byte, out byte, out byte, out byte)"/>, this method uses the entire 8-bit (<c>0</c>-<c>255</c>) range when converting color components from pixel formats with less than 8 bits per RGB component
+	/// (e.g., a completely white pixel in 16-bit <see cref="PixelFormat.Rgb565"/> format would return (<paramref name="r"/>, <paramref name="g"/>, <paramref name="b"/>) = (<c>0xff</c>, <c>0xff</c>, <c>0xff</c>),
+	/// <em>not</em> (<c>0xf8</c>, <c>0xfc</c>, <c>0xf8</c>)).
+	/// </para>
+	/// <para>
+	/// If the surface has no alpha component, the <paramref name="a"/>lpha component value will be returned as <c>0xff</c> (fully opaque).
+	/// </para>
+	/// </remarks>
 	[OverloadResolutionPriority(1)] // To choose TryReadPixel(int, int, out byte, out byte, out byte, out byte) over TryReadPixel(int, int, out float, out float, out float, out float) when using 'out var'
 	public bool TryReadPixel(int x, int y, out byte r, out byte g, out byte b, out byte a)
 	{
@@ -2743,6 +3509,26 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to read a single pixel from the surface at the specified coordinates
+	/// </summary>
+	/// <param name="x">The X coordinate. Must be <c>0</c> ≤ <paramref name="x"/> &lt; <see cref="Width"/>.</param>
+	/// <param name="y">The Y coordinate. Must be <c>0</c> ≤ <paramref name="y"/> &lt; <see cref="Height"/>.</param>
+	/// <param name="color">The color of the pixel, if this method returns <c><see langword="true"/></c>. Uses the entire range from <c>0</c> to <c>255</c> for each component.</param>
+	/// <returns><c><see langword="true"/></c>, if the pixel was read successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method prioritizes correctness over speed: it is suitable for unit tests, but is not intended to be used in game engines.
+	/// </para>
+	/// <para>
+	/// Like <see cref="PixelFormatDetails.GetColor(uint, Palette?, out Color{byte})"/>, this method uses the entire 8-bit (<c>0</c>-<c>255</c>) range when converting color components from pixel formats with less than 8 bits per RGB component
+	/// (e.g., a completely white pixel in 16-bit <see cref="PixelFormat.Rgb565"/> format would return (<see cref="Color{T}.R"/>, <see cref="Color{T}.G"/>, <see cref="Color{T}.B"/>) = (<c>0xff</c>, <c>0xff</c>, <c>0xff</c>),
+	/// <em>not</em> (<c>0xf8</c>, <c>0xfc</c>, <c>0xf8</c>))
+	/// </para>
+	/// <para>
+	/// If the surface has no alpha component, the <see cref="Color{T}.A"/> value will be returned as <c>0xff</c> (fully opaque).
+	/// </para>
+	/// </remarks>
 	[OverloadResolutionPriority(1)] // To choose TryReadPixel(int, int, out Color<byte>) over TryReadPixel(int, int, out Color<float>) when using 'out var'
 	public bool TryReadPixel(int x, int y, out Color<byte> color)
 	{
@@ -2756,6 +3542,24 @@ public partial class Surface : IDisposable
 		return false;
 	}
 
+	/// <summary>
+	/// Tries to read a single pixel from the surface at the specified coordinates
+	/// </summary>
+	/// <param name="x">The X coordinate. Must be <c>0</c> ≤ <paramref name="x"/> &lt; <see cref="Width"/>.</param>
+	/// <param name="y">The Y coordinate. Must be <c>0</c> ≤ <paramref name="y"/> &lt; <see cref="Height"/>.</param>
+	/// <param name="r">The red component value of the pixel, if this method returns <c><see langword="true"/></c>. Usually in the range from <c>0</c> to <c>1</c>.</param>
+	/// <param name="g">The green component value of the pixel, if this method returns <c><see langword="true"/></c>. Usually in the range from <c>0</c> to <c>1</c>.</param>
+	/// <param name="b">The blue component value of the pixel, if this method returns <c><see langword="true"/></c>. Usually in the range from <c>0</c> to <c>1</c>.</param>
+	/// <param name="a">The alpha component value of the pixel, if this method returns <c><see langword="true"/></c>. Usually in the range from <c>0</c> to <c>1</c>.</param>
+	/// <returns><c><see langword="true"/></c>, if the pixel was read successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method prioritizes correctness over speed: it is suitable for unit tests, but is not intended to be used in game engines.
+	/// </para>
+	/// <para>
+	/// If the surface has no alpha component, the <paramref name="a"/>lpha component value will be returned as <c>1</c> (fully opaque).
+	/// </para>
+	/// </remarks>
 	public bool TryReadPixel(int x, int y, out float r, out float g, out float b, out float a)
 	{
 		unsafe
@@ -2776,6 +3580,21 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to read a single pixel from the surface at the specified coordinates
+	/// </summary>
+	/// <param name="x">The X coordinate. Must be <c>0</c> ≤ <paramref name="x"/> &lt; <see cref="Width"/>.</param>
+	/// <param name="y">The Y coordinate. Must be <c>0</c> ≤ <paramref name="y"/> &lt; <see cref="Height"/>.</param>
+	/// <param name="color">The color of the pixel, if this method returns <c><see langword="true"/></c>. Usually the range for each component is from <c>0</c> to <c>1</c>.</param>
+	/// <returns><c><see langword="true"/></c>, if the pixel was read successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method prioritizes correctness over speed: it is suitable for unit tests, but is not intended to be used in game engines.
+	/// </para>
+	/// <para>
+	/// If the surface has no alpha component, the <see cref="Color{T}.A"/> value will be returned as <c>1</c> (fully opaque).
+	/// </para>
+	/// </remarks>
 	public bool TryReadPixel(int x, int y, out Color<float> color)
 	{
 		if (TryReadPixel(x, y, out float r, out float g, out float b, out float a))
@@ -2789,6 +3608,26 @@ public partial class Surface : IDisposable
 	}
 
 #if SDL3_4_0_OR_GREATER
+	/// <summary>
+	/// Tries to create a copy of this surface rotated clockwise by the specified angle
+	/// </summary>
+	/// <param name="angle">The angle to rotate the surface clockwise, in degrees</param>
+	/// <param name="rotatedSurface">The rotated surface, if this method returns <c><see langword="true"/></c>; otherwise, <c><see langword="null"/></c></param>
+	/// <returns><c><see langword="true"/></c>, if the surface was rotated successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The <paramref name="angle"/> of rotation can be negative for counter-clockwise rotation.
+	/// </para>
+	/// <para>
+	/// When the rotation isn't a multiple of 90°, the resulting surface is larger than the original, with the background filled in with the <see cref="ColorKey"/>, if available,
+	/// or the color (<see cref="Color{T}.R">R</see> = 255, <see cref="Color{T}.G">G</see> = 255, <see cref="Color{T}.B">B</see> = 255, <see cref="Color{T}.A">A</see> = 0) if not.
+	/// </para>
+	/// <para>
+	/// If surface has the <see cref="Rotation"/> property (<see cref="PropertyNames.RotationFloat"/>) set on it, the new copy will have the adjusted value set:
+	/// if the value of the <see cref="Rotation"/> property is <c>90</c> and <paramref name="angle"/> was <c>30</c>, the new surface will have a <see cref="Rotation"/> property value of <c>60</c> (that is: to be upright vs. gravity, the surface needs to rotate 60° more).
+	/// However, note that further rotations on the new surface in this example will produce unexpected results, since the image will have resized and padded to accommodate the not-90° angle.
+	/// </para>
+	/// </remarks>
 	public bool TryRotate(float angle, [NotNullWhen(true)] out Surface? rotatedSurface)
 	{
 		unsafe
@@ -2807,6 +3646,20 @@ public partial class Surface : IDisposable
 	}
 #endif
 
+	/// <summary>
+	/// Tries to save the surface as a BMP image to the specified file
+	/// </summary>
+	/// <param name="file">A file path to save the BMP image</param>
+	/// <returns><c><see langword="true"/></c>, if the surface was saved successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// Surfaces with a 24-bit, 32-bit and paletted 8-bit format get saved in the BMP directly.
+	/// Other RGB formats with 8-bit or higher get converted to a 24-bit surface or, if they have an alpha mask or a <see cref="ColorKey"/>, to a 32-bit surface before they are saved.
+	/// </para>
+	/// <para>
+	/// YUV and paletted 1-bit and 4-bit formats are not supported.
+	/// </para>
+	/// </remarks>
 	public bool TrySaveBmp(string file)
 	{
 		unsafe
@@ -2823,6 +3676,21 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to save the surface as a BMP image to the specified stream
+	/// </summary>
+	/// <param name="destination">The stream to save the BMP image to</param>
+	/// <param name="closeAfterwards">A value indicating whether the <paramref name="destination"/> stream should be closed before this method returns (even in case of an error)</param>
+	/// <returns><c><see langword="true"/></c>, if the surface was saved successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// Surfaces with a 24-bit, 32-bit and paletted 8-bit format get saved in the BMP directly.
+	/// Other RGB formats with 8-bit or higher get converted to a 24-bit surface or, if they have an alpha mask or a <see cref="ColorKey"/>, to a 32-bit surface before they are saved.
+	/// </para>
+	/// <para>
+	/// YUV and paletted 1-bit and 4-bit formats are not supported.
+	/// </para>
+	/// </remarks>
 	public bool TrySaveBmp(Stream destination, bool closeAfterwards = false)
 	{
 		unsafe
@@ -2842,6 +3710,11 @@ public partial class Surface : IDisposable
 	}
 
 #if SDL3_4_0_OR_GREATER
+	/// <summary>
+	/// Tries to save the surface as a PNG image to the specified file
+	/// </summary>
+	/// <param name="file">A file path to save the PNG image</param>
+	/// <returns><c><see langword="true"/></c>, if the surface was saved successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
 	public bool TrySavePng(string file)
 	{
 		unsafe
@@ -2860,6 +3733,12 @@ public partial class Surface : IDisposable
 #endif
 
 #if SDL3_4_0_OR_GREATER
+	/// <summary>
+	/// Tries to save the surface as a PNG image to the specified stream
+	/// </summary>
+	/// <param name="destination">The stream to save the PNG image to</param>
+	/// <param name="closeAfterwards">A value indicating whether the <paramref name="destination"/> stream should be closed before this method returns (even in case of an error)</param>
+	/// <returns><c><see langword="true"/></c>, if the surface was saved successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
 	public bool TrySavePng(Stream destination, bool closeAfterwards = false)
 	{
 		unsafe
@@ -2879,6 +3758,14 @@ public partial class Surface : IDisposable
 	}
 #endif
 
+	/// <summary>
+	/// Tries to create a copy of this surface scaled to the specified width and height
+	/// </summary>
+	/// <param name="width">The desired width of the scaled surface</param>
+	/// <param name="height">The desired height of the scaled surface</param>
+	/// <param name="scaleMode">The scaling mode to use</param>
+	/// <param name="scaledSurface">The scaled surface, if this method returns <c><see langword="true"/></c>; otherwise, <c><see langword="null"/></c></param>
+	/// <returns><c><see langword="true"/></c> if the surface was scaled successfully; otherwise, <c><see langword="false"/></c></returns>
 	public bool TryScale(int width, int height, ScaleMode scaleMode, [NotNullWhen(true)] out Surface? scaledSurface)
 	{
 		unsafe
@@ -2896,67 +3783,46 @@ public partial class Surface : IDisposable
 		}
 	}
 
-	public bool TrySetAlphaModulator(byte alpha)
-	{
-		unsafe
-		{
-			return SDL_SetSurfaceAlphaMod(mSurface, alpha);
-		}
-	}
-
-	public bool TrySetBlendMode(BlendMode blendMode)
-	{
-		unsafe
-		{
-			return SDL_SetSurfaceBlendMode(mSurface, blendMode);
-		}
-	}
-
-	// TODO: see ResetColorKey too!
-	public bool TrySetColorKey(uint keyValue)
-	{
-		unsafe
-		{
-			return SDL_SetSurfaceColorKey(mSurface, enabled: true, keyValue);
-		}
-	}
-
-	// TODO: see ResetColorKey too!
-	public bool TrySetColorKey(byte r, byte g, byte b) => TrySetColorKey(MapColor(r, g, b));
-
-	// TODO: see ResetColorKey too!
-	public bool TrySetColorKey(Color<byte> keyColor) => TrySetColorKey(MapColor(keyColor));
-
-	public bool TrySetColorModulator(byte r, byte g, byte b)
-	{
-		unsafe
-		{
-			return SDL_SetSurfaceColorMod(mSurface, r, g, b);
-		}
-	}
-
-	public bool TrySetColorSpace(ColorSpace colorSpace)
-	{
-		unsafe
-		{
-			return SDL_SetSurfaceColorspace(mSurface, colorSpace);
-		}
-	}
-
-	public bool TrySetPalette(Palette palette)
-	{
-		unsafe
-		{
-			if (SDL_SetSurfacePalette(mSurface, palette is not null ? palette.Pointer : null))
-			{
-				mPalette = palette;
-				return true;
-			}
-
-			return false;
-		}
-	}
-
+	/// <summary>
+	/// Tries to set up the surface for direct pixel access
+	/// </summary>
+	/// <returns><c><see langword="true"/></c>, if the surface was locked successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// It's unsafe to access the <see cref="UnsafePixels"/> property for surfaces that <see cref="MustLock">must be locked</see> and are not currently <see cref="IsLocked">locked</see>.
+	/// And it's only safe to do so, if this method returned <see langword="true"/>.
+	/// </para>
+	/// <para>
+	/// Between calls to <see cref="TryUnsafeLock"/> / <see cref="UnsafeUnlock"/>, you can write to and read from <see cref="UnsafePixels"/>, using the surface's <see cref="Format"/>.
+	/// Once you are done accessing the surface, you should use <see cref="UnsafeUnlock"/> to release it.
+	/// </para>
+	/// <para>
+	/// This method is meant to be used as part of the <see cref="MustLock"/> - <see cref="IsLocked"/> - <see cref="TryUnsafeLock"/> - <see cref="UnsafePixels"/> - <see cref="UnsafeUnlock"/> pattern,
+	/// if you want to access the surface's pixel memory directly in a faster and more efficient way.
+	/// If you're looking for a simpler and safer way to access the pixel memory, consider using <see cref="TryLock(out SurfacePixelMemoryManager?)"/> instead.
+	/// </para>
+	/// <para>
+	/// Not all surfaces require locking. If the value of the <see cref="MustLock"/> property is <c><see langword="false"/></c>,
+	/// then you can read and write to the surface at any time, and the pixel format of the surface will not change.
+	/// </para>
+	/// </remarks>
+	/// <example>
+	/// Example usage:
+	/// <code>
+	/// Surface surface;
+	/// 
+	/// ...
+	/// 
+	/// if (surface.MustLock &amp;&amp; surface.TryUnsafeLock())
+	/// {
+	///		// It's safe to access surface.UnsafePixels here
+	///		
+	///		...
+	///		
+	///		surface.UnsafeUnlock(); 
+	/// }
+	/// </code>
+	/// </example>
 	public bool TryUnsafeLock()
 	{
 		unsafe
@@ -2965,7 +3831,28 @@ public partial class Surface : IDisposable
 		}
 	}
 
-	[OverloadResolutionPriority(1)] // Actually, that shouldn't be an issue since C# doesn't now byte literals aside from the ambiguous 'default', but we do that for symmetry with 'TryReadPixel'
+	/// <summary>
+	/// Tries to write a single pixel to the surface at the specified coordinates
+	/// </summary>
+	/// <param name="x">The X coordinate of the pixel. Must be <c>0</c> ≤ <paramref name="x"/> &lt; <see cref="Width"/>.</param>
+	/// <param name="y">The Y coordinate of the pixel. Must be <c>0</c> ≤ <paramref name="y"/> &lt; <see cref="Height"/>.</param>
+	/// <param name="r">The red component value of the pixel. Uses the entire range from <c>0</c> to <c>255</c>.</param>
+	/// <param name="g">The green component value of the pixel. Uses the entire range from <c>0</c> to <c>255</c>.</param>
+	/// <param name="b">The blue component value of the pixel. Uses the entire range from <c>0</c> to <c>255</c>.</param>
+	/// <param name="a">The alpha component value of the pixel. Uses the entire range from <c>0</c> to <c>255</c>.</param>
+	/// <returns><c><see langword="true"/></c>, if the pixel was written successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method prioritizes correctness over speed: it is suitable for unit tests, but is not intended to be used in game engines.
+	/// </para>
+	/// <para>
+	/// Like <see cref="PixelFormatDetails.MapColor(Palette?, byte, byte, byte, byte)"/>, this method best approximates a color in the surface's pixel format for the given RGBA color value.
+	/// </para>
+	/// <para>
+	/// If the pixel format has no alpha component, the given <paramref name="a"/>lpha component value will be ignored (as it will be in indexed formats with a <see cref="Palette"/>).
+	/// </para>
+	/// </remarks>
+	[OverloadResolutionPriority(1)] // Actually, that shouldn't be an issue since C# doesn't know byte literals aside from the ambiguous 'default', but we do that for symmetry with 'TryReadPixel'
 	public bool TryWritePixel(int x, int y, byte r, byte g, byte b, byte a)
 	{
 		unsafe
@@ -2974,10 +3861,46 @@ public partial class Surface : IDisposable
 		}
 	}
 
-	[OverloadResolutionPriority(1)] // Actually, that shouldn't be an issue since C# doesn't now literal of custom struct types aside from the ambiguous 'default', but we do that for symmetry with 'TryReadPixel'
+	/// <summary>
+	/// Tries to write a single pixel to the surface at the specified coordinates
+	/// </summary>
+	/// <param name="x">The X coordinate of the pixel. Must be <c>0</c> ≤ <paramref name="x"/> &lt; <see cref="Width"/>.</param>
+	/// <param name="y">The Y coordinate of the pixel. Must be <c>0</c> ≤ <paramref name="y"/> &lt; <see cref="Height"/>.</param>
+	/// <param name="color">The color of the pixel. Uses the entire range from <c>0</c> to <c>255</c> for each component.</param>
+	/// <returns><c><see langword="true"/></c>, if the pixel was written successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method prioritizes correctness over speed: it is suitable for unit tests, but is not intended to be used in game engines.
+	/// </para>
+	/// <para>
+	/// Like <see cref="PixelFormatDetails.MapColor(Palette?, Color{byte})"/>, this method best approximates a color in the surface's pixel format for the <see cref="Color{T}">Color</see>&lt;<see cref="byte"/>&gt;.
+	/// </para>
+	/// <para>
+	/// If the pixel format has no alpha component, the given <see cref="Color{T}.A"/> value will be ignored (as it will be in indexed formats with a <see cref="Palette"/>).
+	/// </para>
+	/// </remarks>
+	[OverloadResolutionPriority(1)] // Actually, that shouldn't be an issue since C# doesn't know literal of custom struct types aside from the ambiguous 'default', but we do that for symmetry with 'TryReadPixel'
 	public bool TryWritePixel(int x, int y, Color<byte> color)
 		=> TryWritePixel(x, y, color.R, color.G, color.B, color.A);
 
+	/// <summary>
+	/// Tries to write a single pixel to the surface at the specified coordinates
+	/// </summary>
+	/// <param name="x">The X coordinate of the pixel. Must be <c>0</c> ≤ <paramref name="x"/> &lt; <see cref="Width"/>.</param>
+	/// <param name="y">The Y coordinate of the pixel. Must be <c>0</c> ≤ <paramref name="y"/> &lt; <see cref="Height"/>.</param>
+	/// <param name="r">The red component value of the pixel. Usually in the range from <c>0</c> to <c>1</c>.</param>
+	/// <param name="g">The green component value of the pixel. Usually in the range from <c>0</c> to <c>1</c>.</param>
+	/// <param name="b">The blue component value of the pixel. Usually in the range from <c>0</c> to <c>1</c>.</param>
+	/// <param name="a">The alpha component value of the pixel. Usually in the range from <c>0</c> to <c>1</c>.</param>
+	/// <returns><c><see langword="true"/></c>, if the pixel was written successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method prioritizes correctness over speed: it is suitable for unit tests, but is not intended to be used in game engines.
+	/// </para>
+	/// <para>
+	/// If the pixel format has no alpha component, the given <paramref name="a"/>lpha component value will be ignored (as it will be in indexed formats with a <see cref="Palette"/>).
+	/// </para>
+	/// </remarks>
 	public bool TryWritePixel(int x, int y, float r, float g, float b, float a)
 	{
 		unsafe
@@ -2986,9 +3909,50 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to write a single pixel to the surface at the specified coordinates
+	/// </summary>
+	/// <param name="x">The X coordinate of the pixel. Must be <c>0</c> ≤ <paramref name="x"/> &lt; <see cref="Width"/>.</param>
+	/// <param name="y">The Y coordinate of the pixel. Must be <c>0</c> ≤ <paramref name="y"/> &lt; <see cref="Height"/>.</param>
+	/// <param name="color">The color of the pixel. Usually the range for each component is from <c>0</c> to <c>1</c>.</param>
+	/// <returns><c><see langword="true"/></c>, if the pixel was written successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method prioritizes correctness over speed: it is suitable for unit tests, but is not intended to be used in game engines.
+	/// </para>
+	/// <para>
+	/// If the pixel format has no alpha component, the given <see cref="Color{T}.A"/> value will be ignored (as it will be in indexed formats with a <see cref="Palette"/>).
+	/// </para>
+	/// </remarks>
 	public bool TryWritePixel(int x, int y, Color<float> color)
 		=> TryWritePixel(x, y, color.R, color.G, color.B, color.A);
 
+	/// <summary>
+	/// Releases the surface after direct pixel access
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// This method is meant to be used as part of the <see cref="MustLock"/> - <see cref="IsLocked"/> - <see cref="TryUnsafeLock"/> - <see cref="UnsafePixels"/> - <see cref="UnsafeUnlock"/> pattern,
+	/// if you want to access the surface's pixel memory directly in a faster and more efficient way.
+	/// If you're looking for a simpler and safer way to access the pixel memory, consider using <see cref="TryLock(out SurfacePixelMemoryManager?)"/> instead.
+	/// </para>
+	/// </remarks><example>
+	/// Example usage:
+	/// <code>
+	/// Surface surface;
+	/// 
+	/// ...
+	/// 
+	/// if (surface.MustLock &amp;&amp; surface.TryUnsafeLock())
+	/// {
+	///		// It's safe to access surface.UnsafePixels here
+	///		
+	///		...
+	///		
+	///		surface.UnsafeUnlock(); 
+	/// }
+	/// </code>
+	/// </example>
 	public void UnsafeUnlock()
 	{
 		unsafe
