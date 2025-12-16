@@ -13,6 +13,14 @@ using System.Runtime.InteropServices.Marshalling;
 
 namespace Sdl3Sharp.Video;
 
+/// <summary>
+/// Represents a buffer of pixels in memory, used for software rendering and as a source for textures
+/// </summary>
+/// <remarks>
+/// <para>
+/// <see cref="Surface"/>s make serious efforts to manage images in various formats, and provide a reasonable toolbox for transforming the data, including copying between <see cref="Surface"/>s, filling rectangles in the image data, etc.
+/// </para>
+/// </remarks>
 public partial class Surface : IDisposable
 {
 	private interface IUnsafeConstructorDispatch;
