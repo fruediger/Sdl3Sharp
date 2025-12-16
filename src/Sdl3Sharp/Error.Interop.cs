@@ -19,15 +19,22 @@ partial class Error
 	/// </summary>
 	/// <returns>Returns a message with information about the specific error that occurred, or an empty string if there hasn't been an error message set since the last call to <see href="https://wiki.libsdl.org/SDL3/SDL_ClearError">SDL_ClearError</see>()</returns>
 	/// <remarks>
+	/// <para>
 	/// It is possible for multiple errors to occur before calling <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>(). Only the last error is returned.
-	///
-	/// The message is only applicable when an SDL function has signaled an error. You must check the return values of SDL function calls to determine when to appropriately call <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>(). You should not use the results of <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>() to decide if an error has occurred! Sometimes SDL will set an error string even when reporting success.
-	///
+	/// </para>
+	/// <para>
+	/// The message is only applicable when an SDL function has signaled an error. You must check the return values of SDL function calls to determine when to appropriately call <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>().
+	/// You should not use the results of <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>() to decide if an error has occurred! Sometimes SDL will set an error string even when reporting success.
+	/// </para>
+	/// <para>
 	/// SDL will <em>not</em> clear the error string for successful API calls. You <em>must</em> check return values for failure cases before you can assume the error string applies.
-	///
+	/// </para>
+	/// <para>
 	/// Error strings are set per-thread, so an error set in a different thread will not interfere with the current thread's operation.
-	///
+	/// </para>
+	/// <para>
 	/// The returned value is a thread-local string which will remain valid until the current thread's error string is changed. The caller should make a copy if the value is needed after the next SDL API call.
+	/// </para>
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
@@ -38,7 +45,9 @@ partial class Error
 	/// </summary>
 	/// <returns>Returns false</returns>
 	/// <remarks>
+	/// <para>
 	/// This function does not do any memory allocation
+	/// </para>
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_OutOfMemory">SDL_OutOfMemory</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
@@ -50,20 +59,23 @@ partial class Error
 	/// <param name="fmt">a printf()-style message format string</param>
 	/// <returns>Returns false</returns>
 	/// <remarks>
+	/// <para>
 	/// Calling this function will replace any previous error message that was set.
-	///
-	/// This function always returns false, since SDL frequently uses false to signify a failing result, leading to this idiom:
-	/// 
+	/// </para>
+	/// <para>
+	/// This function always returns false, since SDL frequently uses false to signify a failing result, leading to this idiom: 
 	/// <code>
 	/// if (error_code) {
 	///		return SDL_SetError("This operation has failed: %d", error_code);
 	/// }
 	/// </code>
-	/// 
-	/// NOTE: Regarding CLR-interop: Since there is currently no clean and platform-/runtime-indepent way to indirectly call external functions with variadic arguments,
-	/// those arguments are omitted from this method signature. Instead format your message on the CLR side and set <c><paramref name="fmt"/></c> to that already formatted string.
+	/// </para>
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_SetError">SDL_SetError</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
 	internal unsafe static partial CBool SDL_SetError(byte* fmt);
+
+	/// <seealso cref="SDL_SetError(byte*)"/>
+	[NativeImportSymbol<Library>("SDL_SetError", Kind = NativeImportSymbolKind.Reference)]
+	internal static partial ref readonly byte SDL_SetError_var();
 }

@@ -12,6 +12,11 @@ namespace Sdl3Sharp.Utilities;
 public static partial class Math
 {
 	/// <summary>
+	/// An epsilon constant, used for comparing <see cref="float"/> values
+	/// </summary>
+	public const float EpsilonF = 1.1920928955078125e-07f; // 0x0.000002p0
+
+	/// <summary>
 	/// The value of the mathematical constant π as a <see cref="double"/> constant
 	/// </summary>
 	public const double Pi = 3.141592653589793238462643383279502884;

@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using Sdl3Sharp.Internal;
+using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices.Marshalling;
 
 namespace Sdl3Sharp;
@@ -19,7 +21,9 @@ public static partial class Error
 	/// </summary>
 	/// <returns><c><see langword="false"/></c> (always)</returns>
 	/// <remarks>
-	/// This method does not do any memory allocation on the native side
+	/// <para>
+	/// This method does not do any memory allocation on the native side.
+	/// </para>
 	/// </remarks>
 	public static bool OutOfMemory() => SDL_OutOfMemory();
 
@@ -29,7 +33,9 @@ public static partial class Error
 	/// <param name="message">The error message to be set</param>
 	/// <returns><c><see langword="false"/></c> (always)</returns>
 	/// <remarks>
-	/// Calling this method will replace any previous error message that was set for this thread
+	/// <para>
+	/// Calling this method will replace any previous error message that was set for this thread.
+	/// </para>
 	/// </remarks>
 	/// <example>
 	/// This method always returns <c><see langword="false"/></c>; since SDL frequently uses <c><see langword="false"/></c> to signify a failing result, this leads to the following idiom:
@@ -57,6 +63,43 @@ public static partial class Error
 		}
 	}
 
+	/// <summary>
+	/// Sets the SDL error message to a <paramref name="format"/> string for the current thread
+	/// </summary>
+	/// <param name="format">The C-style <c>printf</c> format string</param>
+	/// <param name="args">The arguments corresponding to the format specifiers in <paramref name="format"/></param>
+	/// <returns><c><see langword="false"/></c> (always)</returns>
+	/// <remarks>
+	/// <para>
+	/// Calling this method will replace any previous error message that was set for this thread.
+	/// </para>
+	/// <para>
+	/// The <paramref name="format"/> parameter is interpreted as a C-style <c>printf</c> format string, and 
+	/// the <paramref name="args"/> parameter supplies the values for its format specifiers. Supported argument 
+	/// types include all integral types up to 64-bit (including <c><see langword="bool"/></c> and <c><see langword="char"/></c>), 
+	/// floating point types (<c><see langword="float"/></c> and <c><see langword="double"/></c>), pointer types 
+	/// (<c><see cref="IntPtr"/></c> and <c><see cref="UIntPtr"/></c>), and <c><see langword="string"/></c>.
+	/// </para>
+	/// <para>
+	/// For a detailed explanation of C-style <c>printf</c> format strings and their specifiers, see 
+	/// <see href="https://en.wikipedia.org/wiki/Printf#Format_specifier"/>.
+	/// </para>
+	/// <para>
+	/// Consider using <see cref="Set(string)"/> instead when possible, as it may be more efficient. 
+	/// In many cases, you can use C# string interpolation to construct the message before logging.
+	/// </para>
+	/// </remarks>
+	/// <example>
+	/// This method always returns <c><see langword="false"/></c>; since SDL frequently uses <c><see langword="false"/></c> to signify a failing result, this leads to the following idiom:
+	/// <code>
+	/// if (/* condition indicating an error */)
+	/// {
+	///		return Error.Set("%s", "Error message example");
+	/// }
+	/// </code>
+	/// </example>
+	public static bool Set(string format, params ReadOnlySpan<object> args)
+		=> Variadic.Invoke<bool>(in SDL_SetError_var(), 1, [format, .. args]);
 
 	/// <summary>
 	/// Tries to retrieve a message about the last error that occurred on the current thread

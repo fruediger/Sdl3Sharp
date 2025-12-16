@@ -148,7 +148,7 @@ public abstract partial class Stream : IDisposable
 	internal unsafe SDL_IOStream* Pointer { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mContext; }
 
 	/// <summary>
-	/// Get the properties associated with the stream
+	/// Gets the properties associated with the stream
 	/// </summary>
 	/// <value>
 	/// The properties associated with the stream, or <see langword="null"/> if the properties could not be retrieved successfully (check <see cref="Error.TryGet(out string?)"/> for more information)

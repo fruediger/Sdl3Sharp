@@ -139,6 +139,9 @@ public sealed partial class Palette : IDisposable, IFormattable, ISpanFormattabl
 		}
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	internal unsafe static bool IsKnown(SDL_Palette* palette) => mKnownInstances.ContainsKey(unchecked((IntPtr)palette));
+
 	/// <inheritdoc/>
 	public override string ToString() => ToString(format: default, formatProvider: default);
 

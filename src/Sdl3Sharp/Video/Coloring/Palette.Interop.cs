@@ -8,12 +8,12 @@ namespace Sdl3Sharp.Video.Coloring;
 partial class Palette
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal readonly struct SDL_Palette
+	internal struct SDL_Palette
 	{
 		public readonly int NColors;
 		public unsafe readonly Color<byte>* Colors;
 		public readonly uint Version;
-		public readonly int RefCount;
+		public int RefCount; // We actually need to manupulate the ref counter manually at some point
 	}
 
 	/// <summary>

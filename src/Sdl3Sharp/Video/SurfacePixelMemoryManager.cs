@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 namespace Sdl3Sharp.Video;
 
 /// <summary>
-/// Manages and represents the pixel data of a locked <see cref="Surface"/>
+/// Manages and represents the pixel memory of a locked <see cref="Surface"/>
 /// </summary>
 public sealed class SurfacePixelMemoryManager : NativeMemoryManagerBase
 {
@@ -45,17 +45,17 @@ public sealed class SurfacePixelMemoryManager : NativeMemoryManagerBase
 	}
 
 	/// <summary>
-	/// Gets a <see cref="NativeMemory"/> representing the pixel data of the locked <see cref="Surface"/>
+	/// Gets a <see cref="NativeMemory"/> representing the pixel memory of the locked <see cref="Surface"/>
 	/// </summary>
 	/// <value>
-	/// A <see cref="NativeMemory"/> representing the pixel data of the locked <see cref="Surface"/>, or <see cref="NativeMemory.Empty"/> if the <see cref="Surface"/> is not locked
+	/// A <see cref="NativeMemory"/> representing the pixel memory of the locked <see cref="Surface"/>, or <see cref="NativeMemory.Empty"/> if the <see cref="Surface"/> is not locked
 	/// </value>
 	/// <remarks>
 	/// <para>
-	/// The pixel data is in the pixel format specified by the <see cref="Surface.Format"/> of the <see cref="Surface"/>.
+	/// The pixel memory data is in the pixel format specified by the <see cref="Surface.Format"/> of the <see cref="Surface"/>.
 	/// </para>
 	/// <para>
-	/// Please keep the <see cref="Surface.Pitch"/> per vertical pixel row in mind when processing the continuous pixel data.
+	/// Please keep the <see cref="Surface.Pitch"/> per vertical pixel row in mind when processing the continuous pixel memory.
 	/// </para>
 	/// </remarks>
 	public override NativeMemory Memory
@@ -110,7 +110,7 @@ public sealed class SurfacePixelMemoryManager : NativeMemoryManagerBase
 	/// <inheritdoc/>
 	/// <remarks>
 	/// <para>
-	/// Calling this method will unlock the associated <see cref="Surface"/>, if it's still locked, making its pixel data inaccessible until it is locked again.
+	/// Calling this method will unlock the associated <see cref="Surface"/>, if it's still locked, making its pixel memory inaccessible until it is locked again.
 	/// </para>
 	/// </remarks>
 	protected override void Dispose(bool disposing)

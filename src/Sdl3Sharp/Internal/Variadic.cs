@@ -39,7 +39,7 @@ internal static class Variadic
 		}
 	}
 
-	internal static void Invoke<TResult>(ref readonly byte functionRef, int fixedArguments, out TResult result, Span<object> args)
+	internal static TResult Invoke<TResult>(ref readonly byte functionRef, int fixedArguments, Span<object> args)
 		where TResult : unmanaged
 	{
 		unsafe
@@ -60,7 +60,9 @@ internal static class Variadic
 					}
 				}
 
-				Ffi.Ffi.InvokeVariadic(Abi.Default, unchecked((IntPtr)Unsafe.AsPointer(ref Unsafe.AsRef(in functionRef))), fixedArguments, out result, args);
+				Ffi.Ffi.InvokeVariadic(Abi.Default, unchecked((IntPtr)Unsafe.AsPointer(ref Unsafe.AsRef(in functionRef))), fixedArguments, out TResult result, args);
+
+				return result;
 			}
 			finally
 			{

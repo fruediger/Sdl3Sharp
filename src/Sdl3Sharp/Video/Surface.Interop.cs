@@ -6,7 +6,6 @@ using Sdl3Sharp.Video.Coloring;
 using Sdl3Sharp.Video.Drawing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using static System.Net.WebRequestMethods;
 
 namespace Sdl3Sharp.Video;
 
