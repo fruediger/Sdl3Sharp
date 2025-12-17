@@ -12,7 +12,7 @@ namespace Sdl3Sharp.Video;
 partial class Surface
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal readonly struct SDL_Surface
+	internal struct SDL_Surface
 	{
 		public readonly SurfaceFlags Flags;
 		public readonly PixelFormat Format;
@@ -20,7 +20,7 @@ partial class Surface
 		public readonly int H;
 		public readonly int Pitch;
 		public unsafe readonly void* Pixels;
-		public readonly int RefCount;
+		public int RefCount;
 		private unsafe readonly void* Reserved;
 	}
 

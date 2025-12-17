@@ -27,6 +27,12 @@ public sealed partial class Palette : IDisposable, IFormattable, ISpanFormattabl
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	private unsafe Palette(SDL_Palette* palette, IUnsafeConstructorDispatch? _ = default) => mPalette = palette;
 
+	/// <remarks>
+	/// <para>
+	/// Use this only for newly created SDL palettes that start with native <see cref="SDL_Palette.RefCount"/> equal to <c>1</c>;
+	/// do not call <see cref="TryGetOrCreate"/> for such owner instances.
+	/// </para>
+	/// </remarks>
 	internal unsafe Palette(SDL_Palette* palette) :
 #pragma warning disable IDE0034 // Keep it that way for explicitness sake
 		this(palette, default(IUnsafeConstructorDispatch?))
@@ -34,6 +40,10 @@ public sealed partial class Palette : IDisposable, IFormattable, ISpanFormattabl
 	{
 		if (palette is not null)
 		{
+			// Neither addRef nor updateRef increase the native ref counter for a very simple reason:
+			// If we're on this constructor path, we created the native instance ourselves, so its ref counter is already set to 1.
+			// That's totally right, since atm the managed wrapper is the sole borrower of a reference to the native instance.
+
 			mKnownInstances.AddOrUpdate(unchecked((IntPtr)palette), addRef, updateRef, this);
 		}
 
@@ -48,6 +58,8 @@ public sealed partial class Palette : IDisposable, IFormattable, ISpanFormattabl
 				GC.SuppressFinalize(previousPalette);
 #pragma warning restore CA1816
 #pragma warning restore IDE0079
+
+				// Dispose calls SDL_DestroyPalette and already decreases the ref count, so we don't need to do it here manually
 				previousPalette.Dispose(forget: false);
 			}
 
@@ -133,14 +145,12 @@ public sealed partial class Palette : IDisposable, IFormattable, ISpanFormattabl
 				mKnownInstances.TryRemove(unchecked((IntPtr)mPalette), out _);
 			}
 
+			// SDL_DestroyPalette decreases the native ref counter, so we don't need to do it manually here
 			SDL_DestroyPalette(mPalette);
 
 			mPalette = null;
 		}
 	}
-
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	internal unsafe static bool IsKnown(SDL_Palette* palette) => mKnownInstances.ContainsKey(unchecked((IntPtr)palette));
 
 	/// <inheritdoc/>
 	public override string ToString() => ToString(format: default, formatProvider: default);
@@ -173,6 +183,12 @@ public sealed partial class Palette : IDisposable, IFormattable, ISpanFormattabl
 		}
 	}
 
+	/// <remarks>
+	/// <para>
+	/// Use this only for <see cref="SDL_Palette"/> pointers owned by SDL (e.g. returned from other APIs);
+	/// it borrows exactly one native reference for managed tracking and must not be used for owner-created surfaces.
+	/// </para>
+	/// </remarks>
 	internal unsafe static bool TryGetOrCreate(SDL_Palette* palette, [NotNullWhen(true)] out Palette? result)
 	{
 		if (palette is null)
@@ -192,11 +208,22 @@ public sealed partial class Palette : IDisposable, IFormattable, ISpanFormattabl
 
 		static WeakReference<Palette> createRef(IntPtr palette) => new(create(unchecked((SDL_Palette*)palette)));
 
-		static Palette create(SDL_Palette* palette) => new(palette,
+		static Palette create(SDL_Palette* palette)
+		{
+			// create is called in both cases, either we register the instance for the first time,
+			// or a managed instance was GC'ed and we need to recreate it (potentially for a different native instance).
+			// In both cases, that's the ideal place to increase the native ref counter.
+
+			// "Borrow" an additional native reference for remembering the managed instance
+			palette->RefCount++;
+
+			// Notice: this calls the non-registering constructor
+			return new(palette,
 #pragma warning disable IDE0034 // Keep it that way for explicitness sake
-			default(IUnsafeConstructorDispatch?)
+				default(IUnsafeConstructorDispatch?)
 #pragma warning restore
-		);
+			);
+		}
 	}
 
 	/// <summary>

@@ -81,15 +81,19 @@ public partial class Surface : IDisposable
 	private unsafe static byte* Utf8Convert(string? str, out byte* strUtf8) => strUtf8 = Utf8StringMarshaller.ConvertToUnmanaged(str);
 
 	private unsafe SDL_Surface* mSurface;
-	private Utilities.NativeMemory mNativeMemory = default;
 	private NativeMemoryPin? mNativeMemoryPin = null;
-	private Memory<byte> mMemory = default;
 	private MemoryHandle mMemoryHandle = default;
 	private Palette? mPalette = null; // Use this to keep the managed Palette alive
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	private unsafe Surface(SDL_Surface* surface, IUnsafeConstructorDispatch? _ = default) => mSurface = surface;
 
+	/// <remarks>
+	/// <para>
+	/// Use this only for newly created SDL surfaces that start with native <see cref="SDL_Surface.RefCount"/> equal to <c>1</c>;
+	/// do not call <see cref="TryGetOrCreate"/> for such owner instances.
+	/// </para>
+	/// </remarks>
 	private protected unsafe Surface(SDL_Surface* surface) :
 #pragma warning disable IDE0034 // Keep it that way for explicitness sake
 		this(surface, default(IUnsafeConstructorDispatch?))
@@ -97,6 +101,10 @@ public partial class Surface : IDisposable
 	{
 		if (mSurface is not null)
 		{
+			// Neither addRef nor updateRef increase the native ref counter for a very simple reason:
+			// If we're on this constructor path, we created the native instance ourselves, so its ref counter is already set to 1.
+			// That's totally right, since atm the managed wrapper is the sole borrower of a reference to the native instance.
+
 			mKnownInstances.AddOrUpdate(unchecked((IntPtr)mSurface), addRef, updateRef, this);
 		}
 
@@ -111,7 +119,9 @@ public partial class Surface : IDisposable
 				GC.SuppressFinalize(previousSurface);
 #pragma warning restore CA1816
 #pragma warning restore IDE0079
-				previousSurface.Dispose(disposing: true, forget: true);
+
+				// Dispose calls SDL_DestroySurface and already decreases the ref count, so we don't need to do it here manually
+				previousSurface.Dispose(disposing: true, forget: false);
 			}
 
 			previousSurfaceRef.SetTarget(newSurface);
@@ -155,7 +165,6 @@ public partial class Surface : IDisposable
 	private unsafe Surface(int width, int height, PixelFormat format, Utilities.NativeMemory pixels, int pitch, IUnsafeConstructorDispatch? _ = default) :
 		this(width, height, format, ValidateAndPinNativeMemory(pixels, height, pitch, out var nativeMemoryPin), pitch)
 	{
-		mNativeMemory = pixels;
 		mNativeMemoryPin = nativeMemoryPin;
 	}
 
@@ -187,7 +196,6 @@ public partial class Surface : IDisposable
 	private unsafe Surface(int width, int height, PixelFormat format, Memory<byte> pixels, int pitch, IUnsafeConstructorDispatch? _ = default) :
 		this(width, height, format, ValidateAndPinMemory(pixels, height, pitch, out var memoryHandle), pitch)
 	{
-		mMemory = pixels;
 		mMemoryHandle = memoryHandle;
 	}
 
@@ -762,6 +770,9 @@ public partial class Surface : IDisposable
 	/// <para>
 	/// The returned array includes all alternate images of the surface, including itself as the first element.
 	/// </para>
+	/// <para>
+	/// Reading this property can be very expensive, you should consider caching it's value and reusing it as long as you're sure that the alternate images of the surface don't change.
+	/// </para>
 	/// </remarks>
 	public Surface[] Images
 	{
@@ -769,8 +780,6 @@ public partial class Surface : IDisposable
 		{
 			unsafe
 			{
-				// TODO: do we need to handle the surface reference counter for the alternate images coming from SDL here?
-
 				if (mSurface is var surface
 					&& surface is null)
 				{
@@ -780,12 +789,18 @@ public partial class Surface : IDisposable
 				Unsafe.SkipInit(out int count);
 
 				var images = SDL_GetSurfaceImages(mSurface, &count);
+				
+				if (images is null || count is not > 0)
+				{
+					return [];
+				}				
 
 				var result = GC.AllocateUninitializedArray<Surface>(count);
 
+				var imagePtr = images;
 				foreach (ref var image in result.AsSpan())
 				{
-					TryGetOrCreate(*images++, out image!);
+					TryGetOrCreate(*imagePtr++, out image!);
 				}
 
 				Utilities.NativeMemory.SDL_free(images);
@@ -992,37 +1007,16 @@ public partial class Surface : IDisposable
 		{
 			unsafe
 			{
-				// SDL_SetSurfacePalette potentially destroys the old palette if its ref count reaches zero,
-				// but we must make sure, if we have a managed wrapper for it around, that it doesn't get destroyed while we still have a reference to it.
-				// Therefore, we bump the ref count to 2 before calling SDL_SetSurfacePalette, and restore it if needed.
-
-				// Just on a side note: This is highly illegal behavior, messing with SDL's internal reference counting like this.
-				// But I couldn't find a better way to do this.
-
-				var oldPaletteRefCount = int.MaxValue;
-				var oldPalette = SDL_GetSurfacePalette(mSurface);				
-				if (oldPalette is not null
-					&& (value is null || oldPalette != value.Pointer)
-					&& Palette.IsKnown(oldPalette)
-					&& (oldPaletteRefCount = oldPalette->RefCount) is not > 1)
-				{
-					oldPalette->RefCount = 2;
-				}
+				// We don't need to worry about SDL_SetSurfacePalette potentially destroying the old palette,
+				// as we should handle that correctly and consistently via the way we handle ref counting in the managed Palette wrapper.
+				// If SDL_SetSurfacePalette does destroy the old palette, there shouldn't be a registered managed wrapper around it anymore,
+				// and if there would be a registered managed wrapper, SDL_SetSurfacePalette shouldn't destroy the native instance yet (as it's ref counter shouldn't go to zero).
 
 				if (!(bool)SDL_SetSurfacePalette(mSurface, value is not null ? value.Pointer : null)
 					&& Error.SDL_GetError() is var message
 					&& message is not null
 					&& !MemoryMarshal.CreateReadOnlySpanFromNullTerminated(message).SequenceEqual("Parameter 'surface' is invalid"u8) /* filter out "surface" argument errors */)
 				{
-					// the palette doesn't match the surface's format
-
-					// The old palette wasn't replaced, so restore its ref count if we modified it
-
-					if (oldPaletteRefCount is not > 1)
-					{
-						oldPalette->RefCount = oldPaletteRefCount;
-					}
-
 					failSdlError(message);
 				}
 			}
@@ -1265,8 +1259,6 @@ public partial class Surface : IDisposable
 		unsafe
 		{
 			SDL_RemoveSurfaceAlternateImages(mSurface);
-
-			// TODO: do we need to consider implicit surface destruction on the SDL-side?
 		}
 	}
 
@@ -1298,19 +1290,18 @@ public partial class Surface : IDisposable
 					mKnownInstances.TryRemove(unchecked((IntPtr)mSurface), out _);
 				}
 
+				// SDL_DestroySurface decreases the native ref counter, so we don't need to do it manually here
 				SDL_DestroySurface(mSurface);
 				mSurface = null;
 			}
 
-			mNativeMemory = default;
-
+#pragma warning disable IDE0031 // I like this more when it's explicit
 			if (mNativeMemoryPin is not null)
 			{
 				mNativeMemoryPin.Dispose();
 				mNativeMemoryPin = null;
 			}
-
-			mMemory = default;
+#pragma warning restore IDE0031
 
 			if (mMemoryHandle.Pointer is not null)
 			{
@@ -1455,9 +1446,10 @@ public partial class Surface : IDisposable
 	{
 		unsafe
 		{
+			// SDL_AddSurfaceAlternateImage actually increases the native ref counter of the added surface,
+			// but we don't need to worry, because, when we dispose this surface, we call SDL_DestroySurface,
+			// which in turn calls SDL_RemoveSurfaceAlternateImages, which decreases the native ref counter of all added alternate images (to their original state again).
 			return SDL_AddSurfaceAlternateImage(mSurface, image is not null ? image.mSurface : null);
-
-			// TODO: what about SDL_DestroySurface on the image?
 		}
 	}
 
@@ -2787,28 +2779,12 @@ public partial class Surface : IDisposable
 	{
 		unsafe
 		{
-			// TODO: what to do with this sentence from the SDL docs: "You do not need to destroy the returned palette, it will be freed when the reference count reaches 0, usually when the surface is destroyed."?
-
-			// SDL_CreateSurfacePalette calls SDL_SetSurfacePalette, so we need to do the same kind of "reference rescuing" shenanigans 
-
-			var oldPaletteRefCount = int.MaxValue;
-			var oldPalette = SDL_GetSurfacePalette(mSurface);
-			if (oldPalette is not null
-				&& Palette.IsKnown(oldPalette)
-				&& (oldPaletteRefCount = oldPalette->RefCount) is not > 1)
-			{
-				oldPalette->RefCount = 2;
-			}
+			// See the comment in the Palette setter about why this is alright to do without worrying about SDL_CreateSurfacePalette potentially destroying the old palette
 
 			var result = SDL_CreateSurfacePalette(mSurface);
 
 			if (result is null)
 			{
-				if (oldPaletteRefCount is not > 1)
-				{
-					oldPalette->RefCount = oldPaletteRefCount;
-				}
-
 				palette = null;
 				return false;
 			}
@@ -2841,13 +2817,7 @@ public partial class Surface : IDisposable
 				return false;
 			}
 
-			duplicate = new(duplicatePtr)
-			{
-				mNativeMemory = mNativeMemory,
-				mNativeMemoryPin = mNativeMemoryPin is not null ? mNativeMemory.Pin() : null,
-				mMemory = mMemory,
-				mMemoryHandle = mMemoryHandle.Pointer is not null ? mMemory.Pin() : default
-			};
+			duplicate = new(duplicatePtr);
 
 			return true;
 		}
@@ -3104,6 +3074,12 @@ public partial class Surface : IDisposable
 		}
 	}
 
+	/// <remarks>
+	/// <para>
+	/// Use this only for <see cref="SDL_Surface"/> pointers owned by SDL (e.g. returned from other APIs);
+	/// it borrows exactly one native reference for managed tracking and must not be used for owner-created surfaces.
+	/// </para>
+	/// </remarks>
 	internal unsafe static bool TryGetOrCreate(SDL_Surface* surface, [NotNullWhen(true)] out Surface? result)
 	{
 		if (surface is null)
@@ -3123,11 +3099,22 @@ public partial class Surface : IDisposable
 
 		static WeakReference<Surface> createRef(IntPtr surface) => new(create(unchecked((SDL_Surface*)surface)));
 
-		static Surface create(SDL_Surface* surface) => new(surface,
+		static Surface create(SDL_Surface* surface)
+		{
+			// create is called in both cases, either we register the instance for the first time,
+			// or a managed instance was GC'ed and we need to recreate it (potentially for a different native instance).
+			// In both cases, that's the ideal place to increase the native ref counter.
+
+			// "Borrow" an additional native reference for remembering the managed instance
+			surface->RefCount++;
+
+			// Notice: this calls the non-registering constructor
+			return new(surface,
 #pragma warning disable IDE0034 // Keep it that way for explicitness sake
-			default(IUnsafeConstructorDispatch)
+				default(IUnsafeConstructorDispatch)
 #pragma warning restore IDE0034
-		);
+			);
+		}
 	}
 
 	/// <summary>
@@ -3380,7 +3367,7 @@ public partial class Surface : IDisposable
 	{
 		unsafe
 		{
-			if (source.IsValid || destination.IsValid)
+			if (!source.IsValid || !destination.IsValid)
 			{
 				return false;
 			}
