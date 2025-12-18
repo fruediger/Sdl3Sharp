@@ -12,6 +12,45 @@ namespace Sdl3Sharp.IO;
 /// </summary>
 public static class StreamExtensions
 {
+	/// <summary>
+	/// Creates a .NET (CLR) <see cref="System.IO.Stream"/> wrapping the provided SDL <see cref="Stream"/>
+	/// </summary>
+	/// <param name="sdlStream">The SDL <see cref="Stream"/> to wrap</param>
+	/// <param name="leaveOpen">A value indicating whether to leave the underlying SDL stream open when the wrapper is disposed</param>
+	/// <param name="canRead">An overwrite flag indicating whether the stream can be read from</param>
+	/// <param name="canSeek">An overwrite flag indicating whether the stream can be seeked</param>
+	/// <param name="canWrite">An overwrite flag indicating whether the stream can be written to</param>
+	/// <returns>A <see cref="SdlToClrStream"/> wrapper around the SDL <see cref="Stream"/></returns>
+	/// <remarks>
+	/// <para>
+	/// The <see cref="SdlToClrStream"/> constructor does its best to detect the capabilities of the provided SDL <see cref="Stream"/>.
+	/// But in some cases it might not be possible to determine whether the stream can be read from, seeked or written to, or the detection might be wrong.
+	/// In those cases, you can use the optional <paramref name="canRead"/>, <paramref name="canSeek"/> and <paramref name="canWrite"/> parameters to explicitly specify the capabilities of the stream.
+	/// Note that, for example specifying <c><see langword="true"/></c> for <paramref name="canWrite"/> for an inherently read-only stream will not magically make it writable, but it will make this wrapper report that it is writable.
+	/// </para>
+	/// <para>
+	/// Please remember to <see cref="System.IO.Stream.Dispose()">dispose</see> the returned <see cref="SdlToClrStream"/> instance when you are done using it to free up any resources.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="ArgumentNullException"><paramref name="sdlStream"/> is <c><see langword="null"/></c></exception>
+	public static SdlToClrStream ToClrStream(this Stream sdlStream, bool leaveOpen = false, bool? canRead = default, bool? canSeek = default, bool? canWrite = default)
+		=> new(sdlStream, leaveOpen, canRead, canSeek, canWrite);
+
+	/// <summary>
+	/// Creates an SDL <see cref="Stream"/> wrapping the provided .NET (CLR) <see cref="System.IO.Stream"/>
+	/// </summary>
+	/// <param name="clrStream">The CLR <see cref="System.IO.Stream"/> to wrap</param>
+	/// <param name="leaveOpen">A value indicating whether to leave the underlying CLR stream open when the wrapper is disposed</param>
+	/// <returns>A <see cref="ClrToSdlStream"/> wrapper around the CLR <see cref="System.IO.Stream"/></returns>
+	/// <remarks>
+	/// <para>
+	/// Please remember to <see cref="Stream.Dispose()">dispose</see> the returned <see cref="ClrToSdlStream"/> instance when you are done using it to free up any resources.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="ArgumentNullException"><paramref name="clrStream"/> is <c><see langword="null"/></c></exception>
+	public static Stream ToSdlStream(this System.IO.Stream clrStream, bool leaveOpen = false)
+		=> new ClrToSdlStream(clrStream, leaveOpen);
+
 	// this overload exist just for completeness's sake, 'TimeSpan' is the way more csharp-y way of communicating timeout values
 	/// <param name="timeout">
 	/// The time to wait for the <paramref name="destination"/> stream to become ready or fail if exceeded.

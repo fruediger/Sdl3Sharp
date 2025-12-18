@@ -47,6 +47,9 @@ public sealed partial class FileStream : Stream
 		static void failArgumentsInvalid() => throw new ArgumentException($"Invalid combination of values for the {nameof(access)}, {nameof(mode)}, and {nameof(kind)} arguments");
 	}
 
+	private readonly string mFileName;
+	private readonly string mModeString;
+
 	/// <exception cref="SdlException">The <see cref="FileStream"/> could not be created (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	private unsafe FileStream(string fileName, string modeString, IUnsafeConstructorDispatch? _ = default) :
 		base(SDL_IOFromFile(Utf8Convert(fileName, out var fileNameUtf8), Utf8Convert(modeString, out var modeStringUtf8))) // base(SDL_IOStream*) does neither throw nor fail
@@ -57,6 +60,10 @@ public sealed partial class FileStream : Stream
 			{
 				failCouldNotCreateFileStream();
 			}
+
+			// We store them just for debugging purposes and for SdlToClrStream to identify if the stream is readable or not 
+			mFileName = fileName;
+			mModeString = modeString;
 		}
 		finally
 		{
@@ -220,6 +227,10 @@ public sealed partial class FileStream : Stream
 		=> Properties?.TryGetNumberValue(PropertyNames.FileDescriptorNumber, out var fileDescriptor) is true
 			? unchecked((int)fileDescriptor) // POSIX file descriptors should always fit into 'int' (they are 'int' by definition)
 			: -1;
+
+	internal string FileName { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mFileName; }
+
+	internal string ModeString { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mModeString; }
 
 	/// <summary>
 	/// Gets the pointer to the C standard library <c>FILE</c> that the <see cref="FileStream"/> is using to access the filesystem
