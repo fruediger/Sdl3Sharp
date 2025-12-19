@@ -20,6 +20,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Sdl3Sharp.Image" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <ProjectReference Include="..\Sdl3Sharp.SourceGeneration\Sdl3Sharp.SourceGeneration.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
     <PackageReference Include="Sdl3Sharp.Ffi.Core" Version="$(Sdl3SharpFfiVersion)" />
   </ItemGroup>
