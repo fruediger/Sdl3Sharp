@@ -608,6 +608,7 @@ public partial class Surface : IDisposable
 	/// </remarks>
 	public SurfaceFlags Flags
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		get
 		{
 			unsafe
@@ -628,6 +629,7 @@ public partial class Surface : IDisposable
 	/// </value>
 	public PixelFormat Format
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		get
 		{
 			unsafe
@@ -708,6 +710,7 @@ public partial class Surface : IDisposable
 	/// </value>
 	public int Height
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		get
 		{
 			unsafe
@@ -828,6 +831,7 @@ public partial class Surface : IDisposable
 	/// </remarks>
 	public bool IsLocked
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		get
 		{
 			unsafe
@@ -855,6 +859,7 @@ public partial class Surface : IDisposable
 	/// </remarks>
 	public bool IsPreAllocated
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		get
 		{
 			unsafe
@@ -910,6 +915,7 @@ public partial class Surface : IDisposable
 	/// </value>
 	public bool IsSimdAligned
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		get
 		{
 			unsafe
@@ -960,6 +966,7 @@ public partial class Surface : IDisposable
 	/// </example>
 	public bool MustLock
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		get
 		{
 			unsafe
@@ -1054,6 +1061,7 @@ public partial class Surface : IDisposable
 	/// </remarks>
 	public int Pitch
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		get
 		{
 			unsafe
@@ -1217,6 +1225,7 @@ public partial class Surface : IDisposable
 	/// </example>
 	public Utilities.NativeMemory UnsafePixels
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		get
 		{
 			unsafe
@@ -1239,6 +1248,7 @@ public partial class Surface : IDisposable
 	/// </value>
 	public int Width
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		get
 		{
 			unsafe

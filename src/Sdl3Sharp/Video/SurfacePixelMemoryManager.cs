@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 namespace Sdl3Sharp.Video;
 
 /// <summary>
-/// Manages and represents the pixel memory of a locked <see cref="Surface"/>
+/// Manages and represents the pixel memory of a locked <see cref="Video.Surface"/>
 /// </summary>
 public sealed class SurfacePixelMemoryManager : NativeMemoryManagerBase
 {
@@ -33,6 +33,7 @@ public sealed class SurfacePixelMemoryManager : NativeMemoryManagerBase
 	/// <inheritdoc/>
 	public override nuint Length
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		get
 		{
 			unsafe
@@ -52,7 +53,7 @@ public sealed class SurfacePixelMemoryManager : NativeMemoryManagerBase
 	/// </value>
 	/// <remarks>
 	/// <para>
-	/// The pixel memory data is in the pixel format specified by the <see cref="Surface.Format"/> of the <see cref="Surface"/>.
+	/// The pixel memory data is in the pixel format specified by the <see cref="Surface.Format"/> property of the <see cref="Surface"/>.
 	/// </para>
 	/// <para>
 	/// Please keep the <see cref="Surface.Pitch"/> per vertical pixel row in mind when processing the continuous pixel memory.
@@ -60,6 +61,7 @@ public sealed class SurfacePixelMemoryManager : NativeMemoryManagerBase
 	/// </remarks>
 	public override NativeMemory Memory
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		get
 		{
 			unsafe
@@ -74,6 +76,7 @@ public sealed class SurfacePixelMemoryManager : NativeMemoryManagerBase
 	/// <inheritdoc/>
 	public override IntPtr Pointer
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		get
 		{
 			unsafe
@@ -85,17 +88,15 @@ public sealed class SurfacePixelMemoryManager : NativeMemoryManagerBase
 		}
 	}
 
+	internal override unsafe void* RawPointer { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mSurface is { Pointer: var surface } ? surface->Pixels : null; }
+
 	/// <summary>
-	/// Gets the locked <see cref="Surface"/>
+	/// Gets the locked <see cref="Video.Surface"/>
 	/// </summary>
 	/// <value>
-	/// The locked <see cref="Surface"/>, or <c><see langword="null"/></c> if the <see cref="Surface"/> is not locked
+	/// The locked <see cref="Video.Surface"/>, or <c><see langword="null"/></c> if the <see cref="Video.Surface"/> is not locked
 	/// </value>
 	public Surface? Surface { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mSurface; }
-
-	internal override unsafe void* RawPointer => mSurface is { Pointer: var surface } && surface is not null
-		? surface->Pixels
-		: default;
 
 	// unnecessary to override: the base implemenation does nothing anyways
 	// protected override void AddPin(ulong oldPinCounter, ulong newPinCounter);
