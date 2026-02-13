@@ -12,54 +12,31 @@ using System.Runtime.InteropServices;
 namespace Sdl3Sharp.Video.Rendering;
 
 /// <summary>
-/// Provides static methods for creating <see cref="Vertex{TPosition, TColor, TTexCoord}">vertices</see>
-/// </summary>
-public static class Vertex
-{
-	/// <summary>
-	/// Creates a new <see cref="Vertex{TPosition, TColor, TTexCoord}">Vertex</see>&lt;<see cref="float"/>, <see cref="float"/>, <see cref="float"/>&gt; from the specified position, color, and texture coordinate
-	/// </summary>
-	/// <param name="position">The position of the vertex in <see cref="Renderer"/> coordinates</param>
-	/// <param name="color">The color of the vertex</param>
-	/// <param name="texCoord">The texture coordinate of the vertex, normalized to the range from <c>0</c> to <c>1</c></param>
-	/// <returns>A new <see cref="Vertex{TPosition, TColor, TTexCoord}"/> instance</returns>
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static Vertex<float, float, float> From(Point<float> position, Color<float> color, Point<float> texCoord)
-		=> new(position, color, texCoord);
-}
-
-/// <summary>
 /// Represents a vertex structure
 /// </summary>
-/// <typeparam name="TPosition">The type of the position components</typeparam>
-/// <typeparam name="TColor">The type of the color components</typeparam>
-/// <typeparam name="TTexCoord">The type of the texture coordinate components</typeparam>
-/// <param name="position">The position of the vertex in <see cref="Renderer"/> coordinates</param>
+/// <param name="position">The position of the vertex in <see cref="IRenderer"/> coordinates</param>
 /// <param name="color">The color of the vertex</param>
-/// <param name="texCoord">The texture coordinate of the vertex; for floating point <typeparamref name="TTexCoord"/> types, this is typically normalized to the range from <c>0</c> to <c>1</c></param>
+/// <param name="texCoord">The texture coordinate of the vertex, typically normalized to be in the range from <c>0</c> to <c>1</c></param>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 [method: MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization), SetsRequiredMembers]
-public readonly struct Vertex<TPosition, TColor, TTexCoord>(in Point<TPosition> position, in Color<TColor> color, in Point<TTexCoord> texCoord) :
-	IEquatable<Vertex<TPosition, TColor, TTexCoord>>, IFormattable, ISpanFormattable, IEqualityOperators<Vertex<TPosition, TColor, TTexCoord>, Vertex<TPosition, TColor, TTexCoord>, bool>
-	where TPosition : unmanaged, IEquatable<TPosition>, IFormattable, ISpanFormattable, IEqualityOperators<TPosition, TPosition, bool>
-	where TColor : unmanaged, IEquatable<TColor>, IFormattable, ISpanFormattable, IEqualityOperators<TColor, TColor, bool>
-	where TTexCoord : unmanaged, IEquatable<TTexCoord>, IFormattable, ISpanFormattable, IEqualityOperators<TTexCoord, TTexCoord, bool>
+public readonly struct Vertex(in Point<float> position, in Color<float> color, in Point<float> texCoord) :
+	IEquatable<Vertex>, IFormattable, ISpanFormattable, IEqualityOperators<Vertex, Vertex, bool>
 {
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private readonly string DebuggerDisplay => ToString(formatProvider: CultureInfo.InvariantCulture);
 
-	private readonly Point<TPosition> mPosition = position;
-	private readonly Color<TColor> mColor = color;
-	private readonly Point<TTexCoord> mTexCoord = texCoord;
+	private readonly Point<float> mPosition = position;
+	private readonly Color<float> mColor    = color;
+	private readonly Point<float> mTexCoord = texCoord;
 
 	/// <summary>
 	/// Gets or initializes the position of the vertex
 	/// </summary>
 	/// <value>
-	/// The position of the vertex in <see cref="Renderer"/> coordinates
+	/// The position of the vertex in <see cref="IRenderer"/> coordinates
 	/// </value>
-	public required readonly Point<TPosition> Position
+	public required readonly Point<float> Position
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		get => mPosition;
@@ -74,7 +51,7 @@ public readonly struct Vertex<TPosition, TColor, TTexCoord>(in Point<TPosition> 
 	/// <value>
 	/// The color of the vertex
 	/// </value>
-	public required readonly Color<TColor> Color
+	public required readonly Color<float> Color
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		get => mColor;
@@ -87,9 +64,9 @@ public readonly struct Vertex<TPosition, TColor, TTexCoord>(in Point<TPosition> 
 	/// Gets or initializes the texture coordinate of the vertex
 	/// </summary>
 	/// <value>
-	/// The texture coordinate of the vertex; for floating point <typeparamref name="TTexCoord"/> types, this is typically normalized to the range from <c>0</c> to <c>1</c>
+	/// The texture coordinate of the vertex, typically normalized to be in the range from <c>0</c> to <c>1</c>
 	/// </value>
-	public required readonly Point<TTexCoord> TexCoord
+	public required readonly Point<float> TexCoord
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		get => mTexCoord;
@@ -101,11 +78,11 @@ public readonly struct Vertex<TPosition, TColor, TTexCoord>(in Point<TPosition> 
 	/// <summary>
 	/// Deconstructs the vertex into its position, color, and texture coordinate components
 	/// </summary>
-	/// <param name="position">The position of the vertex in <see cref="Renderer"/> coordinates</param>
+	/// <param name="position">The position of the vertex in <see cref="IRenderer"/> coordinates</param>
 	/// <param name="color">The color of the vertex</param>
-	/// <param name="texCoord">The texture coordinate of the vertex; for floating point <typeparamref name="TTexCoord"/> types, this is typically normalized to the range from <c>0</c> to <c>1</c></param>
+	/// <param name="texCoord">The texture coordinate of the vertex, typically normalized to be in the range from <c>0</c> to <c>1</c></param>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public readonly void Deconstruct(out Point<TPosition> position, out Color<TColor> color, out Point<TTexCoord> texCoord)
+	public readonly void Deconstruct(out Point<float> position, out Color<float> color, out Point<float> texCoord)
 	{
 		position = mPosition;
 		color = mColor;
@@ -113,18 +90,18 @@ public readonly struct Vertex<TPosition, TColor, TTexCoord>(in Point<TPosition> 
 	}
 
 	/// <inheritdoc/>
-	public readonly override bool Equals([NotNullWhen(true)] object? obj) => obj is Vertex<TPosition, TColor, TTexCoord> other && Equals(other);
+	public readonly override bool Equals([NotNullWhen(true)] object? obj) => obj is Vertex other && Equals(other);
 
 	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public readonly bool Equals(in Vertex<TPosition, TColor, TTexCoord> other)
+	public readonly bool Equals(in Vertex other)
 		=> mPosition.Equals(in other.mPosition)
 		&& mColor.Equals(in other.mColor)
 		&& mTexCoord.Equals(in other.mTexCoord);
 
 	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	readonly bool IEquatable<Vertex<TPosition, TColor, TTexCoord>>.Equals(Vertex<TPosition, TColor, TTexCoord> other) => Equals(other);
+	readonly bool IEquatable<Vertex>.Equals(Vertex other) => Equals(other);
 
 	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -161,25 +138,25 @@ public readonly struct Vertex<TPosition, TColor, TTexCoord>(in Point<TPosition> 
 
 	/// <inheritdoc cref="IEqualityOperators{TSelf, TOther, TResult}.operator=="/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static bool operator ==(in Vertex<TPosition, TColor, TTexCoord> left, in Vertex<TPosition, TColor, TTexCoord> right)
+	public static bool operator ==(in Vertex left, in Vertex right)
 		=> left.mPosition == right.mPosition
 		&& left.mColor == right.mColor
 		&& left.mTexCoord == right.mTexCoord;
 
 	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	static bool IEqualityOperators<Vertex<TPosition, TColor, TTexCoord>, Vertex<TPosition, TColor, TTexCoord>, bool>.operator ==(Vertex<TPosition, TColor, TTexCoord> left, Vertex<TPosition, TColor, TTexCoord> right)
+	static bool IEqualityOperators<Vertex, Vertex, bool>.operator ==(Vertex left, Vertex right)
 		=> left == right;
 
 	/// <inheritdoc cref="IEqualityOperators{TSelf, TOther, TResult}.operator!="/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static bool operator !=(in Vertex<TPosition, TColor, TTexCoord> left, in Vertex<TPosition, TColor, TTexCoord> right)
+	public static bool operator !=(in Vertex left, in Vertex right)
 		=> left.mPosition != right.mPosition
 		|| left.mColor != right.mColor
 		|| left.mTexCoord != right.mTexCoord;
 
 	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	static bool IEqualityOperators<Vertex<TPosition, TColor, TTexCoord>, Vertex<TPosition, TColor, TTexCoord>, bool>.operator !=(Vertex<TPosition, TColor, TTexCoord> left, Vertex<TPosition, TColor, TTexCoord> right)
+	static bool IEqualityOperators<Vertex, Vertex, bool>.operator !=(Vertex left, Vertex right)
 		=> left != right;
 }

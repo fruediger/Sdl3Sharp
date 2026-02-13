@@ -7,7 +7,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-    <DefineConstants>$(DefineConstants);SDL3_2_0_OR_GREATER</DefineConstants>
+    <DefineConstants>$(DefineConstants);SDL3_2_0_OR_GREATER;SDL3_4_0_OR_GREATER</DefineConstants>
     
     <PackageId>$(PackageId).Core</PackageId>
     <Description>$(Description) - "Core" package - just contains the managed binding code</Description>
@@ -25,6 +25,7 @@
   
   <ItemGroup>
     <ProjectReference Include="..\Sdl3Sharp.SourceGeneration\Sdl3Sharp.SourceGeneration.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+    <ProjectReference Include="..\Sdl3Sharp.SourceGeneration.RegisterDriver\Sdl3Sharp.SourceGeneration.RegisterDriver.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
     <PackageReference Include="Sdl3Sharp.Ffi.Core" Version="$(Sdl3SharpFfiVersion)" />
   </ItemGroup>
 

@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.12.35514.174
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11415.280
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl3Sharp.SourceGeneration", "Sdl3Sharp.SourceGeneration\Sdl3Sharp.SourceGeneration.csproj", "{A06B42A4-DBEB-4404-A829-0A87162FE597}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl3Sharp", "Sdl3Sharp\Sdl3Sharp.csproj", "{8FA78948-772B-41B0-98A4-14B9E99F8D96}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdl3Sharp.SourceGeneration.RegisterDriver", "Sdl3Sharp.SourceGeneration.RegisterDriver\Sdl3Sharp.SourceGeneration.RegisterDriver.csproj", "{06471AD7-34C7-4E47-979E-5835D08274CC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{8FA78948-772B-41B0-98A4-14B9E99F8D96}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8FA78948-772B-41B0-98A4-14B9E99F8D96}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8FA78948-772B-41B0-98A4-14B9E99F8D96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06471AD7-34C7-4E47-979E-5835D08274CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06471AD7-34C7-4E47-979E-5835D08274CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06471AD7-34C7-4E47-979E-5835D08274CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06471AD7-34C7-4E47-979E-5835D08274CC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

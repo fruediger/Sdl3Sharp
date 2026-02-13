@@ -1,14 +1,17 @@
-﻿using Sdl3Sharp.IO;
+﻿using Sdl3Sharp.Internal;
+using Sdl3Sharp.IO;
 using Sdl3Sharp.Utilities;
 using Sdl3Sharp.Video.Blending;
 using Sdl3Sharp.Video.Coloring;
 using Sdl3Sharp.Video.Drawing;
+using Sdl3Sharp.Video.Rendering;
+using Sdl3Sharp.Video.Rendering.Drivers;
+using Sdl3Sharp.Windowing;
 using System;
 using System.Buffers;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
 
 namespace Sdl3Sharp.Video;
@@ -21,7 +24,7 @@ namespace Sdl3Sharp.Video;
 /// <see cref="Surface"/>s make serious efforts to manage images in various formats, and provide a reasonable toolbox for transforming the data, including copying between <see cref="Surface"/>s, filling rectangles in the image data, etc.
 /// </para>
 /// </remarks>
-public partial class Surface : IDisposable
+public sealed partial class Surface : IDisposable
 {
 	private interface IUnsafeConstructorDispatch;
 
@@ -94,7 +97,7 @@ public partial class Surface : IDisposable
 	/// do not call <see cref="TryGetOrCreate"/> for such owner instances.
 	/// </para>
 	/// </remarks>
-	private protected unsafe Surface(SDL_Surface* surface) :
+	internal unsafe Surface(SDL_Surface* surface) :
 #pragma warning disable IDE0034 // Keep it that way for explicitness sake
 		this(surface, default(IUnsafeConstructorDispatch?))
 #pragma warning restore IDE0034
@@ -331,7 +334,7 @@ public partial class Surface : IDisposable
 	/// Remember to <see cref="Dispose()">dispose</see> of the resulting surface when you are done with it. Not doing so will result in a memory leak.
 	/// </para>
 	/// </remarks>
-	/// <inheritdoc cref="Surface.Surface(Stream, bool, IUnsafeConstructorDispatch?)"/>
+	/// <inheritdoc cref="Surface(Stream, bool, IUnsafeConstructorDispatch?)"/>
 	public Surface(Stream source, bool closeAfterwards = false) :
 #pragma warning disable IDE0034 // Keep it that way for explicitness sake
 		this(source, closeAfterwards, default(IUnsafeConstructorDispatch?))
@@ -389,7 +392,7 @@ public partial class Surface : IDisposable
 	/// </para>
 	/// </remarks>
 	/// <exception cref="SdlException">
-	/// When setting this property, the specified blend mode is <see cref="BlendMode.Invalid"/> or not supported by the platform or renderer (check <see cref="Error.TryGet(out string?)"/> for more information)
+	/// When setting this property, the specified blend mode is <see cref="BlendMode.Invalid"/> or not supported by the platform (check <see cref="Error.TryGet(out string?)"/> for more information)
 	/// </exception>
 	public BlendMode BlendMode
 	{
@@ -409,19 +412,9 @@ public partial class Surface : IDisposable
 		{
 			unsafe
 			{
-				if (!(bool)SDL_SetSurfaceBlendMode(mSurface, value)
-					&& Error.SDL_GetError() is var message
-					&& message is not null
-					&& !MemoryMarshal.CreateReadOnlySpanFromNullTerminated(message).SequenceEqual("Parameter 'surface' is invalid"u8) /* filter out "surface" argument errors */)
-				{
-					// value is BlendMode.Invalid or value is an unsupported blend mode
-
-					failSdlError(message);
-				}
+				ErrorHelper.ThrowIfFailed(SDL_SetSurfaceBlendMode(mSurface, value), filterError: GetInvalidSurfaceErrorMessage());
+				// throws if value is BlendMode.Invalid or value is an unsupported blend mode
 			}
-
-			[DoesNotReturn]
-			static unsafe void failSdlError(byte* message) => throw new SdlException(Utf8StringMarshaller.ConvertToManaged(message));
 		}
 	}
 
@@ -429,7 +422,7 @@ public partial class Surface : IDisposable
 	/// Gets or sets the clipping rectangle for the surface
 	/// </summary>
 	/// <value>
-	/// The clipping rectangle for the surface, or <c><see langword="null"/></c> if clipping is disabled
+	/// The clipping rectangle for the surface
 	/// </value>
 	/// <remarks>
 	/// <para>
@@ -437,14 +430,14 @@ public partial class Surface : IDisposable
 	/// Note that blits are automatically clipped to the edges of the source and destination surfaces.
 	/// </para>
 	/// <para>
-	/// If the value of this property is <c><see langword="null"/></c>, clipping is disabled.
+	/// If the value of this property is equal to the surface's bounds, clipping is effectively disabled.
 	/// </para>
 	/// <para>
 	/// Alternatively, you can use the methods <see cref="ResetClippingRect"/> and <see cref="SetClippingRect(in Rect{int})"/> to manipulate the clipping rectangle.
 	/// The latter returns a value indicating whether the set clipping rectangle intersects the surface area.
 	/// </para>
 	/// </remarks>
-	public Rect<int>? ClippingRect
+	public Rect<int> ClippingRect
 	{
 		get
 		{
@@ -452,9 +445,9 @@ public partial class Surface : IDisposable
 			{
 				Unsafe.SkipInit(out Rect<int> rect);
 
-				return (bool)SDL_GetSurfaceClipRect(mSurface, &rect)
-					? rect
-					: null;
+				SDL_GetSurfaceClipRect(mSurface, &rect);
+
+				return rect;
 			}
 		}
 
@@ -462,10 +455,7 @@ public partial class Surface : IDisposable
 		{
 			unsafe
 			{
-				SDL_SetSurfaceClipRect(mSurface, value is Rect<int> rect
-					? &rect
-					: null
-				);
+				SDL_SetSurfaceClipRect(mSurface, &value);
 			}
 		}	
 	}
@@ -510,19 +500,9 @@ public partial class Surface : IDisposable
 		{
 			unsafe
 			{
-				if (!(bool)SDL_SetSurfaceColorKey(mSurface, enabled: value.HasValue, key: value.GetValueOrDefault())
-					&& Error.SDL_GetError() is var message
-					&& message is not null
-					&& !MemoryMarshal.CreateReadOnlySpanFromNullTerminated(message).SequenceEqual("Parameter 'surface' is invalid"u8) /* filter out "surface" argument errors */)
-				{
-					// the key as palette index is invalid
-
-					failSdlError(message);
-				}
+				ErrorHelper.ThrowIfFailed(SDL_SetSurfaceColorKey(mSurface, enabled: value.HasValue, key: value.GetValueOrDefault()), filterError: GetInvalidSurfaceErrorMessage());
+				// throws if the key as palette index is invalid
 			}
-
-			[DoesNotReturn]
-			static unsafe void failSdlError(byte* message) => throw new SdlException(Utf8StringMarshaller.ConvertToManaged(message));
 		}
 	}
 
@@ -1019,17 +999,8 @@ public partial class Surface : IDisposable
 				// If SDL_SetSurfacePalette does destroy the old palette, there shouldn't be a registered managed wrapper around it anymore,
 				// and if there would be a registered managed wrapper, SDL_SetSurfacePalette shouldn't destroy the native instance yet (as it's ref counter shouldn't go to zero).
 
-				if (!(bool)SDL_SetSurfacePalette(mSurface, value is not null ? value.Pointer : null)
-					&& Error.SDL_GetError() is var message
-					&& message is not null
-					&& !MemoryMarshal.CreateReadOnlySpanFromNullTerminated(message).SequenceEqual("Parameter 'surface' is invalid"u8) /* filter out "surface" argument errors */)
-				{
-					failSdlError(message);
-				}
+				ErrorHelper.ThrowIfFailed(SDL_SetSurfacePalette(mSurface, value is not null ? value.Pointer : null), filterError: GetInvalidSurfaceErrorMessage());
 			}
-
-			[DoesNotReturn]
-			static unsafe void failSdlError(byte* message) => throw new SdlException(Utf8StringMarshaller.ConvertToManaged(message));
 		}
 	}
 
@@ -1077,7 +1048,7 @@ public partial class Surface : IDisposable
 	internal unsafe SDL_Surface* Pointer { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mSurface; }
 
 	/// <summary>
-	/// Get the properties associated with the surface
+	/// Gets the properties associated with the surface
 	/// </summary>
 	/// <value>
 	/// The properties associated with the surface, or <see langword="null"/> if the properties could not be retrieved successfully (check <see cref="Error.TryGet(out string?)"/> for more information)
@@ -1098,6 +1069,7 @@ public partial class Surface : IDisposable
 	}
 
 #if SDL3_4_0_OR_GREATER
+
 	/// <summary>
 	/// Gets or sets the rotation angle, in degrees, for the surface
 	/// </summary>
@@ -1123,6 +1095,7 @@ public partial class Surface : IDisposable
 
 		set => Properties?.TrySetFloatValue(PropertyNames.RotationFloat, value);
 	}
+
 #endif
 
 	/// <summary>
@@ -1289,7 +1262,7 @@ public partial class Surface : IDisposable
 	/// This unpins any <see cref="Utilities.NativeMemory"/> instances or <see cref="Memory{T}"/> instances used to create the surface.
 	/// </para>
 	/// </remarks>
-	protected virtual void Dispose(bool disposing, bool forget)
+	private void Dispose(bool disposing, bool forget)
 	{
 		unsafe
 		{
@@ -1409,7 +1382,7 @@ public partial class Surface : IDisposable
 	/// </summary>
 	/// <remarks>
 	/// <para>
-	/// Alternatively, you can set <see cref="ClippingRect"/> to <c><see langword="null"/></c> instead to disable the clipping rectangle.
+	/// This method disables clipping for the surface, essentially setting the clipping rectangle to the surface's bounds.
 	/// </para>
 	/// </remarks>
 	public void ResetClippingRect()
@@ -1912,7 +1885,7 @@ public partial class Surface : IDisposable
 	/// <remarks>
 	/// <para>
 	/// The pixels in the source surface are split into a 3⨯3 grid, using the different corner sizes for each corner, and the sides and center making up the remaining pixels.
-	/// The corners are then scaled using scale and fit into the corners of the <paramref name="destinationRect"/>.
+	/// The corners are then scaled using <paramref name="scale"/> and fit into the corners of the <paramref name="destinationRect"/>.
 	/// The sides and center are then stretched into place to cover the remaining portion of the <paramref name="destinationRect"/>.
 	/// </para>
 	/// <para>
@@ -1945,7 +1918,7 @@ public partial class Surface : IDisposable
 	/// <remarks>
 	/// <para>
 	/// The pixels in the source surface are split into a 3⨯3 grid, using the different corner sizes for each corner, and the sides and center making up the remaining pixels.
-	/// The corners are then scaled using scale and fit into the corners of the <paramref name="destinationRect"/>.
+	/// The corners are then scaled using <paramref name="scale"/> and fit into the corners of the <paramref name="destinationRect"/>.
 	/// The sides and center are then stretched into place to cover the remaining portion of the <paramref name="destinationRect"/>.
 	/// </para>
 	/// <para>
@@ -1978,7 +1951,7 @@ public partial class Surface : IDisposable
 	/// <remarks>
 	/// <para>
 	/// The pixels in the source surface are split into a 3⨯3 grid, using the different corner sizes for each corner, and the sides and center making up the remaining pixels.
-	/// The corners are then scaled using scale and fit into the corners of this surface.
+	/// The corners are then scaled using <paramref name="scale"/> and fit into the corners of this surface.
 	/// The sides and center are then stretched into place to cover the remaining portion of this surface.
 	/// </para>
 	/// <para>
@@ -2010,7 +1983,7 @@ public partial class Surface : IDisposable
 	/// <remarks>
 	/// <para>
 	/// The pixels in the source surface are split into a 3⨯3 grid, using the different corner sizes for each corner, and the sides and center making up the remaining pixels.
-	/// The corners are then scaled using scale and fit into the corners of this surface.
+	/// The corners are then scaled using <paramref name="scale"/> and fit into the corners of this surface.
 	/// The sides and center are then stretched into place to cover the remaining portion of this surface.
 	/// </para>
 	/// <para>
@@ -2676,7 +2649,7 @@ public partial class Surface : IDisposable
 		return SDL_ConvertPixelsAndColorspace(width, height, sourceFormat, sourceColorSpace, sourceProperties?.Id ?? 0, source, sourcePitch, destinationFormat, destinationColorSpace, destinationProperties?.Id ?? 0, destination, destinationPitch);
 	}
 
-#if SDL3_4_0_GREATER
+#if SDL3_4_0_OR_GREATER
 	/// <summary>
 	/// Tries to perform a stretched pixel copy from a specified source surface onto this surface
 	/// </summary>
@@ -2785,7 +2758,7 @@ public partial class Surface : IDisposable
 	/// If this method is called for on surface that already has a palette, a new palette will be created to replace it.
 	/// </para>
 	/// </remarks>
-	public bool TryCreateNewPalette([NotNullWhen(true)] out Palette? palette)
+	public bool TryCreatePalette([NotNullWhen(true)] out Palette? palette)
 	{
 		unsafe
 		{
@@ -2801,6 +2774,177 @@ public partial class Surface : IDisposable
 
 			mPalette = palette = new Palette(result); // we actually want to override any existing managed Palette here
 			return true;
+		}
+	}
+
+	/// <summary>
+	/// Tries to create a new software renderer for this surface
+	/// </summary>
+	/// <param name="renderer">The resulting software renderer, if the method returns <see langword="true"/>; otherwise, <see langword="null"/></param>
+	/// <returns><c><see langword="true"/></c>, if the renderer was created successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method creates a software renderer that renders directly to this surface.
+	/// </para>
+	/// <para>
+	/// As such, the resulting renderer won't be associated with any window. 
+	/// You can also create software renderers for <see cref="Window"/>s using the appropriate methods on a <see cref="Window"/> instance.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	public bool TryCreateRenderer([NotNullWhen(true)] out Renderer<Software>? renderer)
+	{
+		unsafe
+		{
+			var rendererPtr = IRenderer.SDL_CreateSoftwareRenderer(mSurface);
+
+			if (rendererPtr is null)
+			{
+				renderer = default;
+				return false;
+			}
+
+			renderer = new(rendererPtr, register: true);
+			return true;
+		}
+	}
+
+	/// <summary>
+	/// Tries to create a new software renderer for this surface
+	/// </summary>
+	/// <param name="renderer">The resulting software renderer, if the method returns <see langword="true"/>; otherwise, <see langword="null"/></param>
+	/// <param name="outputColorSpace">
+	/// The color space to be used by renderer for presenting the output.
+	/// The <see cref="Direct3D11">Direct3D 11</see>, <see cref="Direct3D12">Direct3D 12</see>, and <see cref="Metal">Metal</see> renderers support <see cref="ColorSpace.SrgbLinear"/>,
+	/// which is a linear color space and supports HDR output. In that case, drawing still uses the sRGB color space, but individual values can go beyond <c>1.0</c>
+	/// and floating point textures can be used for HDR content.
+	/// If this parameter is <see langword="null"/> (the default), the output color space defaults to <see cref="ColorSpace.Srgb"/>.
+	/// </param>
+	/// <param name="properties">Additional properties to use when creating the renderer</param>
+	/// <returns><c><see langword="true"/></c>, if the renderer was created successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method creates a software renderer that renders directly to this surface.
+	/// </para>
+	/// <para>
+	/// As such, the resulting renderer won't be associated with any window. 
+	/// You can also create software renderers for <see cref="Window"/>s using the appropriate methods on a <see cref="Window"/> instance.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	public bool TryCreateRenderer([NotNullWhen(true)] out Renderer<Software>? renderer, ColorSpace? outputColorSpace = default, Properties? properties = default)
+	{
+		unsafe
+		{
+			Properties propertiesUsed;
+			Unsafe.SkipInit(out string? driverNameBackup);
+			Unsafe.SkipInit(out IntPtr? surfaceBackup);
+			Unsafe.SkipInit(out ColorSpace? outputColorSpaceBackup);
+
+			if (properties is null)
+			{
+				propertiesUsed = [];
+
+				// naturally, we want SDL_PROP_RENDERER_CREATE_NAME_STRING to be set to "software" when creating a software renderer
+				propertiesUsed.TrySetStringValue(IRenderer.PropertyNames.CreateNameString, Software.Name);
+
+				// setting SDL_PROP_RENDERER_CREATE_SURFACE_POINTER is required, when creating a software renderer for a surface
+				propertiesUsed.TrySetPointerValue(Renderer<Software>.PropertyNames.CreateSoftwareSurfacePointer, unchecked((IntPtr)(mSurface)));
+
+				if (outputColorSpace is ColorSpace outputColorSpaceValue)
+				{
+					propertiesUsed.TrySetNumberValue(IRenderer.PropertyNames.CreateOutputColorSpaceNumber, unchecked((uint)outputColorSpaceValue));
+				}
+			}
+			else
+			{
+				propertiesUsed = properties;
+
+				driverNameBackup = propertiesUsed.TryGetStringValue(IRenderer.PropertyNames.CreateNameString, out var existingDriverName)
+					? existingDriverName
+					: null;
+
+				// naturally, we want SDL_PROP_RENDERER_CREATE_NAME_STRING to be set to "software" when creating a software renderer
+				propertiesUsed.TrySetStringValue(IRenderer.PropertyNames.CreateNameString, Software.Name);
+
+				surfaceBackup = propertiesUsed.TryGetPointerValue(Renderer<Software>.PropertyNames.CreateSoftwareSurfacePointer, out var existingSurfacePtr)
+					? existingSurfacePtr
+					: null;
+
+				// setting SDL_PROP_RENDERER_CREATE_SURFACE_POINTER is required, when creating a software renderer for a surface
+				propertiesUsed.TrySetPointerValue(Renderer<Software>.PropertyNames.CreateSoftwareSurfacePointer, unchecked((IntPtr)(mSurface)));
+
+				if (outputColorSpace is ColorSpace outputColorSpaceValue)
+				{
+					outputColorSpaceBackup = propertiesUsed.TryGetNumberValue(IRenderer.PropertyNames.CreateOutputColorSpaceNumber, out var existingOutputColorSpaceValue)
+						? unchecked((ColorSpace)existingOutputColorSpaceValue)
+						: null;
+
+					propertiesUsed.TrySetNumberValue(IRenderer.PropertyNames.CreateOutputColorSpaceNumber, unchecked((uint)outputColorSpaceValue));
+				}
+			}
+
+			try
+			{
+				var rendererPtr = IRenderer.SDL_CreateRendererWithProperties(propertiesUsed.Id);
+
+				if (rendererPtr is null)
+				{
+					renderer = null;
+					return false;
+				}
+
+				renderer = new(rendererPtr, register: true);
+				return true;
+			}
+			finally
+			{
+				if (properties is null)
+				{
+					// propertiesUsed was just a temporary instance we created for this call, so we need to dispose it now
+
+					propertiesUsed.Dispose();
+				}
+				else
+				{
+					// we restored the original properties values from the given properties instance
+
+					if (driverNameBackup is not null)
+					{
+						propertiesUsed.TrySetStringValue(IRenderer.PropertyNames.CreateNameString, driverNameBackup);
+					}
+					else
+					{
+						propertiesUsed.TryRemove(IRenderer.PropertyNames.CreateNameString);
+					}
+
+					if (surfaceBackup is IntPtr surfacePtr)
+					{
+						propertiesUsed.TrySetPointerValue(Renderer<Software>.PropertyNames.CreateSoftwareSurfacePointer, surfacePtr);
+					}
+					else
+					{
+						propertiesUsed.TryRemove(Renderer<Software>.PropertyNames.CreateSoftwareSurfacePointer);
+					}
+
+
+					if (outputColorSpace.HasValue)
+					{
+						if (outputColorSpaceBackup is ColorSpace outputColorSpaceValue)
+						{
+							propertiesUsed.TrySetNumberValue(IRenderer.PropertyNames.CreateOutputColorSpaceNumber, unchecked((uint)outputColorSpaceValue));
+						}
+						else
+						{
+							propertiesUsed.TryRemove(IRenderer.PropertyNames.CreateOutputColorSpaceNumber);
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -3313,7 +3457,7 @@ public partial class Surface : IDisposable
 	/// This method is meant to be used as a simpler and safer alternative to the <see cref="MustLock"/> - <see cref="IsLocked"/> - <see cref="TryUnsafeLock"/> - <see cref="UnsafePixels"/> - <see cref="UnsafeUnlock"/> pattern.
 	/// </para>
 	/// <para>
-	/// If the <paramref name="pixelManager"/> was created successfully, you can use it's <see cref="SurfacePixelMemoryManager.Memory"/> property to read and write the pixel memory of this surface, using this surface's <see cref="Format"/>.
+	/// If the <paramref name="pixelManager"/> was created successfully, you can use its <see cref="SurfacePixelMemoryManager.Memory"/> property to read and write the pixel memory of this surface, using this surface's <see cref="Format"/>.
 	/// Once you are done accessing the pixel memory, you should <see cref="NativeMemoryManagerBase.Dispose()">dispose</see> the <paramref name="pixelManager"/> to release the surface.
 	/// </para>
 	/// </remarks>
@@ -3941,7 +4085,8 @@ public partial class Surface : IDisposable
 	/// if you want to access the surface's pixel memory directly in a faster and more efficient way.
 	/// If you're looking for a simpler and safer way to access the pixel memory, consider using <see cref="TryLock(out SurfacePixelMemoryManager?)"/> instead.
 	/// </para>
-	/// </remarks><example>
+	/// </remarks>
+	/// <example>
 	/// Example usage:
 	/// <code>
 	/// Surface surface;

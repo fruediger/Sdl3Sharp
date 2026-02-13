@@ -114,6 +114,18 @@ public sealed partial class Properties :
 		}
 	}
 
+	/// <summary>
+	/// For internal use only: Creates a temporary <see cref="Properties"/> instance without registering it
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// This does not register the created <see cref="Properties"/> instance with any <see cref="Sdl"/> instance.
+	/// Therefore, you must ensure to properly dispose the created instance yourself!
+	/// </para>
+	/// </remarks>
+	internal Properties() : this(sdl: null, ValidateId(SDL_CreateProperties()))
+	{ }
+
 	/// <inheritdoc/>
 	~Properties() => Dispose(deregister: true, forget: true);	
 
@@ -869,6 +881,28 @@ public sealed partial class Properties :
 			finally
 			{
 				Utf8StringMarshaller.Free(valueUtf8);
+				Utf8StringMarshaller.Free(nameUtf8);
+			}
+		}
+	}
+
+	internal unsafe bool TrySetNativeStringValue(string name, byte* value)
+	{
+		unsafe
+		{
+			if (string.IsNullOrWhiteSpace(name))
+			{
+				return false;
+			}
+
+			var nameUtf8 = Utf8StringMarshaller.ConvertToUnmanaged(name);
+
+			try
+			{
+				return SDL_SetStringProperty(mId, nameUtf8, value);
+			}
+			finally
+			{
 				Utf8StringMarshaller.Free(nameUtf8);
 			}
 		}

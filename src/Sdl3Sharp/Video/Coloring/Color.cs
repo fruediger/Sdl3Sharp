@@ -146,7 +146,7 @@ public static class Color
 /// or <see cref="float"/> for 128-bit pixel values with floating-point ranges from 0 to 1 for each component.
 /// </para>
 /// <para>
-/// <see cref="Color{T}">Color</see>&lt;<see cref="byte"/>&gt; values can be directly reinterpreted as an integer-packed color which uses the <see cref="PixelFormat.Rgba32"/> format (<see cref="PixelFormat.Abgr8888"/> on little-endian systems and <see cref="PixelFormat.Rgba8888"/> on big-endian systems).
+/// <see cref="Color{T}">Color</see>&lt;<see cref="byte"/>&gt; values can be directly reinterpreted as an integer-packed color which uses the <see cref="PixelFormatExtensions.get_Rgba32">Rgba32</see> format (<see cref="PixelFormat.Abgr8888"/> on little-endian systems and <see cref="PixelFormat.Rgba8888"/> on big-endian systems).
 /// </para>
 /// <para>
 /// <see cref="Color{T}">Color</see>&lt;<see cref="float"/>&gt; values can be directly reinterpreted as a float-packed color which uses the <see cref="PixelFormat.Rgba128Float"/> format.

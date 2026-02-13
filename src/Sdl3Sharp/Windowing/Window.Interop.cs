@@ -1,5 +1,6 @@
 ﻿using Sdl3Sharp.Internal.Interop;
 using Sdl3Sharp.SourceGeneration;
+using Sdl3Sharp.Video.Rendering;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -11,18 +12,34 @@ partial class Window
 	[StructLayout(LayoutKind.Sequential, Size = 0)]
 	internal readonly struct SDL_Window;
 
+	// TODO: IMPLEMENT!
+	/*
 	/// <summary>
-	/// Create a child popup window of the specified parent window
+	/// Create a window and default renderer
 	/// </summary>
-	/// <param name="parent">the parent of the window, must not be NULL</param>
-	/// <param name="offset_x">the x position of the popup window relative to the origin of the parent</param>
-	/// <param name="offset_y">the y position of the popup window relative to the origin of the parent window</param>
-	/// <param name="w">the width of the window</param>
-	/// <param name="h">the height of the window</param>
-	/// <param name="flags"><see href="https://wiki.libsdl.org/SDL3/SDL_WINDOW_TOOLTIP">SDL_WINDOW_TOOLTIP</see> or <see href="https://wiki.libsdl.org/SDL3/SDL_WINDOW_POPUP_MENU">SDL_WINDOW_POPUP_MENU</see>, and zero or more additional <see href="https://wiki.libsdl.org/SDL3/SDL_WindowFlags">SDL_WindowFlags</see> OR'd togethe</param>
-	/// <returns>Returns the window that was created or NULL on failure; call <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>() for more information.</returns>
+	/// <param name="title">The title of the window, in UTF-8 encoding</param>
+	/// <param name="width">The width of the window</param>
+	/// <param name="height">The height of the window</param>
+	/// <param name="window_flags">The flags used to create the window (see <see href="https://wiki.libsdl.org/SDL3/SDL_CreateWindow">SDL_CreateWindow</see>())</param>
+	/// <param name="window">A pointer filled with the window, or NULL on error</param>
+	/// <param name="renderer">A pointer filled with the renderer, or NULL on error</param>
+	/// <returns>Returns true on success or false on failure; call <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>() for more information</returns>
 	/// <remarks>
+	/// <para>
+	/// This function should only be called on the main thread.
+	/// </para>
 	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_CreateWindowAndRenderer">SDL_CreateWindowAndRenderer</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial SDL_Window* SDL_CreatePopupWindow(SDL_Window* parent, int offset_x, int offset_y, int w, int h, WindowFlags flags);
+	internal unsafe static partial SDL_Window* SDL_CreateWindowAndRenderer(byte* title, int width, int height, WindowFlags window_flags, SDL_Window** window, IRenderer.SDL_Renderer** renderer);
+	*/
+
+	/// <summary>
+	/// Get the renderer associated with a window
+	/// </summary>
+	/// <param name="window">The window to query</param>
+	/// <returns>Returns the rendering context on success or NULL on failure; call <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>() for more information</returns>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetRenderer">SDL_GetRenderer</seealso>
+	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
+	internal unsafe static partial IRenderer.SDL_Renderer* SDL_GetRenderer(SDL_Window* window);
 }

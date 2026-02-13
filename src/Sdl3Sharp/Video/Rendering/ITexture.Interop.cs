@@ -1,16 +1,16 @@
-﻿using Sdl3Sharp.Internal.Interop;
+﻿using Sdl3Sharp.Internal;
+using Sdl3Sharp.Internal.Interop;
 using Sdl3Sharp.SourceGeneration;
 using Sdl3Sharp.Video.Blending;
 using Sdl3Sharp.Video.Coloring;
 using Sdl3Sharp.Video.Drawing;
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Runtime.Intrinsics.X86;
-using static System.Net.WebRequestMethods;
 
 namespace Sdl3Sharp.Video.Rendering;
 
-partial class Texture
+partial interface ITexture
 {
 	[StructLayout(LayoutKind.Sequential)]
 	internal struct SDL_Texture
@@ -20,6 +20,242 @@ partial class Texture
 		public readonly int H;
 		public int RefCount;
 	}
+
+	[FormattedConstant(ErrorHelper.ParameterInvalidErrorFormat, nameof(texture))]
+	internal unsafe static partial ReadOnlySpan<byte> GetTextureInvalidTextureErrorMessage(SDL_Texture* texture = default);
+
+	/// <summary>
+	/// Create a texture for a rendering context
+	/// </summary>
+	/// <param name="renderer">The rendering context</param>
+	/// <param name="format">One of the enumerated values in <see href="https://wiki.libsdl.org/SDL3/SDL_PixelFormat">SDL_PixelFormat</see></param>
+	/// <param name="access">One of the enumerated values in <see href="https://wiki.libsdl.org/SDL3/SDL_TextureAccess">SDL_TextureAccess</see></param>
+	/// <param name="w">The width of the texture in pixels</param>
+	/// <param name="h">The height of the texture in pixels</param>
+	/// <returns>Returns the created texture or NULL on failure; call <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>() for more information</returns>
+	/// <remarks>
+	/// <para>
+	/// This function should only be called on the main thread.
+	/// </para>
+	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_CreateTexture">SDL_CreateTexture</seealso>
+	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
+	internal unsafe static partial SDL_Texture* SDL_CreateTexture(IRenderer.SDL_Renderer* renderer, PixelFormat format, TextureAccess access, int w, int h);
+
+	/// <summary>
+	/// Create a texture from an existing surface
+	/// </summary>
+	/// <param name="renderer">The rendering context</param>
+	/// <param name="surface">The <see href="https://wiki.libsdl.org/SDL3/SDL_Surface">SDL_Surface</see> structure containing pixel data used to fill the texture</param>
+	/// <returns>Returns the created texture or NULL on failure; call <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>() for more information</returns>
+	/// <remarks>
+	/// <para>
+	/// The surface is not modified or freed by this function.
+	/// </para>
+	/// <para>
+	/// The <see href="https://wiki.libsdl.org/SDL3/SDL_TextureAccess">SDL_TextureAccess</see> hint for the created texture is <see href="https://wiki.libsdl.org/SDL3/SDL_TEXTUREACCESS_STATIC"><c>SDL_TEXTUREACCESS_STATIC</c></see>.
+	/// </para>
+	/// <para>
+	/// The pixel format of the created texture may be different from the pixel format of the surface, and can be queried using the <see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_FORMAT_NUMBER">SDL_PROP_TEXTURE_FORMAT_NUMBER</see> property.
+	/// </para>
+	/// <para>
+	/// This function should only be called on the main thread.
+	/// </para>
+	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_CreateTextureFromSurface">SDL_CreateTextureFromSurface</seealso>
+	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
+	internal unsafe static partial SDL_Texture* SDL_CreateTextureFromSurface(IRenderer.SDL_Renderer* renderer, Surface.SDL_Surface* surface);
+
+	/// <summary>
+	/// Create a texture for a rendering context with the specified properties
+	/// </summary>
+	/// <param name="renderer">The rendering context</param>
+	/// <param name="props">The properties to use</param>
+	/// <returns>Returns the created texture or NULL on failure; call <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>() for more information</returns>
+	/// <remarks>
+	/// <para>
+	/// These are the supported properties:
+	/// <list type="bullet">
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_COLORSPACE_NUMBER"><c>SDL_PROP_TEXTURE_CREATE_COLORSPACE_NUMBER</c></see></term>
+	///			<description>
+	///				An <see href="https://wiki.libsdl.org/SDL3/SDL_Colorspace">SDL_Colorspace</see> value describing the texture colorspace,
+	///				defaults to <see href="https://wiki.libsdl.org/SDL3/SDL_COLORSPACE_SRGB_LINEAR">SDL_COLORSPACE_SRGB_LINEAR</see> for floating point textures,
+	///				<see href="https://wiki.libsdl.org/SDL3/SDL_COLORSPACE_HDR10">SDL_COLORSPACE_HDR10</see> for 10-bit textures,
+	///				<see href="https://wiki.libsdl.org/SDL3/SDL_COLORSPACE_SRGB">SDL_COLORSPACE_SRGB</see> for other RGB textures
+	///				and <see href="https://wiki.libsdl.org/SDL3/SDL_COLORSPACE_JPEG">SDL_COLORSPACE_JPEG</see> for YUV textures
+	///			</description>
+	///		</item>
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_FORMAT_NUMBER"><c>SDL_PROP_TEXTURE_CREATE_FORMAT_NUMBER</c></see></term>
+	///			<description>One of the enumerated values in <see href="https://wiki.libsdl.org/SDL3/SDL_PixelFormat">SDL_PixelFormat</see>, defaults to the best RGBA format for the renderer</description>
+	///		</item>
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_WIDTH_NUMBER"><c>SDL_PROP_TEXTURE_CREATE_ACCESS_NUMBER</c></see></term>
+	///			<description>One of the enumerated values in <see href="https://wiki.libsdl.org/SDL3/SDL_TextureAccess">SDL_TextureAccess</see>, defaults to <see href="https://wiki.libsdl.org/SDL3/SDL_TEXTUREACCESS_STATIC">SDL_TEXTUREACCESS_STATIC</see></description>
+	///		</item>
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_HEIGHT_NUMBER"><c>SDL_PROP_TEXTURE_CREATE_WIDTH_NUMBER</c></see></term>
+	///			<description>The width of the texture in pixels, required</description>
+	///		</item>
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_ACCESS_NUMBER"><c>SDL_PROP_TEXTURE_CREATE_HEIGHT_NUMBER</c></see></term>
+	///			<description>The height of the texture in pixels, required</description>
+	///		</item>
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_SDR_WHITE_POINT_FLOAT"><c>SDL_PROP_TEXTURE_CREATE_SDR_WHITE_POINT_FLOAT</c></see></term>
+	///			<description>
+	///				For HDR10 and floating point textures, this defines the value of 100% diffuse white, with higher values being displayed in the High Dynamic Range headroom.
+	///				This defaults to 100 for HDR10 textures and 1.0 for floating point textures.
+	///			</description>
+	///		</item>
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_HDR_HEADROOM_FLOAT"><c>SDL_PROP_TEXTURE_CREATE_HDR_HEADROOM_FLOAT</c></see></term>
+	///			<description>
+	///				For HDR10 and floating point textures, this defines the maximum dynamic range used by the content, in terms of the SDR white point.
+	///				This would be equivalent to maxCLL / <see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_SDR_WHITE_POINT_FLOAT">SDL_PROP_TEXTURE_CREATE_SDR_WHITE_POINT_FLOAT</see> for HDR10 content.
+	///				If this is defined, any values outside the range supported by the display will be scaled into the available HDR headroom, otherwise they are clipped.
+	///			</description>
+	///		</item>
+	/// </list>
+	/// With the direct3d11 renderer:
+	/// <list type="bullet">
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_D3D11_TEXTURE_POINTER"><c>SDL_PROP_TEXTURE_CREATE_D3D11_TEXTURE_POINTER</c></see></term>
+	///			<description>The ID3D11Texture2D associated with the texture, if you want to wrap an existing texture</description>
+	///		</item>
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_D3D11_TEXTURE_U_POINTER"><c>SDL_PROP_TEXTURE_CREATE_D3D11_TEXTURE_U_POINTER</c></see></term>
+	///			<description>The ID3D11Texture2D associated with the U plane of a YUV texture, if you want to wrap an existing texture</description>
+	///		</item>
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_D3D11_TEXTURE_V_POINTER"><c>SDL_PROP_TEXTURE_CREATE_D3D11_TEXTURE_V_POINTER</c></see></term>
+	///			<description>The ID3D11Texture2D associated with the V plane of a YUV texture, if you want to wrap an existing texture</description>
+	///		</item>
+	/// </list>
+	/// With the direct3d12 renderer:
+	/// <list type="bullet">
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_D3D12_TEXTURE_POINTER"><c>SDL_PROP_TEXTURE_CREATE_D3D12_TEXTURE_POINTER</c></see></term>
+	///			<description>The ID3D12Resource associated with the texture, if you want to wrap an existing texture</description>
+	///		</item>
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_D3D12_TEXTURE_U_POINTER"><c>SDL_PROP_TEXTURE_CREATE_D3D12_TEXTURE_U_POINTER</c></see></term>
+	///			<description>The ID3D12Resource associated with the U plane of a YUV texture, if you want to wrap an existing texture</description>
+	///		</item>
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_D3D12_TEXTURE_V_POINTER"><c>SDL_PROP_TEXTURE_CREATE_D3D12_TEXTURE_V_POINTER</c></see></term>
+	///			<description>The ID3D12Resource associated with the V plane of a YUV texture, if you want to wrap an existing texture</description>
+	///		</item>
+	/// </list>
+	/// With the metal renderer:
+	/// <list type="bullet">
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_METAL_PIXELBUFFER_POINTER"><c>SDL_PROP_TEXTURE_CREATE_METAL_PIXELBUFFER_POINTER</c></see></term>
+	///			<description>The CVPixelBufferRef associated with the texture, if you want to create a texture from an existing pixel buffer</description>
+	///		</item>
+	/// </list>
+	/// With the opengl renderer:
+	/// <list type="bullet">
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_D3D12_TEXTURE_POINTER"><c>SDL_PROP_TEXTURE_CREATE_OPENGL_TEXTURE_NUMBER</c></see></term>
+	///			<description>The GLuint texture associated with the texture, if you want to wrap an existing texture</description>
+	///		</item>
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_OPENGL_TEXTURE_UV_NUMBER"><c>SDL_PROP_TEXTURE_CREATE_OPENGL_TEXTURE_UV_NUMBER</c></see></term>
+	///			<description>The GLuint texture associated with the UV plane of an NV12 texture, if you want to wrap an existing texture</description>
+	///		</item>
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_OPENGL_TEXTURE_U_NUMBER"><c>SDL_PROP_TEXTURE_CREATE_OPENGL_TEXTURE_U_NUMBER</c></see></term>
+	///			<description>The GLuint texture associated with the U plane of a YUV texture, if you want to wrap an existing texture</description>
+	///		</item>
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_OPENGL_TEXTURE_V_NUMBER"><c>SDL_PROP_TEXTURE_CREATE_OPENGL_TEXTURE_V_NUMBER</c></see></term>
+	///			<description>The GLuint texture associated with the V plane of a YUV texture, if you want to wrap an existing texture</description>
+	///		</item>
+	/// </list>
+	/// With the opengles2 renderer:
+	/// <list type="bullet">
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_OPENGLES2_TEXTURE_NUMBER"><c>SDL_PROP_TEXTURE_CREATE_OPENGLES2_TEXTURE_NUMBER</c></see></term>
+	///			<description>The GLuint texture associated with the texture, if you want to wrap an existing texture</description>
+	///		</item>
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_OPENGLES2_TEXTURE_UV_NUMBER"><c>SDL_PROP_TEXTURE_CREATE_OPENGLES2_TEXTURE_UV_NUMBER</c></see></term>
+	///			<description>The GLuint texture associated with the UV plane of an NV12 texture, if you want to wrap an existing texture</description>
+	///		</item>
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_OPENGLES2_TEXTURE_U_NUMBER"><c>SDL_PROP_TEXTURE_CREATE_OPENGLES2_TEXTURE_U_NUMBER</c></see></term>
+	///			<description>The GLuint texture associated with the U plane of a YUV texture, if you want to wrap an existing texture</description>
+	///		</item>
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_OPENGLES2_TEXTURE_V_NUMBER"><c>SDL_PROP_TEXTURE_CREATE_OPENGLES2_TEXTURE_V_NUMBER</c></see></term>
+	///			<description>The GLuint texture associated with the V plane of a YUV texture, if you want to wrap an existing texture</description>
+	///		</item>
+	/// </list>
+	/// With the vulkan renderer:
+	/// <list type="bullet">
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_VULKAN_TEXTURE_NUMBER"><c>SDL_PROP_TEXTURE_CREATE_VULKAN_TEXTURE_NUMBER</c></see></term>
+	///			<description>The VkImage associated with the texture, if you want to wrap an existing texture</description>
+	///		</item>
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_VULKAN_LAYOUT_NUMBER"><c>SDL_PROP_TEXTURE_CREATE_VULKAN_LAYOUT_NUMBER</c></see></term>
+	///			<description>The VkImageLayout for the VkImage, defaults to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL</description>
+	///		</item>
+	/// </list>
+	/// With the GPU renderer:
+	/// <list type="bullet">
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_GPU_TEXTURE_POINTER"><c>SDL_PROP_TEXTURE_CREATE_GPU_TEXTURE_POINTER</c></see></term>
+	///			<description>The <see href="https://wiki.libsdl.org/SDL3/SDL_GPUTexture">SDL_GPUTexture</see> associated with the texture, if you want to wrap an existing texture</description>
+	///		</item>
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_GPU_TEXTURE_UV_NUMBER"><c>SDL_PROP_TEXTURE_CREATE_GPU_TEXTURE_UV_NUMBER</c></see></term>
+	///			<description>The <see href="https://wiki.libsdl.org/SDL3/SDL_GPUTexture">SDL_GPUTexture</see> associated with the UV plane of an NV12 texture, if you want to wrap an existing texture</description>
+	///		</item>
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_GPU_TEXTURE_U_NUMBER"><c>SDL_PROP_TEXTURE_CREATE_GPU_TEXTURE_U_NUMBER</c></see></term>
+	///			<description>The <see href="https://wiki.libsdl.org/SDL3/SDL_GPUTexture">SDL_GPUTexture</see> associated with the U plane of a YUV texture, if you want to wrap an existing texture</description>
+	///		</item>
+	///		<item>
+	///			<term><see href="https://wiki.libsdl.org/SDL3/SDL_PROP_TEXTURE_CREATE_GPU_TEXTURE_V_NUMBER"><c>SDL_PROP_TEXTURE_CREATE_GPU_TEXTURE_V_NUMBER</c></see></term>
+	///			<description>the <see href="https://wiki.libsdl.org/SDL3/SDL_GPUTexture">SDL_GPUTexture</see> associated with the V plane of a YUV texture, if you want to wrap an existing texture</description>
+	///		</item>
+	/// </list>
+	/// </para>
+	/// <para>
+	/// This function should only be called on the main thread.
+	/// </para>
+	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_CreateTextureWithProperties">SDL_CreateTextureWithProperties</seealso>
+	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
+	internal unsafe static partial SDL_Texture* SDL_CreateTextureWithProperties(IRenderer.SDL_Renderer* renderer, uint props);
+
+	/// <summary>
+	/// Destroy the specified texture
+	/// </summary>
+	/// <param name="texture">The texture to destroy</param>
+	/// <remarks>
+	/// <para>
+	/// Passing NULL or an otherwise invalid texture will set the SDL error message to "Invalid texture".
+	/// </para>
+	/// <para>
+	/// This function should only be called on the main thread.
+	/// </para>
+	/// </remarks>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_DestroyTexture">SDL_DestroyTexture</seealso>
+	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
+	internal unsafe static partial void SDL_DestroyTexture(SDL_Texture* texture);
+
+	/// <summary>
+	/// Get the renderer that created an <see href="https://wiki.libsdl.org/SDL3/SDL_Texture">SDL_Texture</see>
+	/// </summary>
+	/// <param name="texture">The texture to query</param>
+	/// <returns>Returns a pointer to the <see href="https://wiki.libsdl.org/SDL3/SDL_Renderer">SDL_Renderer</see> that created the texture, or NULL on failure; call <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>() for more information</returns>
+	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetRendererFromTexture">SDL_GetRendererFromTexture</seealso>
+	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
+	internal unsafe static partial IRenderer.SDL_Renderer* SDL_GetRendererFromTexture(SDL_Texture* texture);
 
 	/// <summary>
 	/// Get the additional alpha value multiplied into render copy operations
@@ -332,7 +568,7 @@ partial class Texture
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_LockTexture">SDL_LockTexture</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_LockTexture(SDL_Texture* texture, Rect<int> *rect, void** pixels, int* pitch);
+	internal unsafe static partial CBool SDL_LockTexture(SDL_Texture* texture, Rect<int>* rect, void** pixels, int* pitch);
 
 	/// <summary>
 	/// Lock a portion of the texture for write-only pixel access, and expose it as a SDL surface
@@ -568,7 +804,7 @@ partial class Texture
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_UpdateNVTexture">SDL_UpdateNVTexture</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_UpdateNVTexture(SDL_Texture* texture, Rect<int>* rect, byte *Yplane, int Ypitch, byte* UVplane, int UVpitch);
+	internal unsafe static partial CBool SDL_UpdateNVTexture(SDL_Texture* texture, Rect<int>* rect, byte* Yplane, int Ypitch, byte* UVplane, int UVpitch);
 
 	/// <summary>
 	/// Update the given texture rectangle with new pixel data

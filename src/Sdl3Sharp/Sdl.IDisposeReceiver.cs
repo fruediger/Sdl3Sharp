@@ -22,7 +22,7 @@ partial class Sdl
 		void DisposeFromSdl(Sdl sdl);
 	}
 
-	private readonly ConcurrentDictionary<WeakReference<IDisposeReceiver>, ZeroSized> mRegisteredDisposeReceivers = new(WeakReferenceEqualityComparer<IDisposeReceiver>.Instance);
+	private readonly ConcurrentDictionary<WeakReference<IDisposeReceiver>, byte> mRegisteredDisposeReceivers = new(WeakReferenceEqualityComparer<IDisposeReceiver>.Instance);
 
 	/// <summary>
 	/// Tries to deregister a formerly registered <see cref="IDisposeReceiver"/> from the <see cref="Sdl"/> instance,

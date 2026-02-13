@@ -6,7 +6,7 @@ namespace Sdl3Sharp.Internal.Events;
 
 internal sealed class EventWatchHandler<TSender, TEvent>(TSender sender, EventType type) : EventWatchHandler()
 	where TSender : class
-	where TEvent : struct, ICommonEvent<TEvent>
+	where TEvent : unmanaged, ICommonEvent<TEvent>
 {
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	private static EventType ValidateType(EventType type)

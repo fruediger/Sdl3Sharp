@@ -16,7 +16,7 @@ partial class Surface
 		/// This defaults to <c>203</c> for HDR10 surfaces and <c>1.0</c> for floating point surfaces.
 		/// </para>
 		/// </remarks>
-		public const string SdrWhitePointFloat = "SDL_PROP_SURFACE_SDR_WHITE_POINT_FLOAT";
+		public const string SdrWhitePointFloat = "SDL.surface.SDR_white_point";
 
 		/// <summary>
 		/// The name of a <see cref="Properties">property</see> that holds the maximum dynamic range for HDR10 and floating point <see cref="Surface"/>s
@@ -27,7 +27,7 @@ partial class Surface
 		/// This defaults to <c>0.0</c>, which disables <see cref="TonemapOperatorString">tone mapping</see>.
 		/// </para>
 		/// </remarks>
-		public const string HdrHeadroomFloat = "SDL_PROP_SURFACE_HDR_HEADROOM_FLOAT";
+		public const string HdrHeadroomFloat = "SDL.surface.HDR_headroom";
 
 		/// <summary>
 		/// The name of a <see cref="Properties">property</see> that holds the expression of the tone mapping operator used when compressing from a higher dynamic range to a lower dynamic range
@@ -53,7 +53,7 @@ partial class Surface
 		/// This defaults to <c>"chrome"</c>.
 		/// </para>
 		/// </remarks>
-		public const string TonemapOperatorString = "SDL_PROP_SURFACE_TONEMAP_OPERATOR_STRING";
+		public const string TonemapOperatorString = "SDL.surface.tonemap";
 
 		/// <summary>
 		/// The name of a <see cref="Properties">property</see> that holds the hotspot pixel offset from the left edge for a cursor
@@ -63,7 +63,7 @@ partial class Surface
 		/// The value of the property defines the pixel offset to the hotspot from the left edge of the <see cref="Surface"/> used as a cursor.
 		/// </para>
 		/// </remarks>
-		public const string HotspotXNumber = "SDL_PROP_SURFACE_HOTSPOT_X_NUMBER";
+		public const string HotspotXNumber = "SDL.surface.hotspot.x";
 
 		/// <summary>
 		/// The name of a <see cref="Properties">property</see> that holds the hotspot pixel offset from the top edge for a cursor
@@ -73,7 +73,7 @@ partial class Surface
 		/// The value of the property defines the pixel offset to the hotspot from the top edge of the <see cref="Surface"/> used as a cursor.
 		/// </para>
 		/// </remarks>
-		public const string HotspotYNumber = "SDL_PROP_SURFACE_HOTSPOT_Y_NUMBER";
+		public const string HotspotYNumber = "SDL.surface.hotspot.y";
 
 #if SDL3_4_0_OR_GREATER
 		/// <summary>
@@ -88,7 +88,7 @@ partial class Surface
 		/// This is used by the camera API, if a mobile device is oriented differently than what its camera provides (i.e. the camera always provides portrait images but the phone is being held in landscape orientation).
 		/// </para>
 		/// </remarks>
-		public const string RotationFloat = "SDL_PROP_SURFACE_ROTATION_FLOAT";
+		public const string RotationFloat = "SDL.surface.rotation";
 #endif
 	}
 }

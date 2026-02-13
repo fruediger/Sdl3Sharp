@@ -1,9 +1,11 @@
-﻿using Sdl3Sharp.Internal.Interop;
+﻿using Sdl3Sharp.Internal;
+using Sdl3Sharp.Internal.Interop;
 using Sdl3Sharp.IO;
 using Sdl3Sharp.SourceGeneration;
 using Sdl3Sharp.Video.Blending;
 using Sdl3Sharp.Video.Coloring;
 using Sdl3Sharp.Video.Drawing;
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -23,6 +25,9 @@ partial class Surface
 		public int RefCount;
 		private unsafe readonly void* Reserved;
 	}
+
+	[FormattedConstant(ErrorHelper.ParameterInvalidErrorFormat, nameof(surface))]
+	private unsafe static partial ReadOnlySpan<byte> GetInvalidSurfaceErrorMessage(SDL_Surface* surface = default);
 
 	/// <summary>
 	/// Add an alternate version of a surface
@@ -284,7 +289,7 @@ partial class Surface
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_ConvertPixels">SDL_ConvertPixels</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial bool SDL_ConvertPixels(int width, int height, PixelFormat src_format, void* src, int src_pitch, PixelFormat dst_format, void* dst, int dst_pitch);
+	internal unsafe static partial CBool SDL_ConvertPixels(int width, int height, PixelFormat src_format, void* src, int src_pitch, PixelFormat dst_format, void* dst, int dst_pitch);
 
 	/// <summary>
 	/// Copy a block of pixels of one format and colorspace to another format and colorspace
@@ -309,7 +314,7 @@ partial class Surface
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_ConvertPixelsAndColorspace">SDL_ConvertPixelsAndColorspace</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial bool SDL_ConvertPixelsAndColorspace(int width, int height, PixelFormat src_format, ColorSpace src_colorspace, uint src_properties, void* src, int src_pitch, PixelFormat dst_format, ColorSpace dst_colorspace, uint dst_properties, void* dst, int dst_pitch);
+	internal unsafe static partial CBool SDL_ConvertPixelsAndColorspace(int width, int height, PixelFormat src_format, ColorSpace src_colorspace, uint src_properties, void* src, int src_pitch, PixelFormat dst_format, ColorSpace dst_colorspace, uint dst_properties, void* dst, int dst_pitch);
 
 	/// <summary>
 	/// Copy an existing surface to a new surface of the specified format
@@ -761,7 +766,7 @@ partial class Surface
 	internal unsafe static partial SDL_Surface* SDL_LoadSurface(byte* file);
 #endif
 
-#if SDL_3_4_0_OR_GREATER
+#if SDL3_4_0_OR_GREATER
 	/// <summary>
 	/// Load a BMP or PNG image from a seekable SDL data stream
 	/// </summary>
@@ -1197,7 +1202,7 @@ partial class Surface
 	/// <param name="src">The <see href="https://wiki.libsdl.org/SDL3/SDL_Surface">SDL_Surface</see> structure to be copied from</param>
 	/// <param name="srcrect">The <see href="https://wiki.libsdl.org/SDL3/SDL_Rect">SDL_Rect</see> structure representing the rectangle to be copied, or NULL to copy the entire surface</param>
 	/// <param name="dst">The <see href="https://wiki.libsdl.org/SDL3/SDL_Surface">SDL_Surface</see> structure that is the blit target</param>
-	/// <param name="dstRect">The <see href="https://wiki.libsdl.org/SDL3/SDL_Rect">SDL_Rect</see> structure representing the target rectangle in the destination surface, or NULL to fill the entire destination surface</param>
+	/// <param name="dstrect">The <see href="https://wiki.libsdl.org/SDL3/SDL_Rect">SDL_Rect</see> structure representing the target rectangle in the destination surface, or NULL to fill the entire destination surface</param>
 	/// <param name="scaleMode">The <see href="https://wiki.libsdl.org/SDL3/SDL_ScaleMode">SDL_ScaleMode</see> to be used</param>
 	/// <returns>Returns true on success or false on failure; call <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>() for more information</returns>
 	/// <remarks>

@@ -1,6 +1,7 @@
 ﻿using Sdl3Sharp.Utilities;
 using Sdl3Sharp.Video.Coloring;
 using Sdl3Sharp.Video.Drawing;
+using Sdl3Sharp.Video.Rendering.Drivers;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -8,20 +9,18 @@ using System.Runtime.CompilerServices;
 namespace Sdl3Sharp.Video.Rendering;
 
 /// <summary>
-/// Manages and represents the entire pixel memory of a locked <see cref="Rendering.Texture"/> or a partial rectangle of it
+/// Manages and represents the entire pixel memory of a locked <see cref="ITexture"/> or a partial rectangle of it
 /// </summary>
-public sealed class TexturePixelMemoryManager : NativeMemoryManagerBase
+public abstract class TexturePixelMemoryManager : NativeMemoryManagerBase
 {
-	private Texture? mTexture;
 	private unsafe void* mPixels;
 	private nuint mPitch;
 	private nuint mRowLength;
 	private nuint mRowCount;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	private unsafe TexturePixelMemoryManager(Texture texture, void* pixels, int pitch, int rowLength, int rowCount)
+	private protected unsafe TexturePixelMemoryManager(void* pixels, int pitch, int rowLength, int rowCount)
 	{
-		mTexture = texture;
 		mPixels = pixels;
 		mPitch = unchecked((nuint)pitch);
 		mRowLength = unchecked((nuint)rowLength);
@@ -34,14 +33,10 @@ public sealed class TexturePixelMemoryManager : NativeMemoryManagerBase
 	/// <value>
 	/// <see langword="true"/> if the <see cref="Texture"/> is currently locked (pinned); otherwise, <see langword="false"/> (<see cref="Texture"/> is <c><see langword="null"/></c> in that case)
 	/// </value>
-	public override bool IsPinned
-	{
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		get => mTexture is not null; // The texture's pixels are "pinned" as long as the texture is locked
-	}
+	public abstract override bool IsPinned { get; }
 
-	/// <inheritdoc/>
-	public override nuint Length
+	/// <inheritdoc />
+	public sealed override nuint Length
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		get => unchecked(mPitch * mRowCount);
@@ -55,11 +50,11 @@ public sealed class TexturePixelMemoryManager : NativeMemoryManagerBase
 	/// </value>
 	/// <remarks>
 	/// <para>
-	/// The pixel memory data is in the pixel format specified by the <see cref="Texture.Format"/> property of the <see cref="Texture"/>.
+	/// The pixel memory data is in the pixel format specified by the <see cref="ITexture.Format"/> property of the <see cref="Texture"/>.
 	/// </para>
 	/// <para>
 	/// The pixel memory might be longer than the actual pixel data that's safe to access, due to padding at the end of each row.
-	/// Especially if the <see cref="Texture"/> was <see cref="Texture.TryLock(in Rect{int}, out TexturePixelMemoryManager?)">locked with a rectangle</see> smaller than the full size of the texture.
+	/// Especially if the <see cref="Texture"/> was <see cref="ITexture.TryLock(in Rect{int}, out TexturePixelMemoryManager?)">locked with a rectangle</see> smaller than the full size of the texture.
 	/// </para>
 	/// <para>
 	/// The pixel memory is laid out in rows, where each row is <see cref="RowLength"/> pixels long, and there are <see cref="RowCount"/> rows.
@@ -73,7 +68,7 @@ public sealed class TexturePixelMemoryManager : NativeMemoryManagerBase
 	/// Notice: The pixel memory is <em>write-only</em>, and if you need to keep a copy of the texture data you should do that at the application level.
 	/// </para>
 	/// <para>
-	/// You must <see cref="NativeMemoryManagerBase.Dispose()">dispose</see> the <see cref="TexturePixelMemoryManager"/> to unlock the <see cref="Texture"/> and apply the changes made to the pixel data.
+	/// You must <see cref="IDisposable.Dispose">dispose</see> the <see cref="TexturePixelMemoryManager"/> to unlock the <see cref="Texture"/> and apply the changes made to the pixel data.
 	/// </para>
 	/// </remarks>
 	/// <example>
@@ -127,14 +122,14 @@ public sealed class TexturePixelMemoryManager : NativeMemoryManagerBase
 	/// }
 	/// </code>
 	/// </example>
-	public override NativeMemory Memory
+	public sealed override NativeMemory Memory
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		get
 		{
 			unsafe
 			{
-				return mTexture is not null && mPixels is not null
+				return IsPinned && mPixels is not null
 					? new(this, 0, Length)
 					: NativeMemory.Empty;
 			}
@@ -150,16 +145,16 @@ public sealed class TexturePixelMemoryManager : NativeMemoryManagerBase
 	/// <remarks>
 	/// <para>
 	/// The pitch is the length of a single row of pixel data in bytes, including any padding bytes at the end of the row.
-	/// Notice that that's not necessarily equal to <c><see cref="RowLength">RowLength</see> * <see cref="Texture">Texture</see>.<see cref="Texture.Format">Format</see>.<see cref="PixelFormatExtensions.get_BytesPerPixel(PixelFormat)">BytesPerPixel</see></c>.
-	/// Especially if the <see cref="Texture"/> was <see cref="Texture.TryLock(in Rect{int}, out TexturePixelMemoryManager?)">locked with a rectangle</see> smaller than the full size of the texture.
+	/// Notice that that's not necessarily equal to <c><see cref="RowLength">RowLength</see> * <see cref="Texture">Texture</see>.<see cref="ITexture.Format">Format</see>.<see cref="PixelFormatExtensions.get_BytesPerPixel(PixelFormat)">BytesPerPixel</see></c>.
+	/// Especially if the <see cref="Texture"/> was <see cref="ITexture.TryLock(in Rect{int}, out TexturePixelMemoryManager?)">locked with a rectangle</see> smaller than the full size of the texture.
 	/// </para>
 	/// </remarks>
 	public nuint Pitch { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mPitch; }
 
-	/// <inheritdoc/>
-	public override IntPtr Pointer { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get { unsafe { return unchecked((IntPtr)mPixels); } } }
+	/// <inheritdoc />
+	public sealed override IntPtr Pointer { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get { unsafe { return unchecked((IntPtr)mPixels); } } }
 
-	internal override unsafe void* RawPointer { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mPixels; }
+	internal sealed override unsafe void* RawPointer { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mPixels; }
 
 	/// <summary>
 	/// Gets the number of rows in the pixel memory, in pixels
@@ -177,25 +172,26 @@ public sealed class TexturePixelMemoryManager : NativeMemoryManagerBase
 	/// </value>
 	/// <remarks>
 	/// <para>
-	/// To get the length of each row in bytes, use <c><see cref="RowLength">RowLength</see> * <see cref="Texture">Texture</see>.<see cref="Texture.Format">Format</see>.<see cref="PixelFormatExtensions.get_BytesPerPixel(PixelFormat)">BytesPerPixel</see></c>.
+	/// To get the length of each row in bytes, use <c><see cref="RowLength">RowLength</see> * <see cref="Texture">Texture</see>.<see cref="ITexture.Format">Format</see>.<see cref="PixelFormatExtensions.get_BytesPerPixel(PixelFormat)">BytesPerPixel</see></c>.
 	/// </para>
 	/// </remarks>
 	public nuint RowLength { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mRowLength; }
 
 	/// <summary>
-	/// Gets the locked <see cref="Rendering.Texture"/>
+	/// Gets the locked texture
 	/// </summary>
 	/// <value>
-	/// The locked <see cref="Rendering.Texture"/>, or <c><see langword="null"/></c> if the <see cref="Rendering.Texture"/> is not locked
+	/// The locked texture, or <c><see langword="null"/></c> if the texture is not locked
 	/// </value>
-	public Texture? Texture { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mTexture; }
-
-	// unnecessary to override: the base implemenation does nothing anyways
-	// protected override void AddPin(ulong oldPinCounter, ulong newPinCounter);
+	public abstract ITexture? Texture { get; }
 
 	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	protected override ulong DecreasePinCounter(ulong pinCounter) => pinCounter; // Do nothing
+	protected sealed override void AddPin(ulong oldPinCounter, ulong newPinCounter) => base.AddPin(oldPinCounter, newPinCounter); // fixing this override to the base implementation, which does nothing
+
+	/// <inheritdoc/>
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	protected sealed override ulong DecreasePinCounter(ulong pinCounter) => pinCounter; // Do nothing
 
 	/// <summary>
 	/// Disposes the <see cref="TexturePixelMemoryManager"/>, unlocking the associated <see cref="Texture"/>
@@ -210,13 +206,6 @@ public sealed class TexturePixelMemoryManager : NativeMemoryManagerBase
 	{
 		unsafe
 		{
-			if (mTexture is not null)
-			{
-				Texture.SDL_UnlockTexture(mTexture.Pointer);
-
-				mTexture = null;
-			}
-
 			mPixels = null;
 			mPitch = 0;
 			mRowLength = 0;
@@ -229,12 +218,52 @@ public sealed class TexturePixelMemoryManager : NativeMemoryManagerBase
 
 	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	protected override ulong IncreasePinCounter(ulong pinCounter) => pinCounter; // Do nothing
+	protected sealed override ulong IncreasePinCounter(ulong pinCounter) => pinCounter; // Do nothing
 
-	// unnecessary to override: the base implemenation does nothing anyways
-	// protected override void RemovePin(ulong oldPinCounter, ulong newPinCounter);
+	/// <inheritdoc/>
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	protected sealed override void RemovePin(ulong oldPinCounter, ulong newPinCounter) => base.RemovePin(oldPinCounter, newPinCounter); // fixing this override to the base implementation, which does nothing
+}
 
-	internal static bool TryCreate(Texture texture, in Rect<int> rect, [NotNullWhen(true)] out TexturePixelMemoryManager? pixelManager)
+/// <summary>
+/// Manages and represents the entire pixel memory of a locked <see cref="Texture{TDriver}"/> or a partial rectangle of it
+/// </summary>
+/// <typeparam name="TDriver">
+/// The type of the rendering driver associated with the <see cref="Texture{TDriver}"/>
+/// </typeparam>
+public sealed class TexturePixelMemoryManager<TDriver> : TexturePixelMemoryManager
+	where TDriver : notnull, IDriver
+{
+	private Texture<TDriver>? mTexture;
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	internal unsafe TexturePixelMemoryManager(Texture<TDriver> texture, void* pixels, int pitch, int rowLength, int rowCount)
+		: base(pixels, pitch, rowLength, rowCount)
+		=> mTexture = texture;
+
+	/// <inheritdoc/>
+	public override bool IsPinned { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mTexture is not null; } // The texture's pixels are "pinned" as long as the texture is locked
+
+	/// <inheritdoc/>
+	public override Texture<TDriver>? Texture { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mTexture; }
+
+	/// <inheritdoc/>
+	protected override void Dispose(bool disposing)
+	{
+		unsafe
+		{
+			if (mTexture is not null)
+			{
+				ITexture.SDL_UnlockTexture(mTexture.Pointer);
+
+				mTexture = null;
+			}
+
+			base.Dispose(disposing);
+		}
+	}
+
+	internal static bool TryCreate(Texture<TDriver> texture, in Rect<int> rect, [NotNullWhen(true)] out TexturePixelMemoryManager<TDriver>? pixelManager)
 	{
 		unsafe
 		{
@@ -243,32 +272,32 @@ public sealed class TexturePixelMemoryManager : NativeMemoryManagerBase
 
 			fixed (Rect<int>* rectPtr = &rect)
 			{
-				if (!(texture is not null && (bool)Texture.SDL_LockTexture(texture.Pointer, rectPtr, &pixels, &pitch)))
+				if (!(texture is not null && (bool)ITexture.SDL_LockTexture(texture.Pointer, rectPtr, &pixels, &pitch)))
 				{
 					pixelManager = null;
 					return false;
 				}
 			}
 
-			pixelManager = new TexturePixelMemoryManager(texture, pixels, pitch, rect.Width, rect.Height);
+			pixelManager = new(texture, pixels, pitch, rect.Width, rect.Height);
 			return true;
 		}
 	}
 
-	internal static bool TryCreate(Texture texture, [NotNullWhen(true)] out TexturePixelMemoryManager? pixelManager)
+	internal static bool TryCreate(Texture<TDriver> texture, [NotNullWhen(true)] out TexturePixelMemoryManager<TDriver>? pixelManager)
 	{
 		unsafe
 		{
 			void* pixels;
 			Unsafe.SkipInit(out int pitch);
 
-			if (!(texture is not null && (bool)Texture.SDL_LockTexture(texture.Pointer, null, &pixels, &pitch)))
+			if (!(texture is not null && (bool)ITexture.SDL_LockTexture(texture.Pointer, null, &pixels, &pitch)))
 			{
 				pixelManager = null;
 				return false;
 			}
 
-			pixelManager = new TexturePixelMemoryManager(texture, pixels, pitch, texture.Width, texture.Height);
+			pixelManager = new(texture, pixels, pitch, texture.Width, texture.Height);
 			return true;
 		}
 	}

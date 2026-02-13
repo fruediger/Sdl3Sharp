@@ -1,4 +1,7 @@
-﻿namespace Sdl3Sharp.Video.Blending;
+﻿using Sdl3Sharp.Video.Rendering;
+using Sdl3Sharp.Video.Rendering.Drivers;
+
+namespace Sdl3Sharp.Video.Blending;
 
 /// <summary>
 /// Provides extension methods for <see cref="BlendMode"/>
@@ -46,43 +49,43 @@ public static partial class BlendModeExtensions
 		/// </para>
 		/// <para>
 		/// Support for these custom blend modes varies for each renderer.
-		/// To check if a specific <see cref="BlendMode"/> is supported, create a <see cref="Renderer"/> and use it's <see cref="SDL_SetRenderDrawBlendMode"/> method
-		/// or create a <see cref="Texture"/> and use it's <see cref="SDL_SetTextureBlendMode"/> method.
-		/// Those methods will return <c><see langword="false"/></c> if the blend mode is not supported and you can check <see cref="Error.TryGet(out string?)"/> for more information.
+		/// To check if a specific <see cref="BlendMode"/> is supported, create an <see cref="IRenderer"/>, use it's <see cref="IRenderer.DrawBlendMode"/> property, and then <see langword="try"/>-<see langword="catch"/> for a <see cref="SdlException"/>.
+		/// If there was an exception, check <see cref="Error.TryGet(out string?)"/> if it's about an unsupported blend mode.
+		/// Alternatively, you can do the same procedure with an <see cref="ITexture"/> and it's <see cref="ITexture.BlendMode"/> property.
 		/// </para>
 		/// <para>
-		/// The following list describes the support of custom blend modes for each renderer. All renderers support the blend modes defined in the <see cref="BlendMode"/> enumeration.
+		/// The following list describes the support of custom blend modes for each rendering driver. All rendering drivers support the blend modes defined in the <see cref="BlendMode"/> enumeration.
 		/// <list type="bullet">
 		///		<item>
-		///			<term>direct3d</term>
+		///			<term><see cref="Direct3D9"/></term>
 		///			<description>
 		///			Supports all operations with all factors.
 		///			However, some factors produce unexpected results with the <see cref="BlendOperation.Minimum"/> and <see cref="BlendOperation.Maximum"/> operations.
 		///			</description>
 		///		</item>
 		///		<item>
-		///			<term>direct3d11</term>
+		///			<term><see cref="Direct3D11"/></term>
 		///			<description>Same as Direct3D 9.</description>
 		///		</item>
 		///		<item>
-		///			<term>opengl</term>
+		///			<term><see cref="OpenGl"/></term>
 		///			<description>
 		///			Supports the <see cref="BlendOperation.Add"/> operation with all factors.
 		///			OpenGL versions 1.1, 1.2, and 1.3 do not work correctly here.
 		///			</description>
 		///		</item>
 		///		<item>
-		///			<term>opengles2</term>
+		///			<term><see cref="OpenGlEs2"/></term>
 		///			<description>
 		///			Supports the <see cref="BlendOperation.Add"/>, <see cref="BlendOperation.Subtract"/>, and <see cref="BlendOperation.ReverseSubtract"/> operations with all factors.
 		///			</description>
 		///		</item>
 		///		<item>
-		///			<term>psp</term>
+		///			<term><see cref="PlayStationPortable"/></term>
 		///			<description>No custom blend mode support.</description>
 		///		</item>
 		///		<item>
-		///			<term>software</term>
+		///			<term><see cref="Software"/></term>
 		///			<description>No custom blend mode support.</description>
 		///		</item>
 		/// </list>
@@ -92,7 +95,7 @@ public static partial class BlendModeExtensions
 		/// The <see cref="BlendFactor.DestinationAlpha"/> and <see cref="BlendFactor.OneMinusDestinationAlpha"/> factors do not have an effect in this case.
 		/// </para>
 		/// <para>
-		/// The methods <see cref="SDL_SetRenderDrawBlendMode"/> and <see cref="SDL_SetTextureBlendMode"/> accept the <see cref="BlendMode"/>s returned by this method if the renderer supports it.
+		/// The properties <see cref="IRenderer.DrawBlendMode"/> and <see cref="ITexture.BlendMode"/> accept the <see cref="BlendMode"/>s returned by this method if the renderer supports it.
 		/// </para>
 		/// </remarks>
 		public static BlendMode ComposeCustom(

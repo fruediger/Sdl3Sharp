@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 namespace Sdl3Sharp.Internal.Events;
 
 internal sealed class EventWatchHandler<TEvent>(EventType type) : EventWatchHandler()
-	where TEvent : struct, ICommonEvent<TEvent>
+	where TEvent : unmanaged, ICommonEvent<TEvent>
 {
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	private static EventType ValidateType(EventType type)

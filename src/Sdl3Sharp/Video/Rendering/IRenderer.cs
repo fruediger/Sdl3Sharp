@@ -1,0 +1,2271 @@
+﻿using Sdl3Sharp.Events;
+using Sdl3Sharp.Utilities;
+using Sdl3Sharp.Video.Blending;
+using Sdl3Sharp.Video.Coloring;
+using Sdl3Sharp.Video.Drawing;
+using Sdl3Sharp.Video.Rendering.Drivers;
+using Sdl3Sharp.Windowing;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Sdl3Sharp.Video.Rendering;
+
+/// <summary>
+/// Represents a rendering context (renderer)
+/// </summary>
+/// <remarks>
+/// <para>
+/// This is used to perform driver-specific 2D rendering operations, most commonly to a <see cref="Windowing.Window"/> or an off-screen render target.
+/// </para>
+/// <para>
+/// You can create new renderers for a <see cref="Windowing.Window"/> using the <see cref="Window.TryCreateRenderer(out IRenderer?, ReadOnlySpan{string})"/>
+/// or <see cref="Window.TryCreateRenderer(out IRenderer?, string?, ColorSpace?, RendererVSync?, Properties?)"/>
+/// instance methods on a <see cref="Windowing.Window"/> instance.
+/// </para>
+/// <para>
+/// If you create textures using an <see cref="IRenderer"/>, please remember to dispose them <em>before</em> disposing the renderer.
+/// <em>Do not</em> dispose the associated <see cref="Windowing.Window"/> before disposing the <see cref="IRenderer"/> either!
+/// Using an <see cref="IRenderer"/> after its associated <see cref="Windowing.Window"/> has been disposed can cause undefined behavior, including crashes.
+/// </para>
+/// <para>
+/// For the most part <see cref="IRenderer"/>s are not thread-safe, and most of their properties and methods should only be accessed from the main thread!
+/// </para>
+/// <para>
+/// <see cref="IRenderer"/>s are not driver-agnostic! Most of the time instance of this interface are of the concrete <see cref="Renderer{TDriver}"/> type with a specific <see cref="IDriver">rendering driver</see> as the type argument.
+/// However, the <see cref="IRenderer"/> interface exists as an abstraction to use common rendering operations.
+/// </para>
+/// <para>
+/// To specify an concrete renderer type, use <see cref="Renderer{TDriver}"/> with a rendering driver that implements the <see cref="IDriver"/> interface (e.g. <see cref="Renderer{TDriver}">Renderer&lt;<see cref="OpenGl">OpenGl</see>&gt;</see>).
+/// </para>
+/// </remarks>
+public partial interface IRenderer : IDisposable
+{
+	/// <summary>
+	/// Gets or sets the clipping rectangle for the current target
+	/// </summary>
+	/// <value>
+	/// The clipping rectangle for the current target
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// If the value of this property is equal to the target's bounds, clipping is effectively disabled.
+	/// </para>
+	/// <para>
+	/// Alternatively, you can use the <see cref="IsClippingEnabled"/> property to check whether clipping is enabled or not,
+	/// and the <see cref="ResetClippingRect"/> method to reset the clipping rectangle.
+	/// </para>
+	/// <para>
+	/// Each render target, <see cref="Window"/> or <see cref="Target"/> (or <see cref="RendererExtensions.get_Surface(Renderer{Drivers.Software})"/> in the case of a software renderer), has its own clipping rectangle.
+	/// This property reflects the clipping rectangle of the <em>current</em> target.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">
+	/// When setting or getting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information).
+	/// A common reason for this to happen is when the <see cref="Windowing.Window"/> associated with this renderer was already disposed, but the renderer itself wasn't disposed yet.
+	/// </exception>
+	Rect<int> ClippingRect { get; set; }
+
+	/// <summary>
+	/// Gets or sets the color scale for render operations
+	/// </summary>
+	/// <value>
+	/// The color scale for render operations
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The color scale is an additional scale multiplied into the pixel color value while rendering.
+	/// This can be used to adjust the brightness of colors during HDR rendering, or changing HDR video brightness when playing on an SDR display.
+	/// </para>
+	/// <para>
+	/// The color scale does not affect the alpha channel, only the color brightness.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">
+	/// When setting or getting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information).
+	/// A common reason for this to happen is when the <see cref="Windowing.Window"/> associated with this renderer was already disposed, but the renderer itself wasn't disposed yet.
+	/// </exception>
+	float ColorScale { get; set; }
+
+	/// <summary>
+	/// Gets the <em>current</em> output size for the renderer
+	/// </summary>
+	/// <value>
+	/// The <em>current</em> output size for the renderer, in pixels
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// If a rendering target is active, the value of this property will be the size of that target, otherwise it will be equal to the value of the <see cref="OutputSize"/> property.
+	/// </para>
+	/// <para>
+	/// Either way, the resulting size will be adjusted by the current logical presentation state, dictated by the <see cref="LogicalPresentation"/> property.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">
+	/// When getting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information).
+	/// A common reason for this to happen is when the <see cref="Windowing.Window"/> associated with this renderer was already disposed, but the renderer itself wasn't disposed yet.
+	/// </exception>
+	(int Width, int Height) CurrentOutputSize { get; }
+
+#if SDL3_4_0_OR_GREATER
+
+	/// <summary>
+	/// Gets or sets the default scale mode for new textures created by the renderer
+	/// </summary>
+	/// <value>
+	/// The default scale mode for new textures created by the renderer
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The value of this property defaults to <see cref="ScaleMode.Linear"/> for newly created renderers.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">
+	/// When setting or getting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information).
+	/// A common reason for this to happen is when the <see cref="Windowing.Window"/> associated with this renderer was already disposed, but the renderer itself wasn't disposed yet.
+	/// </exception>
+	ScaleMode DefaultTextureScaleMode { get; set; }
+
+#endif
+
+	/// <summary>
+	/// Gets or sets the blend mode for drawing operations
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// Drawing operations that make use of the blend mode defined by this property include, but are not limited to:
+	/// <see cref="TryRenderDebugText(float, float, string)"/>, <see cref="TryRenderDebugText(float, float, string, ReadOnlySpan{object})"/>,
+	/// <see cref="TryRenderFilledRect(in Rect{float})"/>, <see cref="TryRenderFilledRects(ReadOnlySpan{Rect{float}})"/>,
+	/// <see cref="TryRenderLine(float, float, float, float)"/>, <see cref="TryRenderLines(ReadOnlySpan{Point{float}})"/>,
+	/// <see cref="TryRenderPoint(float, float)"/>, <see cref="TryRenderPoints(ReadOnlySpan{Point{float}})"/>,
+	/// <see cref="TryRenderRect()"/>, <see cref="TryRenderRect(in Rect{float})"/>, and <see cref="TryRenderRects(ReadOnlySpan{Rect{float}})"/>.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">
+	/// When setting this property, the specified blend is <see cref="BlendMode.Invalid"/> or not supported by the renderer (check <see cref="Error.TryGet(out string?)"/> for more information)
+	/// - OR -
+	/// When setting or getting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information).
+	/// A common reason for this to happen is when the <see cref="Windowing.Window"/> associated with this renderer was already disposed, but the renderer itself wasn't disposed yet.
+	/// </exception>
+	BlendMode DrawBlendMode { get; set; }
+
+	/// <summary>
+	/// Gets or sets the color used for drawing operations
+	/// </summary>
+	/// <value>
+	/// The color used for drawing operations
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// Drawing operations that make use of the blend mode defined by this property include, but are not limited to:
+	/// <see cref="TryRenderDebugText(float, float, string)"/>, <see cref="TryRenderDebugText(float, float, string, ReadOnlySpan{object})"/>,
+	/// <see cref="TryRenderFilledRect(in Rect{float})"/>, <see cref="TryRenderFilledRects(ReadOnlySpan{Rect{float}})"/>,
+	/// <see cref="TryRenderLine(float, float, float, float)"/>, <see cref="TryRenderLines(ReadOnlySpan{Point{float}})"/>,
+	/// <see cref="TryRenderPoint(float, float)"/>, <see cref="TryRenderPoints(ReadOnlySpan{Point{float}})"/>,
+	/// <see cref="TryRenderRect()"/>, <see cref="TryRenderRect(in Rect{float})"/>, and <see cref="TryRenderRects(ReadOnlySpan{Rect{float}})"/>.
+	/// </para>
+	/// <para>
+	/// In addition to that, <see cref="DrawColor"/> also defines the color used for clearing the current render target when using the <see cref="TryClear"/> method.
+	/// </para>
+	/// <para>
+	/// The <see cref="DrawBlendMode"/> specifies how the <see cref="Color{T}.A">alpha</see> component of this property is used in drawing operations.
+	/// </para>
+	/// <para>
+	/// The component values of this property are equivalent to the component values of the <see cref="DrawColorFloat"/> property, multiplied by <c>255</c> and rounded towards zero.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">
+	/// When setting or getting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information).
+	/// A common reason for this to happen is when the <see cref="Windowing.Window"/> associated with this renderer was already disposed, but the renderer itself wasn't disposed yet.
+	/// </exception>
+	Color<byte> DrawColor { get; set; }
+
+	/// <summary>
+	/// Gets or sets the color used for drawing operations
+	/// </summary>
+	/// <value>
+	/// The color used for drawing operations
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// Drawing operations that make use of the blend mode defined by this property include, but are not limited to:
+	/// <see cref="TryRenderDebugText(float, float, string)"/>, <see cref="TryRenderDebugText(float, float, string, ReadOnlySpan{object})"/>,
+	/// <see cref="TryRenderFilledRect(in Rect{float})"/>, <see cref="TryRenderFilledRects(ReadOnlySpan{Rect{float}})"/>,
+	/// <see cref="TryRenderLine(float, float, float, float)"/>, <see cref="TryRenderLines(ReadOnlySpan{Point{float}})"/>,
+	/// <see cref="TryRenderPoint(float, float)"/>, <see cref="TryRenderPoints(ReadOnlySpan{Point{float}})"/>,
+	/// <see cref="TryRenderRect()"/>, <see cref="TryRenderRect(in Rect{float})"/>, and <see cref="TryRenderRects(ReadOnlySpan{Rect{float}})"/>.
+	/// </para>
+	/// <para>
+	/// In addition to that, <see cref="DrawColorFloat"/> also defines the color used for clearing the current render target when using the <see cref="TryClear"/> method.
+	/// </para>
+	/// <para>
+	/// The <see cref="DrawBlendMode"/> specifies how the <see cref="Color{T}.A">alpha</see> component of this property is used in drawing operations.
+	/// </para>
+	/// <para>
+	/// The component values of this property are equivalent to the component values of the <see cref="DrawColor"/> property, divided by <c>255</c>.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">
+	/// When setting or getting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information).
+	/// A common reason for this to happen is when the <see cref="Windowing.Window"/> associated with this renderer was already disposed, but the renderer itself wasn't disposed yet.
+	/// </exception>
+	Color<float> DrawColorFloat { get; set; }
+
+	/// <summary>
+	/// Gets the additional high dynamic range that can be displayed, in terms of the <see cref="SdrWhitePoint">SDR white point</see>
+	/// </summary>
+	/// <value>
+	/// The additional high dynamic range that can be displayed, in terms of the <see cref="SdrWhitePoint">SDR white point</see>
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The value of this property will be <c>1.0</c> when HDR is not enabled.
+	/// </para>
+	/// <para>
+	/// The value of this property can change dynamically at runtime when a <see cref="EventType.WindowHdrStateChanged"/> event (<see cref="WindowEvent"/>) is sent.
+	/// </para>
+	/// </remarks>
+	float HdrHeadroom { get; }
+
+	/// <summary>
+	/// Gets a value indicating whether clipping on the current target is enabled or not
+	/// </summary>
+	/// <value>
+	/// A value indicating whether clipping on the current target is enabled or not
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// Each render target, <see cref="Window"/> or <see cref="Target"/> (or <see cref="RendererExtensions.get_Surface(Renderer{Drivers.Software})"/> in the case of a software renderer), has its own clipping state.
+	/// This property reflects the clipping state of the <em>current</em> target.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	bool IsClippingEnabled { get; }
+
+	/// <summary>
+	/// Gets a value indicating whether the renderer is presenting to a display with HDR enabled
+	/// </summary>
+	/// <value>
+	/// A value indicating whether the renderer is presenting to a display with HDR enabled
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The value of this property can change dynamically at runtime when a <see cref="EventType.WindowHdrStateChanged"/> event (<see cref="WindowEvent"/>) is sent.
+	/// </para>
+	/// </remarks>
+	bool IsHdrEnabled { get; }
+
+	/// <summary>
+	/// Gets a value indicating whether an explicit rectangle was set as the current <see cref="Viewport"/> for the renderer
+	/// </summary>
+	/// <value>
+	/// A value indicating whether an explicit rectangle was set as the current <see cref="Viewport"/> for the renderer
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// This is useful if you're saving and restoring the <see cref="Viewport"/> and want to know whether you should restore a specific rectangle or not.
+	/// </para>
+	/// <para>
+	/// Each render target, <see cref="Window"/> or <see cref="Target"/> (or <see cref="RendererExtensions.get_Surface(Renderer{Drivers.Software})"/> in the case of a software renderer), has its own viewport.
+	/// This property reflects the viewport of the <em>current</em> target.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	bool IsViewportSet { get; }
+
+	/// <summary>
+	/// Gets or sets the device-independent resolution and presentation mode for rendering
+	/// </summary>
+	/// <value>
+	/// The device-independent resolution and presentation mode for rendering
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The value of this property specifies the width and height of the logical rendering output. The renderer will act as if the current target is always the specified size, scaling to the actual resolution as necessary.
+	/// </para>
+	/// <para>
+	/// This can be useful for games and applications that expect a fixed size, but would like to scale the output to whatever is available, regardless of how a user resizes a window, or if the display is high DPI.
+	/// </para>
+	/// <para>
+	/// Logical presentation is disabled if the mode is set to <see cref="RendererLogicalPresentation.Disabled"/>, in which case the logical presentation size will be equal to the output size of the current target.
+	/// It is safe to toggle the logical presentation mode during the rendering of a frame. E.g. you can do most of the rendering to a specified logical resolution, but to make text look sharper, you can temporarily disable logical presentation when rendering text.
+	/// </para>
+	/// <para>
+	/// It might be useful to draw to a texture that matches the window dimensions with logical presentation enabled, and then draw that texture across the entire window with logical presentation disabled.
+	/// Be careful not to render both with logical presentation enabled, however, as this could produce double-letterboxing, etc.
+	/// </para>
+	/// <para>
+	/// Coordinates coming from an event can be converted to rendering coordinates using the <see cref="EventExtensions.TryConvertToRenderCoordinates{TEvent, TRenderer}(ref TEvent, TRenderer)"/> method.
+	/// </para>
+	/// <para>
+	/// Each render target, <see cref="Window"/> or <see cref="Target"/> (or <see cref="RendererExtensions.get_Surface(Renderer{Drivers.Software})"/> in the case of a software renderer), has its own logical presentation size and mode.
+	/// This property reflects the logical presentation size and mode of the <em>current</em> target.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">
+	/// When setting or getting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information).
+	/// A common reason for this to happen is when the <see cref="Windowing.Window"/> associated with this renderer was already disposed, but the renderer itself wasn't disposed yet.
+	/// </exception>
+	(int Width, int Height, RendererLogicalPresentation Mode) LogicalPresentation { get; set; }
+
+	/// <summary>
+	/// Gets the final presentation rectangle for rendering
+	/// </summary>
+	/// <value>
+	/// The final presentation rectangle for rendering, in pixels
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// Each render target, <see cref="Window"/> or <see cref="Target"/> (or <see cref="RendererExtensions.get_Surface(Renderer{Drivers.Software})"/> in the case of a software renderer), has its own logical presentation size and mode.
+	/// This property reflects the logical presentation rectangle of the <em>current</em> target.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">
+	/// When getting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information).
+	/// A common reason for this to happen is when the <see cref="Windowing.Window"/> associated with this renderer was already disposed, but the renderer itself wasn't disposed yet.
+	/// </exception>
+	Rect<float> LogicalPresentationRect { get; }
+
+	/// <summary>
+	/// Gets the maximum texture size supported by the renderer
+	/// </summary>
+	/// <value>
+	/// The maximum texture size supported by the renderer, in pixels
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The value of this property is in regards to both width and height of the texture.
+	/// E.g. if the value is <c>4096</c>, then the renderer supports textures up to <c>4096</c>⨯<c>4096</c> in size.
+	/// </para>
+	/// </remarks>
+	int MaximumTextureSize { get; }
+
+	/// <summary>
+	/// Gets the name of the rendering driver used by the renderer
+	/// </summary>
+	/// <value>
+	/// The name of the rendering driver used by the renderer, or <c><see langword="null"/></c> if the name is not available
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The value of this property can be compared to the <see cref="IDriver.Name">name</see> of any pre-defined rendering driver implementing the <see cref="IDriver"/> interface to determine whether the renderer is using that driver.
+	/// </para>
+	/// <para>
+	/// Names of rendering drivers should all be simple, low-ASCII identifiers, like <c>"opengl"</c>, <c>"direct3d12"</c> or <c>"metal"</c>.
+	/// These should never have Unicode characters, and are not meant to be proper names.
+	/// </para>
+	/// <para>
+	/// You can see <see cref="IDriver.AvailableDriverNames"/> for a list of the names of all available rendering drivers in the current environment.
+	/// </para>
+	/// </remarks>
+	string? Name { get; }
+
+	/// <summary>
+	/// Gets the color space used by the renderer for presenting to the output display
+	/// </summary>
+	/// <value>
+	/// The color space used by the renderer for presenting to the output display
+	/// </value>
+	ColorSpace OutputColorSpace { get; }
+
+	/// <summary>
+	/// Gets the output size for the renderer
+	/// </summary>
+	/// <value>
+	/// The output size for the renderer, in pixels
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The value of this property is the true output size in pixels, ignoring any render targets or logical presentation settings.
+	/// </para>
+	/// <para>
+	/// To get the output size of the current target, adjusted by the current logical presentation settings, use the <see cref="CurrentOutputSize"/> property instead.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">
+	/// When getting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information).
+	/// A common reason for this to happen is when the <see cref="Windowing.Window"/> associated with this renderer was already disposed, but the renderer itself wasn't disposed yet.
+	/// </exception>
+	(int Width, int Height) OutputSize { get; }
+
+	/// <summary>
+	/// Gets the properties associated with the renderer
+	/// </summary>
+	/// <value>
+	/// The properties associated with the renderer, or <c><see langword="null"/></c> if the properties could not be retrieved successfully (check <see cref="Error.TryGet(out string?)"/> for more information)
+	/// </value>
+	Properties? Properties { get; }
+
+	internal unsafe SDL_Renderer* Pointer { get; }
+
+	/// <summary>
+	/// Gets the safe area for rendering within the current viewport
+	/// </summary>
+	/// <value>
+	/// The safe area for rendering within the current viewport, in pixels
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// Some devices have portions of the screen which are partially obscured or not interactive, possibly due to on-screen controls, curved edges, camera notches, TV overscan, etc.
+	/// This property provides the area of the current viewport which is safe to have interactible content.
+	/// You should continue rendering into the rest of the render target, but it should not contain visually important or interactible content.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">
+	/// When getting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information).
+	/// A common reason for this to happen is when the <see cref="Windowing.Window"/> associated with this renderer was already disposed, but the renderer itself wasn't disposed yet.
+	/// </exception>
+	Rect<int> SafeArea { get; }
+
+	/// <summary>
+	/// Gets or sets the drawing scales for rendering on the current target
+	/// </summary>
+	/// <value>
+	/// The drawing scales for rendering on the current target
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The drawing coordinates are scaled by the values of this property before they are used by the renderer.
+	/// This allows for resolution-independent drawing with a single coordinate system.
+	/// </para>
+	/// <para>
+	/// If this results in scaling or subpixel drawing by the rendering backend, it will be handled using the appropriate quality hints.
+	/// For best results use integer scaling factors.
+	/// </para>
+	/// <para>
+	/// Each render target, <see cref="Window"/> or <see cref="Target"/> (or <see cref="RendererExtensions.get_Surface(Renderer{Drivers.Software})"/> in the case of a software renderer), has its own drawing scales.
+	/// This property reflects the drawing scales of the <em>current</em> target.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">
+	/// When getting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information).
+	/// A common reason for this to happen is when the <see cref="Windowing.Window"/> associated with this renderer was already disposed, but the renderer itself wasn't disposed yet.
+	/// </exception>
+	(float ScaleX, float ScaleY) Scale { get; set; }
+
+	/// <summary>
+	/// Gets the SDR white point in the <see cref="ColorSpace.SrgbLinear"/> color space
+	/// </summary>
+	/// <value>
+	/// The SDR white point in the <see cref="ColorSpace.SrgbLinear"/> color space
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The value of this property is automatically multiplied into the color scale when HDR is enabled.
+	/// </para>
+	/// <para>
+	/// The value of this property can change dynamically at runtime when a <see cref="EventType.WindowHdrStateChanged"/> event (<see cref="WindowEvent"/>) is sent.
+	/// </para>
+	/// </remarks>
+	float SdrWhitePoint { get; }
+
+	/// <summary>
+	/// Gets the texture formats supported by the renderer
+	/// </summary>
+	/// <value>
+	/// The texture formats supported by the renderer
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// For performance reasons, the resulting collection is enumerated lazily, so the actual enumeration of the supported texture formats is deferred until you start enumerating over the collection.
+	/// </para>
+	/// <para>
+	/// Because of that, the fact that you can enumerate the result just a single time, and the fact that the enumeration itself is quite an expensive operation,
+	/// you should consider caching the result into a persistent collection.
+	/// </para>
+	/// <para>
+	/// Note that the enumerator returned by this property can <see langword="throw"/> an <see cref="InvalidOperationException"/> if the reference to the texture formats is invalid or if it changes during the enumeration.
+	/// </para>
+	/// </remarks>
+	IEnumerable<PixelFormat> SupportedTextureFormats { get; }
+
+	/// <summary>
+	/// Gets a value indicating whether the renderer supports texture address wrapping on non-power-of-two textures
+	/// </summary>
+	/// <value>
+	/// A value indicating whether the renderer supports texture address wrapping on non-power-of-two textures
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The value of this property determines whether the renderer supports <see cref="TextureAddressMode.Wrap"/> on textures that don't have power-of-two dimensions.
+	/// </para>
+	/// <para>
+	/// Texture address wrapping is always supported for power-of-two texture sizes.
+	/// </para>
+	/// </remarks>
+	bool SupportsNonPowerOfTwoTextureWrapping { get; }
+
+	/// <summary>
+	/// Gets the current render target
+	/// </summary>
+	/// <value>
+	/// The current render target, or <c><see langword="null"/></c> if the default render target is active
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// If the value of this property is <c><see langword="null"/></c>, then the default render target is active.
+	/// The default render target is the <see cref="Windowing.Window"/> associated with the renderer, the <see cref="Surface"/> associated with a software renderer, or the off-screen target associated with a GPU renderer.
+	/// </para>
+	/// <para>
+	/// You can reset the current render target to the default render target by either setting this property to <c><see langword="null"/></c>, or by using the <see cref="ResetTarget"/> method.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be used as render targets, and only if they were created with the <see cref="TextureAccess.Target"/> access mode.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="ObjectDisposedException">
+	/// When setting this property, the specified texture was already disposed
+	/// </exception>
+	/// <exception cref="SdlException">
+	/// When setting this property, the specified texture is not a valid render target (e.g. it wasn't created with the <see cref="TextureAccess.Target"/> access mode, or it wasn't created with this renderer) (check <see cref="Error.TryGet(out string?)"/> for more information)
+	/// - OR -
+	/// When setting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information).
+	/// A common reason for this to happen is when the <see cref="Windowing.Window"/> associated with this renderer was already disposed, but the renderer itself wasn't disposed yet.
+	/// </exception>
+	ITexture? Target { get; set; }
+
+#if SDL3_4_0_OR_GREATER
+
+	/// <summary>
+	/// Gets or sets the texture address modes used in <see cref="TryRenderGeometry(ReadOnlySpan{Vertex}, ITexture?)"/> and <see cref="TryRenderGeometry(ReadOnlySpan{Vertex}, ReadOnlySpan{int}, ITexture?)"/>
+	/// </summary>
+	/// <value>
+	/// The texture address modes used in <see cref="TryRenderGeometry(ReadOnlySpan{Vertex}, ITexture?)"/> and <see cref="TryRenderGeometry(ReadOnlySpan{Vertex}, ReadOnlySpan{int}, ITexture?)"/>.
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The <see cref="TextureAddressMode"/>s specified by this property determine the horizontal addressing mode (UMode) and vertical addressing mode (VMode) respectively.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">
+	/// When setting or getting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information).
+	/// A common reason for this to happen is when the <see cref="Windowing.Window"/> associated with this renderer was already disposed, but the renderer itself wasn't disposed yet.
+	/// </exception>
+	(TextureAddressMode UMode, TextureAddressMode VMode) TextureAddressMode { get; set; }
+
+#endif
+
+	/// <summary>
+	/// Gets or sets the drawing area for rendering on the current target
+	/// </summary>
+	/// <value>
+	/// The drawing area for rendering on the current target, in pixels
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// Drawing operations will clip to the area defined by this property (separatly from any clipping defined by the <see cref="ClippingRect"/> property),
+	/// and the top-left of the area will become the coordinates origin (0, 0) for future drawing operations.
+	/// </para>
+	/// <para>
+	/// The area defined by this property must be ≥ 0.
+	/// </para>
+	/// <para>
+	/// You can use the <see cref="IsViewportSet"/> property to check whether an explicit rectangle was set as the current viewport for the renderer or not,
+	/// and the <see cref="ResetViewport"/> method to reset the viewport back to the default, which is the entire target area.
+	/// </para>
+	/// <para>
+	/// Each render target, <see cref="Window"/> or <see cref="Target"/> (or <see cref="RendererExtensions.get_Surface(Renderer{Drivers.Software})"/> in the case of a software renderer), has it own viewport.
+	/// This property reflects the viewport of the <em>current</em> target.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">
+	/// When setting or getting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information).
+	/// A common reason for this to happen is when the <see cref="Windowing.Window"/> associated with this renderer was already disposed, but the renderer itself wasn't disposed yet.
+	/// </exception>
+	Rect<int> Viewport { get; set; }
+
+	/// <summary>
+	/// Gets or sets the vertical synchronization (VSync) mode or interval for the renderer
+	/// </summary>
+	/// <value>
+	/// The vertical synchronization (VSync) mode or interval for the renderer
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// You can set the value of this property to <see cref="RendererVSync.Disabled"/> to disable VSync,
+	/// <see cref="RendererVSync.Adaptive"/> to enable late swap tearing (adaptive VSync) if supported,
+	/// or use the <see cref="RendererVSyncExtensions.Interval(int)"/> method to specify a custom VSync interval.
+	/// You can specify a custom interval of <c>1</c> to synchronize to present of the renderer with <em>every</em> vertical refresh,
+	/// <c>2</c> to synchronize it with <em>every second</em> vertical refresh, and so on.
+	/// </para>
+	/// <para>
+	/// When a renderer is newly created, the value of this property defaults to <see cref="RendererVSync.Disabled"/>.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">
+	/// When setting this property, the renderer is a software renderer associated with a <see cref="Surface"/> instead of a <see cref="Windowing.Window"/>,and you tried to enable VSync (check <see cref="Error.TryGet(out string?)"/> for more information)
+	/// - OR -
+	/// When setting this property, the specified VSync mode or interval is not supported by the renderer (check <see cref="Error.TryGet(out string?)"/> for more information)
+	/// - OR -
+	/// When setting or getting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information).
+	/// A common reason for this to happen is when the <see cref="Windowing.Window"/> associated with this renderer was already disposed, but the renderer itself wasn't disposed yet.
+	/// </exception>
+	RendererVSync VSync { get; set; }
+
+	/// <summary>
+	/// Gets the <see cref="Window"/> associated with the renderer
+	/// </summary>
+	/// <value>
+	/// The <see cref="Window"/> associated with the renderer, or <c><see langword="null"/></c> if there is no associated window
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The value of this property can be <c><see langword="null"/></c> if the renderer is a software renderer with an associated <see cref="Surface"/> instead
+	/// or if the renderer is a GPU renderer associated with an off-screen target.
+	/// </para>
+	/// </remarks>
+	Window? Window { get; }
+
+	private protected void Dispose(bool disposing, bool forget);
+
+	/// <summary>
+	/// Disables the clipping rectangle for the current target
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// After a call to this method, the value of the <see cref="IsClippingEnabled"/> property will be <c><see langword="false"/></c>.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">
+	/// SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information).
+	/// A common reason for this to happen is when the <see cref="Windowing.Window"/> associated with this renderer was already disposed, but the renderer itself wasn't disposed yet.
+	/// </exception>
+	void ResetClippingRect();
+
+	/// <summary>
+	/// Resets the current target to the default render target
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// After a call to this method, the value of the <see cref="Target"/> property will be <c><see langword="null"/></c>.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">
+	/// SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information).
+	/// A common reason for this to happen is when the <see cref="Windowing.Window"/> associated with this renderer was already disposed, but the renderer itself wasn't disposed yet.
+	/// </exception>
+	void ResetTarget();
+
+	/// <summary>
+	/// Resets the drawing area for rendering on the current target to the entire target area
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// After a call to this method, the value of the <see cref="IsViewportSet"/> property will be <c><see langword="false"/></c>.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">
+	/// SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information).
+	/// A common reason for this to happen is when the <see cref="Windowing.Window"/> associated with this renderer was already disposed, but the renderer itself wasn't disposed yet.
+	/// </exception>
+	void ResetViewport();
+
+	/// <summary>
+	/// Tries to clear the current target with the drawing color
+	/// </summary>
+	/// <returns><c><see langword="true"/></c>, if the target was cleared successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method clears the entire current rendering target with the current <see cref="DrawColor"/> (or <see cref="DrawColorFloat"/>), ignoring any <see cref="Viewport"/> or <see cref="ClippingRect"/> settings.
+	/// The <see cref="DrawBlendMode"/> does not affect this method.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryClear();
+
+	/// <summary>
+	/// Tries to get a point in window coordinates for a specified point in render coordinates
+	/// </summary>
+	/// <param name="x">The X coordinate in render coordinates to convert to window coordinates</param>
+	/// <param name="y">The Y coordinate in render coordinates to convert to window coordinates</param>
+	/// <param name="windowX">The X coordinate in window coordinates corresponding to the given render coordinates, if this method returns <c><see langword="true"/></c></param>
+	/// <param name="windowY">The Y coordinate in window coordinates corresponding to the given render coordinates, if this method returns <c><see langword="true"/></c></param>
+	/// <returns><c><see langword="true"/></c>, if the conversion was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The conversion takes into account several factors:
+	/// <list type="bullet">
+	///	<item><description>The <see cref="Window"/> dimensions</description></item>
+	///	<item><description>The <see cref="LogicalPresentation"/> settings</description></item>
+	///	<item><description>The <see cref="Scale"/></description></item>
+	///	<item><description>The <see cref="Viewport"/></description></item>
+	/// </list>
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryConvertRenderToWindowCoordinates(float x, float y, out float windowX, out float windowY);
+
+	/// <summary>
+	/// Tries to get a point in render coordinates for a specified point in window coordinates
+	/// </summary>
+	/// <param name="windowX">The X coordinate in window coordinates to convert to render coordinates</param>
+	/// <param name="windowY">The Y coordinate in window coordinates to convert to render coordinates</param>
+	/// <param name="x">The X coordinate in render coordinates corresponding to the given window coordinates, if this method returns <c><see langword="true"/></c></param>
+	/// <param name="y">The Y coordinate in render coordinates corresponding to the given window coordinates, if this method returns <c><see langword="true"/></c></param>
+	/// <returns><c><see langword="true"/></c>, if the conversion was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The conversion takes into account several factors:
+	/// <list type="bullet">
+	///	<item><description>The <see cref="Window"/> dimensions</description></item>
+	///	<item><description>The <see cref="LogicalPresentation"/> settings</description></item>
+	///	<item><description>The <see cref="Scale"/></description></item>
+	///	<item><description>The <see cref="Viewport"/></description></item>
+	/// </list>
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryConvertWindowToRenderCoordinates(float windowX, float windowY, out float x, out float y);
+
+	/// <summary>
+	/// Tries to create a new texture for the renderer
+	/// </summary>
+	/// <param name="format">The pixel format of the texture. Should be one of the supported texture formats returned by the <see cref="SupportedTextureFormats"/> property.</param>
+	/// <param name="access">The intended access pattern of the texture. Should be one of the pre-defined <see cref="TextureAccess"/> values.</param>
+	/// <param name="width">The width of the texture in pixels</param>
+	/// <param name="height">The height of the texture in pixels</param>
+	/// <param name="texture">The resulting texture, if this method returns <c><see langword="true"/></c>; otherwise, <c><see langword="null"/></c></param>
+	/// <returns><c><see langword="true"/></c>, if the texture was created successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The contents of a newly created texture are undefined.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryCreateTexture(PixelFormat format, TextureAccess access, int width, int height, [NotNullWhen(true)] out ITexture? texture);
+
+	// the inability to use preprocessor directives in XML documentation strikes again...
+#if SDL3_4_0_OR_GREATER
+	/// <summary>
+	/// Tries to create a new texture for the renderer
+	/// </summary>
+	/// <param name="texture">The resulting texture, if this method returns <c><see langword="true"/></c>; otherwise, <c><see langword="null"/></c></param>
+	/// <param name="colorSpace">
+	/// The color space of the texture.
+	/// If not specified, defaults to <see cref="ColorSpace.SrgbLinear"/> for floating point textures,
+	/// <see cref="ColorSpace.Hdr10"/> for 10-bit textures, <see cref="ColorSpace.Srgb"/> for other RGB textures,
+	/// and <see cref="ColorSpace.Jpeg"/> for YUV textures, or whatever the provided <paramref name="properties"/> specify.
+	/// </param>
+	/// <param name="format">
+	/// The pixel format of the texture.
+	/// Should be one of the supported texture formats returned by the <see cref="SupportedTextureFormats"/> property.
+	/// If not specified, defaults to the best RGBA format available for the renderer, or whatever the provided <paramref name="properties"/> specify.
+	/// </param>
+	/// <param name="access">
+	/// The intended access pattern of the texture.
+	/// Should be one of the pre-defined <see cref="TextureAccess"/> values.
+	/// If not specified, defaults to <see cref="TextureAccess.Static"/>, or whatever the provided <paramref name="properties"/> specify.
+	/// </param>
+	/// <param name="width">
+	/// The width of the texture in pixels.
+	/// Required if the provided <paramref name="properties"/> don't specify a width.
+	/// </param>
+	/// <param name="height">
+	/// The height of the texture in pixels.
+	/// Required if the provided <paramref name="properties"/> don't specify a height.
+	/// </param>
+	/// <param name="palette">The palette to use when creating a texture with a palettized pixel format</param>
+	/// <param name="sdrWhitePoint">
+	/// The defining value for 100% diffuse white for HDR10 and floating point textures.
+	/// Defaults to <c>100</c> for HDR10 textures and <c>1.0</c> for floating point textures, or whatever the provided <paramref name="properties"/> specify.
+	/// </param>
+	/// <param name="hdrHeadroom">The maximum dynamic range for HDR10 and floating point textures in terms of the <paramref name="sdrWhitePoint"/></param>
+	/// <param name="properties">Additional properties to use when creating the texture</param>
+	/// <returns><c><see langword="true"/></c>, if the texture was created successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The contents of a newly created texture are undefined.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+#else
+	/// <summary>
+	/// Tries to create a new texture for the renderer
+	/// </summary>
+	/// <param name="texture">The resulting texture, if this method returns <c><see langword="true"/></c>; otherwise, <c><see langword="null"/></c></param>
+	/// <param name="colorSpace">
+	/// The color space of the texture.
+	/// If not specified, defaults to <see cref="ColorSpace.SrgbLinear"/> for floating point textures,
+	/// <see cref="ColorSpace.Hdr10"/> for 10-bit textures, <see cref="ColorSpace.Srgb"/> for other RGB textures,
+	/// and <see cref="ColorSpace.Jpeg"/> for YUV textures, or whatever the provided <paramref name="properties"/> specify.
+	/// </param>
+	/// <param name="format">
+	/// The pixel format of the texture.
+	/// Should be one of the supported texture formats returned by the <see cref="SupportedTextureFormats"/> property.
+	/// If not specified, defaults to the best RGBA format available for the renderer, or whatever the provided <paramref name="properties"/> specify.
+	/// </param>
+	/// <param name="access">
+	/// The intended access pattern of the texture.
+	/// Should be one of the pre-defined <see cref="TextureAccess"/> values.
+	/// If not specified, defaults to <see cref="TextureAccess.Static"/>, or whatever the provided <paramref name="properties"/> specify.
+	/// </param>
+	/// <param name="width">
+	/// The width of the texture in pixels.
+	/// Required if the provided <paramref name="properties"/> don't specify a width.
+	/// </param>
+	/// <param name="height">
+	/// The height of the texture in pixels.
+	/// Required if the provided <paramref name="properties"/> don't specify a height.
+	/// </param>
+	/// <param name="sdrWhitePoint">
+	/// The defining value for 100% diffuse white for HDR10 and floating point textures.
+	/// Defaults to <c>100</c> for HDR10 textures and <c>1.0</c> for floating point textures, or whatever the provided <paramref name="properties"/> specify.
+	/// </param>
+	/// <param name="hdrHeadroom">The maximum dynamic range for HDR10 and floating point textures in terms of the <paramref name="sdrWhitePoint"/></param>
+	/// <param name="properties">Additional properties to use when creating the texture</param>
+	/// <returns><c><see langword="true"/></c>, if the texture was created successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The contents of a newly created texture are undefined.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+#endif
+	bool TryCreateTexture([NotNullWhen(true)] out ITexture? texture, ColorSpace? colorSpace = default, PixelFormat? format = default, TextureAccess? access = default, int? width = default, int? height = default,
+#if SDL3_4_0_OR_GREATER
+		Palette? palette = default,
+#endif
+		float? sdrWhitePoint = default, float? hdrHeadroom = default, Properties? properties = default);
+
+	/// <summary>
+	/// Tries to create a texture from an exisiting <see cref="Surface"/>
+	/// </summary>
+	/// <param name="surface">The <see cref="Surface"/> to copy and create the texture from</param>
+	/// <param name="texture">The resulting texture, if this method returns <c><see langword="true"/></c>; otherwise, <c><see langword="null"/></c></param>
+	/// <returns><c><see langword="true"/></c>, if the texture was created successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The given <paramref name="surface"/>'s pixel data is copied into the texture and the <paramref name="surface"/> is not modified in any way.
+	/// This means that the given <paramref name="surface"/> can be safely disposed of after this method returns, without affecting the resulting texture.
+	/// </para>
+	/// <para>
+	/// The pixel format of the resulting texture my be different from the pixel format of the given <paramref name="surface"/>.
+	/// The actual pixel format of the resulting texture can later be checked using the <see cref="ITexture.Format"/> property.
+	/// </para>
+	/// <para>
+	/// The <see cref="TextureAccess"/> of the resulting texture will be <see cref="TextureAccess.Static"/>.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryCreateTextureFromSurface(Surface surface, [NotNullWhen(true)] out ITexture? texture);
+
+	/// <summary>
+	/// Tries to flush any pending rendering operations on the current target
+	/// </summary>
+	/// <returns><c><see langword="true"/></c>, if the operation was successful; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// You <em>do not need to</em> (and in fact, <em>shouldn't</em>) call this method unless you are planning to call into OpenGL/Direct3D/Metal/whatever directly, in addition to using an <see cref="IRenderer"/>.
+	/// </para>
+	/// <para>
+	/// This method exists for a very-specific case: if you are using SDL's render API, and you plan to make OpenGL/D3D/whatever calls in addition to SDL render API calls.
+	/// If this applies, you should call this method between calls to SDL's render API and the low-level API you're using in cooperation.
+	/// </para>
+	/// <para>
+	/// <em>In all other cases, you can ignore this method!</em>
+	/// </para>
+	/// <para>
+	/// A call to this method makes SDL flush any pending rendering work it was queueing up to do later in a single batch, and marks any internal cached state as invalid, so it'll prepare all its state again later, from scratch.
+	/// </para>
+	/// <para>
+	/// This means you do not need to save state in your rendering code to protect the SDL renderer.
+	/// However, there lots of arbitrary pieces of Direct3D and OpenGL state that can confuse things; you should use your best judgment and be prepared to make changes if specific state needs to be protected.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryFlush();
+
+	/// <summary>
+	/// Tries to read the pixels of an area of the current target into a new <see cref="Surface"/>
+	/// </summary>
+	/// <param name="rect">The area of the current target to read the pixels from</param>
+	/// <param name="pixels">The resulting <see cref="Surface"/> containing the read pixels, if this method returns <c><see langword="true"/></c>; otherwise, <c><see langword="null"/></c></param>
+	/// <returns><c><see langword="true"/></c>, if the pixels were successfully read into a new <see cref="Surface"/>; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The resulting <see cref="Surface"/> contains a copy of the pixels in the area specified by the given <paramref name="rect"/> clipped to the current <see cref="Viewport"/>.
+	/// </para>
+	/// <para>
+	/// Note that this method copies the actual pixels on the screen. So if you are using any form of <see cref="LogicalPresentation">logical presentation</see>,
+	/// you should use <see cref="LogicalPresentationRect"/> to get the area containing your content.
+	/// </para>
+	/// <para>
+	/// <em>WARNING</em>: This is a very slow operation, and should not be used frequently.
+	/// If you're using this on the main rendering target, it should be called after rendering and before <see cref="TryRenderPresent"/>.
+	/// </para>
+	/// <para>
+	/// Please remember to dispose of the resulting <see cref="Surface"/> when you're done using it.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryReadPixels(in Rect<int> rect, [NotNullWhen(true)] out Surface? pixels);
+
+	/// <summary>
+	/// Tries to read the pixels of the entirety of the current target into a new <see cref="Surface"/>
+	/// </summary>
+	/// <param name="pixels">The resulting <see cref="Surface"/> containing the read pixels, if this method returns <c><see langword="true"/></c>; otherwise, <c><see langword="null"/></c></param>
+	/// <returns><c><see langword="true"/></c>, if the pixels were successfully read into a new <see cref="Surface"/>; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The resulting <see cref="Surface"/> contains a copy of the pixels of the entire texture clipped to the current <see cref="Viewport"/>.
+	/// </para>
+	/// <para>
+	/// Note that this method copies the actual pixels on the screen. So if you are using any form of <see cref="LogicalPresentation">logical presentation</see>,
+	/// you should use <see cref="LogicalPresentationRect"/> to get the area containing your content.
+	/// </para>
+	/// <para>
+	/// <em>WARNING</em>: This is a very slow operation, and should not be used frequently.
+	/// If you're using this on the main rendering target, it should be called after rendering and before <see cref="TryRenderPresent"/>.
+	/// </para>
+	/// <para>
+	/// Please remember to dispose of the resulting <see cref="Surface"/> when you're done using it.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryReadPixels([NotNullWhen(true)] out Surface? pixels);
+
+	//TODO: replace SDL_ttf in the xml doc with Sdl3Sharp's adaptation of it, once it's done
+	/// <summary>
+	/// Tries to draw debug text to the current target
+	/// </summary>
+	/// <param name="x">The top-left X coordinate where the text should be drawn</param>
+	/// <param name="y">The top-left Y coordinate where the text should be drawn</param>
+	/// <param name="text">The text to be drawn</param>
+	/// <returns><c><see langword="true"/></c>, if the text was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method will render text to an <see cref="IRenderer"/>.
+	/// Note that this is a convenience method for debugging, with severe limitations, and not intended to be used for production applications and games.
+	/// </para>
+	/// <para>
+	/// Among these limitations are:
+	/// <list type="bullet">
+	/// <item><description>
+	/// It accepts Unicode strings, but will only render ASCII characters
+	/// </description></item>
+	/// <item><description>
+	/// It has a single, tiny size (8x8 pixels). You can use <see cref="LogicalPresentation"/> or <see cref="Scale"/> to adjust for that.
+	/// </description></item>
+	/// <item><description>
+	/// It uses a simple, hardcoded bitmap font. It does not allow different font selections and it does not support truetype, for proper scaling.
+	/// </description></item>
+	/// <item><description>
+	/// It doesn't do word-wrapping and doesn't treat newline characters as a line break. If the text goes out of the target, it's gone.
+	/// </description></item>
+	/// </list>
+	/// </para>
+	/// <para>
+	/// For more serious text rendering, there are several good options, such as <see href="https://wiki.libsdl.org/SDL3/SDL_ttf">SDL_ttf</see>.
+	/// </para>
+	/// <para>
+	/// On first use, this will create an internal texture for rendering glyphs. This texture will live until the renderer is disposed.
+	/// </para>
+	/// <para>
+	/// The text is drawn in the color specified by <see cref="DrawColor"/> (or <see cref="DrawColorFloat"/>) and <see cref="DrawBlendMode"/> determine how the text is blended with the existing content of the target.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderDebugText(float x, float y, string text);
+
+	/// <summary>
+	/// Tries to draw a debug format string to the current target
+	/// </summary>
+	/// <param name="x">The top-left X coordinate where the text should be drawn</param>
+	/// <param name="y">The top-left Y coordinate where the text should be drawn</param>
+	/// <param name="format">The C-style <c>printf</c> format string</param>
+	/// <param name="args">The arguments corresponding to the format specifiers in <paramref name="format"/></param>
+	/// <returns><c><see langword="true"/></c>, if the text was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method will render text to an <see cref="IRenderer"/>.
+	/// Note that this is a convenience method for debugging, with severe limitations, and not intended to be used for production applications and games.
+	/// </para>
+	/// <para>
+	/// Among these limitations are:
+	/// <list type="bullet">
+	/// <item><description>
+	/// It accepts Unicode strings, but will only render ASCII characters
+	/// </description></item>
+	/// <item><description>
+	/// It has a single, tiny size (8x8 pixels). You can use <see cref="LogicalPresentation"/> or <see cref="Scale"/> to adjust for that.
+	/// </description></item>
+	/// <item><description>
+	/// It uses a simple, hardcoded bitmap font. It does not allow different font selections and it does not support truetype, for proper scaling.
+	/// </description></item>
+	/// <item><description>
+	/// It doesn't do word-wrapping and doesn't treat newline characters as a line break. If the text goes out of the target, it's gone.
+	/// </description></item>
+	/// </list>
+	/// </para>
+	/// <para>
+	/// For more serious text rendering, there are several good options, such as <see href="https://wiki.libsdl.org/SDL3/SDL_ttf">SDL_ttf</see>.
+	/// </para>
+	/// <para>
+	/// On first use, this will create an internal texture for rendering glyphs. This texture will live until the renderer is disposed.
+	/// </para>
+	/// <para>
+	/// The text is drawn in the color specified by <see cref="DrawColor"/> (or <see cref="DrawColorFloat"/>) and <see cref="DrawBlendMode"/> determine how the text is blended with the existing content of the target.
+	/// </para>
+	/// <para>
+	/// The <paramref name="format"/> parameter is interpreted as a C-style <c>printf</c> format string, and 
+	/// the <paramref name="args"/> parameter supplies the values for its format specifiers. Supported argument 
+	/// types include all integral types up to 64-bit (including <c><see langword="bool"/></c> and <c><see langword="char"/></c>), 
+	/// floating point types (<c><see langword="float"/></c> and <c><see langword="double"/></c>), pointer types 
+	/// (<c><see cref="IntPtr"/></c> and <c><see cref="UIntPtr"/></c>), and <c><see langword="string"/></c>.
+	/// </para>
+	/// <para>
+	/// For a detailed explanation of C-style <c>printf</c> format strings and their specifiers, see 
+	/// <see href="https://en.wikipedia.org/wiki/Printf#Format_specifier"/>.
+	/// </para>
+	/// <para>
+	/// Consider using <see cref="TryRenderDebugText(float, float, string)"/> instead when possible, as it may be more efficient. 
+	/// In many cases, you can use C# string interpolation to construct the message before logging.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderDebugText(float x, float y, string format, params ReadOnlySpan<object> args);
+
+	/// <summary>
+	/// Tries to draw a filled rectangle to an area of the current target
+	/// </summary>
+	/// <param name="rect">The area of the current target to draw the filled rectangle in</param>
+	/// <returns><c><see langword="true"/></c>, if the filled rectangle was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The rectangle is filled with the color specified by <see cref="DrawColor"/> (or <see cref="DrawColorFloat"/>) and <see cref="DrawBlendMode"/> determines how the rectangle is blended with the existing content of the target.
+	/// </para>
+	/// <para>
+	/// Drawing the rectangle works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderFilledRect(in Rect<float> rect);
+
+	/// <summary>
+	/// Tries to draw a filled rectangle to the entirety of the current target
+	/// </summary>
+	/// <returns><c><see langword="true"/></c>, if the filled rectangle was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The rectangle is filled with the color specified by <see cref="DrawColor"/> (or <see cref="DrawColorFloat"/>) and <see cref="DrawBlendMode"/> determines how the rectangle is blended with the existing content of the target.
+	/// </para>
+	/// <para>
+	/// Drawing the rectangle works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderFilledRect();
+
+	/// <summary>
+	/// Tries to draw multiple filled rectangles to areas of the current target
+	/// </summary>
+	/// <param name="rects">The list of areas of the current target to draw the filled rectangles in</param>
+	/// <returns><c><see langword="true"/></c>, if the filled rectangles were drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The rectangles are filled with the color specified by <see cref="DrawColor"/> (or <see cref="DrawColorFloat"/>) and <see cref="DrawBlendMode"/> determines how the rectangles are blended with the existing content of the target.
+	/// </para>
+	/// <para>
+	/// Drawing the rectangles works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderFilledRects(ReadOnlySpan<Rect<float>> rects);
+
+	/// <summary>
+	/// Tries to draw a list of triangles specified by a list of indices into a list of vertices to the current target, optionally using a texture
+	/// </summary>
+	/// <param name="vertices">The vertices to use</param>
+	/// <param name="indices">The list of indices into the vertex list to specify the triangles to draw</param>
+	/// <param name="texture">An optional texture to use when drawing the triangles</param>
+	/// <returns><c><see langword="true"/></c> if the geometry was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// There are no surface-level checks for the validity of the given <paramref name="indices"/>, so you must make sure they are all within the bounds of the given <paramref name="vertices"/> list.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Color and alpha modulation is done per vertex, so <see cref="ITexture.ColorMod"/> (or <see cref="ITexture.ColorModFloat"/>) and <see cref="ITexture.AlphaMod"/> (or <see cref="ITexture.AlphaModFloat"/>) are ignored.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderGeometry(ReadOnlySpan<Vertex> vertices, ReadOnlySpan<int> indices, ITexture? texture = default);
+
+	/// <summary>
+	/// Tries to draw a list of triangles specified by a list of vertices to the current target, optionally using a texture
+	/// </summary>
+	/// <param name="vertices">The list of vertices to specify the triangles to draw</param>
+	/// <param name="texture">An optional texture to use when drawing the triangles</param>
+	/// <returns><c><see langword="true"/></c> if the geometry was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Color and alpha modulation is done per vertex, so <see cref="ITexture.ColorMod"/> (or <see cref="ITexture.ColorModFloat"/>) and <see cref="ITexture.AlphaMod"/> (or <see cref="ITexture.AlphaModFloat"/>) are ignored.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderGeometry(ReadOnlySpan<Vertex> vertices, ITexture? texture = default);
+
+	/// <summary>
+	/// Tries to draw a list of triangles specified by a list of <see langword="int"/> indices into separate lists of vertex attributes to the current target, optionally using a texture
+	/// </summary>
+	/// <param name="xy">The list of vertex positions, first the X coordinate and then the Y coordinate for each vertex</param>
+	/// <param name="xyStride">The length, in bytes, to move from one element in the <paramref name="xy"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="colors">The list of vertex colors</param>
+	/// <param name="colorStride">The length, in bytes, to move from one element in the <paramref name="colors"/> list to the next. Usually that's <c><see langword="sizeof"/>(<see cref="Color{T}">Color&lt;<see langword="float"/>&gt;</see>)</c>.</param>
+	/// <param name="uv">The list of normalized texture coordinates per vertex, first the horizontal coordinate (U) and then the vertical coordinate (V) for each vertex</param>
+	/// <param name="uvStride">The length, in bytes, to move from one element in the <paramref name="uv"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="indices">The list of <see cref="int"/> indices into the various vertex attribute lists to specify the triangles to draw</param>
+	/// <param name="texture">An optional texture to use when drawing the triangles</param>
+	/// <returns><c><see langword="true"/></c> if the geometry was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The number of vertices specified by the various vertex attribute lists is determined by their byte lengths and strides, always selecting the smallest resulting vertex count among them.
+	/// </para>
+	/// <para>
+	/// There are no surface-level checks for the validity of the given <paramref name="indices"/>, so you must make sure they are all within the bounds of the calculated vertex count from the given vertex attribute lists.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Color and alpha modulation is done per vertex, so <see cref="ITexture.ColorMod"/> (or <see cref="ITexture.ColorModFloat"/>) and <see cref="ITexture.AlphaMod"/> (or <see cref="ITexture.AlphaModFloat"/>) are ignored.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderGeometryRaw(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, ReadOnlySpan<int> indices, ITexture? texture = default);
+
+	/// <summary>
+	/// Tries to draw a list of triangles specified by a list of <see langword="short"/> indices into separate lists of vertex attributes to the current target, optionally using a texture
+	/// </summary>
+	/// <param name="xy">The list of vertex positions, first the X coordinate and then the Y coordinate for each vertex</param>
+	/// <param name="xyStride">The length, in bytes, to move from one element in the <paramref name="xy"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="colors">The list of vertex colors</param>
+	/// <param name="colorStride">The length, in bytes, to move from one element in the <paramref name="colors"/> list to the next. Usually that's <c><see langword="sizeof"/>(<see cref="Color{T}">Color&lt;<see langword="float"/>&gt;</see>)</c>.</param>
+	/// <param name="uv">The list of normalized texture coordinates per vertex, first the horizontal coordinate (U) and then the vertical coordinate (V) for each vertex</param>
+	/// <param name="uvStride">The length, in bytes, to move from one element in the <paramref name="uv"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="indices">The list of <see cref="short"/> indices into the various vertex attribute lists to specify the triangles to draw</param>
+	/// <param name="texture">An optional texture to use when drawing the triangles</param>
+	/// <returns><c><see langword="true"/></c> if the geometry was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The number of vertices specified by the various vertex attribute lists is determined by their byte lengths and strides, always selecting the smallest resulting vertex count among them.
+	/// </para>
+	/// <para>
+	/// There are no surface-level checks for the validity of the given <paramref name="indices"/>, so you must make sure they are all within the bounds of the calculated vertex count from the given vertex attribute lists.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Color and alpha modulation is done per vertex, so <see cref="ITexture.ColorMod"/> (or <see cref="ITexture.ColorModFloat"/>) and <see cref="ITexture.AlphaMod"/> (or <see cref="ITexture.AlphaModFloat"/>) are ignored.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderGeometryRaw(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, ReadOnlySpan<short> indices, ITexture? texture = default);
+
+	/// <summary>
+	/// Tries to draw a list of triangles specified by a list of <see langword="sbyte"/> indices into separate lists of vertex attributes to the current target, optionally using a texture
+	/// </summary>
+	/// <param name="xy">The list of vertex positions, first the X coordinate and then the Y coordinate for each vertex</param>
+	/// <param name="xyStride">The length, in bytes, to move from one element in the <paramref name="xy"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="colors">The list of vertex colors</param>
+	/// <param name="colorStride">The length, in bytes, to move from one element in the <paramref name="colors"/> list to the next. Usually that's <c><see langword="sizeof"/>(<see cref="Color{T}">Color&lt;<see langword="float"/>&gt;</see>)</c>.</param>
+	/// <param name="uv">The list of normalized texture coordinates per vertex, first the horizontal coordinate (U) and then the vertical coordinate (V) for each vertex</param>
+	/// <param name="uvStride">The length, in bytes, to move from one element in the <paramref name="uv"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="indices">The list of <see cref="sbyte"/> indices into the various vertex attribute lists to specify the triangles to draw</param>
+	/// <param name="texture">An optional texture to use when drawing the triangles</param>
+	/// <returns><c><see langword="true"/></c> if the geometry was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The number of vertices specified by the various vertex attribute lists is determined by their byte lengths and strides, always selecting the smallest resulting vertex count among them.
+	/// </para>
+	/// <para>
+	/// There are no surface-level checks for the validity of the given <paramref name="indices"/>, so you must make sure they are all within the bounds of the calculated vertex count from the given vertex attribute lists.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Color and alpha modulation is done per vertex, so <see cref="ITexture.ColorMod"/> (or <see cref="ITexture.ColorModFloat"/>) and <see cref="ITexture.AlphaMod"/> (or <see cref="ITexture.AlphaModFloat"/>) are ignored.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderGeometryRaw(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, ReadOnlySpan<sbyte> indices, ITexture? texture = default);
+
+	/// <summary>
+	/// Tries to draw a list of triangles specified by separate lists of vertex attributes to the current target, optionally using a texture
+	/// </summary>
+	/// <param name="xy">The list of vertex positions, first the X coordinate and then the Y coordinate for each vertex</param>
+	/// <param name="xyStride">The length, in bytes, to move from one element in the <paramref name="xy"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="colors">The list of vertex colors</param>
+	/// <param name="colorStride">The length, in bytes, to move from one element in the <paramref name="colors"/> list to the next. Usually that's <c><see langword="sizeof"/>(<see cref="Color{T}">Color&lt;<see langword="float"/>&gt;</see>)</c>.</param>
+	/// <param name="uv">The list of normalized texture coordinates per vertex, first the horizontal coordinate (U) and then the vertical coordinate (V) for each vertex</param>
+	/// <param name="uvStride">The length, in bytes, to move from one element in the <paramref name="uv"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="texture">An optional texture to use when drawing the triangles</param>
+	/// <returns><c><see langword="true"/></c> if the geometry was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The number of vertices specified by the various vertex attribute lists is determined by their byte lengths and strides, always selecting the smallest resulting vertex count among them.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Color and alpha modulation is done per vertex, so <see cref="ITexture.ColorMod"/> (or <see cref="ITexture.ColorModFloat"/>) and <see cref="ITexture.AlphaMod"/> (or <see cref="ITexture.AlphaModFloat"/>) are ignored.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderGeometryRaw(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, ITexture? texture = default);
+
+	/// <summary>
+	/// Tries to draw a list of triangles specified by a list of <see langword="int"/> indices into separate lists of vertex attributes to the current target, optionally using a texture
+	/// </summary>
+	/// <param name="xy">The list of vertex positions, first the X coordinate and then the Y coordinate for each vertex</param>
+	/// <param name="xyStride">The length, in bytes, to move from one element in the <paramref name="xy"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="colors">The list of vertex colors</param>
+	/// <param name="colorStride">The length, in bytes, to move from one element in the <paramref name="colors"/> list to the next. Usually that's <c><see langword="sizeof"/>(<see cref="Color{T}">Color&lt;<see langword="float"/>&gt;</see>)</c>.</param>
+	/// <param name="uv">The list of normalized texture coordinates per vertex, first the horizontal coordinate (U) and then the vertical coordinate (V) for each vertex</param>
+	/// <param name="uvStride">The length, in bytes, to move from one element in the <paramref name="uv"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="indices">The list of <see cref="int"/> indices into the various vertex attribute lists to specify the triangles to draw</param>
+	/// <param name="texture">An optional texture to use when drawing the triangles</param>
+	/// <returns><c><see langword="true"/></c> if the geometry was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The number of vertices specified by the various vertex attribute lists is determined by their byte lengths and strides, always selecting the smallest resulting vertex count among them.
+	/// </para>
+	/// <para>
+	/// There are no surface-level checks for the validity of the given <paramref name="indices"/>, so you must make sure they are all within the bounds of the calculated vertex count from the given vertex attribute lists.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Color and alpha modulation is done per vertex, so <see cref="ITexture.ColorMod"/> (or <see cref="ITexture.ColorModFloat"/>) and <see cref="ITexture.AlphaMod"/> (or <see cref="ITexture.AlphaModFloat"/>) are ignored.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderGeometryRaw(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, ReadOnlySpan<int> indices, ITexture? texture = default);
+
+	/// <summary>
+	/// Tries to draw a list of triangles specified by a list of <see langword="short"/> indices into separate lists of vertex attributes to the current target, optionally using a texture
+	/// </summary>
+	/// <param name="xy">The list of vertex positions, first the X coordinate and then the Y coordinate for each vertex</param>
+	/// <param name="xyStride">The length, in bytes, to move from one element in the <paramref name="xy"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="colors">The list of vertex colors</param>
+	/// <param name="colorStride">The length, in bytes, to move from one element in the <paramref name="colors"/> list to the next. Usually that's <c><see langword="sizeof"/>(<see cref="Color{T}">Color&lt;<see langword="float"/>&gt;</see>)</c>.</param>
+	/// <param name="uv">The list of normalized texture coordinates per vertex, first the horizontal coordinate (U) and then the vertical coordinate (V) for each vertex</param>
+	/// <param name="uvStride">The length, in bytes, to move from one element in the <paramref name="uv"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="indices">The list of <see cref="short"/> indices into the various vertex attribute lists to specify the triangles to draw</param>
+	/// <param name="texture">An optional texture to use when drawing the triangles</param>
+	/// <returns><c><see langword="true"/></c> if the geometry was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The number of vertices specified by the various vertex attribute lists is determined by their byte lengths and strides, always selecting the smallest resulting vertex count among them.
+	/// </para>
+	/// <para>
+	/// There are no surface-level checks for the validity of the given <paramref name="indices"/>, so you must make sure they are all within the bounds of the calculated vertex count from the given vertex attribute lists.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Color and alpha modulation is done per vertex, so <see cref="ITexture.ColorMod"/> (or <see cref="ITexture.ColorModFloat"/>) and <see cref="ITexture.AlphaMod"/> (or <see cref="ITexture.AlphaModFloat"/>) are ignored.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderGeometryRaw(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, ReadOnlySpan<short> indices, ITexture? texture = default);
+
+	/// <summary>
+	/// Tries to draw a list of triangles specified by a list of <see langword="sbyte"/> indices into separate lists of vertex attributes to the current target, optionally using a texture
+	/// </summary>
+	/// <param name="xy">The list of vertex positions, first the X coordinate and then the Y coordinate for each vertex</param>
+	/// <param name="xyStride">The length, in bytes, to move from one element in the <paramref name="xy"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="colors">The list of vertex colors</param>
+	/// <param name="colorStride">The length, in bytes, to move from one element in the <paramref name="colors"/> list to the next. Usually that's <c><see langword="sizeof"/>(<see cref="Color{T}">Color&lt;<see langword="float"/>&gt;</see>)</c>.</param>
+	/// <param name="uv">The list of normalized texture coordinates per vertex, first the horizontal coordinate (U) and then the vertical coordinate (V) for each vertex</param>
+	/// <param name="uvStride">The length, in bytes, to move from one element in the <paramref name="uv"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="indices">The list of <see cref="sbyte"/> indices into the various vertex attribute lists to specify the triangles to draw</param>
+	/// <param name="texture">An optional texture to use when drawing the triangles</param>
+	/// <returns><c><see langword="true"/></c> if the geometry was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The number of vertices specified by the various vertex attribute lists is determined by their byte lengths and strides, always selecting the smallest resulting vertex count among them.
+	/// </para>
+	/// <para>
+	/// There are no surface-level checks for the validity of the given <paramref name="indices"/>, so you must make sure they are all within the bounds of the calculated vertex count from the given vertex attribute lists.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Color and alpha modulation is done per vertex, so <see cref="ITexture.ColorMod"/> (or <see cref="ITexture.ColorModFloat"/>) and <see cref="ITexture.AlphaMod"/> (or <see cref="ITexture.AlphaModFloat"/>) are ignored.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderGeometryRaw(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, ReadOnlySpan<sbyte> indices, ITexture? texture = default);
+
+	/// <summary>
+	/// Tries to draw a list of triangles specified by separate lists of vertex attributes to the current target, optionally using a texture
+	/// </summary>
+	/// <param name="xy">The list of vertex positions, first the X coordinate and then the Y coordinate for each vertex</param>
+	/// <param name="xyStride">The length, in bytes, to move from one element in the <paramref name="xy"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="colors">The list of vertex colors</param>
+	/// <param name="colorStride">The length, in bytes, to move from one element in the <paramref name="colors"/> list to the next. Usually that's <c><see langword="sizeof"/>(<see cref="Color{T}">Color&lt;<see langword="float"/>&gt;</see>)</c>.</param>
+	/// <param name="uv">The list of normalized texture coordinates per vertex, first the horizontal coordinate (U) and then the vertical coordinate (V) for each vertex</param>
+	/// <param name="uvStride">The length, in bytes, to move from one element in the <paramref name="uv"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="texture">An optional texture to use when drawing the triangles</param>
+	/// <returns><c><see langword="true"/></c> if the geometry was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// /// <remarks>
+	/// <para>
+	/// The number of vertices specified by the various vertex attribute lists is determined by their byte lengths and strides, always selecting the smallest resulting vertex count among them.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Color and alpha modulation is done per vertex, so <see cref="ITexture.ColorMod"/> (or <see cref="ITexture.ColorModFloat"/>) and <see cref="ITexture.AlphaMod"/> (or <see cref="ITexture.AlphaModFloat"/>) are ignored.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderGeometryRaw(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, ITexture? texture = default);
+
+	/// <summary>
+	/// Tries to draw a list of triangles specified by a list of <see langword="int"/> indices into separate lists of vertex attributes to the current target, optionally using a texture
+	/// </summary>
+	/// <param name="xy">A pointer to a contiguous array of vertex positions, first the X coordinate and then the Y coordinate for each vertex. Must be dereferenceable for at least <c><paramref name="verticesCount"/> * <paramref name="xyStride"/></c> bytes.</param>
+	/// <param name="xyStride">The length, in bytes, to move from one element in the <paramref name="xy"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="colors">A pointer to a contiguous array of vertex colors. Must be dereferenceable for at least <c><paramref name="verticesCount"/> * <paramref name="colorStride"/></c> bytes.</param>
+	/// <param name="colorStride">The length, in bytes, to move from one element in the <paramref name="colors"/> list to the next. Usually that's <c><see langword="sizeof"/>(<see cref="Color{T}">Color&lt;<see langword="float"/>&gt;</see>)</c>.</param>
+	/// <param name="uv">A pointer to a contiguous array of normalized texture coordinates per vertex, first the horizontal coordinate (U) and then the vertical coordinate (V) for each vertex. Must be dereferenceable for at least <c><paramref name="verticesCount"/> * <paramref name="uvStride"/></c> bytes.</param>
+	/// <param name="uvStride">The length, in bytes, to move from one element in the <paramref name="uv"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="verticesCount">The number of vertices</param>
+	/// <param name="indices">A pointer to a contiguous array of <see langword="int"/> indices into the various vertex attribute lists to specify the triangles to draw. Must be dereferenceable for at least <c><paramref name="indicesCount"/> * <see langword="sizeof"/>(<see langword="int"/>)</c> bytes.</param>
+	/// <param name="indicesCount">The number of <see langword="int"/> indices</param>
+	/// <param name="texture">An optional texture to use when drawing the triangles</param>
+	/// <returns><c><see langword="true"/></c> if the geometry was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// There are no surface-level checks for the validity of the given <paramref name="indices"/>, so you must make sure they are all within the bounds of the given <paramref name="verticesCount"/>.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Color and alpha modulation is done per vertex, so <see cref="ITexture.ColorMod"/> (or <see cref="ITexture.ColorModFloat"/>) and <see cref="ITexture.AlphaMod"/> (or <see cref="ITexture.AlphaModFloat"/>) are ignored.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	unsafe bool TryRenderGeometryRaw(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, int* indices, int indicesCount, ITexture? texture);
+
+	/// <summary>
+	/// Tries to draw a list of triangles specified by a list of <see langword="short"/> indices into separate lists of vertex attributes to the current target, optionally using a texture
+	/// </summary>
+	/// <param name="xy">A pointer to a contiguous array of vertex positions, first the X coordinate and then the Y coordinate for each vertex. Must be dereferenceable for at least <c><paramref name="verticesCount"/> * <paramref name="xyStride"/></c> bytes.</param>
+	/// <param name="xyStride">The length, in bytes, to move from one element in the <paramref name="xy"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="colors">A pointer to a contiguous array of vertex colors. Must be dereferenceable for at least <c><paramref name="verticesCount"/> * <paramref name="colorStride"/></c> bytes.</param>
+	/// <param name="colorStride">The length, in bytes, to move from one element in the <paramref name="colors"/> list to the next. Usually that's <c><see langword="sizeof"/>(<see cref="Color{T}">Color&lt;<see langword="float"/>&gt;</see>)</c>.</param>
+	/// <param name="uv">A pointer to a contiguous array of normalized texture coordinates per vertex, first the horizontal coordinate (U) and then the vertical coordinate (V) for each vertex. Must be dereferenceable for at least <c><paramref name="verticesCount"/> * <paramref name="uvStride"/></c> bytes.</param>
+	/// <param name="uvStride">The length, in bytes, to move from one element in the <paramref name="uv"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="verticesCount">The number of vertices</param>
+	/// <param name="indices">A pointer to a contiguous array of <see langword="short"/> indices into the various vertex attribute lists to specify the triangles to draw. Must be dereferenceable for at least <c><paramref name="indicesCount"/> * <see langword="sizeof"/>(<see langword="short"/>)</c> bytes.</param>
+	/// <param name="indicesCount">The number of <see langword="short"/> indices</param>
+	/// <param name="texture">An optional texture to use when drawing the triangles</param>
+	/// <returns><c><see langword="true"/></c> if the geometry was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// There are no surface-level checks for the validity of the given <paramref name="indices"/>, so you must make sure they are all within the bounds of the given <paramref name="verticesCount"/>.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Color and alpha modulation is done per vertex, so <see cref="ITexture.ColorMod"/> (or <see cref="ITexture.ColorModFloat"/>) and <see cref="ITexture.AlphaMod"/> (or <see cref="ITexture.AlphaModFloat"/>) are ignored.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	unsafe bool TryRenderGeometryRaw(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, short* indices, int indicesCount, ITexture? texture = default);
+
+	/// <summary>
+	/// Tries to draw a list of triangles specified by a list of <see langword="sbyte"/> indices into separate lists of vertex attributes to the current target, optionally using a texture
+	/// </summary>
+	/// <param name="xy">A pointer to a contiguous array of vertex positions, first the X coordinate and then the Y coordinate for each vertex. Must be dereferenceable for at least <c><paramref name="verticesCount"/> * <paramref name="xyStride"/></c> bytes.</param>
+	/// <param name="xyStride">The length, in bytes, to move from one element in the <paramref name="xy"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="colors">A pointer to a contiguous array of vertex colors. Must be dereferenceable for at least <c><paramref name="verticesCount"/> * <paramref name="colorStride"/></c> bytes.</param>
+	/// <param name="colorStride">The length, in bytes, to move from one element in the <paramref name="colors"/> list to the next. Usually that's <c><see langword="sizeof"/>(<see cref="Color{T}">Color&lt;<see langword="float"/>&gt;</see>)</c>.</param>
+	/// <param name="uv">A pointer to a contiguous array of normalized texture coordinates per vertex, first the horizontal coordinate (U) and then the vertical coordinate (V) for each vertex. Must be dereferenceable for at least <c><paramref name="verticesCount"/> * <paramref name="uvStride"/></c> bytes.</param>
+	/// <param name="uvStride">The length, in bytes, to move from one element in the <paramref name="uv"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="verticesCount">The number of vertices</param>
+	/// <param name="indices">A pointer to a contiguous array of <see langword="sbyte"/> indices into the various vertex attribute lists to specify the triangles to draw. Must be dereferenceable for at least <c><paramref name="indicesCount"/> * <see langword="sizeof"/>(<see langword="sbyte"/>)</c> bytes.</param>
+	/// <param name="indicesCount">The number of <see langword="sbyte"/> indices</param>
+	/// <param name="texture">An optional texture to use when drawing the triangles</param>
+	/// <returns><c><see langword="true"/></c> if the geometry was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// There are no surface-level checks for the validity of the given <paramref name="indices"/>, so you must make sure they are all within the bounds of the given <paramref name="verticesCount"/>.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Color and alpha modulation is done per vertex, so <see cref="ITexture.ColorMod"/> (or <see cref="ITexture.ColorModFloat"/>) and <see cref="ITexture.AlphaMod"/> (or <see cref="ITexture.AlphaModFloat"/>) are ignored.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	unsafe bool TryRenderGeometryRaw(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, sbyte* indices, int indicesCount, ITexture? texture = default);
+
+	/// <summary>
+	/// Tries to draw a list of triangles specified by separate lists of vertex attributes to the current target, optionally using a texture
+	/// </summary>
+	/// <param name="xy">A pointer to a contiguous array of vertex positions, first the X coordinate and then the Y coordinate for each vertex. Must be dereferenceable for at least <c><paramref name="verticesCount"/> * <paramref name="xyStride"/></c> bytes.</param>
+	/// <param name="xyStride">The length, in bytes, to move from one element in the <paramref name="xy"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="colors">A pointer to a contiguous array of vertex colors. Must be dereferenceable for at least <c><paramref name="verticesCount"/> * <paramref name="colorStride"/></c> bytes.</param>
+	/// <param name="colorStride">The length, in bytes, to move from one element in the <paramref name="colors"/> list to the next. Usually that's <c><see langword="sizeof"/>(<see cref="Color{T}">Color&lt;<see langword="float"/>&gt;</see>)</c>.</param>
+	/// <param name="uv">A pointer to a contiguous array of normalized texture coordinates per vertex, first the horizontal coordinate (U) and then the vertical coordinate (V) for each vertex. Must be dereferenceable for at least <c><paramref name="verticesCount"/> * <paramref name="uvStride"/></c> bytes.</param>
+	/// <param name="uvStride">The length, in bytes, to move from one element in the <paramref name="uv"/> list to the next. Usually that's <c>2 * <see langword="sizeof"/>(<see langword="float"/>)</c>.</param>
+	/// <param name="verticesCount">The number of vertices</param>
+	/// <param name="texture">An optional texture to use when drawing the triangles</param>
+	/// <returns><c><see langword="true"/></c> if the geometry was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Color and alpha modulation is done per vertex, so <see cref="ITexture.ColorMod"/> (or <see cref="ITexture.ColorModFloat"/>) and <see cref="ITexture.AlphaMod"/> (or <see cref="ITexture.AlphaModFloat"/>) are ignored.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	unsafe bool TryRenderGeometryRaw(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, ITexture? texture = default);
+
+	/// <summary>
+	/// Tries to draw a line to the current target
+	/// </summary>
+	/// <param name="x1">The X coordinate of the start point of the line</param>
+	/// <param name="y1">The Y coordinate of the start point of the line</param>
+	/// <param name="x2">The X coordinate of the end point of the line</param>
+	/// <param name="y2">The Y coordinate of the end point of the line</param>
+	/// <returns><c><see langword="true"/></c>, if the line was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)s</returns>
+	/// <remarks>
+	/// <para>
+	/// The line is drawn with the color specified by <see cref="DrawColor"/> (or <see cref="DrawColorFloat"/>) and <see cref="DrawBlendMode"/> determines how the line is blended with the existing content of the target.
+	/// </para>
+	/// <para>
+	/// Drawing the line works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderLine(float x1, float y1, float x2, float y2);
+
+	/// <summary>
+	/// Tries to draw a series of connected lines to the current target
+	/// </summary>
+	/// <param name="points">The list of positions specifying the vertices of the connected lines</param>
+	/// <returns><c><see langword="true"/></c> if the lines were drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The lines are drawn with the color specified by <see cref="DrawColor"/> (or <see cref="DrawColorFloat"/>) and <see cref="DrawBlendMode"/> determines how the lines are blended with the existing content of the target.
+	/// </para>
+	/// <para>
+	/// Drawing the lines works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderLines(ReadOnlySpan<Point<float>> points);
+
+	/// <summary>
+	/// Tries to draw a point to the current target
+	/// </summary>
+	/// <param name="x">The X coordinate of the point to draw</param>
+	/// <param name="y">The Y coordinate of the point to draw</param>
+	/// <returns><c><see langword="true"/></c> if the point was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The point is drawn with the color specified by <see cref="DrawColor"/> (or <see cref="DrawColorFloat"/>) and <see cref="DrawBlendMode"/> determines how the point is blended with the existing content of the target.
+	/// </para>
+	/// <para>
+	/// Drawing the point works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderPoint(float x, float y);
+
+	/// <summary>
+	/// Tries to draw multiple points to the current target
+	/// </summary>
+	/// <param name="points">The list of positions where the points should be drawn</param>
+	/// <returns><c><see langword="true"/></c> if the points were drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// /// <remarks>
+	/// <para>
+	/// The points are drawn with the color specified by <see cref="DrawColor"/> (or <see cref="DrawColorFloat"/>) and <see cref="DrawBlendMode"/> determines how the points are blended with the existing content of the target.
+	/// </para>
+	/// <para>
+	/// Drawing the points works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderPoints(ReadOnlySpan<Point<float>> points);
+
+	/// <summary>
+	/// Tries to update the screen with any rendering performed since the previous call
+	/// </summary>
+	/// <returns><c><see langword="true"/></c> if the screen was updated successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// SDL's rendering API operates on a backbuffer.
+	/// E.g., performing a rendering operation such as <see cref="TryRenderLine(float, float, float, float)"/> does not directly draw a line on the screen, but rather updates the backbuffer.
+	/// That means that you should compose the entire scene in the backbuffer and then present the composed backbuffer to the screen as a complete picture.
+	/// </para>
+	/// <para>
+	/// When using SDL's rendering API, once per frame, do all drawing intended for the frame, and then call this method once to present the final drawing to the user.
+	/// </para>
+	/// <para>
+	/// The backbuffer should be considered invalidated after each call to this method; do not assume that previous contents will exist between frames.
+	/// It is strongly recommended to initialize the backbuffer before starting each new frame's drawing by calling <see cref="TryClear"/>. Even if you plan to overwrite every pixel.
+	/// </para>
+	/// <para>
+	/// Please note, that in case of rendering to a texture target (<see cref="Target"/> is non-<see langword="null"/>), there is <em>no need</em> to call <see cref="TryRenderPresent"/> and in fact, it <em>shouldn't</em> be called.
+	/// You are only required to change back the rendering target to default via <see cref="ResetTarget"/> or setting <see cref="Target"/> to <see langword="null"/> afterwards, as textures by themselves do not have a concept of backbuffers.
+	/// Calling <see cref="TryRenderPresent"/> while rendering to a texture will fail.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderPresent();
+
+	/// <summary>
+	/// Tries to draw a rectangle to an area of the current target
+	/// </summary>
+	/// <param name="rect">The area of the current target to draw the rectangle in</param>
+	/// <returns><c><see langword="true"/></c>, if the rectangle was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The rectangle is drawn with the color specified by <see cref="DrawColor"/> (or <see cref="DrawColorFloat"/>) and <see cref="DrawBlendMode"/> determines how the rectangle is blended with the existing content of the target.
+	/// </para>
+	/// <para>
+	/// Drawing the rectangle works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderRect(in Rect<float> rect);
+
+	/// <summary>
+	/// Tries to draw a rectangle to the entirety of the current target
+	/// </summary>
+	/// <returns><c><see langword="true"/></c>, if the rectangle was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The rectangle is drawn with the color specified by <see cref="DrawColor"/> (or <see cref="DrawColorFloat"/>) and <see cref="DrawBlendMode"/> determines how the rectangle is blended with the existing content of the target.
+	/// </para>
+	/// <para>
+	/// Drawing the rectangle works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderRect();
+
+	/// <summary>
+	/// Tries to draw multiple rectangles to areas of the current target
+	/// </summary>
+	/// <param name="rects">The list of areas of the current target to draw the rectangles in</param>
+	/// <returns><c><see langword="true"/></c>, if the rectangles were drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The rectangles are drawn with the color specified by <see cref="DrawColor"/> (or <see cref="DrawColorFloat"/>) and <see cref="DrawBlendMode"/> determines how the rectangles are blended with the existing content of the target.
+	/// </para>
+	/// <para>
+	/// Drawing the rectangles works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderRects(ReadOnlySpan<Rect<float>> rects);
+
+	/// <summary>
+	/// Tries to copy a portion of a texture to an area of the current target
+	/// </summary>
+	/// <param name="destinationRect">The area of the current target to copy the texture to</param>
+	/// <param name="texture">The texture to copy</param>
+	/// <param name="sourceRect">The area of the texture to copy</param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTexture(in Rect<float> destinationRect, ITexture texture, in Rect<float> sourceRect);
+
+	/// <summary>
+	/// Tries to copy the entirety of a texture to an area of the current target
+	/// </summary>
+	/// <param name="destinationRect">The area of the current target to copy the texture to</param>
+	/// <param name="texture">The texture to copy</param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTexture(in Rect<float> destinationRect, ITexture texture);
+
+	/// <summary>
+	/// Tries to copy a portion of a texture to entirety of the current target
+	/// </summary>
+	/// <param name="texture">The texture to copy</param>
+	/// <param name="sourceRect">The area of the texture to copy</param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTexture(ITexture texture, in Rect<float> sourceRect);
+
+	/// <summary>
+	/// Tries to copy the entirety of a texture to entirety of the current target
+	/// </summary>
+	/// <param name="texture">The texture to copy</param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTexture(ITexture texture);
+
+	/// <summary>
+	/// Tries to scalingly copy a portion of a texture to an area of the current target using the 9-grid algorithm
+	/// </summary>
+	/// <param name="destinationRect">The area of the current target to copy the texture to, in a 9-grid manner</param>
+	/// <param name="texture">The texture to copy</param>
+	/// <param name="sourceRect">The area of the texture to copy, in a 9-grid manner</param>
+	/// <param name="leftWidth">The width, in pixels, of the left corners in <paramref name="sourceRect"/></param>
+	/// <param name="rightWidth">The width, in pixels, of the right corners in <paramref name="sourceRect"/></param>
+	/// <param name="topHeight">The height, in pixels, of the top corners in <paramref name="sourceRect"/></param>
+	/// <param name="bottomHeight">The height, in pixels, of the bottom corners in <paramref name="sourceRect"/></param>
+	/// <param name="scale">The scale to use to transform the corners of <paramref name="sourceRect"/> into the corners of <paramref name="destinationRect"/>, or <c>0</c> for an unscaled copy</param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c>false</c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The pixels in the texture are split into a 3⨯3 grid, using the different corner sizes for each corner, and the sides and center making up the remaining pixels.
+	/// The corners are then scaled using <paramref name="scale"/> and fit into the corners of the <paramref name="destinationRect"/>.
+	/// The sides and center are then stretched into place to cover the remaining portion of the <paramref name="destinationRect"/>.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTexture9Grid(in Rect<float> destinationRect, ITexture texture, in Rect<float> sourceRect, float leftWidth, float rightWidth, float topHeight, float bottomHeight, float scale);
+
+	/// <summary>
+	/// Tries to scalingly copy the entirety of a texture to an area of the current target using the 9-grid algorithm
+	/// </summary>
+	/// <param name="destinationRect">The area of the current target to copy the texture to, in a 9-grid manner</param>
+	/// <param name="texture">The texture to copy</param>
+	/// <param name="leftWidth">The width, in pixels, of the left corners of the <paramref name="texture"/></param>
+	/// <param name="rightWidth">The width, in pixels, of the right corners of the <paramref name="texture"/></param>
+	/// <param name="topHeight">The height, in pixels, of the top corners of the <paramref name="texture"/></param>
+	/// <param name="bottomHeight">The height, in pixels, of the bottom corners of the <paramref name="texture"/></param>
+	/// <param name="scale">The scale to use to transform the corners of the <paramref name="texture"/> into the corners of <paramref name="destinationRect"/>, or <c>0</c> for an unscaled copy</param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c>false</c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The pixels in the texture are split into a 3⨯3 grid, using the different corner sizes for each corner, and the sides and center making up the remaining pixels.
+	/// The corners are then scaled using <paramref name="scale"/> and fit into the corners of the <paramref name="destinationRect"/>.
+	/// The sides and center are then stretched into place to cover the remaining portion of the <paramref name="destinationRect"/>.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTexture9Grid(in Rect<float> destinationRect, ITexture texture, float leftWidth, float rightWidth, float topHeight, float bottomHeight, float scale);
+
+	/// <summary>
+	/// Tries to scalingly copy a portion of a texture to the entirety of the current target using the 9-grid algorithm
+	/// </summary>
+	/// <param name="texture">The texture to copy</param>
+	/// <param name="sourceRect">The area of the texture to copy, in a 9-grid manner</param>
+	/// <param name="leftWidth">The width, in pixels, of the left corners in <paramref name="sourceRect"/></param>
+	/// <param name="rightWidth">The width, in pixels, of the right corners in <paramref name="sourceRect"/></param>
+	/// <param name="topHeight">The height, in pixels, of the top corners in <paramref name="sourceRect"/></param>
+	/// <param name="bottomHeight">The height, in pixels, of the bottom corners in <paramref name="sourceRect"/></param>
+	/// <param name="scale">The scale to use to transform the corners of <paramref name="sourceRect"/> into the corners of the current target, or <c>0</c> for an unscaled copy</param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c>false</c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The pixels in the texture are split into a 3⨯3 grid, using the different corner sizes for each corner, and the sides and center making up the remaining pixels.
+	/// The corners are then scaled using <paramref name="scale"/> and fit into the corners of the current target.
+	/// The sides and center are then stretched into place to cover the remaining portion of the current target.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTexture9Grid(ITexture texture, in Rect<float> sourceRect, float leftWidth, float rightWidth, float topHeight, float bottomHeight, float scale);
+
+	/// <summary>
+	/// Tries to scalingly copy a portion of a texture to the entirety of the current target using the 9-grid algorithm
+	/// </summary>
+	/// <param name="texture">The texture to copy</param>
+	/// <param name="leftWidth">The width, in pixels, of the left corners of the <paramref name="texture"/></param>
+	/// <param name="rightWidth">The width, in pixels, of the right corners of the <paramref name="texture"/></param>
+	/// <param name="topHeight">The height, in pixels, of the top corners of the <paramref name="texture"/></param>
+	/// <param name="bottomHeight">The height, in pixels, of the bottom corners of the <paramref name="texture"/></param>
+	/// <param name="scale">The scale to use to transform the corners of the <paramref name="texture"/> into the corners of the current target, or <c>0</c> for an unscaled copy</param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c>false</c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The pixels in the texture are split into a 3⨯3 grid, using the different corner sizes for each corner, and the sides and center making up the remaining pixels.
+	/// The corners are then scaled using <paramref name="scale"/> and fit into the corners of the current target.
+	/// The sides and center are then stretched into place to cover the remaining portion of the current target.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTexture9Grid(ITexture texture, float leftWidth, float rightWidth, float topHeight, float bottomHeight, float scale);
+
+#if SDL3_4_0_OR_GREATER
+
+	/// <summary>
+	/// Tries to scalingly copy a portion of a texture to an area of the current target using the 9-grid algorithm with tiling for the borders and the center
+	/// </summary>
+	/// <param name="destinationRect">The area of the current target to copy the texture to, in a 9-grid manner</param>
+	/// <param name="texture">The texture to copy</param>
+	/// <param name="sourceRect">The area of the texture to copy, in a 9-grid manner</param>
+	/// <param name="leftWidth">The width, in pixels, of the left corners in <paramref name="sourceRect"/></param>
+	/// <param name="rightWidth">The width, in pixels, of the right corners in <paramref name="sourceRect"/></param>
+	/// <param name="topHeight">The height, in pixels, of the top corners in <paramref name="sourceRect"/></param>
+	/// <param name="bottomHeight">The height, in pixels, of the bottom corners in <paramref name="sourceRect"/></param>
+	/// <param name="scale">The scale to use to transform the corners of <paramref name="sourceRect"/> into the corners of <paramref name="destinationRect"/>, or <c>0</c> for an unscaled copy</param>
+	/// <param name="tileScale">The scale to use to transform the borders and the center of <paramref name="sourceRect"/> into the border and the center of <paramref name="destinationRect"/>, or <c>1</c> for an unscaled copy</param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c>false</c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The pixels in the texture are split into a 3⨯3 grid, using the different corner sizes for each corner, and the sides and center making up the remaining pixels.
+	/// The corners are then scaled using <paramref name="scale"/> and fit into the corners of the <paramref name="destinationRect"/>.
+	/// The sides and center are then <em>tiled</em> into place to cover the remaining portion of the <paramref name="destinationRect"/>.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTexture9GridTiled(in Rect<float> destinationRect, ITexture texture, in Rect<float> sourceRect, float leftWidth, float rightWidth, float topHeight, float bottomHeight, float scale, float tileScale);
+
+	/// <summary>
+	/// Tries to scalingly copy the entirety of a texture to an area of the current target using the 9-grid algorithm with tiling for the borders and the center
+	/// </summary>
+	/// <param name="destinationRect">The area of the current target to copy the texture to, in a 9-grid manner</param>
+	/// <param name="texture">The texture to copy</param>
+	/// <param name="leftWidth">The width, in pixels, of the left corners of the <paramref name="texture"/></param>
+	/// <param name="rightWidth">The width, in pixels, of the right corners of the <paramref name="texture"/></param>
+	/// <param name="topHeight">The height, in pixels, of the top corners of the <paramref name="texture"/></param>
+	/// <param name="bottomHeight">The height, in pixels, of the bottom corners of the <paramref name="texture"/></param>
+	/// <param name="scale">The scale to use to transform the corners of the <paramref name="texture"/> into the corners of <paramref name="destinationRect"/>, or <c>0</c> for an unscaled copy</param>
+	/// <param name="tileScale">The scale to use to transform the borders and the center of the <paramref name="texture"/> into the border and the center of <paramref name="destinationRect"/>, or <c>1</c> for an unscaled copy</param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c>false</c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The pixels in the texture are split into a 3⨯3 grid, using the different corner sizes for each corner, and the sides and center making up the remaining pixels.
+	/// The corners are then scaled using <paramref name="scale"/> and fit into the corners of the <paramref name="destinationRect"/>.
+	/// The sides and center are then <em>tiled</em> into place to cover the remaining portion of the <paramref name="destinationRect"/>.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTexture9GridTiled(in Rect<float> destinationRect, ITexture texture, float leftWidth, float rightWidth, float topHeight, float bottomHeight, float scale, float tileScale);
+
+	/// <summary>
+	/// Tries to scalingly copy a portion of a texture to the entirety of the current target using the 9-grid algorithm with tiling for the borders and the center
+	/// </summary>
+	/// <param name="texture">The texture to copy</param>
+	/// <param name="sourceRect">The area of the texture to copy, in a 9-grid manner</param>
+	/// <param name="leftWidth">The width, in pixels, of the left corners in <paramref name="sourceRect"/></param>
+	/// <param name="rightWidth">The width, in pixels, of the right corners in <paramref name="sourceRect"/></param>
+	/// <param name="topHeight">The height, in pixels, of the top corners in <paramref name="sourceRect"/></param>
+	/// <param name="bottomHeight">The height, in pixels, of the bottom corners in <paramref name="sourceRect"/></param>
+	/// <param name="scale">The scale to use to transform the corners of <paramref name="sourceRect"/> into the corners of the current target, or <c>0</c> for an unscaled copy</param>
+	/// <param name="tileScale">The scale to use to transform the borders and the center of <paramref name="sourceRect"/> into the border and the center of the current target, or <c>1</c> for an unscaled copy</param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c>false</c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The pixels in the texture are split into a 3⨯3 grid, using the different corner sizes for each corner, and the sides and center making up the remaining pixels.
+	/// The corners are then scaled using <paramref name="scale"/> and fit into the corners of the current target.
+	/// The sides and center are then <em>tiled</em> into place to cover the remaining portion of the current target.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTexture9GridTiled(ITexture texture, in Rect<float> sourceRect, float leftWidth, float rightWidth, float topHeight, float bottomHeight, float scale, float tileScale);
+
+	/// <summary>
+	/// Tries to scalingly copy the entirety of a texture to the entirety of the current target using the 9-grid algorithm with tiling for the borders and the center
+	/// </summary>
+	/// <param name="texture">The texture to copy</param>
+	/// <param name="leftWidth">The width, in pixels, of the left corners of the <paramref name="texture"/></param>
+	/// <param name="rightWidth">The width, in pixels, of the right corners of the <paramref name="texture"/></param>
+	/// <param name="topHeight">The height, in pixels, of the top corners of the <paramref name="texture"/></param>
+	/// <param name="bottomHeight">The height, in pixels, of the bottom corners of the <paramref name="texture"/></param>
+	/// <param name="scale">The scale to use to transform the corners of the <paramref name="texture"/> into the corners of the current target, or <c>0</c> for an unscaled copy</param>
+	/// <param name="tileScale">The scale to use to transform the borders and the center of the <paramref name="texture"/> into the border and the center of the current target, or <c>1</c> for an unscaled copy</param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c>false</c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The pixels in the texture are split into a 3⨯3 grid, using the different corner sizes for each corner, and the sides and center making up the remaining pixels.
+	/// The corners are then scaled using <paramref name="scale"/> and fit into the corners of the current target.
+	/// The sides and center are then <em>tiled</em> into place to cover the remaining portion of the current target.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTexture9GridTiled(ITexture texture, float leftWidth, float rightWidth, float topHeight, float bottomHeight, float scale, float tileScale);
+
+#endif
+
+	/// <summary>
+	/// Tries to copy a portion of a texture to the current target with a specified affine transformation
+	/// </summary>
+	/// <param name="destinationOrigin">A point specifying where the top-left corner of <paramref name="sourceRect"/> should be mapped to on the current target, or <c><see langword="null"/></c> to use the current target's origin</param>
+	/// <param name="destinationRight">A point specifying where the top-right corner of <paramref name="sourceRect"/> should be mapped to on the current target, or <c><see langword="null"/></c> to use the current target's top-right corner</param>
+	/// <param name="destinationDown">A point specifying where the bottom-left corner of <paramref name="sourceRect"/> should be mapped to on the current target, or <c><see langword="null"/></c> to use the current target's bottom-left corner</param>
+	/// <param name="texture">The texture to copy</param>
+	/// <param name="sourceRect"></param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c>false</c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTextureAffine(in Point<float>? destinationOrigin, in Point<float>? destinationRight, in Point<float>? destinationDown, ITexture texture, in Rect<float> sourceRect);
+
+	/// <summary>
+	/// Tries to copy the entirety of a texture to the current target with a specified affine transformation
+	/// </summary>
+	/// <param name="destinationOrigin">A point specifying where the top-left corner of the <paramref name="texture"/> should be mapped to on the current target, or <c><see langword="null"/></c> to use the current target's origin</param>
+	/// <param name="destinationRight">A point specifying where the top-right corner of the <paramref name="texture"/> should be mapped to on the current target, or <c><see langword="null"/></c> to use the current target's top-right corner</param>
+	/// <param name="destinationDown">A point specifying where the bottom-left corner of the <paramref name="texture"/> should be mapped to on the current target, or <c><see langword="null"/></c> to use the current target's bottom-left corner</param>
+	/// <param name="texture">The texture to copy</param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c>false</c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTextureAffine(in Point<float>? destinationOrigin, in Point<float>? destinationRight, in Point<float>? destinationDown, ITexture texture);
+
+	/// <summary>
+	/// Tries to copy a portion of a texture to an area of the current target with a specified rotation and flipping
+	/// </summary>
+	/// <param name="destinationRect">The area of the current target to copy the texture to</param>
+	/// <param name="texture">The texture to copy</param>
+	/// <param name="sourceRect">The area of the texture to copy</param>
+	/// <param name="angle">The angle, in degrees, to rotate the texture clockwise around the center point</param>
+	/// <param name="centerPoint">An optional point specifying the center of rotation, or <c><see langword="null"/></c> to rotate around the center of <paramref name="destinationRect"/></param>
+	/// <param name="flip">An optional flipping direction to flip the texture in addition to rotating it</param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c>false</c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// You can also use this method to just render a flipped texture by specifying the <paramref name="angle"/> as <c>0</c> and leaving the <paramref name="centerPoint"/> as unspecified.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTextureRotated(in Rect<float> destinationRect, ITexture texture, in Rect<float> sourceRect, double angle, in Point<float>? centerPoint = null, FlipMode flip = FlipMode.None);
+
+	/// <summary>
+	/// Tries to copy the entirety of a texture to an area of the current target with a specified rotation and flipping
+	/// </summary>
+	/// <param name="destinationRect">The area of the current target to copy the texture to</param>
+	/// <param name="texture">The texture to copy</param>
+	/// <param name="angle">The angle, in degrees, to rotate the texture clockwise around the center point</param>
+	/// <param name="centerPoint">An optional point specifying the center of rotation, or <c><see langword="null"/></c> to rotate around the center of <paramref name="destinationRect"/></param>
+	/// <param name="flip">An optional flipping direction to flip the texture in addition to rotating it</param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c>false</c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// You can also use this method to just render a flipped texture by specifying the <paramref name="angle"/> as <c>0</c> and leaving the <paramref name="centerPoint"/> as unspecified.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTextureRotated(in Rect<float> destinationRect, ITexture texture, double angle, in Point<float>? centerPoint = null, FlipMode flip = FlipMode.None);
+
+	/// <summary>
+	/// Tries to copy a portion of a texture to the entirety of the current target with a specified rotation and flipping
+	/// </summary>
+	/// <param name="texture">The texture to copy</param>
+	/// <param name="sourceRect">The area of the texture to copy</param>
+	/// <param name="angle">The angle, in degrees, to rotate the texture clockwise around the center point</param>
+	/// <param name="centerPoint">An optional point specifying the center of rotation, or <c><see langword="null"/></c> to rotate around the center of the current target</param>
+	/// <param name="flip">An optional flipping direction to flip the texture in addition to rotating it</param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c>false</c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// You can also use this method to just render a flipped texture by specifying the <paramref name="angle"/> as <c>0</c> and leaving the <paramref name="centerPoint"/> as unspecified.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTextureRotated(ITexture texture, in Rect<float> sourceRect, double angle, in Point<float>? centerPoint = null, FlipMode flip = FlipMode.None);
+
+	/// <summary>
+	/// Tries to copy the entirety of a texture to the entirety of the current target with a specified rotation and flipping
+	/// </summary>
+	/// <param name="texture">The texture to copy</param>
+	/// <param name="angle">The angle, in degrees, to rotate the texture clockwise around the center point</param>
+	/// <param name="centerPoint">An optional point specifying the center of rotation, or <c><see langword="null"/></c> to rotate around the center of the current target</param>
+	/// <param name="flip">An optional flipping direction to flip the texture in addition to rotating it</param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c>false</c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// You can also use this method to just render a flipped texture by specifying the <paramref name="angle"/> as <c>0</c> and leaving the <paramref name="centerPoint"/> as unspecified.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTextureRotated(ITexture texture, double angle, in Point<float>? centerPoint = null, FlipMode flip = FlipMode.None);
+
+	/// <summary>
+	/// Tries to tilingly copy a portion of a texture to an area of the current target with a specified scale
+	/// </summary>
+	/// <param name="destinationRect">The area of the current target to copy the texture to</param>
+	/// <param name="texture">The texture to copy</param>
+	/// <param name="sourceRect">The area of the texture to copy</param>
+	/// <param name="scale">The scale used to transform the <paramref name="sourceRect"/> into the <paramref name="destinationRect"/></param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c>false</c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The <paramref name="scale"/> is applied to the region of the texture specified by <paramref name="sourceRect"/>, e.g. 32⨯32 region with a scale of <c>2</c> would become a 64⨯64 region.
+	/// That scaled region is then used and repeated as many times as needed to completely fill the region specified by <paramref name="destinationRect"/> on the current target.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTextureTiled(in Rect<float> destinationRect, ITexture texture, in Rect<float> sourceRect, float scale);
+
+	/// <summary>
+	/// Tries to tilingly copy the entirety of a texture to an area of the current target with a specified scale
+	/// </summary>
+	/// <param name="destinationRect">The area of the current target to copy the texture to</param>
+	/// <param name="texture">The texture to copy</param>
+	/// <param name="scale">The scale used to transform the <paramref name="texture"/> into the <paramref name="destinationRect"/></param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c>false</c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The <paramref name="scale"/> is applied to the entire <paramref name="texture"/>, e.g. 32⨯32 texture with a scale of <c>2</c> would become a 64⨯64 region.
+	/// That scaled region is then used and repeated as many times as needed to completely fill the region specified by <paramref name="destinationRect"/> on the current target.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTextureTiled(in Rect<float> destinationRect, ITexture texture, float scale);
+
+	/// <summary>
+	/// Tries to tilingly copy a portion of a texture to the entirety of the current target with a specified scale
+	/// </summary>
+	/// <param name="texture">The texture to copy</param>
+	/// <param name="sourceRect">The area of the texture to copy</param>
+	/// <param name="scale">The scale used to transform the <paramref name="sourceRect"/> into the current target</param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c>false</c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The <paramref name="scale"/> is applied to the region of the texture specified by <paramref name="sourceRect"/>, e.g. 32⨯32 region with a scale of <c>2</c> would become a 64⨯64 region.
+	/// That scaled region is then used and repeated as many times as needed to completely fill the entire area of the current target.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTextureTiled(ITexture texture, in Rect<float> sourceRect, float scale);
+
+	/// <summary>
+	/// Tries to tilingly copy the entirety of a texture to the entirety of the current target with a specified scale
+	/// </summary>
+	/// <param name="texture">The texture to copy</param>
+	/// <param name="scale">The scale used to transform the <paramref name="texture"/> into the current target</param>
+	/// <returns><c><see langword="true"/></c>, if the texture was rendered successfully; otherwise, <c>false</c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The <paramref name="scale"/> is applied to the entire <paramref name="texture"/>, e.g. 32⨯32 texture with a scale of <c>2</c> would become a 64⨯64 region.
+	/// That scaled region is then used and repeated as many times as needed to completely fill the entire area of the current target.
+	/// </para>
+	/// <para>
+	/// Only textures created with this renderer can be rendered with this method.
+	/// </para>
+	/// <para>
+	/// Rendering the texture works with sub-pixel precision.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	bool TryRenderTextureTiled(ITexture texture, float scale);
+}

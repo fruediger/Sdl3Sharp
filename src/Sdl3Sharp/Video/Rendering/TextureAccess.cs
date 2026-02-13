@@ -1,7 +1,7 @@
 ﻿namespace Sdl3Sharp.Video.Rendering;
 
 /// <summary>
-/// Represents the access pattern for a <see cref="Texture"/>
+/// Represents the access mode for a texture
 /// </summary>
 public enum TextureAccess
 {

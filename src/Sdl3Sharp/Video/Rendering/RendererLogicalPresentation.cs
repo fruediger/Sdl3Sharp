@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents how the logical size is mapped to the output resolution
 /// </summary>
-public enum LogicalPresentation
+public enum RendererLogicalPresentation
 {
 	/// <summary>No logical sizing is applied</summary>
 	Disabled,

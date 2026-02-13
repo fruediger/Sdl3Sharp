@@ -151,7 +151,7 @@ public interface ICommonEvent
 /// </summary>
 /// <typeparam name="TSelf">The type of event structure that implements this interface itself</typeparam>
 public interface ICommonEvent<TSelf> : ICommonEvent
-	where TSelf : struct, ICommonEvent<TSelf>
+	where TSelf : unmanaged, ICommonEvent<TSelf>
 {
 	internal static abstract bool Accepts(EventType type);
 
