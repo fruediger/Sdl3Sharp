@@ -2,7 +2,7 @@
   "project":                    "./src/Sdl3Sharp",
   "logoFile":                   "./assets/icon.txt",
 
-  "runtimesVersion":            "3.2.28",
+  "runtimesVersion":            "3.4.0",
   "runtimesUrl":                "https://github.com/fruediger/SDL-native/releases/download/v{0}/runtimes.zip",
   "runtimesLicenseFileUrl":     "https://github.com/fruediger/SDL-native/releases/download/v{0}/LICENSE.txt",
   "runtimesLicenseSpdxFileUrl": "https://github.com/fruediger/SDL-native/releases/download/v{0}/LICENSE.spdx",
