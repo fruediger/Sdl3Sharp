@@ -1628,7 +1628,7 @@ public sealed partial class Renderer<TDriver> : IRenderer
 
 	/// <inheritdoc cref="IRenderer.TryRenderTexture(in Rect{float}, ITexture)"/>
 	public bool TryRenderTexture(in Rect<float> destinationRect, Texture<TDriver> texture)
-		=> TryRenderTexture(in destinationRect, texture);
+		=> TryRenderTextureImpl(in destinationRect, texture);
 
 	/// <inheritdoc/>
 	bool IRenderer.TryRenderTexture(in Rect<float> destinationRect, ITexture texture)
