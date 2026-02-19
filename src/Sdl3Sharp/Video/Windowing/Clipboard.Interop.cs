@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using unsafe SDL_ClipboardCleanupCallback = delegate* unmanaged[Cdecl]<void*, void>;
 using unsafe SDL_ClipboardDataCallback = delegate* unmanaged[Cdecl]<void*, byte*, System.UIntPtr*, void*>;
 
-namespace Sdl3Sharp.Windowing;
+namespace Sdl3Sharp.Video.Windowing;
 
 partial class Clipboard
 {

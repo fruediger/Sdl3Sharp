@@ -5,7 +5,7 @@ using Sdl3Sharp.Video.Blending;
 using Sdl3Sharp.Video.Coloring;
 using Sdl3Sharp.Video.Drawing;
 using Sdl3Sharp.Video.Gpu;
-using Sdl3Sharp.Windowing;
+using Sdl3Sharp.Video.Windowing;
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;

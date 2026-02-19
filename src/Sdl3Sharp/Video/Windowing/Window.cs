@@ -5,7 +5,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
-namespace Sdl3Sharp.Windowing;
+namespace Sdl3Sharp.Video.Windowing;
 
 public partial class Window
 {

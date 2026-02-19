@@ -1,4 +1,4 @@
-﻿using Sdl3Sharp.Windowing;
+﻿using Sdl3Sharp.Video.Windowing;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.Marshalling;

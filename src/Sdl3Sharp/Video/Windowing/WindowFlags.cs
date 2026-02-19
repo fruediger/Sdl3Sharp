@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sdl3Sharp.Windowing;
+namespace Sdl3Sharp.Video.Windowing;
 
 [Flags]
 public enum WindowFlags : ulong

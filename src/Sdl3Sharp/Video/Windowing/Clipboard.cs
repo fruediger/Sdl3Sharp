@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
 
-namespace Sdl3Sharp.Windowing;
+namespace Sdl3Sharp.Video.Windowing;
 
 /// <summary>
 /// Provides methods for accessing the system clipboard, both for reading information from other processes and publishing information of its own

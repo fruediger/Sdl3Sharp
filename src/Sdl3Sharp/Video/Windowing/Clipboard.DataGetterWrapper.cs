@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
 
-namespace Sdl3Sharp.Windowing;
+namespace Sdl3Sharp.Video.Windowing;
 
 partial class Clipboard
 {

@@ -1,6 +1,6 @@
 ﻿using Sdl3Sharp.SourceGeneration;
 using Sdl3Sharp.SourceGeneration.RegisterDriver;
-using Sdl3Sharp.Windowing;
+using Sdl3Sharp.Video.Windowing;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;

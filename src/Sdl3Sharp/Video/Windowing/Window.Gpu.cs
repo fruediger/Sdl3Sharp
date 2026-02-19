@@ -8,7 +8,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
-namespace Sdl3Sharp.Windowing;
+namespace Sdl3Sharp.Video.Windowing;
 
 partial class Window
 {
@@ -21,14 +21,14 @@ partial class Window
 	/// <remarks>
 	/// <para>
 	/// If the <paramref name="gpuDevice"/> is <c><see langword="null"/></c>, SDL will automatically select or create a suitable GPU device for you.
-	/// The <see cref="GpuDevice"/> can be later retrieved from the renderer using the <see cref="RendererExtensions.get_GpuDevice(Renderer{Gpu})"/> property.
+	/// The <see cref="GpuDevice"/> can be later retrieved from the renderer using the <see cref="RendererExtensions.get_GpuDevice(Renderer{Rendering.Drivers.Gpu})"/> property.
 	/// </para>
 	/// <para>
 	/// If this method is called with a non-<see langword="null"/> <see cref="GpuDevice"/>, it should be called on the thread that created the device.
 	/// And it should be definitely be called on the thread that created the window.
 	/// </para>
 	/// </remarks>
-	public bool TryCreateRenderer([NotNullWhen(true)] out Renderer<Gpu>? renderer, GpuDevice? gpuDevice = default)
+	public bool TryCreateRenderer([NotNullWhen(true)] out Renderer<Rendering.Drivers.Gpu>? renderer, GpuDevice? gpuDevice = default)
 	{
 		unsafe
 		{
@@ -54,7 +54,7 @@ partial class Window
 	/// <param name="gpuShadersDxil">An optional value indicating whether the application is able to provide DXIL shaders to the renderer</param>
 	/// <param name="gpuShadersMsl">An optional value indicating whether the application is able to provide MSL shaders to the renderer</param>
 #pragma warning disable CS1573 // we get these from inheritdoc
-	public bool TryCreateRenderer([NotNullWhen(true)] out Renderer<Gpu>? renderer, ColorSpace? outputColorSpace = default, RendererVSync? presentVSync = default,
+	public bool TryCreateRenderer([NotNullWhen(true)] out Renderer<Rendering.Drivers.Gpu>? renderer, ColorSpace? outputColorSpace = default, RendererVSync? presentVSync = default,
 		GpuDevice? gpuDevice = default, bool? gpuShadersSpirV = default, bool? gpuShadersDxil = default, bool? gpuShadersMsl = default, Properties? properties = default)
 #pragma warning restore CS1573
 	{
@@ -72,22 +72,22 @@ partial class Window
 
 				if (gpuDevice is not null)
 				{
-					propertiesUsed.TrySetPointerValue(Renderer<Gpu>.PropertyNames.CreateGpuDevicePointer, unchecked((IntPtr)gpuDevice.Pointer));
+					propertiesUsed.TrySetPointerValue(Renderer<Rendering.Drivers.Gpu>.PropertyNames.CreateGpuDevicePointer, unchecked((IntPtr)gpuDevice.Pointer));
 				}
 
 				if (gpuShadersSpirV is bool gpuShadersSpirVValue)
 				{
-					propertiesUsed.TrySetBooleanValue(Renderer<Gpu>.PropertyNames.CreateGpuShadersSpirVBoolean, gpuShadersSpirVValue);
+					propertiesUsed.TrySetBooleanValue(Renderer<Rendering.Drivers.Gpu>.PropertyNames.CreateGpuShadersSpirVBoolean, gpuShadersSpirVValue);
 				}
 
 				if (gpuShadersDxil is bool gpuShadersDxilValue)
 				{
-					propertiesUsed.TrySetBooleanValue(Renderer<Gpu>.PropertyNames.CreateGpuShadersDxilBoolean, gpuShadersDxilValue);
+					propertiesUsed.TrySetBooleanValue(Renderer<Rendering.Drivers.Gpu>.PropertyNames.CreateGpuShadersDxilBoolean, gpuShadersDxilValue);
 				}
 
 				if (gpuShadersMsl is bool gpuShadersMslValue)
 				{
-					propertiesUsed.TrySetBooleanValue(Renderer<Gpu>.PropertyNames.CreateGpuShadersMslBoolean, gpuShadersMslValue);
+					propertiesUsed.TrySetBooleanValue(Renderer<Rendering.Drivers.Gpu>.PropertyNames.CreateGpuShadersMslBoolean, gpuShadersMslValue);
 				}
 			}
 			else
@@ -96,44 +96,44 @@ partial class Window
 
 				if (gpuDevice is not null)
 				{
-					gpuDeviceBackup = propertiesUsed.TryGetPointerValue(Renderer<Gpu>.PropertyNames.CreateGpuDevicePointer, out var exisitingGpuDevicePtr)
+					gpuDeviceBackup = propertiesUsed.TryGetPointerValue(Renderer<Rendering.Drivers.Gpu>.PropertyNames.CreateGpuDevicePointer, out var exisitingGpuDevicePtr)
 						? exisitingGpuDevicePtr
 						: null;
 
-					propertiesUsed.TrySetPointerValue(Renderer<Gpu>.PropertyNames.CreateGpuDevicePointer, unchecked((IntPtr)gpuDevice.Pointer));
+					propertiesUsed.TrySetPointerValue(Renderer<Rendering.Drivers.Gpu>.PropertyNames.CreateGpuDevicePointer, unchecked((IntPtr)gpuDevice.Pointer));
 				}
 
 				if (gpuShadersSpirV is bool gpuShadersSpirVValue)
 				{
-					gpuShadersSpirVBackup = propertiesUsed.TryGetBooleanValue(Renderer<Gpu>.PropertyNames.CreateGpuShadersSpirVBoolean, out var existingGpuShadersSpirV)
+					gpuShadersSpirVBackup = propertiesUsed.TryGetBooleanValue(Renderer<Rendering.Drivers.Gpu>.PropertyNames.CreateGpuShadersSpirVBoolean, out var existingGpuShadersSpirV)
 						? existingGpuShadersSpirV
 						: null;
 
-					propertiesUsed.TrySetBooleanValue(Renderer<Gpu>.PropertyNames.CreateGpuShadersSpirVBoolean, gpuShadersSpirVValue);
+					propertiesUsed.TrySetBooleanValue(Renderer<Rendering.Drivers.Gpu>.PropertyNames.CreateGpuShadersSpirVBoolean, gpuShadersSpirVValue);
 				}
 
 				if (gpuShadersDxil is bool gpuShadersDxilValue)
 				{
-					gpuShadersDxilBackup = propertiesUsed.TryGetBooleanValue(Renderer<Gpu>.PropertyNames.CreateGpuShadersDxilBoolean, out var existingGpuShadersDxil)
+					gpuShadersDxilBackup = propertiesUsed.TryGetBooleanValue(Renderer<Rendering.Drivers.Gpu>.PropertyNames.CreateGpuShadersDxilBoolean, out var existingGpuShadersDxil)
 						? existingGpuShadersDxil
 						: null;
 
-					propertiesUsed.TrySetBooleanValue(Renderer<Gpu>.PropertyNames.CreateGpuShadersDxilBoolean, gpuShadersDxilValue);
+					propertiesUsed.TrySetBooleanValue(Renderer<Rendering.Drivers.Gpu>.PropertyNames.CreateGpuShadersDxilBoolean, gpuShadersDxilValue);
 				}
 
 				if (gpuShadersMsl is bool gpuShadersMslValue)
 				{
-					gpuShadersMslBackup = propertiesUsed.TryGetBooleanValue(Renderer<Gpu>.PropertyNames.CreateGpuShadersMslBoolean, out var existingGpuShadersMsl)
+					gpuShadersMslBackup = propertiesUsed.TryGetBooleanValue(Renderer<Rendering.Drivers.Gpu>.PropertyNames.CreateGpuShadersMslBoolean, out var existingGpuShadersMsl)
 						? existingGpuShadersMsl
 						: null;
 
-					propertiesUsed.TrySetBooleanValue(Renderer<Gpu>.PropertyNames.CreateGpuShadersMslBoolean, gpuShadersMslValue);
+					propertiesUsed.TrySetBooleanValue(Renderer<Rendering.Drivers.Gpu>.PropertyNames.CreateGpuShadersMslBoolean, gpuShadersMslValue);
 				}
 			}
 
 			try
 			{
-				return TryCreateRenderer<Gpu>(out renderer, outputColorSpace, presentVSync, propertiesUsed);
+				return TryCreateRenderer<Rendering.Drivers.Gpu>(out renderer, outputColorSpace, presentVSync, propertiesUsed);
 			}
 			finally
 			{
@@ -151,11 +151,11 @@ partial class Window
 					{
 						if (gpuDeviceBackup is IntPtr gpuDevicePtr)
 						{
-							propertiesUsed.TrySetPointerValue(Renderer<Gpu>.PropertyNames.CreateGpuDevicePointer, gpuDevicePtr);
+							propertiesUsed.TrySetPointerValue(Renderer<Rendering.Drivers.Gpu>.PropertyNames.CreateGpuDevicePointer, gpuDevicePtr);
 						}
 						else
 						{
-							propertiesUsed.TryRemove(Renderer<Gpu>.PropertyNames.CreateGpuDevicePointer);
+							propertiesUsed.TryRemove(Renderer<Rendering.Drivers.Gpu>.PropertyNames.CreateGpuDevicePointer);
 						}
 					}
 
@@ -163,11 +163,11 @@ partial class Window
 					{
 						if (gpuShadersSpirVBackup is bool gpuShadersSpirVValue)
 						{
-							propertiesUsed.TrySetBooleanValue(Renderer<Gpu>.PropertyNames.CreateGpuShadersSpirVBoolean, gpuShadersSpirVValue);
+							propertiesUsed.TrySetBooleanValue(Renderer<Rendering.Drivers.Gpu>.PropertyNames.CreateGpuShadersSpirVBoolean, gpuShadersSpirVValue);
 						}
 						else
 						{
-							propertiesUsed.TryRemove(Renderer<Gpu>.PropertyNames.CreateGpuShadersSpirVBoolean);
+							propertiesUsed.TryRemove(Renderer<Rendering.Drivers.Gpu>.PropertyNames.CreateGpuShadersSpirVBoolean);
 						}
 					}
 
@@ -175,11 +175,11 @@ partial class Window
 					{
 						if (gpuShadersDxilBackup is bool gpuShadersDxilValue)
 						{
-							propertiesUsed.TrySetBooleanValue(Renderer<Gpu>.PropertyNames.CreateGpuShadersDxilBoolean, gpuShadersDxilValue);
+							propertiesUsed.TrySetBooleanValue(Renderer<Rendering.Drivers.Gpu>.PropertyNames.CreateGpuShadersDxilBoolean, gpuShadersDxilValue);
 						}
 						else
 						{
-							propertiesUsed.TryRemove(Renderer<Gpu>.PropertyNames.CreateGpuShadersDxilBoolean);
+							propertiesUsed.TryRemove(Renderer<Rendering.Drivers.Gpu>.PropertyNames.CreateGpuShadersDxilBoolean);
 						}
 					}
 
@@ -187,11 +187,11 @@ partial class Window
 					{
 						if (gpuShadersMslBackup is bool gpuShadersMslValue)
 						{
-							propertiesUsed.TrySetBooleanValue(Renderer<Gpu>.PropertyNames.CreateGpuShadersMslBoolean, gpuShadersMslValue);
+							propertiesUsed.TrySetBooleanValue(Renderer<Rendering.Drivers.Gpu>.PropertyNames.CreateGpuShadersMslBoolean, gpuShadersMslValue);
 						}
 						else
 						{
-							propertiesUsed.TryRemove(Renderer<Gpu>.PropertyNames.CreateGpuShadersMslBoolean);
+							propertiesUsed.TryRemove(Renderer<Rendering.Drivers.Gpu>.PropertyNames.CreateGpuShadersMslBoolean);
 						}
 					}
 				}

@@ -1,6 +1,6 @@
 ﻿using Sdl3Sharp.Internal.Interop;
 using Sdl3Sharp.SourceGeneration;
-using Sdl3Sharp.Windowing;
+using Sdl3Sharp.Video.Windowing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using unsafe SDL_DialogFileCallback = delegate* unmanaged[Cdecl]<void*, byte**, int, void>;

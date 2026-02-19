@@ -1,5 +1,5 @@
 ﻿using Sdl3Sharp.Events;
-using Sdl3Sharp.Windowing;
+using Sdl3Sharp.Video.Windowing;
 using Sdl3Sharp.Video.Coloring;
 using Sdl3Sharp.Video.Rendering.Drivers;
 

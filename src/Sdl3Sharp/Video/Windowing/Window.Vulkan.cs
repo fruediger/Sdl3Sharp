@@ -5,7 +5,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
-namespace Sdl3Sharp.Windowing;
+namespace Sdl3Sharp.Video.Windowing;
 
 partial class Window
 {
@@ -50,32 +50,32 @@ partial class Window
 
 			if (vulkanInstance is IntPtr vulkanInstancePtr)
 			{
-				properties.TrySetPointerValue(Renderer<Vulkan>.PropertyNames.CreateVulkanInstancePointer, vulkanInstancePtr);
+				propertiesUsed.TrySetPointerValue(Renderer<Vulkan>.PropertyNames.CreateVulkanInstancePointer, vulkanInstancePtr);
 			}
 
 			if (vulkanSurface is ulong vulkanSurfaceValue)
 			{
-				properties.TrySetNumberValue(Renderer<Vulkan>.PropertyNames.CreateVulkanSurfaceNumber, unchecked((long)vulkanSurfaceValue));
+				propertiesUsed.TrySetNumberValue(Renderer<Vulkan>.PropertyNames.CreateVulkanSurfaceNumber, unchecked((long)vulkanSurfaceValue));
 			}
 
 			if (vulkanPhysicalDevice is IntPtr vulkanPhysicalDevicePtr)
 			{
-				properties.TrySetPointerValue(Renderer<Vulkan>.PropertyNames.CreateVulkanPhysicalDevicePointer, vulkanPhysicalDevicePtr);
+				propertiesUsed.TrySetPointerValue(Renderer<Vulkan>.PropertyNames.CreateVulkanPhysicalDevicePointer, vulkanPhysicalDevicePtr);
 			}
 
 			if (vulkanDevice is IntPtr vulkanDevicePtr)
 			{
-				properties.TrySetPointerValue(Renderer<Vulkan>.PropertyNames.CreateVulkanDevicePointer, vulkanDevicePtr);
+				propertiesUsed.TrySetPointerValue(Renderer<Vulkan>.PropertyNames.CreateVulkanDevicePointer, vulkanDevicePtr);
 			}
 
 			if (vulkanGraphicsQueueFamilyIndex is uint vulkanGraphicsQueueFamilyIndexValue)
 			{
-				properties.TrySetNumberValue(Renderer<Vulkan>.PropertyNames.CreateVulkanGraphicsQueueFamilyIndexNumber, vulkanGraphicsQueueFamilyIndexValue);
+				propertiesUsed.TrySetNumberValue(Renderer<Vulkan>.PropertyNames.CreateVulkanGraphicsQueueFamilyIndexNumber, vulkanGraphicsQueueFamilyIndexValue);
 			}
 
 			if (vulkanPresentQueueFamilyIndex is uint vulkanPresentQueueIndexValue)
 			{
-				properties.TrySetNumberValue(Renderer<Vulkan>.PropertyNames.CreateVulkanPresentQueueFamilyIndexNumber, vulkanPresentQueueIndexValue);
+				propertiesUsed.TrySetNumberValue(Renderer<Vulkan>.PropertyNames.CreateVulkanPresentQueueFamilyIndexNumber, vulkanPresentQueueIndexValue);
 			}
 		}
 		else

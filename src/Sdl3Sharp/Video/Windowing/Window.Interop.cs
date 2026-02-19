@@ -4,7 +4,7 @@ using Sdl3Sharp.Video.Rendering;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace Sdl3Sharp.Windowing;
+namespace Sdl3Sharp.Video.Windowing;
 
 partial class Window
 {

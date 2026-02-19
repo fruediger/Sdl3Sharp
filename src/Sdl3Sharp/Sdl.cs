@@ -1,6 +1,7 @@
 ﻿using Sdl3Sharp.Internal;
 using Sdl3Sharp.IO;
 using Sdl3Sharp.Utilities;
+using Sdl3Sharp.Video.Windowing;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -42,7 +43,7 @@ public sealed partial class Sdl : IDisposable
 	/// </para>
 	/// <para>
 	/// The file I/O (for example: <see cref="FileStream"/>) and threading (<see cref="SDL_CreateThread"/>) subsystems are initialized by default.
-	/// Message boxes (<see cref="MessageBox.TryShowSimple(MessageBoxFlags, string, string, Windowing.Window?)"/> and <see cref="MessageBox.TryShow(out int)"/>) also attempt to work without initializing the <see cref="SubSystems.Video">video sub system</see>,
+	/// Message boxes (<see cref="MessageBox.TryShowSimple(MessageBoxFlags, string, string, Window?)"/> and <see cref="MessageBox.TryShow(out int)"/>) also attempt to work without initializing the <see cref="SubSystems.Video">video sub system</see>,
 	/// in hopes of being useful in showing an error dialog even before SDL initializes correclty.
 	/// Logging (such as <see cref="Log.Info(string)"/>) works without initialization, too.
 	/// </para>

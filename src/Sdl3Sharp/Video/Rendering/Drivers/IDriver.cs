@@ -1,4 +1,4 @@
-﻿using Sdl3Sharp.Windowing;
+﻿using Sdl3Sharp.Video.Windowing;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;

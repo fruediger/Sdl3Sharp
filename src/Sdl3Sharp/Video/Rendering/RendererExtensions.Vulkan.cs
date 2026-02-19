@@ -1,6 +1,6 @@
 ﻿using Sdl3Sharp.Video.Coloring;
 using Sdl3Sharp.Video.Rendering.Drivers;
-using Sdl3Sharp.Windowing;
+using Sdl3Sharp.Video.Windowing;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;

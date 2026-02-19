@@ -6,7 +6,7 @@ using Sdl3Sharp.Video.Coloring;
 using Sdl3Sharp.Video.Drawing;
 using Sdl3Sharp.Video.Rendering;
 using Sdl3Sharp.Video.Rendering.Drivers;
-using Sdl3Sharp.Windowing;
+using Sdl3Sharp.Video.Windowing;
 using System;
 using System.Buffers;
 using System.Collections.Concurrent;

@@ -1,4 +1,4 @@
-﻿namespace Sdl3Sharp.Windowing;
+﻿namespace Sdl3Sharp.Video.Windowing;
 
 partial class Clipboard
 {

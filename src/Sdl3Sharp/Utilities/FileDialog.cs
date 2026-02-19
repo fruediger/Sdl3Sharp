@@ -1,5 +1,5 @@
 ﻿using Sdl3Sharp.Internal;
-using Sdl3Sharp.Windowing;
+using Sdl3Sharp.Video.Windowing;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;

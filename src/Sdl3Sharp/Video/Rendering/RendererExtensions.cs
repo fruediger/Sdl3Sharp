@@ -31,7 +31,7 @@ public static partial class RendererExtensions
 		/// This method should only be called from the main thread.
 		/// </para>
 		/// </remarks>
-		public bool TryConvertRenderToWindowCoordinates(Point<float> point, out Point<float> windowPoint)
+		public bool TryConvertRenderToWindowCoordinates(in Point<float> point, out Point<float> windowPoint)
 		{
 			var result = renderer.TryConvertRenderToWindowCoordinates(point.X, point.Y, out var windowX, out var windowY);
 			windowPoint = new(windowX, windowY);
@@ -58,7 +58,7 @@ public static partial class RendererExtensions
 		/// This method should only be called from the main thread.
 		/// </para>
 		/// </remarks>
-		public bool TryConvertWindowToRenderCoordinates(Point<float> windowPoint, out Point<float> point)
+		public bool TryConvertWindowToRenderCoordinates(in Point<float> windowPoint, out Point<float> point)
 		{
 			var result = renderer.TryConvertWindowToRenderCoordinates(windowPoint.X, windowPoint.Y, out var x, out var y);
 			point = new(x, y);
@@ -107,7 +107,7 @@ public static partial class RendererExtensions
 		/// This method should only be called from the main thread.
 		/// </para>
 		/// </remarks>
-		public bool TryRenderDebugText(Point<float> point, string text) => renderer.TryRenderDebugText(point.X, point.Y, text);
+		public bool TryRenderDebugText(in Point<float> point, string text) => renderer.TryRenderDebugText(point.X, point.Y, text);
 
 		/// <summary>
 		/// Tries to draw a debug format string to the current target
@@ -159,14 +159,14 @@ public static partial class RendererExtensions
 		/// <see href="https://en.wikipedia.org/wiki/Printf#Format_specifier"/>.
 		/// </para>
 		/// <para>
-		/// Consider using <see cref="RendererExtensions.TryRenderDebugText{TRenderer}(TRenderer, Point{float}, string)"/> instead when possible, as it may be more efficient. 
+		/// Consider using <see cref="TryRenderDebugText{TRenderer}(TRenderer, in Point{float}, string)"/> instead when possible, as it may be more efficient. 
 		/// In many cases, you can use C# string interpolation to construct the message before logging.
 		/// </para>
 		/// <para>
 		/// This method should only be called from the main thread.
 		/// </para>
 		/// </remarks>
-		public bool TryRenderDebugText(Point<float> point, string format, params ReadOnlySpan<object> args) => renderer.TryRenderDebugText(point.X, point.Y, format, args);
+		public bool TryRenderDebugText(in Point<float> point, string format, params ReadOnlySpan<object> args) => renderer.TryRenderDebugText(point.X, point.Y, format, args);
 
 		/// <summary>
 		/// Tries to draw a line to the current target
@@ -185,7 +185,7 @@ public static partial class RendererExtensions
 		/// This method should only be called from the main thread.
 		/// </para>
 		/// </remarks>
-		public bool TryRenderLine(Point<float> startPoint, Point<float> endPoint) => renderer.TryRenderLine(startPoint.X, startPoint.Y, endPoint.X, endPoint.Y);
+		public bool TryRenderLine(in Point<float> startPoint, in Point<float> endPoint) => renderer.TryRenderLine(startPoint.X, startPoint.Y, endPoint.X, endPoint.Y);
 
 		/// <summary>
 		/// Tries to draw a point to the current target
@@ -203,6 +203,6 @@ public static partial class RendererExtensions
 		/// This method should only be called from the main thread.
 		/// </para>
 		/// </remarks>
-		public bool TryRenderPoint(Point<float> point) => renderer.TryRenderPoint(point.X, point.Y);
+		public bool TryRenderPoint(in Point<float> point) => renderer.TryRenderPoint(point.X, point.Y);
 	}
 }
