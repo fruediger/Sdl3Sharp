@@ -16,6 +16,12 @@ namespace Sdl3Sharp.Video.Windowing;
 /// <summary>
 /// Represents a display
 /// </summary>
+/// <remarks>
+/// <para>
+/// The <see cref="Id"/> of a display is unique, remains unchanged while the display is connected to the system, and is never reused for the lifetime of the application.
+/// If a display is disconnected and then reconnected, it will get assigned a new <see cref="Id"/>.
+/// </para>
+/// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
 public readonly partial struct Display :
@@ -304,6 +310,10 @@ public readonly partial struct Display :
 	/// </value>
 	/// <remarks>
 	/// <para>
+	/// The <see cref="Id"/> of a display is unique, remains unchanged while the display is connected to the system, and is never reused for the lifetime of the application.
+	/// If a display is disconnected and then reconnected, it will get assigned a new <see cref="Id"/>.
+	/// </para>
+	/// <para>
 	/// An id of <c>0</c> indicates an invalid display.
 	/// </para>
 	/// </remarks>
@@ -563,7 +573,7 @@ public readonly partial struct Display :
 	/// <param name="width">The desired width of the display mode, in pixels</param>
 	/// <param name="height">The desired height of the display mode, in pixels</param>
 	/// <param name="displayMode">The resulting closest matching display mode that is equal to or larger than the specified display mode, if this method returns <c><see langword="true"/></c></param>
-	/// <param name="refreshRate">The desired refresh rate of the display mode, in hertz, or <c>0</c> (the default) for the desktop refresh rate</param>
+	/// <param name="refreshRate">The desired refresh rate of the display mode, in Hz (hertz), or <c>0</c> (the default) for the desktop refresh rate</param>
 	/// <param name="includeHighDensityModes">A value indicating whether high-density display modes should be included in the search</param>
 	/// <returns><c><see langword="true"/></c>, if a matching display mode was found successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
 	/// <remarks>

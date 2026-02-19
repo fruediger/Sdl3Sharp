@@ -2,6 +2,9 @@
 
 partial struct Display
 {
+	/// <summary>
+	/// Provides property names for <see cref="Display"/> <see cref="Properties">properties</see>
+	/// </summary>
 	public static class PropertyNames
 	{
 		/// <summary>
