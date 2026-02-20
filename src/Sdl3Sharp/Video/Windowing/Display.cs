@@ -529,7 +529,7 @@ public readonly partial struct Display :
 	/// This property should only be accessed from the main thread.
 	/// </para>
 	/// </remarks>
-	public readonly IntPtr WindowsHmonitor => Properties?.TryGetPointerValue(PropertyNames.WindowsHMonitorPointer, out var hMonitor) is true
+	public readonly IntPtr WindowsHMonitor => Properties?.TryGetPointerValue(PropertyNames.WindowsHMonitorPointer, out var hMonitor) is true
 		? hMonitor
 		: IntPtr.Zero;
 

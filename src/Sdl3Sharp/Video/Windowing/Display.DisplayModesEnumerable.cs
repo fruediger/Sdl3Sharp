@@ -30,8 +30,9 @@ partial struct Display
 		[StructLayout(LayoutKind.Sequential)]
 		public struct Enumerator : IDisposable
 		{
-			private unsafe readonly delegate* managed<void*, void> mFree;
 			private unsafe DisplayMode** mModes;
+			private unsafe delegate* managed<void*, void> mFree;
+			private unsafe DisplayMode** mCurrent;
 			private int mCount;
 
 			/// <summary>
@@ -48,22 +49,20 @@ partial struct Display
 			{
 				unsafe
 				{
-					Unsafe.SkipInit(out int count);
-
 					if (enumerable.mGetter is not null)
 					{
+						Unsafe.SkipInit(out int count);
+
+						mModes = enumerable.mGetter(enumerable.mDisplayId, &count);
 						mFree = enumerable.mFree;
-						mModes = enumerable.mGetter(enumerable.mDisplayId, &count) switch
-						{
-							null => null,
-							var modes => modes - 1 // the getter returns a pointer to the first element, but we want to start one before the first element so that the first call to MoveNext() advances to the first element
-						};
+						mCurrent = mModes - 1; // the getter returns a pointer to the first element, but we want to start one before the first element so that the first call to MoveNext() advances to the first element
 						mCount = count;
 					}
 					else
 					{
-						mFree = null;
 						mModes = null;
+						mFree = null;
+						mCurrent = null;
 						mCount = 0;
 					}
 				}
@@ -87,8 +86,8 @@ partial struct Display
 				{
 					unsafe
 					{
-						return ref (mModes is not null
-							? ref Unsafe.AsRef<DisplayMode>(*mModes)
+						return ref (mCurrent is not null
+							? ref Unsafe.AsRef<DisplayMode>(*mCurrent)
 							: ref Unsafe.NullRef<DisplayMode>() // this is dangerous, but highly unlikely to hit, if MoveNext() is used correctly and the enumerator isn't used after Dispose()
 						);
 					}
@@ -109,15 +108,15 @@ partial struct Display
 			{
 				unsafe
 				{
-					if (mModes is null || mCount is not > 0)
+					if (mCurrent is null || mCount is not > 0)
 					{
 						return false;
 					}
 
-					mModes++;
+					mCurrent++;
 					mCount--;
 
-					return true;
+					return *mCurrent is not null;
 				}
 			}
 
@@ -128,11 +127,18 @@ partial struct Display
 			{
 				unsafe
 				{
-					if (mFree is not null)
+					if (mModes is not null)
 					{
-						mFree(mModes);
+						if (mFree is not null)
+						{
+							mFree(mModes);
+							mFree = null;
+						}
+
+						mModes = null;
 					}
-					mModes = null;
+
+					mCurrent = null;
 					mCount = 0;
 				}
 			}
