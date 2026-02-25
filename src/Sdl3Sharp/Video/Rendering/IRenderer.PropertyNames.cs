@@ -69,7 +69,7 @@ partial interface IRenderer
 		/// </summary>
 		/// <remarks>
 		/// <para>
-		/// The value of the associated property can be compared against the <see cref="IDriver.Name">name</see> of any pre-defined rendering driver implementing the <see cref="IDriver"/> interface to determine whether the renderer is using that driver.
+		/// The value of the associated property can be compared against the <see cref="IRenderingDriver.Name">name</see> of any pre-defined rendering driver implementing the <see cref="IRenderingDriver"/> interface to determine whether the renderer is using that driver.
 		/// </para>
 		/// </remarks>
 		public const string NameString = "SDL.renderer.name";

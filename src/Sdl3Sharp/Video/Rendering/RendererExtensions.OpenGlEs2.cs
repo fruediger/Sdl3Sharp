@@ -7,7 +7,7 @@ namespace Sdl3Sharp.Video.Rendering;
 
 partial class RendererExtensions
 {
-	extension(Renderer<OpenGlEs2> renderer)
+	extension(Renderer<OpenGLEs2> renderer)
 	{
 		/// <inheritdoc cref="Renderer{TDriver}.TryCreateTexture(out Texture{TDriver}?, ColorSpace?, PixelFormat?, TextureAccess?, int?, int?, Palette?, float?, float?, Properties?)"/>
 		/// <param name="openGlEs2Texture">A <c>GLuint</c> texture to associate with the newly created texture, if you want to wrap an existing texture</param>
@@ -15,7 +15,7 @@ partial class RendererExtensions
 		/// <param name="openGlEs2TextureU">A <c>GLuint</c> texture to associate with the U plane of the newly created YUV texture, if you want to wrap an existing texture</param>
 		/// <param name="openGlEs2TextureV">A <c>GLuint</c> texture to associate with the V plane of the newly created YUV texture, if you want to wrap an existing texture</param>
 #pragma warning disable CS1573 // we get these from inheritdoc
-		public bool TryCreateTexture([NotNullWhen(true)] out Texture<OpenGlEs2>? texture, ColorSpace? colorSpace = default, PixelFormat? format = default, TextureAccess? access = default, int? width = default, int? height = default,
+		public bool TryCreateTexture([NotNullWhen(true)] out Texture<OpenGLEs2>? texture, ColorSpace? colorSpace = default, PixelFormat? format = default, TextureAccess? access = default, int? width = default, int? height = default,
 #if SDL3_4_0_OR_GREATER
 			Palette? palette = default,
 #endif
@@ -41,22 +41,22 @@ partial class RendererExtensions
 
 				if (openGlEs2Texture is uint openGlEs2TextureValue)
 				{
-					propertiesUsed.TrySetNumberValue(Texture<OpenGlEs2>.PropertyNames.CreateOpenGlEs2TextureNumber, openGlEs2TextureValue);
+					propertiesUsed.TrySetNumberValue(Texture<OpenGLEs2>.PropertyNames.CreateOpenGLEs2TextureNumber, openGlEs2TextureValue);
 				}
 
 				if (openGlEs2TextureUv is uint openGlEs2TextureUvValue)
 				{
-					propertiesUsed.TrySetNumberValue(Texture<OpenGlEs2>.PropertyNames.CreateOpenGlEs2TextureUvNumber, openGlEs2TextureUvValue);
+					propertiesUsed.TrySetNumberValue(Texture<OpenGLEs2>.PropertyNames.CreateOpenGLEs2TextureUvNumber, openGlEs2TextureUvValue);
 				}
 
 				if (openGlEs2TextureU is uint openGlEs2TextureUValue)
 				{
-					propertiesUsed.TrySetNumberValue(Texture<OpenGlEs2>.PropertyNames.CreateOpenGlEs2TextureUNumber, openGlEs2TextureUValue);
+					propertiesUsed.TrySetNumberValue(Texture<OpenGLEs2>.PropertyNames.CreateOpenGLEs2TextureUNumber, openGlEs2TextureUValue);
 				}
 
 				if (openGlEs2TextureV is uint openGlEs2TextureVValue)
 				{
-					propertiesUsed.TrySetNumberValue(Texture<OpenGlEs2>.PropertyNames.CreateOpenGlEs2TextureVNumber, openGlEs2TextureVValue);
+					propertiesUsed.TrySetNumberValue(Texture<OpenGLEs2>.PropertyNames.CreateOpenGLEs2TextureVNumber, openGlEs2TextureVValue);
 				}
 			}
 			else
@@ -65,38 +65,38 @@ partial class RendererExtensions
 
 				if (openGlEs2Texture is uint openGlEs2TextureValue)
 				{
-					openGlEs2TextureBackup = propertiesUsed.TryGetNumberValue(Texture<OpenGlEs2>.PropertyNames.CreateOpenGlEs2TextureNumber, out var existingOpenGlEs2TextureValue)
-						? unchecked((uint)existingOpenGlEs2TextureValue)
+					openGlEs2TextureBackup = propertiesUsed.TryGetNumberValue(Texture<OpenGLEs2>.PropertyNames.CreateOpenGLEs2TextureNumber, out var existingOpenGLEs2TextureValue)
+						? unchecked((uint)existingOpenGLEs2TextureValue)
 						: null;
 
-					propertiesUsed.TrySetNumberValue(Texture<OpenGlEs2>.PropertyNames.CreateOpenGlEs2TextureNumber, openGlEs2TextureValue);
+					propertiesUsed.TrySetNumberValue(Texture<OpenGLEs2>.PropertyNames.CreateOpenGLEs2TextureNumber, openGlEs2TextureValue);
 				}
 
 				if (openGlEs2TextureUv is uint openGlEs2TextureUvValue)
 				{
-					openGlEs2TextureUvBackup = propertiesUsed.TryGetNumberValue(Texture<OpenGlEs2>.PropertyNames.CreateOpenGlEs2TextureUvNumber, out var existingOpenGlEs2TextureUvValue)
-						? unchecked((uint)existingOpenGlEs2TextureUvValue)
+					openGlEs2TextureUvBackup = propertiesUsed.TryGetNumberValue(Texture<OpenGLEs2>.PropertyNames.CreateOpenGLEs2TextureUvNumber, out var existingOpenGLEs2TextureUvValue)
+						? unchecked((uint)existingOpenGLEs2TextureUvValue)
 						: null;
 
-					propertiesUsed.TrySetNumberValue(Texture<OpenGlEs2>.PropertyNames.CreateOpenGlEs2TextureUvNumber, openGlEs2TextureUvValue);
+					propertiesUsed.TrySetNumberValue(Texture<OpenGLEs2>.PropertyNames.CreateOpenGLEs2TextureUvNumber, openGlEs2TextureUvValue);
 				}
 
 				if (openGlEs2TextureU is uint openGlEs2TextureUValue)
 				{
-					openGlEs2TextureUBackup = propertiesUsed.TryGetNumberValue(Texture<OpenGlEs2>.PropertyNames.CreateOpenGlEs2TextureUNumber, out var existingOpenGlEs2TextureUValue)
-						? unchecked((uint)existingOpenGlEs2TextureUValue)
+					openGlEs2TextureUBackup = propertiesUsed.TryGetNumberValue(Texture<OpenGLEs2>.PropertyNames.CreateOpenGLEs2TextureUNumber, out var existingOpenGLEs2TextureUValue)
+						? unchecked((uint)existingOpenGLEs2TextureUValue)
 						: null;
 
-					propertiesUsed.TrySetNumberValue(Texture<OpenGlEs2>.PropertyNames.CreateOpenGlEs2TextureUNumber, openGlEs2TextureUValue);
+					propertiesUsed.TrySetNumberValue(Texture<OpenGLEs2>.PropertyNames.CreateOpenGLEs2TextureUNumber, openGlEs2TextureUValue);
 				}
 
 				if (openGlEs2TextureV is uint openGlEs2TextureVValue)
 				{
-					openGlEs2TextureVBackup = propertiesUsed.TryGetNumberValue(Texture<OpenGlEs2>.PropertyNames.CreateOpenGlEs2TextureVNumber, out var existingOpenGlEs2TextureVValue)
-						? unchecked((uint)existingOpenGlEs2TextureVValue)
+					openGlEs2TextureVBackup = propertiesUsed.TryGetNumberValue(Texture<OpenGLEs2>.PropertyNames.CreateOpenGLEs2TextureVNumber, out var existingOpenGLEs2TextureVValue)
+						? unchecked((uint)existingOpenGLEs2TextureVValue)
 						: null;
 
-					propertiesUsed.TrySetNumberValue(Texture<OpenGlEs2>.PropertyNames.CreateOpenGlEs2TextureVNumber, openGlEs2TextureVValue);
+					propertiesUsed.TrySetNumberValue(Texture<OpenGLEs2>.PropertyNames.CreateOpenGLEs2TextureVNumber, openGlEs2TextureVValue);
 				}
 			}
 
@@ -124,11 +124,11 @@ partial class RendererExtensions
 					{
 						if (openGlEs2TextureBackup is uint openGlEs2TextureValue)
 						{
-							propertiesUsed.TrySetNumberValue(Texture<OpenGlEs2>.PropertyNames.CreateOpenGlEs2TextureNumber, openGlEs2TextureValue);
+							propertiesUsed.TrySetNumberValue(Texture<OpenGLEs2>.PropertyNames.CreateOpenGLEs2TextureNumber, openGlEs2TextureValue);
 						}
 						else
 						{
-							propertiesUsed.TryRemove(Texture<OpenGlEs2>.PropertyNames.CreateOpenGlEs2TextureNumber);
+							propertiesUsed.TryRemove(Texture<OpenGLEs2>.PropertyNames.CreateOpenGLEs2TextureNumber);
 						}
 					}
 
@@ -136,11 +136,11 @@ partial class RendererExtensions
 					{
 						if (openGlEs2TextureUvBackup is uint openGlEs2TextureUvValue)
 						{
-							propertiesUsed.TrySetNumberValue(Texture<OpenGlEs2>.PropertyNames.CreateOpenGlEs2TextureUvNumber, openGlEs2TextureUvValue);
+							propertiesUsed.TrySetNumberValue(Texture<OpenGLEs2>.PropertyNames.CreateOpenGLEs2TextureUvNumber, openGlEs2TextureUvValue);
 						}
 						else
 						{
-							propertiesUsed.TryRemove(Texture<OpenGlEs2>.PropertyNames.CreateOpenGlEs2TextureUvNumber);
+							propertiesUsed.TryRemove(Texture<OpenGLEs2>.PropertyNames.CreateOpenGLEs2TextureUvNumber);
 						}
 					}
 
@@ -148,7 +148,7 @@ partial class RendererExtensions
 					{
 						if (openGlEs2TextureUBackup is uint openGlEs2TextureUValue)
 						{
-							propertiesUsed.TrySetNumberValue(Texture<OpenGlEs2>.PropertyNames.CreateOpenGlEs2TextureUNumber, openGlEs2TextureUValue);
+							propertiesUsed.TrySetNumberValue(Texture<OpenGLEs2>.PropertyNames.CreateOpenGLEs2TextureUNumber, openGlEs2TextureUValue);
 						}
 						else
 						{
@@ -160,11 +160,11 @@ partial class RendererExtensions
 					{
 						if (openGlEs2TextureVBackup is uint openGlEs2TextureVValue)
 						{
-							propertiesUsed.TrySetNumberValue(Texture<OpenGlEs2>.PropertyNames.CreateOpenGlEs2TextureVNumber, openGlEs2TextureVValue);
+							propertiesUsed.TrySetNumberValue(Texture<OpenGLEs2>.PropertyNames.CreateOpenGLEs2TextureVNumber, openGlEs2TextureVValue);
 						}
 						else
 						{
-							propertiesUsed.TryRemove(Texture<OpenGlEs2>.PropertyNames.CreateOpenGlEs2TextureVNumber);
+							propertiesUsed.TryRemove(Texture<OpenGLEs2>.PropertyNames.CreateOpenGLEs2TextureVNumber);
 						}
 					}
 				}

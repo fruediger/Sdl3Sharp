@@ -68,14 +68,14 @@ public static partial class BlendModeExtensions
 		///			<description>Same as Direct3D 9.</description>
 		///		</item>
 		///		<item>
-		///			<term><see cref="OpenGl"/></term>
+		///			<term><see cref="OpenGL"/></term>
 		///			<description>
 		///			Supports the <see cref="BlendOperation.Add"/> operation with all factors.
 		///			OpenGL versions 1.1, 1.2, and 1.3 do not work correctly here.
 		///			</description>
 		///		</item>
 		///		<item>
-		///			<term><see cref="OpenGlEs2"/></term>
+		///			<term><see cref="OpenGLEs2"/></term>
 		///			<description>
 		///			Supports the <see cref="BlendOperation.Add"/>, <see cref="BlendOperation.Subtract"/>, and <see cref="BlendOperation.ReverseSubtract"/> operations with all factors.
 		///			</description>

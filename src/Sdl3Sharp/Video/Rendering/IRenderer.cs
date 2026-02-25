@@ -32,11 +32,11 @@ namespace Sdl3Sharp.Video.Rendering;
 /// For the most part <see cref="IRenderer"/>s are not thread-safe, and most of their properties and methods should only be accessed from the main thread!
 /// </para>
 /// <para>
-/// <see cref="IRenderer"/>s are not driver-agnostic! Most of the time instance of this interface are of the concrete <see cref="Renderer{TDriver}"/> type with a specific <see cref="IDriver">rendering driver</see> as the type argument.
+/// <see cref="IRenderer"/>s are not driver-agnostic! Most of the time instance of this interface are of the concrete <see cref="Renderer{TDriver}"/> type with a specific <see cref="IRenderingDriver">rendering driver</see> as the type argument.
 /// However, the <see cref="IRenderer"/> interface exists as an abstraction to use common rendering operations.
 /// </para>
 /// <para>
-/// To specify an concrete renderer type, use <see cref="Renderer{TDriver}"/> with a rendering driver that implements the <see cref="IDriver"/> interface (e.g. <see cref="Renderer{TDriver}">Renderer&lt;<see cref="OpenGl">OpenGl</see>&gt;</see>).
+/// To specify an concrete renderer type, use <see cref="Renderer{TDriver}"/> with a rendering driver that implements the <see cref="IRenderingDriver"/> interface (e.g. <see cref="Renderer{TDriver}">Renderer&lt;<see cref="OpenGL">OpenGL</see>&gt;</see>).
 /// </para>
 /// </remarks>
 public partial interface IRenderer : IDisposable
@@ -379,14 +379,14 @@ public partial interface IRenderer : IDisposable
 	/// </value>
 	/// <remarks>
 	/// <para>
-	/// The value of this property can be compared to the <see cref="IDriver.Name">name</see> of any pre-defined rendering driver implementing the <see cref="IDriver"/> interface to determine whether the renderer is using that driver.
+	/// The value of this property can be compared to the <see cref="IRenderingDriver.Name">name</see> of any pre-defined rendering driver implementing the <see cref="IRenderingDriver"/> interface to determine whether the renderer is using that driver.
 	/// </para>
 	/// <para>
 	/// Names of rendering drivers should all be simple, low-ASCII identifiers, like <c>"opengl"</c>, <c>"direct3d12"</c> or <c>"metal"</c>.
 	/// These should never have Unicode characters, and are not meant to be proper names.
 	/// </para>
 	/// <para>
-	/// You can see <see cref="IDriver.AvailableDriverNames"/> for a list of the names of all available rendering drivers in the current environment.
+	/// You can see <see cref="IRenderingDriver.AvailableDriverNames"/> for a list of the names of all available rendering drivers in the current environment.
 	/// </para>
 	/// </remarks>
 	string? Name { get; }

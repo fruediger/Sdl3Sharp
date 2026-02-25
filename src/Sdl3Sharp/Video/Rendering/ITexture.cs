@@ -25,11 +25,11 @@ namespace Sdl3Sharp.Video.Rendering;
 /// Using an <see cref="ITexture"/> after its associated <see cref="IRenderer"/> has been disposed can lead to undefined behavior, including corruption and crashes.
 /// </para>
 /// <para>
-/// <see cref="ITexture"/>s are not driver-agnostic! Most of the time instance of this interface are of the concrete <see cref="Texture{TDriver}"/> type with a specific <see cref="IDriver">rendering driver</see> as the type argument.
+/// <see cref="ITexture"/>s are not driver-agnostic! Most of the time instance of this interface are of the concrete <see cref="Texture{TDriver}"/> type with a specific <see cref="IRenderingDriver">rendering driver</see> as the type argument.
 /// However, the <see cref="ITexture"/> interface exists as an abstraction to use them in common rendering operations with the <see cref="IRenderer"/> instance that created them.
 /// </para>
 /// <para>
-/// To specify an concrete texture type, use <see cref="Texture{TDriver}"/> with a rendering driver that implements the <see cref="IDriver"/> interface (e.g. <see cref="Texture{TDriver}">Texture&lt;<see cref="OpenGl">OpenGl</see>&gt;</see>).
+/// To specify an concrete texture type, use <see cref="Texture{TDriver}"/> with a rendering driver that implements the <see cref="IRenderingDriver"/> interface (e.g. <see cref="Texture{TDriver}">Texture&lt;<see cref="OpenGL">OpenGL</see>&gt;</see>).
 /// </para>
 /// </remarks>
 public partial interface ITexture : IDisposable

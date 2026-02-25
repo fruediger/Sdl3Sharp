@@ -97,7 +97,7 @@ partial interface ITexture
 	}
 
 	private protected unsafe static bool TryGetOrCreate<TDriver>(SDL_Texture* texture, [NotNullWhen(true)] out Texture<TDriver>? result)
-		where TDriver : notnull, IDriver
+		where TDriver : notnull, IRenderingDriver
 	{
 		if (texture is null)
 		{

@@ -7,7 +7,7 @@ namespace Sdl3Sharp.Video.Rendering;
 
 partial class RendererExtensions
 {
-	extension(Renderer<OpenGl> renderer)
+	extension(Renderer<OpenGL> renderer)
 	{
 		/// <inheritdoc cref="Renderer{TDriver}.TryCreateTexture(out Texture{TDriver}?, ColorSpace?, PixelFormat?, TextureAccess?, int?, int?, Palette?, float?, float?, Properties?)"/>
 		/// <param name="openGlTexture">A <c>GLuint</c> texture to associate with the newly created texture, if you want to wrap an existing texture</param>
@@ -15,7 +15,7 @@ partial class RendererExtensions
 		/// <param name="openGlTextureU">A <c>GLuint</c> texture to associate with the U plane of the newly created YUV texture, if you want to wrap an existing texture</param>
 		/// <param name="openGlTextureV">A <c>GLuint</c> texture to associate with the V plane of the newly created YUV texture, if you want to wrap an existing texture</param>
 #pragma warning disable CS1573 // we get these from inheritdoc
-		public bool TryCreateTexture([NotNullWhen(true)] out Texture<OpenGl>? texture, ColorSpace? colorSpace = default, PixelFormat? format = default, TextureAccess? access = default, int? width = default, int? height = default,
+		public bool TryCreateTexture([NotNullWhen(true)] out Texture<OpenGL>? texture, ColorSpace? colorSpace = default, PixelFormat? format = default, TextureAccess? access = default, int? width = default, int? height = default,
 #if SDL3_4_0_OR_GREATER
 			Palette? palette = default,
 #endif
@@ -41,22 +41,22 @@ partial class RendererExtensions
 
 				if (openGlTexture is uint openGlTextureValue)
 				{
-					propertiesUsed.TrySetNumberValue(Texture<OpenGl>.PropertyNames.CreateOpenGlTextureNumber, openGlTextureValue);
+					propertiesUsed.TrySetNumberValue(Texture<OpenGL>.PropertyNames.CreateOpenGLTextureNumber, openGlTextureValue);
 				}
 
 				if (openGlTextureUv is uint openGlTextureUvValue)
 				{
-					propertiesUsed.TrySetNumberValue(Texture<OpenGl>.PropertyNames.CreateOpenGlTextureUvNumber, openGlTextureUvValue);
+					propertiesUsed.TrySetNumberValue(Texture<OpenGL>.PropertyNames.CreateOpenGLTextureUvNumber, openGlTextureUvValue);
 				}
 
 				if (openGlTextureU is uint openGlTextureUValue)
 				{
-					propertiesUsed.TrySetNumberValue(Texture<OpenGl>.PropertyNames.CreateOpenGlTextureUNumber, openGlTextureUValue);
+					propertiesUsed.TrySetNumberValue(Texture<OpenGL>.PropertyNames.CreateOpenGLTextureUNumber, openGlTextureUValue);
 				}
 
 				if (openGlTextureV is uint openGlTextureVValue)
 				{
-					propertiesUsed.TrySetNumberValue(Texture<OpenGl>.PropertyNames.CreateOpenGlTextureVNumber, openGlTextureVValue);
+					propertiesUsed.TrySetNumberValue(Texture<OpenGL>.PropertyNames.CreateOpenGLTextureVNumber, openGlTextureVValue);
 				}
 			}
 			else
@@ -65,38 +65,38 @@ partial class RendererExtensions
 
 				if (openGlTexture is uint openGlTextureValue)
 				{
-					openGlTextureBackup = propertiesUsed.TryGetNumberValue(Texture<OpenGl>.PropertyNames.CreateOpenGlTextureNumber, out var existingOpenGlTextureValue)
-						? unchecked((uint)existingOpenGlTextureValue)
+					openGlTextureBackup = propertiesUsed.TryGetNumberValue(Texture<OpenGL>.PropertyNames.CreateOpenGLTextureNumber, out var existingOpenGLTextureValue)
+						? unchecked((uint)existingOpenGLTextureValue)
 						: null;
 
-					propertiesUsed.TrySetNumberValue(Texture<OpenGl>.PropertyNames.CreateOpenGlTextureNumber, openGlTextureValue);
+					propertiesUsed.TrySetNumberValue(Texture<OpenGL>.PropertyNames.CreateOpenGLTextureNumber, openGlTextureValue);
 				}
 
 				if (openGlTextureUv is uint openGlTextureUvValue)
 				{
-					openGlTextureUvBackup = propertiesUsed.TryGetNumberValue(Texture<OpenGl>.PropertyNames.CreateOpenGlTextureUvNumber, out var existingOpenGlTextureUvValue)
-						? unchecked((uint)existingOpenGlTextureUvValue)
+					openGlTextureUvBackup = propertiesUsed.TryGetNumberValue(Texture<OpenGL>.PropertyNames.CreateOpenGLTextureUvNumber, out var existingOpenGLTextureUvValue)
+						? unchecked((uint)existingOpenGLTextureUvValue)
 						: null;
 
-					propertiesUsed.TrySetNumberValue(Texture<OpenGl>.PropertyNames.CreateOpenGlTextureUvNumber, openGlTextureUvValue);
+					propertiesUsed.TrySetNumberValue(Texture<OpenGL>.PropertyNames.CreateOpenGLTextureUvNumber, openGlTextureUvValue);
 				}
 
 				if (openGlTextureU is uint openGlTextureUValue)
 				{
-					openGlTextureUBackup = propertiesUsed.TryGetNumberValue(Texture<OpenGl>.PropertyNames.CreateOpenGlTextureUNumber, out var existingOpenGlTextureUValue)
-						? unchecked((uint)existingOpenGlTextureUValue)
+					openGlTextureUBackup = propertiesUsed.TryGetNumberValue(Texture<OpenGL>.PropertyNames.CreateOpenGLTextureUNumber, out var existingOpenGLTextureUValue)
+						? unchecked((uint)existingOpenGLTextureUValue)
 						: null;
 
-					propertiesUsed.TrySetNumberValue(Texture<OpenGl>.PropertyNames.CreateOpenGlTextureUNumber, openGlTextureUValue);
+					propertiesUsed.TrySetNumberValue(Texture<OpenGL>.PropertyNames.CreateOpenGLTextureUNumber, openGlTextureUValue);
 				}
 
 				if (openGlTextureV is uint openGlTextureVValue)
 				{
-					openGlTextureVBackup = propertiesUsed.TryGetNumberValue(Texture<OpenGl>.PropertyNames.CreateOpenGlTextureVNumber, out var existingOpenGlTextureVValue)
-						? unchecked((uint)existingOpenGlTextureVValue)
+					openGlTextureVBackup = propertiesUsed.TryGetNumberValue(Texture<OpenGL>.PropertyNames.CreateOpenGLTextureVNumber, out var existingOpenGLTextureVValue)
+						? unchecked((uint)existingOpenGLTextureVValue)
 						: null;
 
-					propertiesUsed.TrySetNumberValue(Texture<OpenGl>.PropertyNames.CreateOpenGlTextureVNumber, openGlTextureVValue);
+					propertiesUsed.TrySetNumberValue(Texture<OpenGL>.PropertyNames.CreateOpenGLTextureVNumber, openGlTextureVValue);
 				}
 			}
 
@@ -124,11 +124,11 @@ partial class RendererExtensions
 					{
 						if (openGlTextureBackup is uint openGlTextureValue)
 						{
-							propertiesUsed.TrySetNumberValue(Texture<OpenGl>.PropertyNames.CreateOpenGlTextureNumber, openGlTextureValue);
+							propertiesUsed.TrySetNumberValue(Texture<OpenGL>.PropertyNames.CreateOpenGLTextureNumber, openGlTextureValue);
 						}
 						else
 						{
-							propertiesUsed.TryRemove(Texture<OpenGl>.PropertyNames.CreateOpenGlTextureNumber);
+							propertiesUsed.TryRemove(Texture<OpenGL>.PropertyNames.CreateOpenGLTextureNumber);
 						}
 					}
 
@@ -136,11 +136,11 @@ partial class RendererExtensions
 					{
 						if (openGlTextureUvBackup is uint openGlTextureUvValue)
 						{
-							propertiesUsed.TrySetNumberValue(Texture<OpenGl>.PropertyNames.CreateOpenGlTextureUvNumber, openGlTextureUvValue);
+							propertiesUsed.TrySetNumberValue(Texture<OpenGL>.PropertyNames.CreateOpenGLTextureUvNumber, openGlTextureUvValue);
 						}
 						else
 						{
-							propertiesUsed.TryRemove(Texture<OpenGl>.PropertyNames.CreateOpenGlTextureUvNumber);
+							propertiesUsed.TryRemove(Texture<OpenGL>.PropertyNames.CreateOpenGLTextureUvNumber);
 						}
 					}
 
@@ -148,7 +148,7 @@ partial class RendererExtensions
 					{
 						if (openGlTextureUBackup is uint openGlTextureUValue)
 						{
-							propertiesUsed.TrySetNumberValue(Texture<OpenGl>.PropertyNames.CreateOpenGlTextureUNumber, openGlTextureUValue);
+							propertiesUsed.TrySetNumberValue(Texture<OpenGL>.PropertyNames.CreateOpenGLTextureUNumber, openGlTextureUValue);
 						}
 						else
 						{
@@ -160,11 +160,11 @@ partial class RendererExtensions
 					{
 						if (openGlTextureVBackup is uint openGlTextureVValue)
 						{
-							propertiesUsed.TrySetNumberValue(Texture<OpenGl>.PropertyNames.CreateOpenGlTextureVNumber, openGlTextureVValue);
+							propertiesUsed.TrySetNumberValue(Texture<OpenGL>.PropertyNames.CreateOpenGLTextureVNumber, openGlTextureVValue);
 						}
 						else
 						{
-							propertiesUsed.TryRemove(Texture<OpenGl>.PropertyNames.CreateOpenGlTextureVNumber);
+							propertiesUsed.TryRemove(Texture<OpenGL>.PropertyNames.CreateOpenGLTextureVNumber);
 						}
 					}
 				}

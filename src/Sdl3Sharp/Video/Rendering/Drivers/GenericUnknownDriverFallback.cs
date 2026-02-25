@@ -3,11 +3,11 @@ using System.Runtime.CompilerServices;
 
 namespace Sdl3Sharp.Video.Rendering.Drivers;
 
-internal sealed class GenericUnknownDriverFallback : IDriver
+internal sealed class GenericUnknownDriverFallback : IRenderingDriver
 {
-	static string? IDriver.Name { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => null; }
+	static string? IRenderingDriver.Name { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => null; }
 
-	static ReadOnlySpan<byte> IDriver.NameAscii { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => []; }
+	static ReadOnlySpan<byte> IRenderingDriver.NameAscii { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => []; }
 
 	private GenericUnknownDriverFallback() { }
 }

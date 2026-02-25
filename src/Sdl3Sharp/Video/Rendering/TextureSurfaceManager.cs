@@ -73,7 +73,7 @@ public abstract class TextureSurfaceManager : IDisposable
 /// The type of the rendering driver associated with the <see cref="Texture{TDriver}"/>
 /// </typeparam>
 public sealed class TextureSurfaceManager<TDriver> : TextureSurfaceManager
-	where TDriver : notnull, IDriver
+	where TDriver : notnull, IRenderingDriver
 {
 	private Texture<TDriver>? mTexture;
 

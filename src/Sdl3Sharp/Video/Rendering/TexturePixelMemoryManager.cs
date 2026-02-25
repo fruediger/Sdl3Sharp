@@ -232,7 +232,7 @@ public abstract class TexturePixelMemoryManager : NativeMemoryManagerBase
 /// The type of the rendering driver associated with the <see cref="Texture{TDriver}"/>
 /// </typeparam>
 public sealed class TexturePixelMemoryManager<TDriver> : TexturePixelMemoryManager
-	where TDriver : notnull, IDriver
+	where TDriver : notnull, IRenderingDriver
 {
 	private Texture<TDriver>? mTexture;
 

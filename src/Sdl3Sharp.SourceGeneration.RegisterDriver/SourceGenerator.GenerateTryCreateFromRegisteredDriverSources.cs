@@ -174,35 +174,35 @@ partial class SourceGenerator
 
 	private static void GenerateRenderDriverDispatchSources(SourceProductionContext spc, (Compilation compilation, ImmutableArray<(INamedTypeSymbol targetType, string driverName, Location? location)> values) data)
 	{
-		const string renderingNamespaceName     = "Sdl3Sharp.Video.Rendering",
-					 iDriversNamespaceName      = $"{renderingNamespaceName}.Drivers",
-					 iDriverTypeName            = "IDriver",
-					 iDriverFullTypeName        = $"{iDriversNamespaceName}.{iDriverTypeName}",
-					 iRendererTypeName          = "IRenderer",
-					 iRendererFullTypeName      = $"{renderingNamespaceName}.{iRendererTypeName}",
-					 sdlRendererTypeName        = "SDL_Renderer",
-					 sdlRendererFullTypeName    = $"{iRendererFullTypeName}+{sdlRendererTypeName}",
-					 rendererTypeName           = "Renderer`1",
-					 rendererFullTypeName       = $"{renderingNamespaceName}.{rendererTypeName}",
-					 iTextureTypeName           = "ITexture",
-					 iTextureFullTypeName       = $"{renderingNamespaceName}.{iTextureTypeName}",
-					 sdlTextureTypeName         = "SDL_Texture",
-					 sdlTextureFullTypeName     = $"{iTextureFullTypeName}+{sdlTextureTypeName}",
-					 textureTypeName            = "Texture`1",
-					 textureFullTypeName        = $"{renderingNamespaceName}.{textureTypeName}",
-					 sdlUnsupportedDriverDiagId = "SDL3001";
+		const string renderingNamespaceName        = "Sdl3Sharp.Video.Rendering",
+					 iRenderingDriverNamespaceName = $"{renderingNamespaceName}.Drivers",
+					 iRenderingDriverTypeName      = "IRenderingDriver",
+					 iRenderingDriverFullTypeName  = $"{iRenderingDriverNamespaceName}.{iRenderingDriverTypeName}",
+					 iRendererTypeName             = "IRenderer",
+					 iRendererFullTypeName         = $"{renderingNamespaceName}.{iRendererTypeName}",
+					 sdlRendererTypeName           = "SDL_Renderer",
+					 sdlRendererFullTypeName       = $"{iRendererFullTypeName}+{sdlRendererTypeName}",
+					 rendererTypeName              = "Renderer`1",
+					 rendererFullTypeName          = $"{renderingNamespaceName}.{rendererTypeName}",
+					 iTextureTypeName              = "ITexture",
+					 iTextureFullTypeName          = $"{renderingNamespaceName}.{iTextureTypeName}",
+					 sdlTextureTypeName            = "SDL_Texture",
+					 sdlTextureFullTypeName        = $"{iTextureFullTypeName}+{sdlTextureTypeName}",
+					 textureTypeName               = "Texture`1",
+					 textureFullTypeName           = $"{renderingNamespaceName}.{textureTypeName}",
+					 sdlUnsupportedDriverDiagId    = "SDL3001";
 
 		var (compilation, values) = data;
 
-		var iDriverType = compilation.GetTypeByMetadataName(iDriverFullTypeName);
-		if (iDriverType is null)
+		var iRenderingDriverType = compilation.GetTypeByMetadataName(iRenderingDriverFullTypeName);
+		if (iRenderingDriverType is null)
 		{
 			foreach (var (_, _, location) in values)
 			{
 				spc.ReportDiagnostic(Diagnostic.Create(
 					mMissingRequiredTypeDescriptor,
 					location,
-					iDriverFullTypeName
+					iRenderingDriverFullTypeName
 				));
 			}
 			return;
@@ -332,12 +332,12 @@ partial class SourceGenerator
 
 		foreach (var (targetType, driverName, location) in values)
 		{
-			if (!targetType.AllInterfaces.Contains(iDriverType, SymbolEqualityComparer.Default))
+			if (!targetType.AllInterfaces.Contains(iRenderingDriverType, SymbolEqualityComparer.Default))
 			{
 				spc.ReportDiagnostic(Diagnostic.Create(
 					mMissingRequiredInterfaceImplementation,
 					location,
-					targetType.ToDisplayString(mDiagnosticTypeSymbolDisplayFormat), iDriverType.ToDisplayString(mDiagnosticTypeSymbolDisplayFormat)
+					targetType.ToDisplayString(mDiagnosticTypeSymbolDisplayFormat), iRenderingDriverType.ToDisplayString(mDiagnosticTypeSymbolDisplayFormat)
 				));
 				break;
 			}

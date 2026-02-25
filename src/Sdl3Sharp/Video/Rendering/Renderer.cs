@@ -56,10 +56,10 @@ namespace Sdl3Sharp.Video.Rendering;
 /// </para>
 /// </remarks>
 public sealed partial class Renderer<TDriver> : IRenderer
-	where TDriver : notnull, IDriver // we don't need to worry about putting type argument independent code in the Renderer<TDriver> class,
-									 // because TDriver surely is always going to be a reference type
-									 // (that's because all of our predefined drivers types are reference types and it's impossible for user code to implement the IDriver interface),
-									 // and the JIT will share code for all reference type instantiations
+	where TDriver : notnull, IRenderingDriver // we don't need to worry about putting type argument independent code in the Renderer<TDriver> class,
+									          // because TDriver surely is always going to be a reference type
+									          // (that's because all of our predefined drivers types are reference types and it's impossible for user code to implement the IRenderingDriver interface),
+									          // and the JIT will share code for all reference type instantiations
 {
 	private unsafe IRenderer.SDL_Renderer* mRenderer;
 

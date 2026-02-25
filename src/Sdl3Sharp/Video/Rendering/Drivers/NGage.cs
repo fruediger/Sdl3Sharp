@@ -18,7 +18,7 @@ namespace Sdl3Sharp.Video.Rendering.Drivers;
 // TODO: add message to the Experimental attribute
 [Experimental("SDL3001")]
 [RegisterDriver(Name)]
-public sealed partial class NGage : IDriver
+public sealed partial class NGage : IRenderingDriver
 {
 	/// <summary>
 	/// The name of the Nokia N-Gage rendering driver
@@ -30,11 +30,11 @@ public sealed partial class NGage : IDriver
 	/// </remarks>
 	public const string Name = "N-Gage";
 
-	[NotNull] static string? IDriver.Name { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => Name; }
+	[NotNull] static string? IRenderingDriver.Name { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => Name; }
 
 	[FormattedConstant($"{Name}\0")] private static partial ReadOnlySpan<byte> NameAscii { get; }
 
-	static ReadOnlySpan<byte> IDriver.NameAscii { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => NameAscii; }
+	static ReadOnlySpan<byte> IRenderingDriver.NameAscii { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => NameAscii; }
 
 	private NGage() { }
 }

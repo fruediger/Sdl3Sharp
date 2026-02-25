@@ -31,8 +31,8 @@ namespace Sdl3Sharp.Video.Rendering;
 /// <see cref="RendererExtensions.TryCreateTexture(Renderer{Direct3D12}, out Texture{Direct3D12}?, ColorSpace?, PixelFormat?, TextureAccess?, int?, int?, Palette?, float?, float?, nint?, nint?, nint?, Properties?)">Direct3D 12</see>,
 /// <see cref="RendererExtensions.TryCreateTexture(Renderer{Drivers.Gpu}, out Texture{Drivers.Gpu}?, ColorSpace?, PixelFormat?, TextureAccess?, int?, int?, Palette?, float?, float?, GpuTexture?, GpuTexture?, GpuTexture?, GpuTexture?, Properties?)">GPU</see>,
 /// <see cref="RendererExtensions.TryCreateTexture(Renderer{Metal}, out Texture{Metal}?, ColorSpace?, PixelFormat?, TextureAccess?, int?, int?, Palette?, float?, float?, nint?, Properties?)">Metal</see>,
-/// <see cref="RendererExtensions.TryCreateTexture(Renderer{OpenGl}, out Texture{OpenGl}?, ColorSpace?, PixelFormat?, TextureAccess?, int?, int?, Palette?, float?, float?, uint?, uint?, uint?, uint?, Properties?)">OpenGL</see>,
-/// <see cref="RendererExtensions.TryCreateTexture(Renderer{OpenGlEs2}, out Texture{OpenGlEs2}?, ColorSpace?, PixelFormat?, TextureAccess?, int?, int?, Palette?, float?, float?, uint?, uint?, uint?, uint?, Properties?)">OpenGL ES 2</see>,
+/// <see cref="RendererExtensions.TryCreateTexture(Renderer{OpenGL}, out Texture{OpenGL}?, ColorSpace?, PixelFormat?, TextureAccess?, int?, int?, Palette?, float?, float?, uint?, uint?, uint?, uint?, Properties?)">OpenGL</see>,
+/// <see cref="RendererExtensions.TryCreateTexture(Renderer{OpenGLEs2}, out Texture{OpenGLEs2}?, ColorSpace?, PixelFormat?, TextureAccess?, int?, int?, Palette?, float?, float?, uint?, uint?, uint?, uint?, Properties?)">OpenGL ES 2</see>,
 /// and <see cref="RendererExtensions.TryCreateTexture(Renderer{Vulkan}, out Texture{Vulkan}?, ColorSpace?, PixelFormat?, TextureAccess?, int?, int?, Palette?, float?, float?, ulong?, uint?, Properties?)">Vulkan</see>.
 /// </para>
 /// <para>
@@ -48,9 +48,9 @@ namespace Sdl3Sharp.Video.Rendering;
 /// </para>
 /// </remarks>
 public sealed partial class Texture<TDriver> : ITexture
-	where TDriver : notnull, IDriver // we don't need to worry about putting type argument independent code in the Renderer<TDriver> class,
+	where TDriver : notnull, IRenderingDriver // we don't need to worry about putting type argument independent code in the Renderer<TDriver> class,
 									 // because TDriver surely is always going to be a reference type
-									 // (that's because all of our predefined drivers types, implementing IDriver, are reference types and it's impossible for user code to implement the IDriver interface),
+									 // (that's because all of our predefined drivers types, implementing IRenderingDriver, are reference types and it's impossible for user code to implement the IRenderingDriver interface),
 									 // and the JIT will share code for all reference type instantiations
 {
 	private unsafe ITexture.SDL_Texture* mTexture;

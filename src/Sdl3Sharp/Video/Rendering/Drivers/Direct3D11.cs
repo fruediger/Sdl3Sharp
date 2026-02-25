@@ -15,7 +15,7 @@ namespace Sdl3Sharp.Video.Rendering.Drivers;
 /// </para>
 /// </remarks>
 [RegisterDriver(Name)]
-public sealed partial class Direct3D11 : IDriver
+public sealed partial class Direct3D11 : IRenderingDriver
 {
 	/// <summary>
 	/// The name of the Direct3D 11 rendering driver
@@ -27,11 +27,11 @@ public sealed partial class Direct3D11 : IDriver
 	/// </remarks>
 	public const string Name = "direct3d11";
 
-	[NotNull] static string? IDriver.Name { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => Name; }
+	[NotNull] static string? IRenderingDriver.Name { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => Name; }
 
 	[FormattedConstant($"{Name}\0")] private static partial ReadOnlySpan<byte> NameAscii { get; }
 
-	static ReadOnlySpan<byte> IDriver.NameAscii { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => NameAscii; }
+	static ReadOnlySpan<byte> IRenderingDriver.NameAscii { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => NameAscii; }
 
 
 	private Direct3D11() { }

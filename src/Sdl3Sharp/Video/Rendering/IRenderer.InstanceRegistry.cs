@@ -89,7 +89,7 @@ partial interface IRenderer
 	}
 
 	internal unsafe static bool TryGetOrCreate<TDriver>(SDL_Renderer* renderer, [NotNullWhen(true)] out Renderer<TDriver>? result)
-		where TDriver : notnull, IDriver
+		where TDriver : notnull, IRenderingDriver
 	{
 		if (renderer is null)
 		{
