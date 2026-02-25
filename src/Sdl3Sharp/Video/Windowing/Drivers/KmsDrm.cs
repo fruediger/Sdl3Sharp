@@ -1,6 +1,7 @@
 ﻿using Sdl3Sharp.SourceGeneration;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Sdl3Sharp.Video.Windowing.Drivers;
 
@@ -24,11 +25,11 @@ public sealed partial class KmsDrm : IWindowingDriver
 	/// </remarks>
 	public const string Name = "kmsdrm";
 
-	[NotNull] static string? IWindowingDriver.Name { get => Name; }
+	[NotNull] static string? IWindowingDriver.Name { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => Name; }
 
 	[FormattedConstant($"{Name}\0")] private static partial ReadOnlySpan<byte> NameAscii { get; }
 
-	static ReadOnlySpan<byte> IWindowingDriver.NameAscii { get => NameAscii; }
+	static ReadOnlySpan<byte> IWindowingDriver.NameAscii { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => NameAscii; }
 
 	private KmsDrm() { }
 }
