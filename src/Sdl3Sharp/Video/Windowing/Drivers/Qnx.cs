@@ -13,9 +13,6 @@ namespace Sdl3Sharp.Video.Windowing.Drivers;
 /// This windowing backend is experimental and is <em>not supported</em>.
 /// </para>
 /// </remarks>
-// TODO: make SDL3002 the diagnostic id for "unsupported windowing driver"
-// TODO: add message to the Experimental attribute
-[Experimental("SDL3002")]
 public sealed partial class Qnx : IWindowingDriver
 {
 	/// <summary>

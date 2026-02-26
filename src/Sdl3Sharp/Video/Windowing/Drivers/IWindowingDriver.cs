@@ -4,6 +4,104 @@ using System.Runtime.InteropServices.Marshalling;
 
 namespace Sdl3Sharp.Video.Windowing.Drivers;
 
+/// <summary>
+/// Represents a windowing driver used to specify the windowing backend in <see cref="Window{TDriver}"/> and <see cref="Display{TDriver}"/>
+/// </summary>
+/// <remarks>
+/// <para>
+/// There are some pre-defined windowing drivers that SDL comes with.
+/// Not all of them are necessarily available in every environment.
+/// You can check the <see cref="AvailableDriverNames"/> property to see which windowing drivers are available in the current environment.
+/// The windowing drivers that SDL comes with are:
+/// <list type="bullet">
+///		<item>
+///			<term><see cref="Cocoa"/></term>
+///			<description>Cocoa backend (only available on Apple platforms)</description>
+///		</item>
+///		<item>
+///			<term><see cref="X11"/></term>
+///			<description>X11 backend (only available on platforms that support the X11 display server protocol)</description>
+///		</item>
+///		<item>
+///			<term><see cref="Wayland"/></term>
+///			<description>Wayland backend (only available on platforms that support the Wayland display server protocol)</description>
+///		</item>
+///		<item>
+///			<term><see cref="Vivante"/></term>
+///			<description>Vivante EGL backend</description>
+///		</item>
+///		<item>
+///			<term><see cref="Windows"/></term>
+///			<description>Windows backend (only available on Windows platforms)</description>
+///		</item>
+///		<item>
+///			<term><see cref="Haiku"/></term>
+///			<description>Haiku backend (only available on Haiku OS platforms)</description>
+///		</item>
+///		<item>
+///			<term><see cref="UIKit"/></term>
+///			<description>UIKit backend (only available on Apple platforms)</description>
+///		</item>
+///		<item>
+///			<term><see cref="Android"/></term>
+///			<description>Android backend (only available on Android platforms)</description>
+///		</item>
+///		<item>
+///			<term><see cref="PlayStation2"/></term>
+///			<description>Sony PlayStation 2 backend</description>
+///		</item>
+///		<item>
+///			<term><see cref="PlayStationPortable"/></term>
+///			<description>Sony PlayStation Portable backend</description>
+///		</item>
+///		<item>
+///			<term><see cref="PlayStationVita"/></term>
+///			<description>Sony PlayStation Vita backend</description>
+///		</item>
+///		<item>
+///			<term><see cref="N3DS"/></term>
+///			<description>Nintendo 3DS backend</description>
+///		</item>
+///		<item>
+///			<term><see cref="NGage"/></term>
+///			<description>Nokia N-Gage backend</description>
+///		</item>
+///		<item>
+///			<term><see cref="KmsDrm"/></term>
+///			<description>Linux KMS/DRM backend (only available on Linux platforms with <see href="https://www.kernel.org/doc/html/latest/gpu/introduction.html">Kernel Mode Setting (KMS) and Direct Rendering Manager (DRM)</see> support)</description>
+///		</item>
+///		<item>
+///			<term><see cref="RiscOS"/></term>
+///			<description>RISC OS backend (only available on RISC OS platforms)</description>
+///		</item>
+///		<item>
+///			<term><see cref="RaspberryPi"/></term>
+///			<description>Raspberry Pi backend (only available on Raspberry Pi platforms)</description>
+///		</item>
+///		<item>
+///			<term><see cref="Emscripten"/></term>
+///			<description>Emscripten backend (only available on platforms that support Emscripten)</description>
+///		</item>
+///		<item>
+///			<term><see cref="Qnx"/></term>
+///			<description>QNX backend (only available on QNX platforms)</description>
+///		</item>
+///		<item>
+///			<term><see cref="Offscreen"/></term>
+///			<description>"Offscreen-video" backend</description>
+///		</item>
+///		<item>
+///			<term><see cref="Dummy"/></term>
+///			<description>"Dummy video" (sometimes called "null video") backend</description>
+///		</item>
+///		<item>
+///			<term><see cref="DummyEvdev"/></term>
+///			<description>"Dummy video" (sometimes called "null video") backend with <see href="https://en.wikipedia.org/wiki/Evdev">evdev</see> (only available on platforms that support <see href="https://en.wikipedia.org/wiki/Evdev">evdev</see>)</description>
+///		</item>
+///	</list>
+///	Please note that some of these windowing drivers require platforms that .NET doesn't run on (yet). These drivers are currently unsupported (e.g. <see cref="NGage"/>, etc.).
+///	</para>
+/// </remarks>
 public partial interface IWindowingDriver
 {
 	// See Sdl3Sharp.Video.Rendering.Drivers.IRenderingDriver for more information about why this interface is designed this way and why we don't need something like CRTP here.
@@ -31,7 +129,7 @@ public partial interface IWindowingDriver
 	/// These never have Unicode characters, and are not meant to be proper names.
 	/// </para>
 	/// <para>
-	/// You can use the value of the <see cref="Name"/> properties of individual windowing drivers types (e.g. <see cref="Direct3D11.Name"/>) to check for the availability of a certain windowing driver;
+	/// You can use the value of the <see cref="Name"/> properties of individual windowing drivers types (e.g. <see cref="Windows.Name"/>) to check for the availability of a certain windowing driver;
 	/// alternatively you can check the <see cref="WindowingDriverExtensions.get_IsAvailable{TDriver}"/> property for that.
 	/// </para>
 	/// <para>
