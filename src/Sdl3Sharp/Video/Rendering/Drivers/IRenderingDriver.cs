@@ -17,7 +17,7 @@ namespace Sdl3Sharp.Video.Rendering.Drivers;
 /// </summary>
 /// <remarks>
 /// <para>
-/// There are some pre-defined rendering driver that SDL comes with.
+/// There are some pre-defined rendering drivers that SDL comes with.
 /// Not all of them are necessarily available in every environment.
 /// You can check the <see cref="AvailableDriverNames"/> property to see which rendering drivers are available in the current environment.
 /// The rendering drivers that SDL comes with are:

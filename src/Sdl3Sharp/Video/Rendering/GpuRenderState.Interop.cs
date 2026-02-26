@@ -48,7 +48,7 @@ partial class GpuRenderState
 	/// <param name="slot_index">The fragment uniform slot to push data to</param>
 	/// <param name="data">Client data to write</param>
 	/// <param name="length">The length of the data to write</param>
-	/// <returns>Returns true on success or false on failure; call <see cref="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>() for more information</returns>
+	/// <returns>Returns true on success or false on failure; call <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>() for more information</returns>
 	/// <remarks>
 	/// <para>
 	/// The data is copied and will be pushed using <see href="https://wiki.libsdl.org/SDL3/SDL_PushGPUFragmentUniformData">SDL_PushGPUFragmentUniformData</see>() during draw call execution.
