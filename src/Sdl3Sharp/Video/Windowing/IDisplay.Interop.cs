@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace Sdl3Sharp.Video.Windowing;
 
-partial struct Display
+partial interface IDisplay
 {
 	/// <summary>
 	/// Gets the closest match to the requested display mode

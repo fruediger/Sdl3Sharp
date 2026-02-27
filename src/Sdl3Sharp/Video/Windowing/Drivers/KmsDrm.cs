@@ -1,4 +1,5 @@
 ﻿using Sdl3Sharp.SourceGeneration;
+using Sdl3Sharp.SourceGeneration.RegisterDriver;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -13,6 +14,7 @@ namespace Sdl3Sharp.Video.Windowing.Drivers;
 /// This windowing backend is only available on Linux platforms with <see href="https://www.kernel.org/doc/html/latest/gpu/introduction.html">Kernel Mode Setting (KMS) and Direct Rendering Manager (DRM)</see> support.
 /// </para>
 /// </remarks>
+[RegisterDriver(Name)]
 public sealed partial class KmsDrm : IWindowingDriver
 {
 	/// <summary>

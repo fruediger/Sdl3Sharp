@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace Sdl3Sharp.Video.Windowing;
 
 /// <summary>
-/// Represents a display mode for a specific <see cref="Display"/>
+/// Represents a display mode for a specific <see cref="IDisplay"/>
 /// </summary>
 [StructLayout(LayoutKind.Sequential)]
 public readonly partial struct DisplayMode
@@ -21,12 +21,24 @@ public readonly partial struct DisplayMode
 	private unsafe readonly SDL_DisplayModeData* mInternal;
 
 	/// <summary>
-	/// Gets the <see cref="Display"/> associated with this display mode
+	/// Gets the <see cref="IDisplay"/> associated with this display mode
 	/// </summary>
 	/// <value>
-	/// The <see cref="Display"/> associated with this display mode
+	/// The <see cref="IDisplay"/> associated with this display mode, or <c><see langword="null"/></c> if this display mode is invalid
 	/// </value>
-	public readonly Display Display { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new(mDisplayID); }
+	/// <remarks>
+	/// <para>
+	/// The value of this property will only be <c><see langword="null"/></c> if this display mode is invalid.
+	/// </para>
+	/// </remarks>
+	public readonly IDisplay? Display
+	{
+		get
+		{
+			IDisplay.TryGetOrCreate(mDisplayID, out var result);
+			return result;
+		}
+	}
 
 	/// <summary>
 	/// Gets the pixel format of this display mode

@@ -89,7 +89,7 @@ partial interface ITexture
 			// if that fails, fall back to the generic unknown driver
 			if (!TryCreateFromRegisteredDriver(texture, register: false, out var result))
 			{
-				result = new Texture<GenericUnknownDriverFallback>(texture, register: false);
+				result = new Texture<GenericFallbackRendereringDriver>(texture, register: false);
 			}
 
 			return result;

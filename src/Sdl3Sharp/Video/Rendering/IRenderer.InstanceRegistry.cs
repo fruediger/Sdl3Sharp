@@ -81,7 +81,7 @@ partial interface IRenderer
 
 			if (!TryCreateFromRegisteredDriver(renderer, register: false, out var result))
 			{
-				result = new Renderer<GenericUnknownDriverFallback>(renderer, register: false);
+				result = new Renderer<GenericFallbackRendereringDriver>(renderer, register: false);
 			}
 
 			return result;

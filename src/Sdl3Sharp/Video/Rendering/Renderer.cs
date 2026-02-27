@@ -1,5 +1,4 @@
-﻿using Sdl3Sharp.Events;
-using Sdl3Sharp.Internal;
+﻿using Sdl3Sharp.Internal;
 using Sdl3Sharp.Internal.Interop;
 using Sdl3Sharp.Utilities;
 using Sdl3Sharp.Video.Blending;
@@ -48,7 +47,7 @@ namespace Sdl3Sharp.Video.Rendering;
 /// For the most part <see cref="Renderer{TDriver}"/>s are not thread-safe, and most of their properties and methods should only be accessed from the main thread!
 /// </para>
 /// <para>
-/// <see cref="Renderer{TDriver}"/> are concrete renderer types, associate with a specific rendering driver.
+/// <see cref="Renderer{TDriver}"/>s are concrete renderer types, associate with a specific rendering driver.
 /// They are used for driver-specific rendering operations with <see cref="Texture{TDriver}"/>s that were created by them.
 /// </para>
 /// <para>

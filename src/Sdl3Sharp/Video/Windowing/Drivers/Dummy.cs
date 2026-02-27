@@ -1,4 +1,5 @@
 ﻿using Sdl3Sharp.SourceGeneration;
+using Sdl3Sharp.SourceGeneration.RegisterDriver;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -8,6 +9,7 @@ namespace Sdl3Sharp.Video.Windowing.Drivers;
 /// <summary>
 /// Represents the SDL "dummy video" (sometimes called "null video") windowing driver
 /// </summary>
+[RegisterDriver(Name)]
 public sealed partial class Dummy : IWindowingDriver
 {
 	/// <summary>

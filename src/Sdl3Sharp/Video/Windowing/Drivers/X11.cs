@@ -1,4 +1,5 @@
 ﻿using Sdl3Sharp.SourceGeneration;
+using Sdl3Sharp.SourceGeneration.RegisterDriver;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -13,6 +14,7 @@ namespace Sdl3Sharp.Video.Windowing.Drivers;
 /// This windowing backend is only available on platforms that support the X11 display server protocol.
 /// </para>
 /// </remarks>
+[RegisterDriver(Name)]
 public sealed partial class X11 : IWindowingDriver
 {
 	/// <summary>

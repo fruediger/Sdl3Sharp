@@ -29,7 +29,7 @@ namespace Sdl3Sharp.Video.Rendering;
 /// However, the <see cref="ITexture"/> interface exists as an abstraction to use them in common rendering operations with the <see cref="IRenderer"/> instance that created them.
 /// </para>
 /// <para>
-/// To specify an concrete texture type, use <see cref="Texture{TDriver}"/> with a rendering driver that implements the <see cref="IRenderingDriver"/> interface (e.g. <see cref="Texture{TDriver}">Texture&lt;<see cref="OpenGL">OpenGL</see>&gt;</see>).
+/// To specify a concrete texture type, use <see cref="Texture{TDriver}"/> with a rendering driver that implements the <see cref="IRenderingDriver"/> interface (e.g. <see cref="Texture{TDriver}">Texture&lt;<see cref="OpenGL">OpenGL</see>&gt;</see>).
 /// </para>
 /// </remarks>
 public partial interface ITexture : IDisposable

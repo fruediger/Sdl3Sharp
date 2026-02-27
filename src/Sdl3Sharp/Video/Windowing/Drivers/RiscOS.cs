@@ -1,4 +1,5 @@
 ﻿using Sdl3Sharp.SourceGeneration;
+using Sdl3Sharp.SourceGeneration.RegisterDriver;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -13,6 +14,7 @@ namespace Sdl3Sharp.Video.Windowing.Drivers;
 /// This windowing backend is only available on <see href="https://en.wikipedia.org/wiki/RISC_OS">RISC OS</see> platforms.
 /// </para>
 /// </remarks>
+[RegisterDriver(Name)]
 public sealed partial class RiscOS : IWindowingDriver
 {
 	/// <summary>

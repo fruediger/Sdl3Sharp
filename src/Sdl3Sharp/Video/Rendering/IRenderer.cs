@@ -36,7 +36,7 @@ namespace Sdl3Sharp.Video.Rendering;
 /// However, the <see cref="IRenderer"/> interface exists as an abstraction to use common rendering operations.
 /// </para>
 /// <para>
-/// To specify an concrete renderer type, use <see cref="Renderer{TDriver}"/> with a rendering driver that implements the <see cref="IRenderingDriver"/> interface (e.g. <see cref="Renderer{TDriver}">Renderer&lt;<see cref="OpenGL">OpenGL</see>&gt;</see>).
+/// To specify a concrete renderer type, use <see cref="Renderer{TDriver}"/> with a rendering driver that implements the <see cref="IRenderingDriver"/> interface (e.g. <see cref="Renderer{TDriver}">Renderer&lt;<see cref="OpenGL">OpenGL</see>&gt;</see>).
 /// </para>
 /// </remarks>
 public partial interface IRenderer : IDisposable

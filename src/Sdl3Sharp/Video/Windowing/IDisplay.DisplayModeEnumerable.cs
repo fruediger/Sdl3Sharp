@@ -1,12 +1,11 @@
-﻿using Sdl3Sharp.Utilities;
-using System;
+﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Sdl3Sharp.Video.Windowing;
 
-partial struct Display
+partial interface IDisplay
 {
 	/// <summary>
 	/// Provides an <see cref="Enumerator"/> for the display modes of a specific display

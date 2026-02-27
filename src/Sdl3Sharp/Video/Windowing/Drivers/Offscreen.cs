@@ -1,4 +1,5 @@
 ﻿using Sdl3Sharp.SourceGeneration;
+using Sdl3Sharp.SourceGeneration.RegisterDriver;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -14,6 +15,7 @@ namespace Sdl3Sharp.Video.Windowing.Drivers;
 /// It is primarily intended for testing purposes, and may not support all features of a normal windowing driver.
 /// </para>
 /// </remarks>
+[RegisterDriver(Name)]
 public sealed partial class Offscreen : IWindowingDriver
 {
 	/// <summary>
