@@ -12,6 +12,10 @@ namespace Sdl3Sharp.Video.Windowing;
 /// </summary>
 /// <remarks>
 /// <para>
+/// The <see cref="Id"/> of a display is unique, remains unchanged while the display is connected to the system, and is never reused for the lifetime of the application.
+/// If a display is disconnected and then reconnected, it will get assigned a new <see cref="Id"/>.
+/// </para>
+/// <para>
 /// For the most part <see cref="IDisplay"/>s are not thread-safe, and most of their properties and methods should only be accessed from the main thread!
 /// </para>
 /// <para>
