@@ -5,7 +5,7 @@ partial class MemoryStream
 	/// <summary>
 	/// Provides property names for <see cref="MemoryStream"/> <see cref="Stream.Properties">properties</see>
 	/// </summary>
-	public static class PropertyNames
+	public new sealed class PropertyNames : Stream.PropertyNames
 	{
 		/// <summary>
 		/// The name of a <see cref="Stream.Properties">property</see> that holds the pointer to the memory buffer that the <see cref="MemoryStream"/> was initialized with
@@ -30,5 +30,7 @@ partial class MemoryStream
 		/// </remarks>
 		/// <seealso cref="FreeFunc"/>
 		public const string FreeFuncPointer = "FREE_FUNC_POINTER";
+
+		private PropertyNames() { }
 	}
 }

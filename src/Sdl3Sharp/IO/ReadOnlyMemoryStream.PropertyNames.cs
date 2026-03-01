@@ -5,7 +5,7 @@ partial class ReadOnlyMemoryStream
 	/// <summary>
 	/// Provides property names for <see cref="ReadOnlyMemoryStream"/> <see cref="Stream.Properties">properties</see>
 	/// </summary>
-	public static class PropertyNames
+	public new sealed class PropertyNames : Stream.PropertyNames
 	{
 		/// <summary>
 		/// The name of a <see cref="Stream.Properties">property</see> that holds the pointer to the memory buffer that the <see cref="ReadOnlyMemoryStream"/> was initialized with
@@ -30,5 +30,7 @@ partial class ReadOnlyMemoryStream
 		/// </remarks>
 		/// <seealso cref="FreeFunc"/>
 		public const string FreeFuncPointer = MemoryStream.PropertyNames.FreeFuncPointer;
+
+		private PropertyNames() { }
 	}
 }

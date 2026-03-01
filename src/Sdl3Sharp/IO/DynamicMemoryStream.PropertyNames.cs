@@ -5,7 +5,7 @@ partial class DynamicMemoryStream
 	/// <summary>
 	/// Provides property names for <see cref="DynamicMemoryStream"/> <see cref="Stream.Properties">properties</see>
 	/// </summary>
-	public static class PropertyNames
+	public new sealed class PropertyNames : Stream.PropertyNames
 	{
 		/// <summary>
 		/// The name of a <see cref="Properties">property</see> that holds the pointer to the internal memory of the stream
@@ -32,5 +32,7 @@ partial class DynamicMemoryStream
 		/// </remarks>
 		/// <seealso cref="ChunkSize"/>
 		public const string ChunkSizeNumber = "SDL_PROP_IOSTREAM_DYNAMIC_CHUNKSIZE_NUMBER";
+
+		private PropertyNames() { }
 	}
 }

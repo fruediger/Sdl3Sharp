@@ -5,7 +5,7 @@ partial class FileStream
 	/// <summary>
 	/// Provides property names for <see cref="FileStream"/> <see cref="Stream.Properties">properties</see>
 	/// </summary>
-	public static class PropertyNames
+	public new sealed class PropertyNames : Stream.PropertyNames
 	{
 		/// <summary>
 		/// The name of a <see cref="Properties">property</see> that holds the pointer to the Android NDK <c>AAsset</c> that the <see cref="FileStream"/> is using to access the filesystem
@@ -64,5 +64,7 @@ partial class FileStream
 		/// </remarks>
 		/// <seealso cref="WindowsHandle"/>
 		public const string WindowsHandlePointer = "SDL_PROP_IOSTREAM_WINDOWS_HANDLE_POINTER";
+
+		private PropertyNames() { }
 	}
 }
