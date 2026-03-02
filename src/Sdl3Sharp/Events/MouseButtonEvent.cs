@@ -246,7 +246,7 @@ public struct MouseButtonEvent : ICommonEvent<MouseButtonEvent>, IFormattable, I
 			&& SpanFormat.TryWrite(" }", ref destination, ref charsWritten);
 	}
 
-	/// <<inheritdoc/>
+	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	public static implicit operator Event(in MouseButtonEvent @event) => new(in @event);
 

@@ -159,7 +159,7 @@ public sealed partial class DynamicMemoryStream : Stream
 	/// If this method returns <c><see langword="true"/></c>, the stream is disposed and no longer usable. The stream does not get disposed, if this method returns <c><see langword="false"/></c>.
 	/// </para>
 	/// <para>
-	/// The resulting <see cref="NativeMemoryManager"/> should be <see cref="NativeMemoryManager.Dispose()">disposed</see> when the memory it's managing is no longer needed. That also frees the allocated memory.
+	/// The resulting <see cref="NativeMemoryManager"/> should be <see cref="NativeMemoryManagerBase.Dispose()">disposed</see> when the memory it's managing is no longer needed. That also frees the allocated memory.
 	/// </para>
 	/// </remarks>
 	public bool TryGetMemoryManagerAndDispose([NotNullWhen(true)] out NativeMemoryManager? memoryManager)
