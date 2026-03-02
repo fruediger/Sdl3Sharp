@@ -187,18 +187,18 @@ partial class SourceGenerator
 					 iRenderingDriverNamespaceName = $"{renderingNamespaceName}.Drivers",
 					 iRenderingDriverTypeName      = "IRenderingDriver",
 					 iRenderingDriverFullTypeName  = $"{iRenderingDriverNamespaceName}.{iRenderingDriverTypeName}",
-					 iRendererTypeName             = "IRenderer",
-					 iRendererFullTypeName         = $"{renderingNamespaceName}.{iRendererTypeName}",
-					 sdlRendererTypeName           = "SDL_Renderer",
-					 sdlRendererFullTypeName       = $"{iRendererFullTypeName}+{sdlRendererTypeName}",
-					 rendererTypeName              = "Renderer`1",
+					 rendererTypeName              = "Renderer",
 					 rendererFullTypeName          = $"{renderingNamespaceName}.{rendererTypeName}",
-					 iTextureTypeName              = "ITexture",
-					 iTextureFullTypeName          = $"{renderingNamespaceName}.{iTextureTypeName}",
-					 sdlTextureTypeName            = "SDL_Texture",
-					 sdlTextureFullTypeName        = $"{iTextureFullTypeName}+{sdlTextureTypeName}",
-					 textureTypeName               = "Texture`1",
+					 sdlRendererTypeName           = "SDL_Renderer",
+					 sdlRendererFullTypeName       = $"{rendererFullTypeName}+{sdlRendererTypeName}",
+					 rendererTDriverTypeName       = "Renderer`1",
+					 rendererTDriverFullTypeName   = $"{renderingNamespaceName}.{rendererTDriverTypeName}",
+					 textureTypeName               = "Texture",
 					 textureFullTypeName           = $"{renderingNamespaceName}.{textureTypeName}",
+					 sdlTextureTypeName            = "SDL_Texture",
+					 sdlTextureFullTypeName        = $"{textureFullTypeName}+{sdlTextureTypeName}",
+					 textureTDriverTypeName        = "Texture`1",
+					 textureTDriverFullTypeName    = $"{renderingNamespaceName}.{textureTDriverTypeName}",
 					 sdlUnsupportedDriverDiagId    = "SDL3001",
 					 windowingNamespaceName        = "Sdl3Sharp.Video.Windowing",
 					 iWindowingDriverNamespaceName = $"{windowingNamespaceName}.Drivers",
@@ -225,15 +225,15 @@ partial class SourceGenerator
 			return;
 		}
 
-		var iRendererType = compilation.GetTypeByMetadataName(iRendererFullTypeName);
-		if (iRendererType is null)
+		var rendererType = compilation.GetTypeByMetadataName(rendererFullTypeName);
+		if (rendererType is null)
 		{
 			foreach (var (_, _, location) in values)
 			{
 				spc.ReportDiagnostic(Diagnostic.Create(
 					mMissingRequiredTypeDescriptor,
 					location,
-					iRendererFullTypeName
+					rendererFullTypeName
 				));
 			}
 			return;
@@ -255,21 +255,21 @@ partial class SourceGenerator
 
 		var sdlRendererPointerType = compilation.CreatePointerTypeSymbol(sdlRendererType);
 
-		var rendererType = compilation.GetTypeByMetadataName(rendererFullTypeName);
-		if (rendererType is null)
+		var rendererTDriverType = compilation.GetTypeByMetadataName(rendererTDriverFullTypeName);
+		if (rendererTDriverType is null)
 		{
 			foreach (var (_, _, location) in values)
 			{
 				spc.ReportDiagnostic(Diagnostic.Create(
 					mMissingRequiredTypeDescriptor,
 					location,
-					rendererFullTypeName
+					rendererTDriverFullTypeName
 				));
 			}
 			return;
 		}
 
-		if (!rendererType.InstanceConstructors.Any(ctor
+		if (!rendererTDriverType.InstanceConstructors.Any(ctor
 			=> ctor is { Parameters: [{ Type: var rendererType }, { Type.SpecialType: SpecialType.System_Boolean }] }
 			&& SymbolEqualityComparer.Default.Equals(rendererType, sdlRendererPointerType)
 		))
@@ -279,21 +279,21 @@ partial class SourceGenerator
 				spc.ReportDiagnostic(Diagnostic.Create(
 					mMissingRequiredConstructorDescriptor,
 					location,
-					rendererType.ToDisplayString(mDiagnosticTypeSymbolDisplayFormat), $"{sdlRendererPointerType.ToDisplayString(mDiagnosticTypeSymbolDisplayFormat)}, {compilation.GetSpecialType(SpecialType.System_Boolean).ToDisplayString(mDiagnosticTypeSymbolDisplayFormat)}"
+					rendererTDriverType.ToDisplayString(mDiagnosticTypeSymbolDisplayFormat), $"{sdlRendererPointerType.ToDisplayString(mDiagnosticTypeSymbolDisplayFormat)}, {compilation.GetSpecialType(SpecialType.System_Boolean).ToDisplayString(mDiagnosticTypeSymbolDisplayFormat)}"
 				));
 			}
 			return;
 		}
 
-		var iTextureType = compilation.GetTypeByMetadataName(iTextureFullTypeName);
-		if (iTextureType is null)
+		var textureType = compilation.GetTypeByMetadataName(textureFullTypeName);
+		if (textureType is null)
 		{
 			foreach (var (_, _, location) in values)
 			{
 				spc.ReportDiagnostic(Diagnostic.Create(
 					mMissingRequiredTypeDescriptor,
 					location,
-					iTextureFullTypeName
+					textureFullTypeName
 				));
 			}
 			return;
@@ -315,21 +315,21 @@ partial class SourceGenerator
 
 		var sdlTexturePointerType = compilation.CreatePointerTypeSymbol(sdlTextureType);
 
-		var textureType = compilation.GetTypeByMetadataName(textureFullTypeName);
-		if (textureType is null)
+		var textureTDriverType = compilation.GetTypeByMetadataName(textureTDriverFullTypeName);
+		if (textureTDriverType is null)
 		{
 			foreach (var (_, _, location) in values)
 			{
 				spc.ReportDiagnostic(Diagnostic.Create(
 					mMissingRequiredTypeDescriptor,
 					location,
-					textureFullTypeName
+					textureTDriverFullTypeName
 				));
 			}
 			return;
 		}
 
-		if (!textureType.InstanceConstructors.Any(ctor
+		if (!textureTDriverType.InstanceConstructors.Any(ctor
 			=> ctor is { Parameters: [{ Type: var textureType }, { Type.SpecialType: SpecialType.System_Boolean }] }
 			&& SymbolEqualityComparer.Default.Equals(textureType, sdlTexturePointerType)
 		))
@@ -339,7 +339,7 @@ partial class SourceGenerator
 				spc.ReportDiagnostic(Diagnostic.Create(
 					mMissingRequiredConstructorDescriptor,
 					location,
-					textureType.ToDisplayString(mDiagnosticTypeSymbolDisplayFormat), $"{sdlTexturePointerType.ToDisplayString(mDiagnosticTypeSymbolDisplayFormat)}, {compilation.GetSpecialType(SpecialType.System_Boolean).ToDisplayString(mDiagnosticTypeSymbolDisplayFormat)}"
+					textureTDriverType.ToDisplayString(mDiagnosticTypeSymbolDisplayFormat), $"{sdlTexturePointerType.ToDisplayString(mDiagnosticTypeSymbolDisplayFormat)}, {compilation.GetSpecialType(SpecialType.System_Boolean).ToDisplayString(mDiagnosticTypeSymbolDisplayFormat)}"
 				));
 			}
 			return;
@@ -444,10 +444,10 @@ partial class SourceGenerator
 			
 			namespace {{renderingNamespaceName}};
 			
-			partial interface {{iRendererTypeName}}
+			partial class {{rendererTypeName}}
 			{
 				[global::System.CodeDom.Compiler.GeneratedCode("{{mTool.Name}}", "{{mTool.Version}}")]
-				internal unsafe static bool TryCreateFromRegisteredDriver({{sdlRendererType.ToDisplayString(mDefaultTypeSymbolDisplayFormat)}}* renderer, bool register, [global::System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out {{iRendererTypeName}}? result)
+				internal unsafe static bool TryCreateFromRegisteredDriver({{sdlRendererType.ToDisplayString(mDefaultTypeSymbolDisplayFormat)}}* renderer, bool register, [global::System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out {{rendererTypeName}}? result)
 				{
 			""");
 
@@ -465,7 +465,7 @@ partial class SourceGenerator
 			renderingDrivers.Print(builder, "name", (builder, targetType, indentation) =>
 				builder.Append($$"""
 
-					{{indentation}}result = new {{rendererType.Construct(targetType).ToDisplayString(mDefaultTypeSymbolDisplayFormat)}}(renderer, register);
+					{{indentation}}result = new {{rendererTDriverType.Construct(targetType).ToDisplayString(mDefaultTypeSymbolDisplayFormat)}}(renderer, register);
 					{{indentation}}return true;
 
 					"""),
@@ -490,7 +490,7 @@ partial class SourceGenerator
 			#nullable restore
 			""");
 
-		spc.AddSource($"{iRendererFullTypeName}_TryCreateFromRegisteredDriver.g.cs", SourceText.From(
+		spc.AddSource($"{rendererFullTypeName}_TryCreateFromRegisteredDriver.g.cs", SourceText.From(
 			text: builder.ToString(),
 			encoding: Encoding.UTF8
 		));
@@ -502,10 +502,10 @@ partial class SourceGenerator
 			
 			namespace {{renderingNamespaceName}};
 			
-			partial interface {{iTextureTypeName}}
+			partial class {{textureTypeName}}
 			{
 				[global::System.CodeDom.Compiler.GeneratedCode("{{mTool.Name}}", "{{mTool.Version}}")]
-				internal unsafe static bool TryCreateFromRegisteredDriver({{sdlTextureType.ToDisplayString(mDefaultTypeSymbolDisplayFormat)}}* texture, bool register, [global::System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out {{iTextureTypeName}}? result)
+				internal unsafe static bool TryCreateFromRegisteredDriver({{sdlTextureType.ToDisplayString(mDefaultTypeSymbolDisplayFormat)}}* texture, bool register, [global::System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out {{textureTypeName}}? result)
 				{
 			""");
 
@@ -517,7 +517,7 @@ partial class SourceGenerator
 
 						if (renderer is not null)
 						{				
-							var name = {{iRendererTypeName}}.SDL_GetRendererName(renderer);
+							var name = {{rendererTypeName}}.SDL_GetRendererName(renderer);
 
 							if (name is not null)
 							{
@@ -527,7 +527,7 @@ partial class SourceGenerator
 			renderingDrivers.Print(builder, "name", (builder, targetType, indentation) =>
 				builder.Append($$"""
 
-					{{indentation}}result = new {{textureType.Construct(targetType).ToDisplayString(mDefaultTypeSymbolDisplayFormat)}}(texture, register);
+					{{indentation}}result = new {{textureTDriverType.Construct(targetType).ToDisplayString(mDefaultTypeSymbolDisplayFormat)}}(texture, register);
 					{{indentation}}return true;
 
 					"""),
@@ -553,7 +553,7 @@ partial class SourceGenerator
 			#nullable restore
 			""");
 
-		spc.AddSource($"{iTextureFullTypeName}_TryCreateFromRegisteredDriver.g.cs", SourceText.From(
+		spc.AddSource($"{textureFullTypeName}_TryCreateFromRegisteredDriver.g.cs", SourceText.From(
 				text: builder.ToString(),
 				encoding: Encoding.UTF8
 			));
