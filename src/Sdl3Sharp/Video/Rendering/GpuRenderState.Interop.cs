@@ -26,7 +26,7 @@ partial class GpuRenderState
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_CreateGPURenderState">SDL_CreateGPURenderState</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial SDL_GPURenderState* SDL_CreateGPURenderState(IRenderer.SDL_Renderer* renderer, GpuRenderStateCreateInfo.SDL_GPURenderStateCreateInfo* createInfo);
+	internal unsafe static partial SDL_GPURenderState* SDL_CreateGPURenderState(Renderer.SDL_Renderer* renderer, GpuRenderStateCreateInfo.SDL_GPURenderStateCreateInfo* createInfo);
 
 	/// <summary>
 	/// Destroy custom GPU render state

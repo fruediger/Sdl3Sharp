@@ -3,7 +3,6 @@
 using Sdl3Sharp.Video.Coloring;
 using Sdl3Sharp.Video.Gpu;
 using Sdl3Sharp.Video.Rendering;
-using Sdl3Sharp.Video.Rendering.Drivers;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -32,7 +31,7 @@ partial class Window
 	{
 		unsafe
 		{
-			var rendererPtr = IRenderer.SDL_CreateGPURenderer(gpuDevice is not null ? gpuDevice.Pointer : null, WindowPtr);
+			var rendererPtr = Renderer.SDL_CreateGPURenderer(gpuDevice is not null ? gpuDevice.Pointer : null, WindowPtr);
 
 			if (rendererPtr is null)
 			{

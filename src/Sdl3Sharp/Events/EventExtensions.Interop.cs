@@ -42,7 +42,7 @@ partial class EventExtensions
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_ConvertEventToRenderCoordinates">SDL_ConvertEventToRenderCoordinates</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_ConvertEventToRenderCoordinates(IRenderer.SDL_Renderer* renderer, Event* @event);
+	internal unsafe static partial CBool SDL_ConvertEventToRenderCoordinates(Renderer.SDL_Renderer* renderer, Event* @event);
 
 	/* TODO: implement when Window is implemented
 	 * 

@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 
 namespace Sdl3Sharp.Video.Rendering;
 
-partial interface ITexture
+partial class Texture
 {
 	[StructLayout(LayoutKind.Sequential)]
 	internal struct SDL_Texture
@@ -40,7 +40,7 @@ partial interface ITexture
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_CreateTexture">SDL_CreateTexture</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial SDL_Texture* SDL_CreateTexture(IRenderer.SDL_Renderer* renderer, PixelFormat format, TextureAccess access, int w, int h);
+	internal unsafe static partial SDL_Texture* SDL_CreateTexture(Renderer.SDL_Renderer* renderer, PixelFormat format, TextureAccess access, int w, int h);
 
 	/// <summary>
 	/// Create a texture from an existing surface
@@ -64,7 +64,7 @@ partial interface ITexture
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_CreateTextureFromSurface">SDL_CreateTextureFromSurface</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial SDL_Texture* SDL_CreateTextureFromSurface(IRenderer.SDL_Renderer* renderer, Surface.SDL_Surface* surface);
+	internal unsafe static partial SDL_Texture* SDL_CreateTextureFromSurface(Renderer.SDL_Renderer* renderer, Surface.SDL_Surface* surface);
 
 	/// <summary>
 	/// Create a texture for a rendering context with the specified properties
@@ -230,7 +230,7 @@ partial interface ITexture
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_CreateTextureWithProperties">SDL_CreateTextureWithProperties</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial SDL_Texture* SDL_CreateTextureWithProperties(IRenderer.SDL_Renderer* renderer, uint props);
+	internal unsafe static partial SDL_Texture* SDL_CreateTextureWithProperties(Renderer.SDL_Renderer* renderer, uint props);
 
 	/// <summary>
 	/// Destroy the specified texture
@@ -255,7 +255,7 @@ partial interface ITexture
 	/// <returns>Returns a pointer to the <see href="https://wiki.libsdl.org/SDL3/SDL_Renderer">SDL_Renderer</see> that created the texture, or NULL on failure; call <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>() for more information</returns>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetRendererFromTexture">SDL_GetRendererFromTexture</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial IRenderer.SDL_Renderer* SDL_GetRendererFromTexture(SDL_Texture* texture);
+	internal unsafe static partial Renderer.SDL_Renderer* SDL_GetRendererFromTexture(SDL_Texture* texture);
 
 	/// <summary>
 	/// Get the additional alpha value multiplied into render copy operations

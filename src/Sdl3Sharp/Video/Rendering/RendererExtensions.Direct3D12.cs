@@ -11,19 +11,19 @@ partial class RendererExtensions
 	extension(Renderer<Direct3D12>.PropertyNames)
 	{
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="IRenderer.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Renderer.Properties">property</see> that holds
 		/// a pointer to the <c><see href="https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nn-d3d12-id3d12device">ID3D12Device</see></c> associated with the renderer
 		/// </summary>
 		public static string Direct3D12DevicePointer => "SDL.renderer.d3d12.device";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="IRenderer.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Renderer.Properties">property</see> that holds
 		/// a pointer to the <c><see href="https://learn.microsoft.com/en-us/windows/win32/api/dxgi1_5/nn-dxgi1_5-idxgiswapchain4">IDXGISwapChain4</see></c> associated with the renderer
 		/// </summary>
 		public static string Direct3D12SwapChainPointer => "SDL.renderer.d3d12.swap_chain";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="IRenderer.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Renderer.Properties">property</see> that holds
 		/// a pointer to the <c><see href="https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nn-d3d12-id3d12commandqueue">ID3D12CommandQueue</see></c> associated with the renderer
 		/// </summary>
 		public static string Direct3D12CommandQueuePointer => "SDL.renderer.d3d12.command_queue";

@@ -33,25 +33,25 @@ partial class TextureExtensions
 		public static string CreateGpuTextureVPointer => "SDL.texture.create.gpu.texture_v";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="ITexture.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Texture.Properties">property</see> that holds
 		/// a pointer to the native <c><see href="https://wiki.libsdl.org/SDL3/SDL_GPUTexture">SDL_GPUTexture</see></c> associated with the texture
 		/// </summary>
 		public static string GpuTexturePointer => "SDL.texture.gpu.texture";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="ITexture.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Texture.Properties">property</see> that holds
 		/// a pointer to the native <c><see href="https://wiki.libsdl.org/SDL3/SDL_GPUTexture">SDL_GPUTexture</see></c> associated with the UV plane of the NV12 texture
 		/// </summary>
 		public static string GpuTextureUvPointer => "SDL.texture.gpu.texture_uv";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="ITexture.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Texture.Properties">property</see> that holds
 		/// a pointer to the native <c><see href="https://wiki.libsdl.org/SDL3/SDL_GPUTexture">SDL_GPUTexture</see></c> associated with the U plane of the YUV texture
 		/// </summary>
 		public static string GpuTextureUPointer => "SDL.texture.gpu.texture_u";
 		
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="ITexture.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Texture.Properties">property</see> that holds
 		/// a pointer to the native <c><see href="https://wiki.libsdl.org/SDL3/SDL_GPUTexture">SDL_GPUTexture</see></c> associated with the V plane of the YUV texture
 		/// </summary>
 		public static string GpuTextureVPointer => "SDL.texture.gpu.texture_v";

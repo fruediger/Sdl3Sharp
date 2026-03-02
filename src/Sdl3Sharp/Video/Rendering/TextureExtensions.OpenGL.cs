@@ -31,31 +31,31 @@ partial class TextureExtensions
 		public static string CreateOpenGLTextureVNumber => "SDL.texture.opengl.create.texture_v";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="ITexture.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Texture.Properties">property</see> that holds
 		/// the <c>GLuint</c> texture associated with the texture
 		/// </summary>
 		public static string OpenGLTextureNumber => "SDL.texture.opengl.texture";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="ITexture.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Texture.Properties">property</see> that holds
 		/// the <c>GLuint</c> texture associated with the UV plane of the NV12 texture
 		/// </summary>
 		public static string OpenGLTextureUvNumber => "SDL.texture.opengl.texture_uv";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="ITexture.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Texture.Properties">property</see> that holds
 		/// the <c>GLuint</c> texture associated with the U plane of the YUV texture
 		/// </summary>
 		public static string OpenGLTextureUNumber => "SDL.texture.opengl.texture_u";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="ITexture.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Texture.Properties">property</see> that holds
 		/// the <c>GLuint</c> texture associated with the V plane of the YUV texture
 		/// </summary>
 		public static string OpenGLTextureVNumber => "SDL.texture.opengl.texture_v";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="ITexture.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Texture.Properties">property</see> that holds
 		/// the <c>GLenum</c> for the texture target associated with the texture
 		/// </summary>
 		/// <remarks>
@@ -66,7 +66,7 @@ partial class TextureExtensions
 		public static string OpenGLTextureTargetNumber => "SDL.texture.opengl.target";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="ITexture.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Texture.Properties">property</see> that holds
 		/// the texture coordinate width of the texture
 		/// </summary>
 		/// <remarks>
@@ -77,7 +77,7 @@ partial class TextureExtensions
 		public static string OpenGLTexWFloat => "SDL.texture.opengl.tex_w";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="ITexture.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Texture.Properties">property</see> that holds
 		/// the texture coordinate height of the texture
 		/// </summary>
 		/// <remarks>

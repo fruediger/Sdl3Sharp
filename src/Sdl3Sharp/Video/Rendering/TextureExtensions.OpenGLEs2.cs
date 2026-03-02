@@ -31,31 +31,31 @@ partial class TextureExtensions
 		public static string CreateOpenGLEs2TextureVNumber => "SDL.texture.opengles2.create.texture_v";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="ITexture.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Texture.Properties">property</see> that holds
 		/// the <c>GLuint</c> texture associated with the texture
 		/// </summary>
 		public static string OpenGLEs2TextureNumber => "SDL.texture.opengles2.texture";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="ITexture.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Texture.Properties">property</see> that holds
 		/// the <c>GLuint</c> texture associated with the UV plane of the NV12 texture
 		/// </summary>
 		public static string OpenGLEs2TextureUvNumber => "SDL.texture.opengles2.texture_uv";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="ITexture.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Texture.Properties">property</see> that holds
 		/// the <c>GLuint</c> texture associated with the U plane of the YUV texture
 		/// </summary>
 		public static string OpenGLEs2TextureUNumber => "SDL.texture.opengles2.texture_u";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="ITexture.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Texture.Properties">property</see> that holds
 		/// the <c>GLuint</c> texture associated with the V plane of the YUV texture
 		/// </summary>
 		public static string OpenGLEs2TextureVNumber => "SDL.texture.opengles2.texture_v";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="ITexture.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Texture.Properties">property</see> that holds
 		/// the <c>GLenum</c> for the texture target associated with the texture
 		/// </summary>
 		/// <remarks>

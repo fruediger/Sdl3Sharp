@@ -29,5 +29,5 @@ partial class RendererExtensions
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_AddVulkanRenderSemaphores">SDL_AddVulkanRenderSemaphores</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_AddVulkanRenderSemaphores(IRenderer.SDL_Renderer* renderer, uint wait_state_mask, long wait_semaphore, long signal_semaphore);
+	internal unsafe static partial CBool SDL_AddVulkanRenderSemaphores(Renderer.SDL_Renderer* renderer, uint wait_state_mask, long wait_semaphore, long signal_semaphore);
 }

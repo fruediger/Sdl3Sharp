@@ -8,7 +8,7 @@ partial class RendererExtensions
 	extension(Renderer<Direct3D9>.PropertyNames)
 	{
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="IRenderer.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Renderer.Properties">property</see> that holds
 		/// a pointer to the <c><see href="https://docs.microsoft.com/en-us/windows/win32/api/d3d9/nn-d3d9-idirect3ddevice9">IDirect3DDevice9</see></c> associated with the renderer
 		/// </summary>
 		public static string Direct3D9DevicePointer => "SDL.renderer.d3d9.device";

@@ -22,7 +22,7 @@ partial class TextureExtensions
 		public static string CreateVulkanLayoutNumber => "SDL.texture.create.vulkan.layout";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="ITexture.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Texture.Properties">property</see> that holds
 		/// the <c><see href="https://docs.vulkan.org/refpages/latest/refpages/source/VkImage.html">VkImage</see></c> associated with the texture
 		/// </summary>
 		public static string VulkanTextureNumber => "SDL.texture.vulkan.texture";

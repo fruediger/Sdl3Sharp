@@ -9,11 +9,10 @@ using Sdl3Sharp.Video.Windowing;
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using static Sdl3Sharp.Video.Surface;
 
 namespace Sdl3Sharp.Video.Rendering;
 
-partial interface IRenderer
+partial class Renderer
 {
 	// opaque struct
 	[StructLayout(LayoutKind.Sequential, Size = 0)]
@@ -175,7 +174,7 @@ partial interface IRenderer
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_CreateSoftwareRenderer">SDL_CreateSoftwareRenderer</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial SDL_Renderer* SDL_CreateSoftwareRenderer(SDL_Surface* surface);
+	internal unsafe static partial SDL_Renderer* SDL_CreateSoftwareRenderer(Surface.SDL_Surface* surface);
 
 	/// <summary>
 	/// Destroy the rendering context for a window and free all associated textures
@@ -635,7 +634,7 @@ partial interface IRenderer
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetRenderTarget">SDL_GetRenderTarget</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial ITexture.SDL_Texture* SDL_GetRenderTarget(SDL_Renderer* renderer);
+	internal unsafe static partial Texture.SDL_Texture* SDL_GetRenderTarget(SDL_Renderer* renderer);
 
 #if SDL3_4_0_OR_GREATER
 
@@ -903,7 +902,7 @@ partial interface IRenderer
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_RenderGeometry">SDL_RenderGeometry</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_RenderGeometry(SDL_Renderer* renderer, ITexture.SDL_Texture* texture, Vertex* vertices, int num_vertices, int* indices, int num_indices);
+	internal unsafe static partial CBool SDL_RenderGeometry(SDL_Renderer* renderer, Texture.SDL_Texture* texture, Vertex* vertices, int num_vertices, int* indices, int num_indices);
 
 	/// <summary>
 	/// Render a list of triangles, optionally using a texture and indices into the vertex arrays Color and alpha modulation is done per vertex
@@ -929,7 +928,7 @@ partial interface IRenderer
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_RenderGeometryRaw">SDL_RenderGeometryRaw</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_RenderGeometryRaw(SDL_Renderer* renderer, ITexture.SDL_Texture* texture, float* xy, int xy_stride, Color<float>* color, int color_stride, float* uv, int uv_stride, int num_vertices, void* indices, int num_indices, int size_indices);
+	internal unsafe static partial CBool SDL_RenderGeometryRaw(SDL_Renderer* renderer, Texture.SDL_Texture* texture, float* xy, int xy_stride, Color<float>* color, int color_stride, float* uv, int uv_stride, int num_vertices, void* indices, int num_indices, int size_indices);
 
 	/// <summary>
 	/// Draw a line on the current rendering target at subpixel precision
@@ -1097,7 +1096,7 @@ partial interface IRenderer
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_RenderTexture">SDL_RenderTexture</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_RenderTexture(SDL_Renderer* renderer, ITexture.SDL_Texture* texture, Rect<float>* srcrect, Rect<float>* dstrect);
+	internal unsafe static partial CBool SDL_RenderTexture(SDL_Renderer* renderer, Texture.SDL_Texture* texture, Rect<float>* srcrect, Rect<float>* dstrect);
 
 	/// <summary>
 	/// Perform a scaled copy using the 9-grid algorithm to the current rendering target at subpixel precision
@@ -1124,7 +1123,7 @@ partial interface IRenderer
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_RenderTexture9Grid">SDL_RenderTexture9Grid</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_RenderTexture9Grid(SDL_Renderer* renderer, ITexture.SDL_Texture* texture, Rect<float>* srcrect, float left_width, float right_width, float top_height, float bottom_height, float scale, Rect<float>* dstrect);
+	internal unsafe static partial CBool SDL_RenderTexture9Grid(SDL_Renderer* renderer, Texture.SDL_Texture* texture, Rect<float>* srcrect, float left_width, float right_width, float top_height, float bottom_height, float scale, Rect<float>* dstrect);
 
 #if SDL3_4_0_OR_GREATER
 
@@ -1154,7 +1153,7 @@ partial interface IRenderer
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_RenderTexture9GridTiled">SDL_RenderTexture9GridTiled</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_RenderTexture9GridTiled(SDL_Renderer* renderer, ITexture.SDL_Texture* texture, Rect<float>* srcrect, float left_width, float right_width, float top_height, float bottom_height, float scale, Rect<float>* dstrect, float tileScale);
+	internal unsafe static partial CBool SDL_RenderTexture9GridTiled(SDL_Renderer* renderer, Texture.SDL_Texture* texture, Rect<float>* srcrect, float left_width, float right_width, float top_height, float bottom_height, float scale, Rect<float>* dstrect, float tileScale);
 
 #endif
 
@@ -1175,7 +1174,7 @@ partial interface IRenderer
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_RenderTexture9GridTiled">SDL_RenderTexture9GridTiled</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_RenderTextureAffine(SDL_Renderer* renderer, ITexture.SDL_Texture* texture, Rect<float>* srcrect, Point<float>* origin, Point<float>* right, Point<float>* down);
+	internal unsafe static partial CBool SDL_RenderTextureAffine(SDL_Renderer* renderer, Texture.SDL_Texture* texture, Rect<float>* srcrect, Point<float>* origin, Point<float>* right, Point<float>* down);
 
 	/// <summary>
 	/// Copy a portion of the source texture to the current rendering target, with rotation and flipping, at subpixel precision
@@ -1195,7 +1194,7 @@ partial interface IRenderer
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_RenderTextureRotated">SDL_RenderTextureRotated</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_RenderTextureRotated(SDL_Renderer* renderer, ITexture.SDL_Texture* texture, Rect<float>* srcrect, Rect<float>* dstrect, double angle, Point<float>* center, FlipMode flip);
+	internal unsafe static partial CBool SDL_RenderTextureRotated(SDL_Renderer* renderer, Texture.SDL_Texture* texture, Rect<float>* srcrect, Rect<float>* dstrect, double angle, Point<float>* center, FlipMode flip);
 
 	/// <summary>
 	/// Tile a portion of the texture to the current rendering target at subpixel precision
@@ -1216,7 +1215,7 @@ partial interface IRenderer
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_RenderTextureTiled">SDL_RenderTextureTiled</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_RenderTextureTiled(SDL_Renderer* renderer, ITexture.SDL_Texture* texture, Rect<float>* srcrect, float scale, Rect<float>* dstrect);
+	internal unsafe static partial CBool SDL_RenderTextureTiled(SDL_Renderer* renderer, Texture.SDL_Texture* texture, Rect<float>* srcrect, float scale, Rect<float>* dstrect);
 
 	/// <summary>
 	/// Return whether an explicit rectangle was set as the viewport
@@ -1440,7 +1439,7 @@ partial interface IRenderer
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_SetRenderTarget">SDL_SetRenderTarget</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_SetRenderTarget(SDL_Renderer* renderer, ITexture.SDL_Texture* texture);
+	internal unsafe static partial CBool SDL_SetRenderTarget(SDL_Renderer* renderer, Texture.SDL_Texture* texture);
 
 	/// <summary>
 	/// Set the texture addressing mode used in <see href="https://wiki.libsdl.org/SDL3/SDL_RenderGeometry">SDL_RenderGeometry</see>()

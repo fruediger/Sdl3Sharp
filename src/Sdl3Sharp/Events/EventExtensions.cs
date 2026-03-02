@@ -25,10 +25,10 @@ public static partial class EventExtensions
 		/// <para>
 		/// The conversion takes into account several factors:
 		/// <list type="bullet">
-		///	<item><description>The <see cref="IRenderer.Window"/> dimensions</description></item>
-		///	<item><description>The <see cref="IRenderer.LogicalPresentation"/> settings</description></item>
-		///	<item><description>The <see cref="IRenderer.Scale"/> settings</description></item>
-		///	<item><description>The <see cref="IRenderer.Viewport"/> settings</description></item>
+		///	<item><description>The <see cref="Renderer.Window"/> dimensions</description></item>
+		///	<item><description>The <see cref="Renderer.LogicalPresentation"/> settings</description></item>
+		///	<item><description>The <see cref="Renderer.Scale"/> settings</description></item>
+		///	<item><description>The <see cref="Renderer.Viewport"/> settings</description></item>
 		/// </list>
 		/// </para>
 		/// <para>
@@ -39,7 +39,7 @@ public static partial class EventExtensions
 		/// </para>
 		/// <para>
 		/// Relative mouse coordinates (e.g. <see cref="MouseMotionEvent.RelativeX"/> and <see cref="MouseMotionEvent.RelativeY"/>) are <em>also</em> converted.
-		/// Applications that do not want these coordinates to be converted should use the <see cref="IRenderer.TryConvertWindowToRenderCoordinates(float, float, out float, out float)"/> method
+		/// Applications that do not want these coordinates to be converted should use the <see cref="Renderer.TryConvertWindowToRenderCoordinates(float, float, out float, out float)"/> method
 		/// with the specific property values of the event instead of converting the entire event.
 		/// </para>
 		/// <para>
@@ -50,7 +50,7 @@ public static partial class EventExtensions
 		/// </para>
 		/// </remarks>
 		public bool TryConvertToRenderCoordinates<TRenderer>(TRenderer renderer)
-			where TRenderer : notnull, IRenderer
+			where TRenderer : notnull, Renderer
 		{
 			unsafe
 			{

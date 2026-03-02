@@ -14,7 +14,7 @@ namespace Sdl3Sharp.Video.Rendering;
 /// <summary>
 /// Represents a vertex structure
 /// </summary>
-/// <param name="position">The position of the vertex in <see cref="IRenderer"/> coordinates</param>
+/// <param name="position">The position of the vertex in <see cref="Renderer"/> coordinates</param>
 /// <param name="color">The color of the vertex</param>
 /// <param name="texCoord">The texture coordinate of the vertex, typically normalized to be in the range from <c>0</c> to <c>1</c></param>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
@@ -34,7 +34,7 @@ public readonly struct Vertex(in Point<float> position, in Color<float> color, i
 	/// Gets or initializes the position of the vertex
 	/// </summary>
 	/// <value>
-	/// The position of the vertex in <see cref="IRenderer"/> coordinates
+	/// The position of the vertex in <see cref="Renderer"/> coordinates
 	/// </value>
 	public required readonly Point<float> Position
 	{
@@ -78,7 +78,7 @@ public readonly struct Vertex(in Point<float> position, in Color<float> color, i
 	/// <summary>
 	/// Deconstructs the vertex into its position, color, and texture coordinate components
 	/// </summary>
-	/// <param name="position">The position of the vertex in <see cref="IRenderer"/> coordinates</param>
+	/// <param name="position">The position of the vertex in <see cref="Renderer"/> coordinates</param>
 	/// <param name="color">The color of the vertex</param>
 	/// <param name="texCoord">The texture coordinate of the vertex, typically normalized to be in the range from <c>0</c> to <c>1</c></param>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]

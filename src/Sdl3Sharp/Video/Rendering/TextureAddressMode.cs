@@ -7,10 +7,10 @@
 /// </summary>
 /// <remarks>
 /// <para>
-/// This is primarily used in <see cref="IRenderer.TryRenderGeometry(System.ReadOnlySpan{Vertex}, Sdl3Sharp.Video.Rendering.ITexture?)"/> and any of the other texture rendering methods.
+/// This is primarily used in <see cref="Renderer.TryRenderGeometry(System.ReadOnlySpan{Vertex}, Sdl3Sharp.Video.Rendering.Texture?)"/> and any of the other texture rendering methods.
 /// </para>
 /// <para>
-/// Texture wrapping is always supported for power-of-two texture sizes, and is supported for other texture sizes if <see cref="IRenderer.SupportsNonPowerOfTwoTextureWrapping"/> is set to <c><see langword="true"/></c>.
+/// Texture wrapping is always supported for power-of-two texture sizes, and is supported for other texture sizes if <see cref="Renderer.SupportsNonPowerOfTwoTextureWrapping"/> is set to <c><see langword="true"/></c>.
 /// </para>
 /// </remarks>
 public enum TextureAddressMode

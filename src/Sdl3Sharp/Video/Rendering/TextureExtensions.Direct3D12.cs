@@ -26,19 +26,19 @@ partial class TextureExtensions
 		public static string CreateDirect3D12TextureVPointer => "SDL.texture.create.d3d12.texture_v";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="ITexture.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Texture.Properties">property</see> that holds
 		/// a pointer to the <c><see href="https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nn-d3d12-id3d12resource">ID3D12Resource</see></c> associated with the texture
 		/// </summary>
 		public static string Direct3D12TexturePointer => "SDL.texture.d3d12.texture";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="ITexture.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Texture.Properties">property</see> that holds
 		/// a pointer to the <c><see href="https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nn-d3d12-id3d12resource">ID3D12Resource</see></c> associated with the U plane of the YUV texture
 		/// </summary>
 		public static string Direct3D12TextureUPointer => "SDL.texture.d3d12.texture_u";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="ITexture.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Texture.Properties">property</see> that holds
 		/// a pointer to the <c><see href="https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nn-d3d12-id3d12resource">ID3D12Resource</see></c> associated with the V plane of the YUV texture
 		/// </summary>
 		public static string Direct3D12TextureVPointer => "SDL.texture.d3d12.texture_v";

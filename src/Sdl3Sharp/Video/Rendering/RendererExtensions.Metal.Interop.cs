@@ -26,7 +26,7 @@ partial class RendererExtensions
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetRenderMetalCommandEncoder">SDL_GetRenderMetalCommandEncoder</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial void* SDL_GetRenderMetalCommandEncoder(IRenderer.SDL_Renderer* renderer);
+	internal unsafe static partial void* SDL_GetRenderMetalCommandEncoder(Renderer.SDL_Renderer* renderer);
 
 	/// <summary>
 	/// Get the CAMetalLayer associated with the given Metal renderer
@@ -43,5 +43,5 @@ partial class RendererExtensions
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetRenderMetalLayer">SDL_GetRenderMetalLayer</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial void* SDL_GetRenderMetalLayer(IRenderer.SDL_Renderer* renderer);
+	internal unsafe static partial void* SDL_GetRenderMetalLayer(Renderer.SDL_Renderer* renderer);
 }

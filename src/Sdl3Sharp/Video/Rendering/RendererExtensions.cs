@@ -4,12 +4,12 @@ using System;
 namespace Sdl3Sharp.Video.Rendering;
 
 /// <summary>
-/// Provides extension methods and properties for <see cref="IRenderer"/> and various driver-specific implementations of <see cref="Renderer{TDriver}"/>
+/// Provides extension methods and properties for <see cref="Renderer"/> and various driver-specific implementations of <see cref="Renderer{TDriver}"/>
 /// </summary>
 public static partial class RendererExtensions
 {
 	extension<TRenderer>(TRenderer renderer)
-		where TRenderer : notnull, IRenderer
+		where TRenderer : notnull, Renderer
 	{
 		/// <summary>
 		/// Tries to get a point in window coordinates for a specified point in render coordinates
@@ -21,10 +21,10 @@ public static partial class RendererExtensions
 		/// <para>
 		/// The conversion takes into account several factors:
 		/// <list type="bullet">
-		///	<item><description>The <see cref="IRenderer.Window"/> dimensions</description></item>
-		///	<item><description>The <see cref="IRenderer.LogicalPresentation"/> settings</description></item>
-		///	<item><description>The <see cref="IRenderer.Scale"/> settings</description></item>
-		///	<item><description>The <see cref="IRenderer.Viewport"/> settings</description></item>
+		///	<item><description>The <see cref="Renderer.Window"/> dimensions</description></item>
+		///	<item><description>The <see cref="Renderer.LogicalPresentation"/> settings</description></item>
+		///	<item><description>The <see cref="Renderer.Scale"/> settings</description></item>
+		///	<item><description>The <see cref="Renderer.Viewport"/> settings</description></item>
 		/// </list>
 		/// </para>
 		/// <para>
@@ -48,10 +48,10 @@ public static partial class RendererExtensions
 		/// <para>
 		/// The conversion takes into account several factors:
 		/// <list type="bullet">
-		///	<item><description>The <see cref="IRenderer.Window"/> dimensions</description></item>
-		///	<item><description>The <see cref="IRenderer.LogicalPresentation"/> settings</description></item>
-		///	<item><description>The <see cref="IRenderer.Scale"/> settings</description></item>
-		///	<item><description>The <see cref="IRenderer.Viewport"/> settings</description></item>
+		///	<item><description>The <see cref="Renderer.Window"/> dimensions</description></item>
+		///	<item><description>The <see cref="Renderer.LogicalPresentation"/> settings</description></item>
+		///	<item><description>The <see cref="Renderer.Scale"/> settings</description></item>
+		///	<item><description>The <see cref="Renderer.Viewport"/> settings</description></item>
 		/// </list>
 		/// </para>
 		/// <para>
@@ -74,7 +74,7 @@ public static partial class RendererExtensions
 		/// <returns><c><see langword="true"/></c>, if the text was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
 		/// <remarks>
 		/// <para>
-		/// This method will render text to an <see cref="IRenderer"/>.
+		/// This method will render text to a <see cref="Renderer"/>.
 		/// Note that this is a convenience method for debugging, with severe limitations, and not intended to be used for production applications and games.
 		/// </para>
 		/// <para>
@@ -84,7 +84,7 @@ public static partial class RendererExtensions
 		/// It accepts Unicode strings, but will only render ASCII characters
 		/// </description></item>
 		/// <item><description>
-		/// It has a single, tiny size (8x8 pixels). You can use <see cref="IRenderer.LogicalPresentation"/> or <see cref="IRenderer.Scale"/> to adjust for that.
+		/// It has a single, tiny size (8x8 pixels). You can use <see cref="Renderer.LogicalPresentation"/> or <see cref="Renderer.Scale"/> to adjust for that.
 		/// </description></item>
 		/// <item><description>
 		/// It uses a simple, hardcoded bitmap font. It does not allow different font selections and it does not support truetype, for proper scaling.
@@ -101,7 +101,7 @@ public static partial class RendererExtensions
 		/// On first use, this will create an internal texture for rendering glyphs. This texture will live until the renderer is disposed.
 		/// </para>
 		/// <para>
-		/// The text is drawn in the color specified by <see cref="IRenderer.DrawColor"/> (or <see cref="IRenderer.DrawColorFloat"/>) and <see cref="IRenderer.DrawBlendMode"/> determine how the text is blended with the existing content of the target.
+		/// The text is drawn in the color specified by <see cref="Renderer.DrawColor"/> (or <see cref="Renderer.DrawColorFloat"/>) and <see cref="Renderer.DrawBlendMode"/> determine how the text is blended with the existing content of the target.
 		/// </para>
 		/// <para>
 		/// This method should only be called from the main thread.
@@ -118,7 +118,7 @@ public static partial class RendererExtensions
 		/// <returns><c><see langword="true"/></c>, if the text was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
 		/// <remarks>
 		/// <para>
-		/// This method will render text to an <see cref="IRenderer"/>.
+		/// This method will render text to a <see cref="Renderer"/>.
 		/// Note that this is a convenience method for debugging, with severe limitations, and not intended to be used for production applications and games.
 		/// </para>
 		/// <para>
@@ -128,7 +128,7 @@ public static partial class RendererExtensions
 		/// It accepts Unicode strings, but will only render ASCII characters
 		/// </description></item>
 		/// <item><description>
-		/// It has a single, tiny size (8x8 pixels). You can use <see cref="IRenderer.LogicalPresentation"/> or <see cref="IRenderer.Scale"/> to adjust for that.
+		/// It has a single, tiny size (8x8 pixels). You can use <see cref="Renderer.LogicalPresentation"/> or <see cref="Renderer.Scale"/> to adjust for that.
 		/// </description></item>
 		/// <item><description>
 		/// It uses a simple, hardcoded bitmap font. It does not allow different font selections and it does not support truetype, for proper scaling.
@@ -145,7 +145,7 @@ public static partial class RendererExtensions
 		/// On first use, this will create an internal texture for rendering glyphs. This texture will live until the renderer is disposed.
 		/// </para>
 		/// <para>
-		/// The text is drawn in the color specified by <see cref="IRenderer.DrawColor"/> (or <see cref="IRenderer.DrawColorFloat"/>) and <see cref="IRenderer.DrawBlendMode"/> determine how the text is blended with the existing content of the target.
+		/// The text is drawn in the color specified by <see cref="Renderer.DrawColor"/> (or <see cref="Renderer.DrawColorFloat"/>) and <see cref="Renderer.DrawBlendMode"/> determine how the text is blended with the existing content of the target.
 		/// </para>
 		/// <para>
 		/// The <paramref name="format"/> parameter is interpreted as a C-style <c>printf</c> format string, and 
@@ -176,7 +176,7 @@ public static partial class RendererExtensions
 		/// <returns><c><see langword="true"/></c>, if the line was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)s</returns>
 		/// <remarks>
 		/// <para>
-		/// The line is drawn with the color specified by <see cref="IRenderer.DrawColor"/> (or <see cref="IRenderer.DrawColorFloat"/>) and <see cref="IRenderer.DrawBlendMode"/> determines how the line is blended with the existing content of the target.
+		/// The line is drawn with the color specified by <see cref="Renderer.DrawColor"/> (or <see cref="Renderer.DrawColorFloat"/>) and <see cref="Renderer.DrawBlendMode"/> determines how the line is blended with the existing content of the target.
 		/// </para>
 		/// <para>
 		/// Drawing the line works with sub-pixel precision.
@@ -194,7 +194,7 @@ public static partial class RendererExtensions
 		/// <returns><c><see langword="true"/></c> if the point was drawn successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
 		/// <remarks>
 		/// <para>
-		/// The point is drawn with the color specified by <see cref="IRenderer.DrawColor"/> (or <see cref="IRenderer.DrawColorFloat"/>) and <see cref="IRenderer.DrawBlendMode"/> determines how the point is blended with the existing content of the target.
+		/// The point is drawn with the color specified by <see cref="Renderer.DrawColor"/> (or <see cref="Renderer.DrawColorFloat"/>) and <see cref="Renderer.DrawBlendMode"/> determines how the point is blended with the existing content of the target.
 		/// </para>
 		/// <para>
 		/// Drawing the point works with sub-pixel precision.

@@ -16,7 +16,7 @@ partial class RendererExtensions
 	/// <returns>Returns the GPU device used by the renderer, or NULL if the renderer is not a GPU renderer; <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>() for more information</returns>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetGPURendererDevice">SDL_GetGPURendererDevice</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial GpuDevice.SDL_GPUDevice* SDL_GetGPURendererDevice(IRenderer.SDL_Renderer* renderer);
+	internal unsafe static partial GpuDevice.SDL_GPUDevice* SDL_GetGPURendererDevice(Renderer.SDL_Renderer* renderer);
 
 	/// <summary>
 	/// Set custom GPU render state
@@ -34,7 +34,7 @@ partial class RendererExtensions
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_SetGPURenderState">SDL_SetGPURenderState</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_SetGPURenderState(IRenderer.SDL_Renderer* renderer, GpuRenderState.SDL_GPURenderState* state);
+	internal unsafe static partial CBool SDL_SetGPURenderState(Renderer.SDL_Renderer* renderer, GpuRenderState.SDL_GPURenderState* state);
 }
 
 #endif

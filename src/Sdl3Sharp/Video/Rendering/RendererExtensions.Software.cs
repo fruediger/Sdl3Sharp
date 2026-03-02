@@ -13,7 +13,7 @@ partial class RendererExtensions
 		public static string CreateSoftwareSurfacePointer => "SDL.renderer.create.surface";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="IRenderer.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Renderer.Properties">property</see> that holds
 		/// a pointer to the native <c><see href="https://wiki.libsdl.org/SDL3/SDL_Surface">SDL_Surface</see></c> where rendering is displayed to, if the renderer is a software renderer without a window
 		/// </summary>
 		public static string SoftwareSurfacePointer => "SDL.renderer.surface";

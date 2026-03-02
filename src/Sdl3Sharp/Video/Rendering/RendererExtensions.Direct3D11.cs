@@ -11,13 +11,13 @@ partial class RendererExtensions
 	extension(Renderer<Direct3D11>.PropertyNames)
 	{
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="IRenderer.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Renderer.Properties">property</see> that holds
 		/// a pointer to the <c><see href="https://docs.microsoft.com/en-us/windows/win32/api/d3d11/nn-d3d11-id3d11device">ID3D11Device</see></c> associated with the renderer
 		/// </summary>
 		public static string Direct3D11DevicePointer => "SDL.renderer.d3d11.device";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="IRenderer.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Renderer.Properties">property</see> that holds
 		/// a pointer to the <c><see href="https://learn.microsoft.com/en-us/windows/win32/api/dxgi1_2/nn-dxgi1_2-idxgiswapchain1">IDXGISwapChain1</see></c> associated with the renderer
 		/// </summary>
 		public static string Direct3D11SwapChainPointer => "SDL.renderer.d3d11.swap_chain";

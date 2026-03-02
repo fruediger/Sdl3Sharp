@@ -13,13 +13,13 @@ public static class RendererVSyncExtensions
 		/// <summary>
 		/// Creates a <see cref="RendererVSync"/> value from a given interval
 		/// </summary>
-		/// <param name="interval">The interval in which the present of the <see cref="IRenderer"/> should be synchronized, in number of vertical refreshes</param>
+		/// <param name="interval">The interval in which the present of the <see cref="Renderer"/> should be synchronized, in number of vertical refreshes</param>
 		/// <returns>A <see cref="RendererVSync"/> value representing the given interval</returns>
 		/// <exception cref="ArgumentOutOfRangeException"><paramref name="interval"/> is less than <see cref="RendererVSync.Disabled"/> (<c>0</c>)</exception>
 		/// <exception cref="ArgumentException"><paramref name="interval"/> is equal to <see cref="RendererVSync.Adaptive"/> (<c>-1</c>) or <see cref="RendererVSync.Disabled"/> (<c>0</c>)</exception>
 		/// <remarks>
 		/// <para>
-		/// If <paramref name="interval"/> is <c>1</c> the present of the <see cref="IRenderer"/> will be synchronized with <em>every</em> vertical refresh,
+		/// If <paramref name="interval"/> is <c>1</c> the present of the <see cref="Renderer"/> will be synchronized with <em>every</em> vertical refresh,
 		/// if <paramref name="interval"/> is <c>2</c> it will be synchronized with <em>every second</em> vertical refresh, and so on.
 		/// </para>
 		/// <para>

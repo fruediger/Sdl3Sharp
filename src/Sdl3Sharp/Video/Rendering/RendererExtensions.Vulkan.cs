@@ -48,43 +48,43 @@ partial class RendererExtensions
 		public static string CreateVulkanPresentQueueFamilyIndexNumber => "SDL.renderer.create.vulkan.present_queue_family_index";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="IRenderer.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Renderer.Properties">property</see> that holds
 		/// a <c><see href="https://docs.vulkan.org/refpages/latest/refpages/source/VkInstance.html"/>VkInstance</c> associated with the renderer
 		/// </summary>
 		public static string VulkanInstancePointer => "SDL.renderer.vulkan.instance";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="IRenderer.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Renderer.Properties">property</see> that holds
 		/// a <c><see href="https://docs.vulkan.org/refpages/latest/refpages/source/VkSurfaceKHR.html"/>VkSurfaceKHR</c> associated with the renderer
 		/// </summary>
 		public static string VulkanSurfaceNumber => "SDL.renderer.vulkan.surface";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="IRenderer.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Renderer.Properties">property</see> that holds
 		/// a <c><see href="https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDevice.html"/>VkPhysicalDevice</c> associated with the renderer
 		/// </summary>
 		public static string VulkanPhysicalDevicePointer => "SDL.renderer.vulkan.physical_device";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="IRenderer.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Renderer.Properties">property</see> that holds
 		/// a <c><see href="https://docs.vulkan.org/refpages/latest/refpages/source/VkDevice.html"/>VkDevice</c> associated with the renderer
 		/// </summary>
 		public static string VulkanDevicePointer => "SDL.renderer.vulkan.device";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="IRenderer.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Renderer.Properties">property</see> that holds
 		/// the queue family index used for rendering
 		/// </summary>
 		public static string VulkanGraphicsQueueFamilyIndexNumber => "SDL.renderer.vulkan.graphics_queue_family_index";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="IRenderer.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Renderer.Properties">property</see> that holds
 		/// the queue family index used for presentation
 		/// </summary>
 		public static string VulkanPresentQueueFamilyIndexNumber => "SDL.renderer.vulkan.present_queue_family_index";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="IRenderer.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Renderer.Properties">property</see> that holds
 		/// the number of swap-chain images, or potential frames in flight, used by the renderer
 		/// </summary>
 		public static string VulkanSwapChainImageCountNumber => "SDL.renderer.vulkan.swapchain_image_count";

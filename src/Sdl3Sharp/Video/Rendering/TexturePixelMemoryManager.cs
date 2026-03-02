@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 namespace Sdl3Sharp.Video.Rendering;
 
 /// <summary>
-/// Manages and represents the entire pixel memory of a locked <see cref="ITexture"/> or a partial rectangle of it
+/// Manages and represents the entire pixel memory of a locked <see cref="Texture"/> or a partial rectangle of it
 /// </summary>
 public abstract class TexturePixelMemoryManager : NativeMemoryManagerBase
 {
@@ -50,11 +50,11 @@ public abstract class TexturePixelMemoryManager : NativeMemoryManagerBase
 	/// </value>
 	/// <remarks>
 	/// <para>
-	/// The pixel memory data is in the pixel format specified by the <see cref="ITexture.Format"/> property of the <see cref="Texture"/>.
+	/// The pixel memory data is in the pixel format specified by the <see cref="Texture.Format"/> property of the <see cref="Texture"/>.
 	/// </para>
 	/// <para>
 	/// The pixel memory might be longer than the actual pixel data that's safe to access, due to padding at the end of each row.
-	/// Especially if the <see cref="Texture"/> was <see cref="ITexture.TryLock(in Rect{int}, out TexturePixelMemoryManager?)">locked with a rectangle</see> smaller than the full size of the texture.
+	/// Especially if the <see cref="Texture"/> was <see cref="Texture.TryLock(in Rect{int}, out TexturePixelMemoryManager?)">locked with a rectangle</see> smaller than the full size of the texture.
 	/// </para>
 	/// <para>
 	/// The pixel memory is laid out in rows, where each row is <see cref="RowLength"/> pixels long, and there are <see cref="RowCount"/> rows.
@@ -145,8 +145,8 @@ public abstract class TexturePixelMemoryManager : NativeMemoryManagerBase
 	/// <remarks>
 	/// <para>
 	/// The pitch is the length of a single row of pixel data in bytes, including any padding bytes at the end of the row.
-	/// Notice that that's not necessarily equal to <c><see cref="RowLength">RowLength</see> * <see cref="Texture">Texture</see>.<see cref="ITexture.Format">Format</see>.<see cref="PixelFormatExtensions.get_BytesPerPixel(PixelFormat)">BytesPerPixel</see></c>.
-	/// Especially if the <see cref="Texture"/> was <see cref="ITexture.TryLock(in Rect{int}, out TexturePixelMemoryManager?)">locked with a rectangle</see> smaller than the full size of the texture.
+	/// Notice that that's not necessarily equal to <c><see cref="RowLength">RowLength</see> * <see cref="Texture">Texture</see>.<see cref="Texture.Format">Format</see>.<see cref="PixelFormatExtensions.get_BytesPerPixel(PixelFormat)">BytesPerPixel</see></c>.
+	/// Especially if the <see cref="Texture"/> was <see cref="Texture.TryLock(in Rect{int}, out TexturePixelMemoryManager?)">locked with a rectangle</see> smaller than the full size of the texture.
 	/// </para>
 	/// </remarks>
 	public nuint Pitch { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mPitch; }
@@ -172,7 +172,7 @@ public abstract class TexturePixelMemoryManager : NativeMemoryManagerBase
 	/// </value>
 	/// <remarks>
 	/// <para>
-	/// To get the length of each row in bytes, use <c><see cref="RowLength">RowLength</see> * <see cref="Texture">Texture</see>.<see cref="ITexture.Format">Format</see>.<see cref="PixelFormatExtensions.get_BytesPerPixel(PixelFormat)">BytesPerPixel</see></c>.
+	/// To get the length of each row in bytes, use <c><see cref="RowLength">RowLength</see> * <see cref="Texture">Texture</see>.<see cref="Texture.Format">Format</see>.<see cref="PixelFormatExtensions.get_BytesPerPixel(PixelFormat)">BytesPerPixel</see></c>.
 	/// </para>
 	/// </remarks>
 	public nuint RowLength { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mRowLength; }
@@ -183,7 +183,7 @@ public abstract class TexturePixelMemoryManager : NativeMemoryManagerBase
 	/// <value>
 	/// The locked texture, or <c><see langword="null"/></c> if the texture is not locked
 	/// </value>
-	public abstract ITexture? Texture { get; }
+	public abstract Texture? Texture { get; }
 
 	/// <inheritdoc/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -254,7 +254,7 @@ public sealed class TexturePixelMemoryManager<TDriver> : TexturePixelMemoryManag
 		{
 			if (mTexture is not null)
 			{
-				ITexture.SDL_UnlockTexture(mTexture.Pointer);
+				Rendering.Texture.SDL_UnlockTexture(mTexture.Pointer);
 
 				mTexture = null;
 			}
@@ -272,7 +272,7 @@ public sealed class TexturePixelMemoryManager<TDriver> : TexturePixelMemoryManag
 
 			fixed (Rect<int>* rectPtr = &rect)
 			{
-				if (!(texture is not null && (bool)ITexture.SDL_LockTexture(texture.Pointer, rectPtr, &pixels, &pitch)))
+				if (!(texture is not null && (bool)Rendering.Texture.SDL_LockTexture(texture.Pointer, rectPtr, &pixels, &pitch)))
 				{
 					pixelManager = null;
 					return false;
@@ -291,7 +291,7 @@ public sealed class TexturePixelMemoryManager<TDriver> : TexturePixelMemoryManag
 			void* pixels;
 			Unsafe.SkipInit(out int pitch);
 
-			if (!(texture is not null && (bool)ITexture.SDL_LockTexture(texture.Pointer, null, &pixels, &pitch)))
+			if (!(texture is not null && (bool)Rendering.Texture.SDL_LockTexture(texture.Pointer, null, &pixels, &pitch)))
 			{
 				pixelManager = null;
 				return false;

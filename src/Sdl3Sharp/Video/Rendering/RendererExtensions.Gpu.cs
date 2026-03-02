@@ -43,7 +43,7 @@ partial class RendererExtensions
 		public static string CreateGpuShadersMslBoolean => "SDL.renderer.create.gpu.shaders_msl";
 
 		/// <summary>
-		/// The name of a <em>read-only</em> <see cref="IRenderer.Properties">property</see> that holds
+		/// The name of a <em>read-only</em> <see cref="Renderer.Properties">property</see> that holds
 		/// a pointer to the native <see href="https://wiki.libsdl.org/SDL3/SDL_GPUDevice">SDL_GPUDevice</see> that the renderer is using
 		/// </summary>
 		public static string GpuDevicePointer => "SDL.renderer.gpu.device";
@@ -65,8 +65,8 @@ partial class RendererExtensions
 		/// </para>
 		/// <para>
 		/// If the <paramref name="window"/> is <c><see langword="null"/></c>, the created renderer will be an off-screen renderer, not associated with any window.
-		/// In that case, you should set a valid <see cref="Renderer{TDriver}.Target"/> for the renderer and then <em>still call <see cref="Renderer{TDriver}.TryRenderPresent"/> normally to complete drawing a frame</em>
-		/// (note that that's different from using a target texture with a window-associated renderer, where you shouldn't call <see cref="Renderer{TDriver}.TryRenderPresent"/> when rendering to the target texture).
+		/// In that case, you should set a valid <see cref="Renderer{TDriver}.Target"/> for the renderer and then <em>still call <see cref="Renderer.TryRenderPresent"/> normally to complete drawing a frame</em>
+		/// (note that that's different from using a target texture with a window-associated renderer, where you shouldn't call <see cref="Renderer.TryRenderPresent"/> when rendering to the target texture).
 		/// </para>
 		/// <para>
 		/// If this method is called with a non-<see langword="null"/> <see cref="GpuDevice"/>, it should be called on the thread that created the device.
@@ -77,7 +77,7 @@ partial class RendererExtensions
 		{
 			unsafe
 			{
-				var rendererPtr = IRenderer.SDL_CreateGPURenderer(gpuDevice is not null ? gpuDevice.Pointer : null, window is not null ? window.WindowPtr : null);
+				var rendererPtr = Renderer.SDL_CreateGPURenderer(gpuDevice is not null ? gpuDevice.Pointer : null, window is not null ? window.WindowPtr : null);
 
 				if (rendererPtr is null)
 				{

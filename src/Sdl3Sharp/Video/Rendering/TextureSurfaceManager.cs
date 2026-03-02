@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 namespace Sdl3Sharp.Video.Rendering;
 
 /// <summary>
-/// Manages and represents the entire pixel data of a locked <see cref="ITexture"/> or a partial rectangle of it as a <see cref="Video.Surface"/>
+/// Manages and represents the entire pixel data of a locked <see cref="Texture"/> or a partial rectangle of it as a <see cref="Video.Surface"/>
 /// </summary>
 public abstract class TextureSurfaceManager : IDisposable
 {
@@ -45,7 +45,7 @@ public abstract class TextureSurfaceManager : IDisposable
 	/// <value>
 	/// The locked texture, or <c><see langword="null"/></c> if the texture is not locked
 	/// </value>
-	public abstract ITexture? Texture { get; }
+	public abstract Texture? Texture { get; }
 
 	/// <summary>
 	/// Disposes this <see cref="TexturePixelMemoryManager"/>, unlocking the associated <see cref="Texture"/>
@@ -88,7 +88,7 @@ public sealed class TextureSurfaceManager<TDriver> : TextureSurfaceManager
 		{
 			if (mTexture is not null)
 			{
-				ITexture.SDL_UnlockTexture(mTexture.Pointer);
+				Rendering.Texture.SDL_UnlockTexture(mTexture.Pointer);
 
 				mTexture = null;
 			}
@@ -108,7 +108,7 @@ public sealed class TextureSurfaceManager<TDriver> : TextureSurfaceManager
 
 			fixed (Rect<int>* rectPtr = &rect)
 			{
-				if (!(texture is not null && (bool)ITexture.SDL_LockTextureToSurface(texture.Pointer, rectPtr, &surfacePtr)))
+				if (!(texture is not null && (bool)Rendering.Texture.SDL_LockTextureToSurface(texture.Pointer, rectPtr, &surfacePtr)))
 				{
 					surfaceManager = null;
 					return false;
@@ -117,7 +117,7 @@ public sealed class TextureSurfaceManager<TDriver> : TextureSurfaceManager
 				if (!Surface.TryGetOrCreate(surfacePtr, out var surface))
 				{
 					// if we somehow fail to create the surface, we need to unlock the texture in order for the native surface to be safely disposed
-					ITexture.SDL_UnlockTexture(texture.Pointer);
+					Rendering.Texture.SDL_UnlockTexture(texture.Pointer);
 
 					surfaceManager = null;
 					return false;
@@ -139,7 +139,7 @@ public sealed class TextureSurfaceManager<TDriver> : TextureSurfaceManager
 		{
 			Surface.SDL_Surface* surfacePtr;
 
-			if (!(texture is not null && (bool)ITexture.SDL_LockTextureToSurface(texture.Pointer, null, &surfacePtr)))
+			if (!(texture is not null && (bool)Rendering.Texture.SDL_LockTextureToSurface(texture.Pointer, null, &surfacePtr)))
 			{
 				surfaceManager = null;
 				return false;
@@ -148,7 +148,7 @@ public sealed class TextureSurfaceManager<TDriver> : TextureSurfaceManager
 			if (!Surface.TryGetOrCreate(surfacePtr, out var surface))
 			{
 				// if we somehow fail to create the surface, we need to unlock the texture in order for the native surface to be safely disposed
-				ITexture.SDL_UnlockTexture(texture.Pointer);
+				Rendering.Texture.SDL_UnlockTexture(texture.Pointer);
 
 				surfaceManager = null;
 				return false;

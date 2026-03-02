@@ -49,9 +49,9 @@ public static partial class BlendModeExtensions
 		/// </para>
 		/// <para>
 		/// Support for these custom blend modes varies for each renderer.
-		/// To check if a specific <see cref="BlendMode"/> is supported, create an <see cref="IRenderer"/>, use it's <see cref="IRenderer.DrawBlendMode"/> property, and then <see langword="try"/>-<see langword="catch"/> for a <see cref="SdlException"/>.
+		/// To check if a specific <see cref="BlendMode"/> is supported, create a <see cref="Renderer"/>, use it's <see cref="Renderer.DrawBlendMode"/> property, and then <see langword="try"/>-<see langword="catch"/> for a <see cref="SdlException"/>.
 		/// If there was an exception, check <see cref="Error.TryGet(out string?)"/> if it's about an unsupported blend mode.
-		/// Alternatively, you can do the same procedure with an <see cref="ITexture"/> and it's <see cref="ITexture.BlendMode"/> property.
+		/// Alternatively, you can do the same procedure with a <see cref="Texture"/> and it's <see cref="Texture.BlendMode"/> property.
 		/// </para>
 		/// <para>
 		/// The following list describes the support of custom blend modes for each rendering driver. All rendering drivers support the blend modes defined in the <see cref="BlendMode"/> enumeration.
@@ -95,7 +95,7 @@ public static partial class BlendModeExtensions
 		/// The <see cref="BlendFactor.DestinationAlpha"/> and <see cref="BlendFactor.OneMinusDestinationAlpha"/> factors do not have an effect in this case.
 		/// </para>
 		/// <para>
-		/// The properties <see cref="IRenderer.DrawBlendMode"/> and <see cref="ITexture.BlendMode"/> accept the <see cref="BlendMode"/>s returned by this method if the renderer supports it.
+		/// The properties <see cref="Renderer.DrawBlendMode"/> and <see cref="Texture.BlendMode"/> accept the <see cref="BlendMode"/>s returned by this method if the renderer supports it.
 		/// </para>
 		/// </remarks>
 		public static BlendMode ComposeCustom(

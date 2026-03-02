@@ -2798,7 +2798,7 @@ public sealed partial class Surface : IDisposable
 	{
 		unsafe
 		{
-			var rendererPtr = IRenderer.SDL_CreateSoftwareRenderer(mSurface);
+			var rendererPtr = Renderer.SDL_CreateSoftwareRenderer(mSurface);
 
 			if (rendererPtr is null)
 			{
@@ -2850,26 +2850,26 @@ public sealed partial class Surface : IDisposable
 				propertiesUsed = [];
 
 				// naturally, we want SDL_PROP_RENDERER_CREATE_NAME_STRING to be set to "software" when creating a software renderer
-				propertiesUsed.TrySetStringValue(IRenderer.PropertyNames.CreateNameString, Software.Name);
+				propertiesUsed.TrySetStringValue(Renderer.PropertyNames.CreateNameString, Software.Name);
 
 				// setting SDL_PROP_RENDERER_CREATE_SURFACE_POINTER is required, when creating a software renderer for a surface
 				propertiesUsed.TrySetPointerValue(Renderer<Software>.PropertyNames.CreateSoftwareSurfacePointer, unchecked((IntPtr)(mSurface)));
 
 				if (outputColorSpace is ColorSpace outputColorSpaceValue)
 				{
-					propertiesUsed.TrySetNumberValue(IRenderer.PropertyNames.CreateOutputColorSpaceNumber, unchecked((uint)outputColorSpaceValue));
+					propertiesUsed.TrySetNumberValue(Renderer.PropertyNames.CreateOutputColorSpaceNumber, unchecked((uint)outputColorSpaceValue));
 				}
 			}
 			else
 			{
 				propertiesUsed = properties;
 
-				driverNameBackup = propertiesUsed.TryGetStringValue(IRenderer.PropertyNames.CreateNameString, out var existingDriverName)
+				driverNameBackup = propertiesUsed.TryGetStringValue(Renderer.PropertyNames.CreateNameString, out var existingDriverName)
 					? existingDriverName
 					: null;
 
 				// naturally, we want SDL_PROP_RENDERER_CREATE_NAME_STRING to be set to "software" when creating a software renderer
-				propertiesUsed.TrySetStringValue(IRenderer.PropertyNames.CreateNameString, Software.Name);
+				propertiesUsed.TrySetStringValue(Renderer.PropertyNames.CreateNameString, Software.Name);
 
 				surfaceBackup = propertiesUsed.TryGetPointerValue(Renderer<Software>.PropertyNames.CreateSoftwareSurfacePointer, out var existingSurfacePtr)
 					? existingSurfacePtr
@@ -2880,17 +2880,17 @@ public sealed partial class Surface : IDisposable
 
 				if (outputColorSpace is ColorSpace outputColorSpaceValue)
 				{
-					outputColorSpaceBackup = propertiesUsed.TryGetNumberValue(IRenderer.PropertyNames.CreateOutputColorSpaceNumber, out var existingOutputColorSpaceValue)
+					outputColorSpaceBackup = propertiesUsed.TryGetNumberValue(Renderer.PropertyNames.CreateOutputColorSpaceNumber, out var existingOutputColorSpaceValue)
 						? unchecked((ColorSpace)existingOutputColorSpaceValue)
 						: null;
 
-					propertiesUsed.TrySetNumberValue(IRenderer.PropertyNames.CreateOutputColorSpaceNumber, unchecked((uint)outputColorSpaceValue));
+					propertiesUsed.TrySetNumberValue(Renderer.PropertyNames.CreateOutputColorSpaceNumber, unchecked((uint)outputColorSpaceValue));
 				}
 			}
 
 			try
 			{
-				var rendererPtr = IRenderer.SDL_CreateRendererWithProperties(propertiesUsed.Id);
+				var rendererPtr = Renderer.SDL_CreateRendererWithProperties(propertiesUsed.Id);
 
 				if (rendererPtr is null)
 				{
@@ -2915,11 +2915,11 @@ public sealed partial class Surface : IDisposable
 
 					if (driverNameBackup is not null)
 					{
-						propertiesUsed.TrySetStringValue(IRenderer.PropertyNames.CreateNameString, driverNameBackup);
+						propertiesUsed.TrySetStringValue(Renderer.PropertyNames.CreateNameString, driverNameBackup);
 					}
 					else
 					{
-						propertiesUsed.TryRemove(IRenderer.PropertyNames.CreateNameString);
+						propertiesUsed.TryRemove(Renderer.PropertyNames.CreateNameString);
 					}
 
 					if (surfaceBackup is IntPtr surfacePtr)
@@ -2936,11 +2936,11 @@ public sealed partial class Surface : IDisposable
 					{
 						if (outputColorSpaceBackup is ColorSpace outputColorSpaceValue)
 						{
-							propertiesUsed.TrySetNumberValue(IRenderer.PropertyNames.CreateOutputColorSpaceNumber, unchecked((uint)outputColorSpaceValue));
+							propertiesUsed.TrySetNumberValue(Renderer.PropertyNames.CreateOutputColorSpaceNumber, unchecked((uint)outputColorSpaceValue));
 						}
 						else
 						{
-							propertiesUsed.TryRemove(IRenderer.PropertyNames.CreateOutputColorSpaceNumber);
+							propertiesUsed.TryRemove(Renderer.PropertyNames.CreateOutputColorSpaceNumber);
 						}
 					}
 				}
