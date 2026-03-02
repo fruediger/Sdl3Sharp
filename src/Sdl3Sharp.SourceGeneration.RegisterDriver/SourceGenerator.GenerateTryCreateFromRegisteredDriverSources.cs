@@ -204,10 +204,10 @@ partial class SourceGenerator
 					 iWindowingDriverNamespaceName = $"{windowingNamespaceName}.Drivers",
 					 iWindowingDriverTypeName      = "IWindowingDriver",
 					 iWindowingDriverFullTypeName  = $"{iWindowingDriverNamespaceName}.{iWindowingDriverTypeName}",
-					 iDisplayTypeName              = "IDisplay",
-					 iDisplayFullTypeName          = $"{windowingNamespaceName}.{iDisplayTypeName}",
-					 displayTypeName               = "Display`1",
-					 displayFullTypeName           = $"{windowingNamespaceName}.{displayTypeName}";
+					 displayTypeName               = "Display",
+					 displayFullTypeName           = $"{windowingNamespaceName}.{displayTypeName}",
+					 displayTDriverTypeName        = "Display`1",
+					 displayTDriverFullTypeName    = $"{windowingNamespaceName}.{displayTDriverTypeName}";
 
 		var (compilation, values) = data;
 
@@ -359,20 +359,6 @@ partial class SourceGenerator
 			return;
 		}
 
-		var iDisplayType = compilation.GetTypeByMetadataName(iDisplayFullTypeName);
-		if (iDisplayType is null)
-		{
-			foreach (var (_, _, location) in values)
-			{
-				spc.ReportDiagnostic(Diagnostic.Create(
-					mMissingRequiredTypeDescriptor,
-					location,
-					iDisplayFullTypeName
-				));
-			}
-			return;
-		}
-
 		var displayType = compilation.GetTypeByMetadataName(displayFullTypeName);
 		if (displayType is null)
 		{
@@ -387,7 +373,21 @@ partial class SourceGenerator
 			return;
 		}
 
-		if (!displayType.InstanceConstructors.Any(ctor
+		var displayTDriverType = compilation.GetTypeByMetadataName(displayTDriverFullTypeName);
+		if (displayTDriverType is null)
+		{
+			foreach (var (_, _, location) in values)
+			{
+				spc.ReportDiagnostic(Diagnostic.Create(
+					mMissingRequiredTypeDescriptor,
+					location,
+					displayTDriverFullTypeName
+				));
+			}
+			return;
+		}
+
+		if (!displayTDriverType.InstanceConstructors.Any(ctor
 			=> ctor is { Parameters: [{ Type.SpecialType: SpecialType.System_UInt32 }, { Type.SpecialType: SpecialType.System_Boolean }] }
 		))
 		{
@@ -396,7 +396,7 @@ partial class SourceGenerator
 				spc.ReportDiagnostic(Diagnostic.Create(
 					mMissingRequiredConstructorDescriptor,
 					location,
-					displayType.ToDisplayString(mDiagnosticTypeSymbolDisplayFormat), $"{compilation.GetSpecialType(SpecialType.System_UInt32).ToDisplayString(mDiagnosticTypeSymbolDisplayFormat)}, {compilation.GetSpecialType(SpecialType.System_Boolean).ToDisplayString(mDiagnosticTypeSymbolDisplayFormat)}"
+					displayTDriverType.ToDisplayString(mDiagnosticTypeSymbolDisplayFormat), $"{compilation.GetSpecialType(SpecialType.System_UInt32).ToDisplayString(mDiagnosticTypeSymbolDisplayFormat)}, {compilation.GetSpecialType(SpecialType.System_Boolean).ToDisplayString(mDiagnosticTypeSymbolDisplayFormat)}"
 				));
 			}
 			return;
@@ -565,10 +565,10 @@ partial class SourceGenerator
 			
 			namespace {{windowingNamespaceName}};
 			
-			partial interface {{iDisplayTypeName}}
+			partial class {{displayTypeName}}
 			{
 				[global::System.CodeDom.Compiler.GeneratedCode("{{mTool.Name}}", "{{mTool.Version}}")]
-				internal unsafe static bool TryCreateFromRegisteredDriver(uint displayId, bool register, [global::System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out {{iDisplayTypeName}}? result)
+				internal unsafe static bool TryCreateFromRegisteredDriver(uint displayId, bool register, [global::System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out {{displayTypeName}}? result)
 				{
 			""");
 
@@ -586,7 +586,7 @@ partial class SourceGenerator
 			windowingDrivers.Print(builder, "name", (builder, targetType, indentation) =>
 				builder.Append($$"""
 
-					{{indentation}}result = new {{displayType.Construct(targetType).ToDisplayString(mDefaultTypeSymbolDisplayFormat)}}(displayId, register);
+					{{indentation}}result = new {{displayTDriverType.Construct(targetType).ToDisplayString(mDefaultTypeSymbolDisplayFormat)}}(displayId, register);
 					{{indentation}}return true;
 
 					"""),
@@ -611,7 +611,7 @@ partial class SourceGenerator
 			#nullable restore
 			""");
 
-		spc.AddSource($"{iDisplayFullTypeName}_TryCreateFromRegisteredDriver.g.cs", SourceText.From(
+		spc.AddSource($"{displayFullTypeName}_TryCreateFromRegisteredDriver.g.cs", SourceText.From(
 			text: builder.ToString(),
 			encoding: Encoding.UTF8
 		));

@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace Sdl3Sharp.Video.Windowing;
 
-partial interface IDisplay
+partial class Display
 {
 	/// <summary>
 	/// Provides an <see cref="Enumerator"/> for the display modes of a specific display
@@ -76,6 +76,10 @@ partial interface IDisplay
 			/// <remarks>
 			/// <para>
 			/// The resulting reference is only valid until the enumerator is <see cref="Dispose">disposed</see>. Don't use the enumerator nor any references obtained from it after it's disposed.
+			/// </para>
+			/// <para>
+			/// If the enumerator is positioned before the first display mode or after the last display mode (e.g. <see cref="MoveNext"/> wasn't called yet, or it returned <see langword="false"/>), the resulting reference will be a <see langword="null"/>-reference or an invalid reference.
+			/// Don't try to use or dereference the resulting reference in that case!
 			/// </para>
 			/// </remarks>
 			public readonly ref readonly DisplayMode Current
