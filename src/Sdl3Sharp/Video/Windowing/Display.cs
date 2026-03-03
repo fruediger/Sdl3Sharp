@@ -1,9 +1,12 @@
 ﻿using Sdl3Sharp.Events;
+using Sdl3Sharp.Internal;
 using Sdl3Sharp.Video.Drawing;
 using Sdl3Sharp.Video.Windowing.Drivers;
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.Marshalling;
 
@@ -28,9 +31,14 @@ namespace Sdl3Sharp.Video.Windowing;
 /// To specify a concrete display type, use <see cref="Display{TDriver}"/> with a windowing driver that implements the <see cref="IWindowingDriver"/> interface (e.g. <see cref="Display{TDriver}">Display&lt;<see cref="Windows">Windows</see>&gt;</see>).
 /// </para>
 /// </remarks>
-public abstract partial class Display
+[DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
+public abstract partial class Display :
+	IEquatable<Display>, IFormattable, ISpanFormattable
 {
 	private static readonly ConcurrentDictionary<uint, WeakReference<Display>> mKnownInstances = [];
+
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	private string DebuggerDisplay => ToString(formatProvider: CultureInfo.InvariantCulture);
 
 	private readonly uint mDisplayId;
 
@@ -523,6 +531,40 @@ public abstract partial class Display
 			[DoesNotReturn]
 			static void failCouldNotGetDisplayUsableBounds() => throw new SdlException("Couldn't get the display usable bounds for the display");
 		}
+	}
+
+	/// <inheritdoc/>
+	public override bool Equals(object? obj) => Equals(obj as Display);
+
+	/// <inheritdoc/>
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	public bool Equals(Display? other) => mDisplayId == other?.mDisplayId;
+
+	/// <inheritdoc/>
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	public override int GetHashCode() => mDisplayId.GetHashCode();
+
+	/// <inheritdoc/>
+	public override string ToString() => ToString(format: default, formatProvider: default);
+
+	/// <inheritdoc cref="IFormattable.ToString(string?, IFormatProvider?)"/>
+	public string ToString(IFormatProvider? formatProvider) => ToString(format: default, formatProvider);
+
+	/// <inheritdoc cref="IFormattable.ToString(string?, IFormatProvider?)"/>
+	public string ToString(string? format) => ToString(format, formatProvider: default);
+
+	/// <inheritdoc/>
+	public string ToString(string? format, IFormatProvider? formatProvider)
+		=> $"{{ {nameof(Id)}: {mDisplayId.ToString(format, formatProvider)} }}";
+
+	/// <inheritdoc/>
+	public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default)
+	{
+		charsWritten = 0;
+
+		return SpanFormat.TryWrite($"{{ {nameof(Id)}: ", ref destination, ref charsWritten)
+			&& SpanFormat.TryWrite(mDisplayId, ref destination, ref charsWritten, format, provider)
+			&& SpanFormat.TryWrite(" }", ref destination, ref charsWritten);
 	}
 
 	/// <summary>
