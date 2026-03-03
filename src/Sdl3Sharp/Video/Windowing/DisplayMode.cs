@@ -1,4 +1,8 @@
-﻿using Sdl3Sharp.Video.Coloring;
+﻿using Sdl3Sharp.Internal;
+using Sdl3Sharp.Video.Coloring;
+using System;
+using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -7,9 +11,13 @@ namespace Sdl3Sharp.Video.Windowing;
 /// <summary>
 /// Represents a display mode for a specific <see cref="Display"/>
 /// </summary>
+[DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 [StructLayout(LayoutKind.Sequential)]
-public readonly partial struct DisplayMode
+public readonly partial struct DisplayMode : IFormattable, ISpanFormattable
 {
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	private readonly string DebuggerDisplay => ToString(formatProvider: CultureInfo.InvariantCulture);
+
 	private readonly uint mDisplayID;
 	private readonly PixelFormat mFormat;
 	private readonly int mW;
@@ -102,4 +110,53 @@ public readonly partial struct DisplayMode
 	/// </para>
 	/// </remarks>
 	public readonly int Width { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mW; }
+
+	/// <inheritdoc/>
+	public readonly override string ToString() => ToString(format: default, formatProvider: default);
+
+	/// <inheritdoc cref="IFormattable.ToString(string?, IFormatProvider?)"/>
+	public readonly string ToString(IFormatProvider? formatProvider) => ToString(format: default, formatProvider);
+
+	/// <inheritdoc cref="IFormattable.ToString(string?, IFormatProvider?)"/>
+	public readonly string ToString(string? format) => ToString(format, formatProvider: default);
+
+	/// <inheritdoc/>
+	public readonly string ToString(string? format, IFormatProvider? formatProvider)
+		=> $"{{ {nameof(Display)}: {Display switch { null => "null", var display => display.ToString(format, formatProvider) }}, {
+			nameof(Format)}: {mFormat}, {
+			nameof(Width)}: {mW.ToString(format, formatProvider)}, {
+			nameof(Height)}: {mH.ToString(format, formatProvider)}, {
+			nameof(PixelDensity)}: {mPixelDensity.ToString(format, formatProvider)}, {
+			nameof(RefreshRate)}: {mRefreshRate.ToString(format, formatProvider)}, {
+			nameof(RefreshRateRatio)}: ({
+				nameof(RefreshRateRatio.Numerator)}: {mRefreshRateNumerator.ToString(format, formatProvider)}, {
+				nameof(RefreshRateRatio.Denominator)}: {mRefreshRateDenominator.ToString(format, formatProvider)}) }}";
+
+	/// <inheritdoc/>
+	public readonly bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default)
+	{
+		charsWritten = 0;
+
+		return SpanFormat.TryWrite($"{{ {nameof(Display)}: ", ref destination, ref charsWritten)
+			&& Display switch
+			{
+				null => SpanFormat.TryWrite("null", ref destination, ref charsWritten),
+				var display => display.TryFormat(destination, out var displayCharsWritten, format, provider)
+			}
+			&& SpanFormat.TryWrite($", {nameof(Format)}: ", ref destination, ref charsWritten)
+			&& SpanFormat.TryWrite(mFormat, ref destination, ref charsWritten)
+			&& SpanFormat.TryWrite($", {nameof(Width)}: ", ref destination, ref charsWritten)
+			&& SpanFormat.TryWrite(mW, ref destination, ref charsWritten, format, provider)
+			&& SpanFormat.TryWrite($", {nameof(Height)}: ", ref destination, ref charsWritten)
+			&& SpanFormat.TryWrite(mH, ref destination, ref charsWritten, format, provider)
+			&& SpanFormat.TryWrite($", {nameof(PixelDensity)}: ", ref destination, ref charsWritten)
+			&& SpanFormat.TryWrite(mPixelDensity, ref destination, ref charsWritten, format, provider)
+			&& SpanFormat.TryWrite($", {nameof(RefreshRate)}: ", ref destination, ref charsWritten)
+			&& SpanFormat.TryWrite(mRefreshRate, ref destination, ref charsWritten, format, provider)
+			&& SpanFormat.TryWrite($", {nameof(RefreshRateRatio)}: ({nameof(RefreshRateRatio.Numerator)}: ", ref destination, ref charsWritten)
+			&& SpanFormat.TryWrite(mRefreshRateNumerator, ref destination, ref charsWritten, format, provider)
+			&& SpanFormat.TryWrite($", {nameof(RefreshRateRatio.Denominator)}: ", ref destination, ref charsWritten)
+			&& SpanFormat.TryWrite(mRefreshRateDenominator, ref destination, ref charsWritten, format, provider)
+			&& SpanFormat.TryWrite(") }", ref destination, ref charsWritten);
+	}
 }
