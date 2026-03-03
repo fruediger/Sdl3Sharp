@@ -141,7 +141,7 @@ public readonly partial struct DisplayMode : IFormattable, ISpanFormattable
 			&& Display switch
 			{
 				null => SpanFormat.TryWrite("null", ref destination, ref charsWritten),
-				var display => display.TryFormat(destination, out var displayCharsWritten, format, provider)
+				var display => SpanFormat.TryWrite(display, ref destination, ref charsWritten, format, provider)
 			}
 			&& SpanFormat.TryWrite($", {nameof(Format)}: ", ref destination, ref charsWritten)
 			&& SpanFormat.TryWrite(mFormat, ref destination, ref charsWritten)
