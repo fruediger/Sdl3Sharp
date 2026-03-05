@@ -30,7 +30,7 @@ partial class Display
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetClosestFullscreenDisplayMode">SDL_GetClosestFullscreenDisplayMode</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_GetClosestFullscreenDisplayMode(uint displayID, int w, int h, float refresh_rate, CBool include_high_density_modes, DisplayMode* closest);
+	internal unsafe static partial CBool SDL_GetClosestFullscreenDisplayMode(uint displayID, int w, int h, float refresh_rate, CBool include_high_density_modes, DisplayMode.SDL_DisplayMode* closest);
 
 	/// <summary>
 	/// Gets information about the current display mode
@@ -48,7 +48,7 @@ partial class Display
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetCurrentDisplayMode">SDL_GetCurrentDisplayMode</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial DisplayMode* SDL_GetCurrentDisplayMode(uint displayID);
+	internal unsafe static partial DisplayMode.SDL_DisplayMode* SDL_GetCurrentDisplayMode(uint displayID);
 
 	/// <summary>
 	/// Get the orientation of a display
@@ -80,7 +80,7 @@ partial class Display
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetDesktopDisplayMode">SDL_GetDesktopDisplayMode</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial DisplayMode* SDL_GetDesktopDisplayMode(uint displayID);
+	internal unsafe static partial DisplayMode.SDL_DisplayMode* SDL_GetDesktopDisplayMode(uint displayID);
 
 	/// <summary>
 	/// Gets the desktop area represented by a display
@@ -274,7 +274,7 @@ partial class Display
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetFullscreenDisplayModes">SDL_GetFullscreenDisplayModes</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial DisplayMode** SDL_GetFullscreenDisplayModes(uint displayID, int* count);
+	internal unsafe static partial DisplayMode.SDL_DisplayMode** SDL_GetFullscreenDisplayModes(uint displayID, int* count);
 
 	/// <summary>
 	/// Gets the orientation of a display when it is unrotated

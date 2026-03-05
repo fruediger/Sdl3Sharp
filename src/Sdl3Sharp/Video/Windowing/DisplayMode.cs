@@ -1,10 +1,11 @@
 ﻿using Sdl3Sharp.Internal;
 using Sdl3Sharp.Video.Coloring;
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace Sdl3Sharp.Video.Windowing;
 
@@ -12,21 +13,15 @@ namespace Sdl3Sharp.Video.Windowing;
 /// Represents a display mode for a specific <see cref="Display"/>
 /// </summary>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
-[StructLayout(LayoutKind.Sequential)]
-public readonly partial struct DisplayMode : IFormattable, ISpanFormattable
+public abstract partial class DisplayMode : IFormattable, ISpanFormattable
 {
-	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	private readonly string DebuggerDisplay => ToString(formatProvider: CultureInfo.InvariantCulture);
+	private static readonly ConcurrentDictionary<IntPtr, WeakReference<UnmanagedDisplayMode>> mKnownUnmanagedInstances = [];
 
-	private readonly uint mDisplayID;
-	private readonly PixelFormat mFormat;
-	private readonly int mW;
-	private readonly int mH;
-	private readonly float mPixelDensity;
-	private readonly float mRefreshRate;
-	private readonly int mRefreshRateNumerator;
-	private readonly int mRefreshRateDenominator;
-	private unsafe readonly SDL_DisplayModeData* mInternal;
+	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	private string DebuggerDisplay => ToString(formatProvider: CultureInfo.InvariantCulture);
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+	private DisplayMode() { }
 
 	/// <summary>
 	/// Gets the <see cref="Display"/> associated with this display mode
@@ -39,12 +34,15 @@ public readonly partial struct DisplayMode : IFormattable, ISpanFormattable
 	/// The value of this property will only be <c><see langword="null"/></c> if this display mode is invalid.
 	/// </para>
 	/// </remarks>
-	public readonly Display? Display
+	public Display? Display
 	{
 		get
 		{
-			Display.TryGetOrCreate(mDisplayID, out var result);
-			return result;
+			unsafe
+			{
+				Display.TryGetOrCreate(Mode.DisplayID, out var result);
+				return result;
+			}
 		}
 	}
 
@@ -54,7 +52,7 @@ public readonly partial struct DisplayMode : IFormattable, ISpanFormattable
 	/// <value>
 	/// The pixel format of this display mode
 	/// </value>
-	public readonly PixelFormat Format { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mFormat; }
+	public PixelFormat Format { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => Mode.Format; }
 
 	/// <summary>
 	/// Gets the logical height of this display mode
@@ -67,7 +65,9 @@ public readonly partial struct DisplayMode : IFormattable, ISpanFormattable
 	/// To convert the value of this property into actual device pixels, you can multiply it by the value of the <see cref="PixelDensity"/> property. 
 	/// </para>
 	/// </remarks>
-	public readonly int Height { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mH; }
+	public int Height { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => Mode.H; }
+
+	internal abstract ref readonly SDL_DisplayMode Mode { get; }
 
 	/// <summary>
 	/// Gets the scale factor for converting logical pixels into actual device pixels for this display mode
@@ -80,7 +80,7 @@ public readonly partial struct DisplayMode : IFormattable, ISpanFormattable
 	/// You can multiply the values of the <see cref="Width"/> and <see cref="Height"/> properties by the value of this property to get the actual device pixel dimensions of this display mode.
 	/// </para>
 	/// </remarks>
-	public readonly float PixelDensity { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mPixelDensity; }
+	public float PixelDensity { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => Mode.PixelDensity; }
 
 	/// <summary>
 	/// Gets the refresh rate of this display mode
@@ -88,7 +88,7 @@ public readonly partial struct DisplayMode : IFormattable, ISpanFormattable
 	/// <value>
 	/// The refresh rate of this display mode, in Hz (hertz), or <c>0</c> if the refresh rate is unknown or unspecified
 	/// </value>
-	public readonly float RefreshRate { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mRefreshRate; }
+	public float RefreshRate { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => Mode.RefreshRate; }
 
 	/// <summary>
 	/// Gets the refresh rate of this display mode as a ratio of two integers
@@ -96,7 +96,15 @@ public readonly partial struct DisplayMode : IFormattable, ISpanFormattable
 	/// <value>
 	/// The refresh rate of this display mode as a ratio of two integers, where the first integer (the numerator) can be <c>0</c> to indicate an unknown or unspecified refresh rate
 	/// </value>
-	public readonly (int Numerator, int Denominator) RefreshRateRatio { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => (mRefreshRateNumerator, mRefreshRateDenominator); }
+	public (int Numerator, int Denominator) RefreshRateRatio
+	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+		get
+		{
+			ref readonly var mode = ref Mode;
+			return (mode.RefreshRateNumerator, mode.RefreshRateDenominator);
+		}
+	}
 
 	/// <summary>
 	/// Gets the logical width of this display mode
@@ -109,54 +117,103 @@ public readonly partial struct DisplayMode : IFormattable, ISpanFormattable
 	/// To convert the value of this property into actual device pixels, you can multiply it by the value of the <see cref="PixelDensity"/> property.
 	/// </para>
 	/// </remarks>
-	public readonly int Width { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mW; }
+	public int Width { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => Mode.W; }
 
-	/// <inheritdoc/>
-	public readonly override string ToString() => ToString(format: default, formatProvider: default);
-
-	/// <inheritdoc cref="IFormattable.ToString(string?, IFormatProvider?)"/>
-	public readonly string ToString(IFormatProvider? formatProvider) => ToString(format: default, formatProvider);
-
-	/// <inheritdoc cref="IFormattable.ToString(string?, IFormatProvider?)"/>
-	public readonly string ToString(string? format) => ToString(format, formatProvider: default);
-
-	/// <inheritdoc/>
-	public readonly string ToString(string? format, IFormatProvider? formatProvider)
-		=> $"{{ {nameof(Display)}: {Display switch { null => "null", var display => display.ToString(format, formatProvider) }}, {
-			nameof(Format)}: {mFormat}, {
-			nameof(Width)}: {mW.ToString(format, formatProvider)}, {
-			nameof(Height)}: {mH.ToString(format, formatProvider)}, {
-			nameof(PixelDensity)}: {mPixelDensity.ToString(format, formatProvider)}, {
-			nameof(RefreshRate)}: {mRefreshRate.ToString(format, formatProvider)}, {
-			nameof(RefreshRateRatio)}: ({
-				nameof(RefreshRateRatio.Numerator)}: {mRefreshRateNumerator.ToString(format, formatProvider)}, {
-				nameof(RefreshRateRatio.Denominator)}: {mRefreshRateDenominator.ToString(format, formatProvider)}) }}";
-
-	/// <inheritdoc/>
-	public readonly bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default)
+	internal static ref SDL_DisplayMode CreateManaged(out DisplayMode result)
 	{
-		charsWritten = 0;
+		var managed = new ManagedDisplayMode();
+		result = managed;
+		return ref managed.MutableMode;
+	}
 
-		return SpanFormat.TryWrite($"{{ {nameof(Display)}: ", ref destination, ref charsWritten)
-			&& Display switch
+	/// <inheritdoc/>
+	public override string ToString() => ToString(format: default, formatProvider: default);
+
+	/// <inheritdoc cref="IFormattable.ToString(string?, IFormatProvider?)"/>
+	public string ToString(IFormatProvider? formatProvider) => ToString(format: default, formatProvider);
+
+	/// <inheritdoc cref="IFormattable.ToString(string?, IFormatProvider?)"/>
+	public string ToString(string? format) => ToString(format, formatProvider: default);
+
+	/// <inheritdoc/>
+	public string ToString(string? format, IFormatProvider? formatProvider)
+	{
+		unsafe
+		{
+			ref readonly var mode = ref Mode;
+
+			if (mode.DisplayID is 0)
 			{
-				null => SpanFormat.TryWrite("null", ref destination, ref charsWritten),
-				var display => SpanFormat.TryWrite(display, ref destination, ref charsWritten, format, provider)
+				return "invalid";
 			}
-			&& SpanFormat.TryWrite($", {nameof(Format)}: ", ref destination, ref charsWritten)
-			&& SpanFormat.TryWrite(mFormat, ref destination, ref charsWritten)
-			&& SpanFormat.TryWrite($", {nameof(Width)}: ", ref destination, ref charsWritten)
-			&& SpanFormat.TryWrite(mW, ref destination, ref charsWritten, format, provider)
-			&& SpanFormat.TryWrite($", {nameof(Height)}: ", ref destination, ref charsWritten)
-			&& SpanFormat.TryWrite(mH, ref destination, ref charsWritten, format, provider)
-			&& SpanFormat.TryWrite($", {nameof(PixelDensity)}: ", ref destination, ref charsWritten)
-			&& SpanFormat.TryWrite(mPixelDensity, ref destination, ref charsWritten, format, provider)
-			&& SpanFormat.TryWrite($", {nameof(RefreshRate)}: ", ref destination, ref charsWritten)
-			&& SpanFormat.TryWrite(mRefreshRate, ref destination, ref charsWritten, format, provider)
-			&& SpanFormat.TryWrite($", {nameof(RefreshRateRatio)}: ({nameof(RefreshRateRatio.Numerator)}: ", ref destination, ref charsWritten)
-			&& SpanFormat.TryWrite(mRefreshRateNumerator, ref destination, ref charsWritten, format, provider)
-			&& SpanFormat.TryWrite($", {nameof(RefreshRateRatio.Denominator)}: ", ref destination, ref charsWritten)
-			&& SpanFormat.TryWrite(mRefreshRateDenominator, ref destination, ref charsWritten, format, provider)
-			&& SpanFormat.TryWrite(") }", ref destination, ref charsWritten);
+
+			return $"{{ {nameof(Display)}: {(Display.TryGetOrCreate(mode.DisplayID, out var display) ? display.ToString(format, formatProvider) : "null")}, {
+				nameof(Format)}: {mode.Format}, {
+				nameof(Width)}: {mode.W.ToString(format, formatProvider)}, {
+				nameof(Height)}: {mode.H.ToString(format, formatProvider)}, {
+				nameof(PixelDensity)}: {mode.PixelDensity.ToString(format, formatProvider)}, {
+				nameof(RefreshRate)}: {mode.RefreshRate.ToString(format, formatProvider)}, {
+				nameof(RefreshRateRatio)}: ({
+					nameof(RefreshRateRatio.Numerator)}: {mode.RefreshRateNumerator.ToString(format, formatProvider)}, {
+					nameof(RefreshRateRatio.Denominator)}: {mode.RefreshRateDenominator.ToString(format, formatProvider)}) }}";
+		}
+	}
+
+	/// <inheritdoc/>
+	public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default)
+	{
+		unsafe
+		{
+			charsWritten = 0;
+
+			ref readonly var mode = ref Mode;
+
+			if (mode.DisplayID is 0)
+			{
+				return SpanFormat.TryWrite("invalid", ref destination, ref charsWritten);
+			}
+
+			return SpanFormat.TryWrite($"{{ {nameof(Display)}: ", ref destination, ref charsWritten)
+				&& (Display.TryGetOrCreate(mode.DisplayID, out var display)
+					? SpanFormat.TryWrite(display, ref destination, ref charsWritten, format, provider)
+					: SpanFormat.TryWrite("null", ref destination, ref charsWritten))
+				&& SpanFormat.TryWrite($", {nameof(Format)}: ", ref destination, ref charsWritten)
+				&& SpanFormat.TryWrite(mode.Format, ref destination, ref charsWritten)
+				&& SpanFormat.TryWrite($", {nameof(Width)}: ", ref destination, ref charsWritten)
+				&& SpanFormat.TryWrite(mode.W, ref destination, ref charsWritten, format, provider)
+				&& SpanFormat.TryWrite($", {nameof(Height)}: ", ref destination, ref charsWritten)
+				&& SpanFormat.TryWrite(mode.H, ref destination, ref charsWritten, format, provider)
+				&& SpanFormat.TryWrite($", {nameof(PixelDensity)}: ", ref destination, ref charsWritten)
+				&& SpanFormat.TryWrite(mode.PixelDensity, ref destination, ref charsWritten, format, provider)
+				&& SpanFormat.TryWrite($", {nameof(RefreshRate)}: ", ref destination, ref charsWritten)
+				&& SpanFormat.TryWrite(mode.RefreshRate, ref destination, ref charsWritten, format, provider)
+				&& SpanFormat.TryWrite($", {nameof(RefreshRateRatio)}: ({nameof(RefreshRateRatio.Numerator)}: ", ref destination, ref charsWritten)
+				&& SpanFormat.TryWrite(mode.RefreshRateNumerator, ref destination, ref charsWritten, format, provider)
+				&& SpanFormat.TryWrite($", {nameof(RefreshRateRatio.Denominator)}: ", ref destination, ref charsWritten)
+				&& SpanFormat.TryWrite(mode.RefreshRateDenominator, ref destination, ref charsWritten, format, provider)
+				&& SpanFormat.TryWrite(") }", ref destination, ref charsWritten);
+		}
+	}
+	internal unsafe static bool TryGetOrCreateUnmanaged(SDL_DisplayMode* mode, [NotNullWhen(true)] out DisplayMode? result)
+	{
+		if (mode is null)
+		{
+			result = null;
+			return false;
+		}
+
+		var modeRef = mKnownUnmanagedInstances.GetOrAdd(unchecked((IntPtr)mode), createRef);
+
+		if (!modeRef.TryGetTarget(out var target))
+		{
+			modeRef.SetTarget(target = create(mode));
+		}
+
+		result = target;
+		return true;
+
+		static WeakReference<UnmanagedDisplayMode> createRef(IntPtr mode) => new(create(unchecked((SDL_DisplayMode*)mode)));
+
+		static UnmanagedDisplayMode create(SDL_DisplayMode* mode) => new(mode);
 	}
 }

@@ -208,10 +208,10 @@ public abstract partial class Display :
 	}
 
 	/// <summary>
-	/// Gets a reference to the current display mode used by this display
+	/// Gets the current display mode used by this display
 	/// </summary>
 	/// <value>
-	/// A reference to the current display mode used by this display
+	/// The current display mode used by this display
 	/// </value>
 	/// <remarks>
 	/// <para>
@@ -223,20 +223,18 @@ public abstract partial class Display :
 	/// </para>
 	/// </remarks>
 	/// <exception cref="SdlException">Couldn't get the current display mode for the display (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
-	public ref readonly DisplayMode CurrentDisplayMode
+	public DisplayMode CurrentDisplayMode
 	{
 		get
 		{
 			unsafe
 			{
-				var displayMode = SDL_GetCurrentDisplayMode(mDisplayId);
-
-				if (displayMode is null)
+				if (!DisplayMode.TryGetOrCreateUnmanaged(SDL_GetCurrentDisplayMode(mDisplayId), out var result))
 				{
 					failDisplayModeNull();
 				}
 
-				return ref Unsafe.AsRef<DisplayMode>(displayMode);
+				return result;
 			}
 
 			[DoesNotReturn]
@@ -264,10 +262,10 @@ public abstract partial class Display :
 	}
 
 	/// <summary>
-	/// Gets a reference to the desktop display mode for this display
+	/// Gets the desktop display mode for this display
 	/// </summary>
 	/// <value>
-	/// A reference to the desktop display mode for this display
+	/// The desktop display mode for this display
 	/// </value>
 	/// <remarks>
 	/// <para>
@@ -279,21 +277,18 @@ public abstract partial class Display :
 	/// </para>
 	/// </remarks>
 	/// <exception cref="SdlException">Couldn't get the desktop display mode for the display (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
-	public ref readonly DisplayMode DesktopDisplayMode
+	public DisplayMode DesktopDisplayMode
 	{
 		get
 		{
 			unsafe
 			{
-
-				var displayMode = SDL_GetDesktopDisplayMode(mDisplayId);
-
-				if (displayMode is null)
+				if (!DisplayMode.TryGetOrCreateUnmanaged(SDL_GetDesktopDisplayMode(mDisplayId), out var result))
 				{
 					failDisplayModeNull();
 				}
 
-				return ref Unsafe.AsRef<DisplayMode>(displayMode);
+				return result;
 			}
 
 			[DoesNotReturn]
@@ -302,10 +297,10 @@ public abstract partial class Display :
 	}
 
 	/// <summary>
-	/// Gets a collection of references to the fullscreen display modes available for this display
+	/// Gets a collection of the fullscreen display modes available for this display
 	/// </summary>
 	/// <value>
-	/// A collection of references to the fullscreen display modes available for this display
+	/// A collection of the fullscreen display modes available for this display
 	/// </value>
 	/// <remarks>
 	/// <para>
@@ -338,20 +333,51 @@ public abstract partial class Display :
 	///	</list>
 	/// </para>
 	/// <para>
-	/// If the collection happens to be empty, you can check <see cref="Error.TryGet(out string?)"/> to see if there was an error while retrieving the display modes.
-	/// </para>
-	/// <para>
 	/// This property should only be accessed from the main thread.
 	/// </para>
 	/// </remarks>
-	public DisplayModesEnumerable FullscreenDisplayModes
+	/// <exception cref="SdlException">Couldn't get the fullscreen display modes for the display</exception>
+	public DisplayMode[] FullscreenDisplayModes
 	{
 		get
 		{
 			unsafe
 			{
-				return new(&SDL_GetFullscreenDisplayModes, &Utilities.NativeMemory.SDL_free, mDisplayId);
+				Unsafe.SkipInit(out int count);
+
+				var modes = SDL_GetFullscreenDisplayModes(mDisplayId, &count);
+
+				if (modes is null)
+				{
+					failCouldNotGetDisplayModes();
+				}
+
+				try
+				{
+					if (count is not > 0)
+					{
+						return [];
+					}
+
+					var result = GC.AllocateUninitializedArray<DisplayMode>(count);
+
+					var modePtr = modes;
+					foreach (ref var mode in result.AsSpan())
+					{
+						// We silently assume here that the display mode pointers returned by SDL_GetFullscreenDisplayModes() are never null (the only case in which TryGetOrCreateUnmanaged would fail)
+						DisplayMode.TryGetOrCreateUnmanaged(*modePtr++, out mode!);
+					}
+
+					return result;
+				}
+				finally
+				{
+					Utilities.NativeMemory.SDL_free(modes);
+				}
 			}
+
+			[DoesNotReturn]
+			static void failCouldNotGetDisplayModes() => throw new SdlException("Couldn't get the fullscreen display modes for the display");
 		}
 	}
 
@@ -591,7 +617,7 @@ public abstract partial class Display :
 	{
 		unsafe
 		{
-			fixed (DisplayMode* displayModePtr = &displayMode)
+			fixed (DisplayMode.SDL_DisplayMode* displayModePtr = &DisplayMode.CreateManaged(out displayMode))
 			{
 				return SDL_GetClosestFullscreenDisplayMode(mDisplayId, width, height, refreshRate, includeHighDensityModes, displayModePtr);
 			}
