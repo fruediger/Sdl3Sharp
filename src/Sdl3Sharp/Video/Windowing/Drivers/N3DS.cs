@@ -9,11 +9,6 @@ namespace Sdl3Sharp.Video.Windowing.Drivers;
 /// <summary>
 /// Represents the Nintendo 3DS windowing driver
 /// </summary>
-/// <remarks>
-/// <para>
-/// This windowing backend is experimental and is <em>not supported</em>.
-/// </para>
-/// </remarks>
 [RegisterDriver(Name)]
 public sealed partial class N3DS : IWindowingDriver
 {
