@@ -53,7 +53,7 @@ public partial class MessageBox
 						{
 							Flags = Flags,
 							Window = ParentWindow is not null
-								? ParentWindow.WindowPtr
+								? ParentWindow.Pointer
 								: null,
 							Title = utf8Title,
 							Message = utf8Message,
@@ -102,7 +102,7 @@ public partial class MessageBox
 
 			try
 			{
-				return SDL_ShowSimpleMessageBox(flags, utf8Title, utf8Message, parentWindow is not null ? parentWindow.WindowPtr : null);
+				return SDL_ShowSimpleMessageBox(flags, utf8Title, utf8Message, parentWindow is not null ? parentWindow.Pointer : null);
 			}
 			finally
 			{

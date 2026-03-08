@@ -32,8 +32,7 @@ namespace Sdl3Sharp.Video.Windowing;
 /// </para>
 /// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
-public abstract partial class Display :
-	IEquatable<Display>, IFormattable, ISpanFormattable
+public abstract partial class Display : IFormattable, ISpanFormattable
 {
 	private static readonly ConcurrentDictionary<uint, WeakReference<Display>> mKnownInstances = [];
 
@@ -189,7 +188,7 @@ public abstract partial class Display :
 	/// For example, a 4K display might have a <c>2.0</c> (200%) display scale, which means that the user expects UI elements to be twice as big on this display, to aid in readability.
 	/// </para>
 	/// <para>
-	/// After window creation, <see cref="IWindow.DisplayScale"/> should be used to determine the content scale factor for individual windows instead of content scale of the display for a window.
+	/// After window creation, <see cref="Window.DisplayScale"/> should be used to determine the content scale factor for individual windows instead of content scale of the display for a window.
 	/// That's because the per-window content scale factor may differ from the content scale factor of the display it is on, particularly on high-DPI and/or multi-monitor desktop configurations.
 	/// </para>
 	/// <para>
@@ -558,17 +557,6 @@ public abstract partial class Display :
 			static void failCouldNotGetDisplayUsableBounds() => throw new SdlException("Couldn't get the display usable bounds for the display");
 		}
 	}
-
-	/// <inheritdoc/>
-	public override bool Equals(object? obj) => Equals(obj as Display);
-
-	/// <inheritdoc/>
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public bool Equals(Display? other) => mDisplayId == other?.mDisplayId;
-
-	/// <inheritdoc/>
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public override int GetHashCode() => mDisplayId.GetHashCode();
 
 	/// <inheritdoc/>
 	public override string ToString() => ToString(format: default, formatProvider: default);

@@ -1536,11 +1536,11 @@ public abstract partial class Renderer : IDisposable
 			return false;
 		}
 
-		var textureRef = mKnownInstances.GetOrAdd(unchecked((IntPtr)renderer), createRef);
+		var rendererRef = mKnownInstances.GetOrAdd(unchecked((IntPtr)renderer), createRef);
 
-		if (!textureRef.TryGetTarget(out result))
+		if (!rendererRef.TryGetTarget(out result))
 		{
-			textureRef.SetTarget(result = create(renderer));
+			rendererRef.SetTarget(result = create(renderer));
 		}
 
 		return true;
@@ -1565,7 +1565,7 @@ public abstract partial class Renderer : IDisposable
 	{
 		if (renderer is null)
 		{
-			result = default;
+			result = null;
 			return false;
 		}
 
@@ -1583,11 +1583,11 @@ public abstract partial class Renderer : IDisposable
 		}
 		else if (baseResult.Pointer is not null)
 		{
-			// this also means that baseResult.Pointer == texture
-			// this indicates that we actually need the texture to be of a different managed type than it currently is,
+			// this also means that baseResult.Pointer == renderer
+			// this indicates that we actually need the renderer to be of a different managed type than it currently is,
 			// we should just fail in that case
 
-			result = default;
+			result = null;
 			return false;
 		}
 		else
@@ -1949,7 +1949,7 @@ public abstract partial class Renderer : IDisposable
 	/// This method should only be called from the main thread.
 	/// </para>
 	/// </remarks>
-	public bool TryRenderGeometry(ReadOnlySpan<Vertex> vertices, ReadOnlySpan<int> indices, Texture? texture)
+	public bool TryRenderGeometry(ReadOnlySpan<Vertex> vertices, ReadOnlySpan<int> indices, Texture? texture = default)
 	{
 		unsafe
 		{
@@ -1984,7 +1984,7 @@ public abstract partial class Renderer : IDisposable
 	/// This method should only be called from the main thread.
 	/// </para>
 	/// </remarks>
-	public bool TryRenderGeometry(ReadOnlySpan<Vertex> vertices, Texture? texture)
+	public bool TryRenderGeometry(ReadOnlySpan<Vertex> vertices, Texture? texture = default)
 	{
 		unsafe
 		{
@@ -2017,7 +2017,7 @@ public abstract partial class Renderer : IDisposable
 		));
 	}
 
-	private bool TryRenderGeometryRawImpl<TIndex>(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, ReadOnlySpan<TIndex> indices, Texture? texture)
+	private bool TryRenderGeometryRawImpl<TIndex>(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, ReadOnlySpan<TIndex> indices, Texture? texture = default)
 		where TIndex : unmanaged
 	{
 		unsafe
@@ -2071,7 +2071,7 @@ public abstract partial class Renderer : IDisposable
 	/// This method should only be called from the main thread.
 	/// </para>
 	/// </remarks>
-	public bool TryRenderGeometryRaw(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, ReadOnlySpan<int> indices, Texture? texture)
+	public bool TryRenderGeometryRaw(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, ReadOnlySpan<int> indices, Texture? texture = default)
 		=> TryRenderGeometryRawImpl(xy, xyStride, colors, colorStride, uv, uvStride, indices, texture);
 
 	/// <summary>
@@ -2103,7 +2103,7 @@ public abstract partial class Renderer : IDisposable
 	/// This method should only be called from the main thread.
 	/// </para>
 	/// </remarks>
-	public bool TryRenderGeometryRaw(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, ReadOnlySpan<short> indices, Texture? texture)
+	public bool TryRenderGeometryRaw(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, ReadOnlySpan<short> indices, Texture? texture = default)
 		=> TryRenderGeometryRawImpl(xy, xyStride, colors, colorStride, uv, uvStride, indices, texture);
 
 	/// <summary>
@@ -2135,7 +2135,7 @@ public abstract partial class Renderer : IDisposable
 	/// This method should only be called from the main thread.
 	/// </para>
 	/// </remarks>
-	public bool TryRenderGeometryRaw(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, ReadOnlySpan<sbyte> indices, Texture? texture)
+	public bool TryRenderGeometryRaw(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, ReadOnlySpan<sbyte> indices, Texture? texture = default)
 		=> TryRenderGeometryRawImpl(xy, xyStride, colors, colorStride, uv, uvStride, indices, texture);
 
 	/// <summary>
@@ -2163,7 +2163,7 @@ public abstract partial class Renderer : IDisposable
 	/// This method should only be called from the main thread.
 	/// </para>
 	/// </remarks>
-	public bool TryRenderGeometryRaw(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, Texture? texture)
+	public bool TryRenderGeometryRaw(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, Texture? texture = default)
 	{
 		unsafe
 		{
@@ -2200,7 +2200,7 @@ public abstract partial class Renderer : IDisposable
 		);
 	}
 
-	private bool TryRenderGeometryRawImpl<TIndex>(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, ReadOnlySpan<TIndex> indices, Texture? texture)
+	private bool TryRenderGeometryRawImpl<TIndex>(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, ReadOnlySpan<TIndex> indices, Texture? texture = default)
 		where TIndex : unmanaged
 	{
 		unsafe
@@ -2252,7 +2252,7 @@ public abstract partial class Renderer : IDisposable
 	/// This method should only be called from the main thread.
 	/// </para>
 	/// </remarks>
-	public bool TryRenderGeometryRaw(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, ReadOnlySpan<int> indices, Texture? texture)
+	public bool TryRenderGeometryRaw(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, ReadOnlySpan<int> indices, Texture? texture = default)
 		=> TryRenderGeometryRawImpl(xy, xyStride, colors, colorStride, uv, uvStride, indices, texture);
 
 	/// <summary>
@@ -2284,7 +2284,7 @@ public abstract partial class Renderer : IDisposable
 	/// This method should only be called from the main thread.
 	/// </para>
 	/// </remarks>
-	public bool TryRenderGeometryRaw(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, ReadOnlySpan<short> indices, Texture? texture)
+	public bool TryRenderGeometryRaw(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, ReadOnlySpan<short> indices, Texture? texture = default)
 		=> TryRenderGeometryRawImpl(xy, xyStride, colors, colorStride, uv, uvStride, indices, texture);
 
 	/// <summary>
@@ -2316,7 +2316,7 @@ public abstract partial class Renderer : IDisposable
 	/// This method should only be called from the main thread.
 	/// </para>
 	/// </remarks>
-	public bool TryRenderGeometryRaw(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, ReadOnlySpan<sbyte> indices, Texture? texture)
+	public bool TryRenderGeometryRaw(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, ReadOnlySpan<sbyte> indices, Texture? texture = default)
 		=> TryRenderGeometryRawImpl(xy, xyStride, colors, colorStride, uv, uvStride, indices, texture);
 
 	/// <summary>
@@ -2344,7 +2344,7 @@ public abstract partial class Renderer : IDisposable
 	/// This method should only be called from the main thread.
 	/// </para>
 	/// </remarks>
-	public bool TryRenderGeometryRaw(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, Texture? texture)
+	public bool TryRenderGeometryRaw(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, Texture? texture = default)
 	{
 		unsafe
 		{
@@ -2365,7 +2365,7 @@ public abstract partial class Renderer : IDisposable
 		}
 	}
 
-	private unsafe bool TryRenderGeometryRawImpl<TIndex>(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, TIndex* indices, int indicesCount, Texture? texture)
+	private unsafe bool TryRenderGeometryRawImpl<TIndex>(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, TIndex* indices, int indicesCount, Texture? texture = default)
 		where TIndex : unmanaged
 	{
 		if (!TryGetTexturePointer(texture, out var texturePtr))
@@ -2405,7 +2405,7 @@ public abstract partial class Renderer : IDisposable
 	/// This method should only be called from the main thread.
 	/// </para>
 	/// </remarks>
-	public unsafe bool TryRenderGeometryRaw(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, int* indices, int indicesCount, Texture? texture)
+	public unsafe bool TryRenderGeometryRaw(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, int* indices, int indicesCount, Texture? texture = default)
 		=> TryRenderGeometryRawImpl(xy, xyStride, colors, colorStride, uv, uvStride, verticesCount, indices, indicesCount, texture);
 
 	/// <summary>
@@ -2436,7 +2436,7 @@ public abstract partial class Renderer : IDisposable
 	/// This method should only be called from the main thread.
 	/// </para>
 	/// </remarks>
-	public unsafe bool TryRenderGeometryRaw(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, short* indices, int indicesCount, Texture? texture)
+	public unsafe bool TryRenderGeometryRaw(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, short* indices, int indicesCount, Texture? texture = default)
 		=> TryRenderGeometryRawImpl(xy, xyStride, colors, colorStride, uv, uvStride, verticesCount, indices, indicesCount, texture);
 
 	/// <summary>
@@ -2467,7 +2467,7 @@ public abstract partial class Renderer : IDisposable
 	/// This method should only be called from the main thread.
 	/// </para>
 	/// </remarks>
-	public unsafe bool TryRenderGeometryRaw(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, sbyte* indices, int indicesCount, Texture? texture)
+	public unsafe bool TryRenderGeometryRaw(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, sbyte* indices, int indicesCount, Texture? texture = default)
 		=> TryRenderGeometryRawImpl(xy, xyStride, colors, colorStride, uv, uvStride, verticesCount, indices, indicesCount, texture);
 
 	/// <summary>
@@ -2493,7 +2493,7 @@ public abstract partial class Renderer : IDisposable
 	/// This method should only be called from the main thread.
 	/// </para>
 	/// </remarks>
-	public unsafe bool TryRenderGeometryRaw(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, Texture? texture)
+	public unsafe bool TryRenderGeometryRaw(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, Texture? texture = default)
 	{
 		if (!TryGetTexturePointer(texture, out var texturePtr))
 		{

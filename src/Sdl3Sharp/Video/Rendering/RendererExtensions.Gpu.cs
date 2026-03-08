@@ -77,7 +77,7 @@ partial class RendererExtensions
 		{
 			unsafe
 			{
-				var rendererPtr = Renderer.SDL_CreateGPURenderer(gpuDevice is not null ? gpuDevice.Pointer : null, window is not null ? window.WindowPtr : null);
+				var rendererPtr = Renderer.SDL_CreateGPURenderer(gpuDevice is not null ? gpuDevice.Pointer : null, window is not null ? window.Pointer : null);
 
 				if (rendererPtr is null)
 				{

@@ -14,12 +14,12 @@ namespace Sdl3Sharp.Video.Windowing;
 /// </summary>
 /// <remarks>
 /// <para>
-/// If the <see cref="WindowPosition"/> represents a centered position or an undefined position, it can be optionally associated with a specific <see cref="IDisplay"/> where the centered or undefined position is applicable.
-/// Otherwise, if the <see cref="WindowPosition"/> isn't associated with any specific <see cref="IDisplay"/>, then the centered or undefined position is applicable to the primary display.
+/// If the <see cref="WindowPosition"/> represents a centered position or an undefined position, it can be optionally associated with a specific <see cref="Display"/> where the centered or undefined position is applicable.
+/// Otherwise, if the <see cref="WindowPosition"/> isn't associated with any specific <see cref="Display"/>, then the centered or undefined position is applicable to the primary display.
 /// </para>
 /// <para>
-/// You can use the <see cref="TryGetValue(out int)"/>, <see cref="TryGetCentered(out IDisplay?)"/>, and <see cref="TryGetUndefined(out IDisplay?)"/> methods to determine whether a <see cref="WindowPosition"/> represents a definite window coordinate value, a centered position, or an undefined position,
-/// and to extract the associated value or <see cref="IDisplay"/>, if any, accordingly.
+/// You can use the <see cref="TryGetValue(out int)"/>, <see cref="TryGetCentered(out Display?)"/>, and <see cref="TryGetUndefined(out Display?)"/> methods to determine whether a <see cref="WindowPosition"/> represents a definite window coordinate value, a centered position, or an undefined position,
+/// and to extract the associated value or <see cref="Display"/>, if any, accordingly.
 /// </para>
 /// </remarks>
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
@@ -47,7 +47,7 @@ public readonly struct WindowPosition :
 	/// </value>
 	/// <remarks>
 	/// <para>
-	/// If you want to specify a centered position on a specific display, you can use the <see cref="CenteredOn(IDisplay)"/> method instead.
+	/// If you want to specify a centered position on a specific display, you can use the <see cref="CenteredOn(Display)"/> method instead.
 	/// </para>
 	/// </remarks>
 	public static WindowPosition Centered { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => CenteredImpl(0); }
@@ -62,13 +62,13 @@ public readonly struct WindowPosition :
 	/// If you want to specify a centered position on the primary display, you can use the <see cref="Centered"/> property instead.
 	/// </para>
 	/// <para>
-	/// <see cref="IDisplay"/>s used by this method are technically limited to having an <see cref="IDisplay.Id"/> of <c>65535</c> or less.
+	/// <see cref="Display"/>s used by this method are technically limited to having an <see cref="Display.Id"/> of <c>65535</c> or less.
 	/// However, in practice, this shouldn't be an issue since display ids very rarely exceed this value.
 	/// Note that this method doesn't fail if given a display with an id larger than <c>65535</c>, it instead always just takes the lower 16 bits of the display id.
 	/// </para>
 	/// </remarks>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static WindowPosition CenteredOn(IDisplay display)
+	public static WindowPosition CenteredOn(Display display)
 		=> CenteredImpl(display?.Id ?? 0); // technically, display could be null here, but we don't throw, we just treat it as if it were a display with id 0, which is the primary display
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -83,7 +83,7 @@ public readonly struct WindowPosition :
 	/// <remarks>
 	/// <para>
 	/// This can be used to represent a "don't know" or "don't care" position, which is always going to be treated as if it were on the primary display.
-	/// If you want to specify an undefined position on a specific display, you can use the <see cref="UndefinedOn(IDisplay)"/> method instead.
+	/// If you want to specify an undefined position on a specific display, you can use the <see cref="UndefinedOn(Display)"/> method instead.
 	/// </para>
 	/// </remarks>
 	public static WindowPosition Undefined { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => UndefinedImpl(0); }
@@ -99,13 +99,13 @@ public readonly struct WindowPosition :
 	/// If you want to specify an undefined position on the primary display, you can use the <see cref="Undefined"/> property instead.
 	/// </para>
 	/// <para>
-	/// <see cref="IDisplay"/>s used by this method are technically limited to having an <see cref="IDisplay.Id"/> of <c>65535</c> or less.
+	/// <see cref="Display"/>s used by this method are technically limited to having an <see cref="Display.Id"/> of <c>65535</c> or less.
 	/// However, in practice, this shouldn't be an issue since display ids very rarely exceed this value.
 	/// Note that this method doesn't fail if given a display with an id larger than <c>65535</c>, it instead always just takes the lower 16 bits of the display id.
 	/// </para>
 	/// </remarks>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public static WindowPosition UndefinedOn(IDisplay display)
+	public static WindowPosition UndefinedOn(Display display)
 		=> UndefinedImpl(display?.Id ?? 0);  // technically, display could be null here, but we don't throw, we just treat it as if it were a display with id 0, which is the primary display
 
 	/// <summary>
@@ -204,9 +204,9 @@ public readonly struct WindowPosition :
 	}
 
 	/// <summary>
-	/// Tries to determine whether this <see cref="WindowPosition"/> represents a centered position and, if so, gets the associated <see cref="IDisplay"/>, if any
+	/// Tries to determine whether this <see cref="WindowPosition"/> represents a centered position and, if so, gets the associated <see cref="Display"/>, if any
 	/// </summary>
-	/// <param name="display">The associated <see cref="IDisplay"/>, or <c><see langword="null"/></c> if this <see cref="WindowPosition"/> represents a centered position on the primary display</param>
+	/// <param name="display">The associated <see cref="Display"/>, or <c><see langword="null"/></c> if this <see cref="WindowPosition"/> represents a centered position on the primary display</param>
 	/// <returns><c><see langword="true"/></c>, if this <see cref="WindowPosition"/> represents a centered position; otherwise, <c><see langword="false"/></c></returns>
 	/// <remarks>
 	/// <para>
@@ -215,11 +215,11 @@ public readonly struct WindowPosition :
 	/// </para>
 	/// </remarks>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public readonly bool TryGetCentered(out IDisplay? display)
+	public readonly bool TryGetCentered(out Display? display)
 	{
 		if ((mValue & mKindMask) is mCenteredMask)
 		{
-			return IDisplay.TryGetOrCreate(unchecked((uint)(mValue & ~mKindMask)), out display);
+			return Display.TryGetOrCreate(unchecked((uint)(mValue & ~mKindMask)), out display);
 		}
 
 		display = null;
@@ -227,9 +227,9 @@ public readonly struct WindowPosition :
 	}
 
 	/// <summary>
-	/// Tries to determine whether this <see cref="WindowPosition"/> represents an undefined position and, if so, gets the associated <see cref="IDisplay"/>, if any
+	/// Tries to determine whether this <see cref="WindowPosition"/> represents an undefined position and, if so, gets the associated <see cref="Display"/>, if any
 	/// </summary>
-	/// <param name="display">The associated <see cref="IDisplay"/>, or <c><see langword="null"/></c> if this <see cref="WindowPosition"/> represents an undefined position on the primary display</param>
+	/// <param name="display">The associated <see cref="Display"/>, or <c><see langword="null"/></c> if this <see cref="WindowPosition"/> represents an undefined position on the primary display</param>
 	/// <returns><c><see langword="true"/></c>, if this <see cref="WindowPosition"/> represents an undefined position; otherwise, <c><see langword="false"/></c></returns>
 	/// <remarks>
 	/// <para>
@@ -238,11 +238,11 @@ public readonly struct WindowPosition :
 	/// </para>
 	/// </remarks>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public readonly bool TryGetUndefined(out IDisplay? display)
+	public readonly bool TryGetUndefined(out Display? display)
 	{
 		if ((mValue & mKindMask) is mUndefinedMask)
 		{
-			return IDisplay.TryGetOrCreate(unchecked((uint)(mValue & ~mKindMask)), out display);
+			return Display.TryGetOrCreate(unchecked((uint)(mValue & ~mKindMask)), out display);
 		}
 
 		display = null;
@@ -256,7 +256,7 @@ public readonly struct WindowPosition :
 	/// <returns><c><see langword="true"/></c>, if this <see cref="WindowPosition"/> represents a definite window coordinate; otherwise, <c><see langword="false"/></c></returns>
 	/// <remarks>
 	/// <para>
-	/// This method will return <c><see langword="true"/></c> if and only if <see cref="TryGetCentered(out IDisplay?)"/> and <see cref="TryGetUndefined(out IDisplay?)"/> would both return <c><see langword="false"/></c>.
+	/// This method will return <c><see langword="true"/></c> if and only if <see cref="TryGetCentered(out Display?)"/> and <see cref="TryGetUndefined(out Display?)"/> would both return <c><see langword="false"/></c>.
 	/// </para>
 	/// </remarks>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]

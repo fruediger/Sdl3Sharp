@@ -359,7 +359,6 @@ public sealed partial class Renderer<TDriver> : Renderer
 						if (colorSpaceBackup is ColorSpace colorSpaceValue)
 						{
 							propertiesUsed.TrySetNumberValue(Texture.PropertyNames.CreateColorSpaceNumber, unchecked((uint)colorSpaceValue));
-
 						}
 						else
 						{
@@ -508,7 +507,7 @@ public sealed partial class Renderer<TDriver> : Renderer
 		$"Use {nameof(TryRenderGeometry)}({nameof(ReadOnlySpan<>)}<{nameof(Vertex)}>, {nameof(ReadOnlySpan<>)}<int>, {nameof(Texture<>)}<{nameof(TDriver)}>?) instead.",
 		error: true
 	)]
-	public new bool TryRenderGeometry(ReadOnlySpan<Vertex> vertices, ReadOnlySpan<int> indices, Texture? texture)
+	public new bool TryRenderGeometry(ReadOnlySpan<Vertex> vertices, ReadOnlySpan<int> indices, Texture? texture = default)
 		=> base.TryRenderGeometry(vertices, indices, texture);
 
 	/// <inheritdoc cref="Renderer.TryRenderGeometry(ReadOnlySpan{Vertex}, ReadOnlySpan{int}, Texture?)"/>
@@ -523,7 +522,7 @@ public sealed partial class Renderer<TDriver> : Renderer
 		$"Use {nameof(TryRenderGeometry)}({nameof(ReadOnlySpan<>)}<{nameof(Vertex)}>, {nameof(Texture<>)}<{nameof(TDriver)}>?) instead.",
 		error: true
 	)]
-	public new bool TryRenderGeometry(ReadOnlySpan<Vertex> vertices, Texture? texture)
+	public new bool TryRenderGeometry(ReadOnlySpan<Vertex> vertices, Texture? texture = default)
 		=> base.TryRenderGeometry(vertices, texture);
 
 	/// <inheritdoc cref="Renderer.TryRenderGeometry(ReadOnlySpan{Vertex}, Texture?)" />
@@ -538,7 +537,7 @@ public sealed partial class Renderer<TDriver> : Renderer
 		$"Use {nameof(TryRenderGeometryRaw)}({nameof(ReadOnlyNativeMemory<>)}<float>, int, {nameof(ReadOnlyNativeMemory<>)}<{nameof(Color<>)}<float>>, int, {nameof(ReadOnlyNativeMemory<>)}<float>, int, {nameof(ReadOnlySpan<>)}<int>, {nameof(Texture<>)}<{nameof(TDriver)}>?) instead.",
 		error: true
 	)]
-	public new bool TryRenderGeometryRaw(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, ReadOnlySpan<int> indices, Texture? texture)
+	public new bool TryRenderGeometryRaw(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, ReadOnlySpan<int> indices, Texture? texture = default)
 		=> base.TryRenderGeometryRaw(xy, xyStride, colors, colorStride, uv, uvStride, indices, texture);
 
 	/// <inheritdoc cref="Renderer.TryRenderGeometryRaw(ReadOnlyNativeMemory{float}, int, ReadOnlyNativeMemory{Color{float}}, int, ReadOnlyNativeMemory{float}, int, ReadOnlySpan{int}, Texture?)" />
@@ -553,7 +552,7 @@ public sealed partial class Renderer<TDriver> : Renderer
 		$"Use {nameof(TryRenderGeometryRaw)}({nameof(ReadOnlyNativeMemory<>)}<float>, int, {nameof(ReadOnlyNativeMemory<>)}<{nameof(Color<>)}<float>>, int, {nameof(ReadOnlyNativeMemory<>)}<float>, int, {nameof(ReadOnlySpan<>)}<short>, {nameof(Texture<>)}<{nameof(TDriver)}>?) instead.",
 		error: true
 	)]
-	public new bool TryRenderGeometryRaw(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, ReadOnlySpan<short> indices, Texture? texture)
+	public new bool TryRenderGeometryRaw(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, ReadOnlySpan<short> indices, Texture? texture = default)
 		=> base.TryRenderGeometryRaw(xy, xyStride, colors, colorStride, uv, uvStride, indices, texture);
 
 	/// <inheritdoc cref="Renderer.TryRenderGeometryRaw(ReadOnlyNativeMemory{float}, int, ReadOnlyNativeMemory{Color{float}}, int, ReadOnlyNativeMemory{float}, int, ReadOnlySpan{short}, Texture?)" />
@@ -568,7 +567,7 @@ public sealed partial class Renderer<TDriver> : Renderer
 		$"Use {nameof(TryRenderGeometryRaw)}({nameof(ReadOnlyNativeMemory<>)}<float>, int, {nameof(ReadOnlyNativeMemory<>)}<{nameof(Color<>)}<float>>, int, {nameof(ReadOnlyNativeMemory<>)}<float>, int, {nameof(ReadOnlySpan<>)}<sbyte>, {nameof(Texture<>)}<{nameof(TDriver)}>?) instead.",
 		error: true
 	)]
-	public new bool TryRenderGeometryRaw(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, ReadOnlySpan<sbyte> indices, Texture? texture)
+	public new bool TryRenderGeometryRaw(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, ReadOnlySpan<sbyte> indices, Texture? texture = default)
 		=> base.TryRenderGeometryRaw(xy, xyStride, colors, colorStride, uv, uvStride, indices, texture);
 
 	/// <inheritdoc cref="Renderer.TryRenderGeometryRaw(ReadOnlyNativeMemory{float}, int, ReadOnlyNativeMemory{Color{float}}, int, ReadOnlyNativeMemory{float}, int, ReadOnlySpan{sbyte}, Texture?)" />
@@ -583,7 +582,7 @@ public sealed partial class Renderer<TDriver> : Renderer
 		$"Use {nameof(TryRenderGeometryRaw)}({nameof(ReadOnlyNativeMemory<>)}<float>, int, {nameof(ReadOnlyNativeMemory<>)}<{nameof(Color<>)}<float>>, int, {nameof(ReadOnlyNativeMemory<>)}<float>, int, {nameof(Texture<>)}<{nameof(TDriver)}>?) instead.",
 		error: true
 	)]
-	public new bool TryRenderGeometryRaw(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, Texture? texture)
+	public new bool TryRenderGeometryRaw(ReadOnlyNativeMemory<float> xy, int xyStride, ReadOnlyNativeMemory<Color<float>> colors, int colorStride, ReadOnlyNativeMemory<float> uv, int uvStride, Texture? texture = default)
 		=> base.TryRenderGeometryRaw(xy, xyStride, colors, colorStride, uv, uvStride, texture);
 
 	/// <inheritdoc cref="Renderer.TryRenderGeometryRaw(ReadOnlyNativeMemory{float}, int, ReadOnlyNativeMemory{Color{float}}, int, ReadOnlyNativeMemory{float}, int, Texture?)"/>
@@ -598,7 +597,7 @@ public sealed partial class Renderer<TDriver> : Renderer
 		$"Use {nameof(TryRenderGeometryRaw)}({nameof(ReadOnlySpan<>)}<float>, int, {nameof(ReadOnlySpan<>)}<{nameof(Color<>)}<float>>, int, {nameof(ReadOnlySpan<>)}<float>, int, {nameof(ReadOnlySpan<>)}<int>, {nameof(Texture<>)}<{nameof(TDriver)}>?) instead.",
 		error: true
 	)]
-	public new bool TryRenderGeometryRaw(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, ReadOnlySpan<int> indices, Texture? texture)
+	public new bool TryRenderGeometryRaw(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, ReadOnlySpan<int> indices, Texture? texture = default)
 		=> base.TryRenderGeometryRaw(xy, xyStride, colors, colorStride, uv, uvStride, indices, texture);
 
 	/// <inheritdoc cref="Renderer.TryRenderGeometryRaw(ReadOnlySpan{float}, int, ReadOnlySpan{Color{float}}, int, ReadOnlySpan{float}, int, ReadOnlySpan{int}, Texture?)" />
@@ -613,7 +612,7 @@ public sealed partial class Renderer<TDriver> : Renderer
 		$"Use {nameof(TryRenderGeometryRaw)}({nameof(ReadOnlySpan<>)}<float>, int, {nameof(ReadOnlySpan<>)}<{nameof(Color<>)}<float>>, int, {nameof(ReadOnlySpan<>)}<float>, int, {nameof(ReadOnlySpan<>)}<short>, {nameof(Texture<>)}<{nameof(TDriver)}>?) instead.",
 		error: true
 	)]
-	public new bool TryRenderGeometryRaw(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, ReadOnlySpan<short> indices, Texture? texture)
+	public new bool TryRenderGeometryRaw(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, ReadOnlySpan<short> indices, Texture? texture = default)
 		=> base.TryRenderGeometryRaw(xy, xyStride, colors, colorStride, uv, uvStride, indices, texture);
 
 	/// <inheritdoc cref="Renderer.TryRenderGeometryRaw(ReadOnlySpan{float}, int, ReadOnlySpan{Color{float}}, int, ReadOnlySpan{float}, int, ReadOnlySpan{short}, Texture?)" />
@@ -628,7 +627,7 @@ public sealed partial class Renderer<TDriver> : Renderer
 		$"Use {nameof(TryRenderGeometryRaw)}({nameof(ReadOnlySpan<>)}<float>, int, {nameof(ReadOnlySpan<>)}<{nameof(Color<>)}<float>>, int, {nameof(ReadOnlySpan<>)}<float>, int, {nameof(ReadOnlySpan<>)}<byte>, {nameof(Texture<>)}<{nameof(TDriver)}>?) instead.",
 		error: true
 	)]
-	public new bool TryRenderGeometryRaw(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, ReadOnlySpan<sbyte> indices, Texture? texture)
+	public new bool TryRenderGeometryRaw(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, ReadOnlySpan<sbyte> indices, Texture? texture = default)
 		=> base.TryRenderGeometryRaw(xy, xyStride, colors, colorStride, uv, uvStride, indices, texture);
 
 	/// <inheritdoc cref="Renderer.TryRenderGeometryRaw(ReadOnlySpan{float}, int, ReadOnlySpan{Color{float}}, int, ReadOnlySpan{float}, int, ReadOnlySpan{sbyte}, Texture?)" />
@@ -643,7 +642,7 @@ public sealed partial class Renderer<TDriver> : Renderer
 		$"Use {nameof(TryRenderGeometryRaw)}({nameof(ReadOnlySpan<>)}<float>, int, {nameof(ReadOnlySpan<>)}<{nameof(Color<>)}<float>>, int, {nameof(ReadOnlySpan<>)}<float>, int, {nameof(Texture<>)}<{nameof(TDriver)}>?) instead.",
 		error: true
 	)]
-	public new bool TryRenderGeometryRaw(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, Texture? texture)
+	public new bool TryRenderGeometryRaw(ReadOnlySpan<float> xy, int xyStride, ReadOnlySpan<Color<float>> colors, int colorStride, ReadOnlySpan<float> uv, int uvStride, Texture? texture = default)
 		=> base.TryRenderGeometryRaw(xy, xyStride, colors, colorStride, uv, uvStride, texture);
 
 	/// <inheritdoc cref="Renderer.TryRenderGeometryRaw(ReadOnlySpan{float}, int, ReadOnlySpan{Color{float}}, int, ReadOnlySpan{float}, int, Texture?)"/>
@@ -658,7 +657,7 @@ public sealed partial class Renderer<TDriver> : Renderer
 		$"Use {nameof(TryRenderGeometryRaw)}(float*, int, {nameof(Color<>)}<float>*, int, float*, int, int, int*, int, {nameof(Texture<>)}<{nameof(TDriver)}>?) instead.",
 		error: true
 	)]
-	public new unsafe bool TryRenderGeometryRaw(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, int* indices, int indicesCount, Texture? texture)
+	public new unsafe bool TryRenderGeometryRaw(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, int* indices, int indicesCount, Texture? texture = default)
 		=> base.TryRenderGeometryRaw(xy, xyStride, colors, colorStride, uv, uvStride, verticesCount, indices, indicesCount, texture);
 
 	/// <inheritdoc cref="Renderer.TryRenderGeometryRaw(float*, int, Color{float}*, int, float*, int, int, int*, int, Texture?)" />
@@ -673,7 +672,7 @@ public sealed partial class Renderer<TDriver> : Renderer
 		$"Use {nameof(TryRenderGeometryRaw)}(float*, int, {nameof(Color<>)}<float>*, int, float*, int, int, short*, int, {nameof(Texture<>)}<{nameof(TDriver)}>?) instead.",
 		error: true
 	)]
-	public new unsafe bool TryRenderGeometryRaw(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, short* indices, int indicesCount, Texture? texture)
+	public new unsafe bool TryRenderGeometryRaw(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, short* indices, int indicesCount, Texture? texture = default)
 		=> base.TryRenderGeometryRaw(xy, xyStride, colors, colorStride, uv, uvStride, verticesCount, indices, indicesCount, texture);
 
 	/// <inheritdoc cref="Renderer.TryRenderGeometryRaw(float*, int, Color{float}*, int, float*, int, int, short*, int, Texture?)" />
@@ -688,7 +687,7 @@ public sealed partial class Renderer<TDriver> : Renderer
 		$"Use {nameof(TryRenderGeometryRaw)}(float*, int, {nameof(Color<>)}<float>*, int, float*, int, int, sbyte*, int, {nameof(Texture<>)}<{nameof(TDriver)}>?) instead.",
 		error: true
 	)]
-	public new unsafe bool TryRenderGeometryRaw(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, sbyte* indices, int indicesCount, Texture? texture)
+	public new unsafe bool TryRenderGeometryRaw(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, sbyte* indices, int indicesCount, Texture? texture = default)
 		=> base.TryRenderGeometryRaw(xy, xyStride, colors, colorStride, uv, uvStride, verticesCount, indices, indicesCount, texture);
 
 	/// <inheritdoc cref="Renderer.TryRenderGeometryRaw(float*, int, Color{float}*, int, float*, int, int, sbyte*, int, Texture?)" />
@@ -703,7 +702,7 @@ public sealed partial class Renderer<TDriver> : Renderer
 		$"Use {nameof(TryRenderGeometryRaw)}(float*, int, {nameof(Color<>)}<float>*, int, float*, int, int, {nameof(Texture<>)}<{nameof(TDriver)}>?) instead.",
 		error: true
 	)]
-	public new unsafe bool TryRenderGeometryRaw(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, Texture? texture)
+	public new unsafe bool TryRenderGeometryRaw(float* xy, int xyStride, Color<float>* colors, int colorStride, float* uv, int uvStride, int verticesCount, Texture? texture = default)
 		=> base.TryRenderGeometryRaw(xy, xyStride, colors, colorStride, uv, uvStride, verticesCount, texture);
 
 	/// <inheritdoc cref="Renderer.TryRenderGeometryRaw(float*, int, Color{float}*, int, float*, int, int, Texture?)"/>

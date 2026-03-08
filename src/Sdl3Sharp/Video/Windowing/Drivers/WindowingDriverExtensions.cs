@@ -1,4 +1,6 @@
-﻿namespace Sdl3Sharp.Video.Windowing.Drivers;
+﻿using Sdl3Sharp.Internal;
+
+namespace Sdl3Sharp.Video.Windowing.Drivers;
 
 /// <summary>
 /// Provides extension methods and properties for <see cref="IWindowingDriver"/> implementing windowing driver types
@@ -17,6 +19,26 @@ public static class WindowingDriverExtensions
 	extension<TDriver>(TDriver)
 		where TDriver : IWindowingDriver
 	{
+		/// <summary>
+		/// Gets a value indicating whether the windowing driver is currently active
+		/// </summary>
+		/// <value>
+		/// A value indicating whether the windowing driver is currently active (i.e. the one that SDL is currently using for its video subsystem)
+		/// </value>
+		public static bool IsActive
+		{
+			get
+			{
+				unsafe
+				{
+					fixed (byte* name = TDriver.NameAscii)
+					{
+						return NativeStringHelper.Equals(name, IWindowingDriver.SDL_GetCurrentVideoDriver());
+					}
+				}
+			}
+		}
+
 		/// <summary>
 		/// Gets a value indicating whether the windowing driver is available in the loaded build of SDL
 		/// </summary>

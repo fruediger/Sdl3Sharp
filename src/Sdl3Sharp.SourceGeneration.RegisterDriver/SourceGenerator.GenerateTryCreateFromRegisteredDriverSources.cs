@@ -204,6 +204,12 @@ partial class SourceGenerator
 					 iWindowingDriverNamespaceName = $"{windowingNamespaceName}.Drivers",
 					 iWindowingDriverTypeName      = "IWindowingDriver",
 					 iWindowingDriverFullTypeName  = $"{iWindowingDriverNamespaceName}.{iWindowingDriverTypeName}",
+					 windowTypeName                = "Window",
+					 windowFullTypeName            = $"{windowingNamespaceName}.{windowTypeName}",
+					 sdlWindowTypeName             = "SDL_Window",
+					 sdlWindowFullTypeName         = $"{windowFullTypeName}+{sdlWindowTypeName}",
+					 windowTDriverTypeName         = "Window`1",
+					 windowTDriverFullTypeName     = $"{windowingNamespaceName}.{windowTDriverTypeName}",
 					 displayTypeName               = "Display",
 					 displayFullTypeName           = $"{windowingNamespaceName}.{displayTypeName}",
 					 displayTDriverTypeName        = "Display`1",
@@ -359,6 +365,66 @@ partial class SourceGenerator
 			return;
 		}
 
+		var windowType = compilation.GetTypeByMetadataName(windowFullTypeName);
+		if (windowType is null)
+		{
+			foreach (var (_, _, location) in values)
+			{
+				spc.ReportDiagnostic(Diagnostic.Create(
+					mMissingRequiredTypeDescriptor,
+					location,
+					windowFullTypeName
+				));
+			}
+			return;
+		}
+
+		var sdlWindowType = compilation.GetTypeByMetadataName(sdlWindowFullTypeName);
+		if (sdlWindowType is null)
+		{
+			foreach (var (_, _, location) in values)
+			{
+				spc.ReportDiagnostic(Diagnostic.Create(
+					mMissingRequiredTypeDescriptor,
+					location,
+					sdlWindowFullTypeName
+				));
+			}
+			return;
+		}
+
+		var sdlWindowPointerType = compilation.CreatePointerTypeSymbol(sdlWindowType);
+
+		var windowTDriverType = compilation.GetTypeByMetadataName(windowTDriverFullTypeName);
+		if (windowTDriverType is null)
+		{
+			foreach (var (_, _, location) in values)
+			{
+				spc.ReportDiagnostic(Diagnostic.Create(
+					mMissingRequiredTypeDescriptor,
+					location,
+					windowTDriverFullTypeName
+				));
+			}
+			return;
+		}
+
+		if (!windowTDriverType.InstanceConstructors.Any(ctor
+			=> ctor is { Parameters: [{ Type: var windowType }, { Type.SpecialType: SpecialType.System_Boolean }] }
+			&& SymbolEqualityComparer.Default.Equals(windowType, sdlWindowPointerType)
+		))
+		{
+			foreach (var (_, _, location) in values)
+			{
+				spc.ReportDiagnostic(Diagnostic.Create(
+					mMissingRequiredConstructorDescriptor,
+					location,
+					windowTDriverType.ToDisplayString(mDiagnosticTypeSymbolDisplayFormat), $"{sdlWindowPointerType.ToDisplayString(mDiagnosticTypeSymbolDisplayFormat)}, {compilation.GetSpecialType(SpecialType.System_Boolean).ToDisplayString(mDiagnosticTypeSymbolDisplayFormat)}"
+				));
+			}
+			return;
+		}
+
 		var displayType = compilation.GetTypeByMetadataName(displayFullTypeName);
 		if (displayType is null)
 		{
@@ -447,7 +513,7 @@ partial class SourceGenerator
 			partial class {{rendererTypeName}}
 			{
 				[global::System.CodeDom.Compiler.GeneratedCode("{{mTool.Name}}", "{{mTool.Version}}")]
-				internal unsafe static bool TryCreateFromRegisteredDriver({{sdlRendererType.ToDisplayString(mDefaultTypeSymbolDisplayFormat)}}* renderer, bool register, [global::System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out {{rendererTypeName}}? result)
+				internal unsafe static bool TryCreateFromRegisteredDriver({{sdlRendererTypeName}}* renderer, bool register, [global::System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out {{rendererTypeName}}? result)
 				{
 			""");
 
@@ -505,7 +571,7 @@ partial class SourceGenerator
 			partial class {{textureTypeName}}
 			{
 				[global::System.CodeDom.Compiler.GeneratedCode("{{mTool.Name}}", "{{mTool.Version}}")]
-				internal unsafe static bool TryCreateFromRegisteredDriver({{sdlTextureType.ToDisplayString(mDefaultTypeSymbolDisplayFormat)}}* texture, bool register, [global::System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out {{textureTypeName}}? result)
+				internal unsafe static bool TryCreateFromRegisteredDriver({{sdlTextureTypeName}}* texture, bool register, [global::System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out {{textureTypeName}}? result)
 				{
 			""");
 
@@ -557,6 +623,64 @@ partial class SourceGenerator
 				text: builder.ToString(),
 				encoding: Encoding.UTF8
 			));
+
+		builder.Clear();
+
+		builder.Append($$"""
+			#nullable enable
+			
+			namespace {{windowingNamespaceName}};
+			
+			partial class {{windowTypeName}}
+			{
+				[global::System.CodeDom.Compiler.GeneratedCode("{{mTool.Name}}", "{{mTool.Version}}")]
+				internal unsafe static bool TryCreateFromRegisteredDriver({{sdlWindowTypeName}}* window, bool register, [global::System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out {{windowTypeName}}? result)
+				{
+			""");
+
+		if (!windowingDrivers.IsEmpty)
+		{
+			builder.Append($$"""
+
+						var name = {{iWindowingDriverType.ToDisplayString(mDefaultTypeSymbolDisplayFormat)}}.SDL_GetCurrentVideoDriver();
+
+						if (name is not null)
+						{
+				#pragma warning disable {{sdlUnsupportedDriverDiagId}}
+				""");
+
+			windowingDrivers.Print(builder, "name", (builder, targetType, indentation) =>
+				builder.Append($$"""
+
+					{{indentation}}result = new {{windowTDriverType.Construct(targetType).ToDisplayString(mDefaultTypeSymbolDisplayFormat)}}(window, register);
+					{{indentation}}return true;
+
+					"""),
+				indentation: "\t\t\t", indentationStep: "\t"
+			);
+
+			builder.Append($$"""
+
+				#pragma warning restore {{sdlUnsupportedDriverDiagId}}
+						}
+
+				""");
+		}
+
+		builder.Append("""
+
+					result = null;
+					return false;
+				}
+			}
+
+			#nullable restore
+			""");
+
+		spc.AddSource($"{windowFullTypeName}_TryCreateFromRegisteredDriver.g.cs", SourceText.From(
+			text: builder.ToString(),
+			encoding: Encoding.UTF8
+		));
 
 		builder.Clear();
 

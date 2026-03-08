@@ -1070,7 +1070,7 @@ public static partial class Platform
 
 			mIOSAnimationCallback = GCHandle.Alloc(callback, GCHandleType.Normal);
 
-			var result = SDL_SetiOSAnimationCallback(window is not null ? window.WindowPtr : null, interval, &IOSAnimationCallback, unchecked((void*)GCHandle.ToIntPtr(mIOSAnimationCallback)));
+			var result = SDL_SetiOSAnimationCallback(window is not null ? window.Pointer : null, interval, &IOSAnimationCallback, unchecked((void*)GCHandle.ToIntPtr(mIOSAnimationCallback)));
 
 			if (!result.AsClrBool)
 			{

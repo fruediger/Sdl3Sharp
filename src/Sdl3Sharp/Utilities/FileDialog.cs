@@ -67,7 +67,7 @@ public static partial class FileDialog
 
 				if (windowLocallySet)
 				{
-					properties.TrySetPointerValue(PropertyNames.WindowPointer, unchecked((IntPtr)(parentWindow is not null ? parentWindow.WindowPtr : null)));
+					properties.TrySetPointerValue(PropertyNames.WindowPointer, unchecked((IntPtr)(parentWindow is not null ? parentWindow.Pointer : null)));
 				}
 			}
 			else
@@ -153,7 +153,7 @@ public static partial class FileDialog
 				SDL_ShowOpenFileDialog(
 					&DialogFileCallback,
 					unchecked((void*)GCHandle.ToIntPtr(GCHandle.Alloc(wrapper, GCHandleType.Normal))),
-					parentWindow is not null ? parentWindow.WindowPtr : null,
+					parentWindow is not null ? parentWindow.Pointer : null,
 					filters,
 					filtersCount,
 					defaultLocationUtf8,
@@ -190,7 +190,7 @@ public static partial class FileDialog
 					SDL_ShowOpenFolderDialog(
 						&DialogFileCallback,
 						unchecked((void*)GCHandle.ToIntPtr(GCHandle.Alloc(wrapper, GCHandleType.Normal))),
-						parentWindow is not null ? parentWindow.WindowPtr : null,
+						parentWindow is not null ? parentWindow.Pointer : null,
 						defaultLocationUtf8,
 						allowMany
 					);
@@ -264,7 +264,7 @@ public static partial class FileDialog
 				SDL_ShowSaveFileDialog(
 					&DialogFileCallback,
 					unchecked((void*)GCHandle.ToIntPtr(GCHandle.Alloc(wrapper, GCHandleType.Normal))),
-					parentWindow is not null ? parentWindow.WindowPtr : null,
+					parentWindow is not null ? parentWindow.Pointer : null,
 					filters,
 					filtersCount,
 					defaultLocationUtf8

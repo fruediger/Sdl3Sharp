@@ -657,7 +657,7 @@ public abstract partial class Texture : IDisposable
 	{
 		if (texture is null)
 		{
-			result = default;
+			result = null;
 			return false;
 		}
 
@@ -679,7 +679,7 @@ public abstract partial class Texture : IDisposable
 			// this indicates that we actually need the texture to be of a different managed type than it currently is,
 			// we should just fail in that case
 
-			result = default;
+			result = null;
 			return false;
 		}
 		else

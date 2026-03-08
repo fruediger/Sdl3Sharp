@@ -31,7 +31,7 @@ partial class Window
 	{
 		unsafe
 		{
-			var rendererPtr = Renderer.SDL_CreateGPURenderer(gpuDevice is not null ? gpuDevice.Pointer : null, WindowPtr);
+			var rendererPtr = Renderer.SDL_CreateGPURenderer(gpuDevice is not null ? gpuDevice.Pointer : null, mWindow);
 
 			if (rendererPtr is null)
 			{
