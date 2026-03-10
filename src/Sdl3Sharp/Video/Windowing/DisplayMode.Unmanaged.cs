@@ -5,7 +5,7 @@ namespace Sdl3Sharp.Video.Windowing;
 partial class DisplayMode
 {
 	[method: MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	private unsafe sealed class UnmanagedDisplayMode(SDL_DisplayMode* mode) : DisplayMode
+	private unsafe sealed class Unmanaged(SDL_DisplayMode* mode) : DisplayMode
 	{
 		private readonly SDL_DisplayMode* mMode = mode;
 

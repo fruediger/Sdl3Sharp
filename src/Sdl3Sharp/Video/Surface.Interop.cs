@@ -26,7 +26,7 @@ partial class Surface
 		private unsafe readonly void* Reserved;
 	}
 
-	[FormattedConstant(ErrorHelper.ParameterInvalidErrorFormat, nameof(surface))]
+	[FormattedConstant(SdlErrorHelper.ParameterInvalidErrorFormat, nameof(surface))]
 	private unsafe static partial ReadOnlySpan<byte> GetInvalidSurfaceErrorMessage(SDL_Surface* surface = default);
 
 	/// <summary>

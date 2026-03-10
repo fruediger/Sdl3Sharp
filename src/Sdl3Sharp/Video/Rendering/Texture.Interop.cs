@@ -21,7 +21,7 @@ partial class Texture
 		public int RefCount;
 	}
 
-	[FormattedConstant(ErrorHelper.ParameterInvalidErrorFormat, nameof(texture))]
+	[FormattedConstant(SdlErrorHelper.ParameterInvalidErrorFormat, nameof(texture))]
 	internal unsafe static partial ReadOnlySpan<byte> GetTextureInvalidTextureErrorMessage(SDL_Texture* texture = default);
 
 	/// <summary>

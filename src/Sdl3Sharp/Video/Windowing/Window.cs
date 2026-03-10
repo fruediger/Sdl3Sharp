@@ -15,6 +15,46 @@ using System.Runtime.InteropServices.Marshalling;
 
 namespace Sdl3Sharp.Video.Windowing;
 
+/// <summary>
+/// Represents a window
+/// </summary>
+/// <remarks>
+/// <para>
+/// A window is used to display content on the screen and receive input from the user.
+/// </para>
+/// <para>
+/// To display content in a window, you can either use a <see cref="Rendering.Renderer"/>,
+/// constructed from any of the <c>TryCreateRenderer*</c> methods (e.g. <see cref="TryCreateRenderer(out Renderer?, ReadOnlySpan{string})"/>
+/// or from the <see cref="TryCreateWithRenderer(string, int, int, out Window?, out Renderer?, WindowFlags)"/> methods,
+/// or use the <see cref="Surface"/> property to get a <see cref="WindowSurface"/> you can draw on.
+/// Using either one mutually excludes the other.
+/// </para>
+/// <para>
+/// If you use a <see cref="Renderer"/> in conjunction with a <see cref="Window"/>, please make sure that you don't use it after the window has been <see cref="Dispose()">disposed</see>.
+/// The recommended approach is to <see cref="Renderer.Dispose()">dispose</see> the renderer before the window.
+/// </para>
+/// <para>
+/// Windows can be either top-level or be children of other windows. To make a window a child of another window, you just need to set its <see cref="Parent"/> property.
+/// </para>
+/// <para>
+/// Special rules apply for child windows: they will be hidden with their parent and will be destroyed when their parent gets destroyed.
+/// </para>
+/// <para>
+/// You can create new windows using any of the <c>TryCreate*</c> methods (e.g. <see cref="TryCreate(string, int, int, out Window?, WindowFlags)"/>) 
+/// or create new popup windows using the <see cref="TryCreatePopup(int, int, int, int, out Window?, WindowFlags)"/> method.
+/// The latter will create the new window as a child window of the window the method was called on.
+/// </para>
+/// <para>
+/// For the most part <see cref="Window"/>s are not thread-safe, and most of their properties and methods should only be accessed from the main thread!
+/// </para>
+/// <para>
+/// <see cref="Window"/>s are not driver-agnostic! Most of the time instance of this abstract class are of the concrete <see cref="Window{TDriver}"/> type with a specific <see cref="IWindowingDriver">windowing driver</see> as the type argument.
+/// However, the <see cref="Window"/> type exists as a common abstraction.
+/// </para>
+/// <para>
+/// To specify a concrete window type, use <see cref="Window{TDriver}"/> with a windowing driver that implements the <see cref="IWindowingDriver"/> interface (e.g. <see cref="Window{TDriver}">Window&lt;<see cref="Windows">Windows</see>&gt;</see>).
+/// </para>
+/// </remarks>
 public abstract partial class Window : IDisposable
 {
 	private static readonly ConcurrentDictionary<IntPtr, WeakReference<Window>> mKnownInstances = [];
@@ -31,7 +71,7 @@ public abstract partial class Window : IDisposable
 		// even if it's done through other means (e.g. a child window getting destroyed alongside its parent).
 		// This way we can automatically dispose the corresponding Window instance and remove it,
 		// when the native window gets destroyed.
-		Sdl.SDL_AddEventWatch(&EventWatchDestroyImpl, unchecked((void*)GCHandle.ToIntPtr(mSelfHandle)));
+		Sdl.SDL_AddEventWatch(&EventWatchResizeOrDestroy, unchecked((void*)GCHandle.ToIntPtr(mSelfHandle)));
 
 		if (register)
 		{
@@ -62,6 +102,7 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
+	/// <inheritdoc/>
 	~Window() => Dispose(disposing: false, forget: true);
 
 	/// <summary>
@@ -159,7 +200,7 @@ public abstract partial class Window : IDisposable
 			{
 				Unsafe.SkipInit(out (float Minimum, float Maximum) aspectRatio);
 
-				ErrorHelper.ThrowIfFailed(SDL_GetWindowAspectRatio(mWindow, &aspectRatio.Minimum, &aspectRatio.Maximum));
+				SdlErrorHelper.ThrowIfFailed(SDL_GetWindowAspectRatio(mWindow, &aspectRatio.Minimum, &aspectRatio.Maximum));
 
 				return aspectRatio;
 			}
@@ -169,7 +210,7 @@ public abstract partial class Window : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetWindowAspectRatio(mWindow, value.Minimum, value.Maximum));
+				SdlErrorHelper.ThrowIfFailed(SDL_SetWindowAspectRatio(mWindow, value.Minimum, value.Maximum));
 			}
 		}
 	}
@@ -178,7 +219,7 @@ public abstract partial class Window : IDisposable
 	/// Gets the size of the window's borders (decorations) around the client area
 	/// </summary>
 	/// <value>
-	/// The size of the window's borders (decorations) around the client area, in pixels.
+	/// The size of the window's borders (decorations) around the client area, in pixels
 	/// </value>
 	/// <remarks>
 	/// <para>
@@ -327,12 +368,12 @@ public abstract partial class Window : IDisposable
 				{
 					fixed (DisplayMode.SDL_DisplayMode* mode = &value.Mode)
 					{
-						ErrorHelper.ThrowIfFailed(SDL_SetWindowFullscreenMode(mWindow, mode));
+						SdlErrorHelper.ThrowIfFailed(SDL_SetWindowFullscreenMode(mWindow, mode));
 					}
 				}
 				else
 				{
-					ErrorHelper.ThrowIfFailed(SDL_SetWindowFullscreenMode(mWindow, null));
+					SdlErrorHelper.ThrowIfFailed(SDL_SetWindowFullscreenMode(mWindow, null));
 				}
 			}
 		}
@@ -402,7 +443,7 @@ public abstract partial class Window : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetWindowKeyboardGrab(mWindow, value));
+				SdlErrorHelper.ThrowIfFailed(SDL_SetWindowKeyboardGrab(mWindow, value));
 			}
 		}
 	}
@@ -436,23 +477,21 @@ public abstract partial class Window : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetWindowMouseGrab(mWindow, value));
+				SdlErrorHelper.ThrowIfFailed(SDL_SetWindowMouseGrab(mWindow, value));
 			}
 		}
 	}
 
 	/// <summary>
-	/// Gets a value indicating whether the window has a <see cref="Video.Surface"/> associated with it
+	/// Gets a value indicating whether the window currently has a <see cref="Video.Surface"/> associated with it
 	/// </summary>
 	/// <value>
-	/// A value indicating whether the window has a <see cref="Video.Surface"/> associated with it
+	/// A value indicating whether the window currently has a <see cref="Video.Surface"/> associated with it
 	/// </value>
 	/// <remarks>
 	/// <para>
-	/// If the value of this property is <see langword="true"/>, you can expect a non-<c><see langword="null"/></c> value for the <see cref="Surface"/> property, and vice versa.
-	/// </para>
-	/// <para>
-	/// To reset (destroy) the surface associated with the window, you can use <see cref="TryResetSurface"/>.
+	/// If the value of this property is <see langword="true"/>, you can access the <see cref="Surface"/> property and get the existing associated surface,
+	/// otherwise, if the value is <see langword="false"/>, accessing the <see cref="Surface"/> property will create a new surface and associate it with the window.
 	/// </para>
 	/// <para>
 	/// This property should only be accessed from the main thread.
@@ -469,6 +508,20 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Gets the additional high dynamic range that can be displayed, in terms of the <see cref="SdrWhiteLevel">SDR white level</see>
+	/// </summary>
+	/// <value>
+	/// The additional high dynamic range that can be displayed, in terms of the <see cref="SdrWhiteLevel">SDR white level</see>
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The value of this property will be <c>1.0</c> when HDR is not enabled.
+	/// </para>
+	/// <para>
+	/// The value of this property can change dynamically at runtime when a <see cref="EventType.WindowHdrStateChanged"/> event is sent.
+	/// </para>
+	/// </remarks>
 	public float HdrHeadroom => Properties?.TryGetFloatValue(PropertyNames.HdrHeadroomFloat, out var hdrHeadroom) is true
 		? hdrHeadroom
 		: default;
@@ -537,7 +590,7 @@ public abstract partial class Window : IDisposable
 					{
 						mHitTest = oldHitTest;
 
-						ErrorHelper.ThrowIfFailed();
+						SdlErrorHelper.ThrowIfFailed();
 					}
 				}
 				else
@@ -554,7 +607,7 @@ public abstract partial class Window : IDisposable
 					{
 						mHitTest = oldHitTest;
 
-						ErrorHelper.ThrowIfFailed();
+						SdlErrorHelper.ThrowIfFailed();
 					}
 				}
 			}
@@ -564,17 +617,21 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
-	public Surface Icon
-	{
-		set
-		{
-			unsafe
-			{
-				ErrorHelper.ThrowIfFailed(SDL_SetWindowIcon(mWindow, value is not null ? value.Pointer : null));
-			}
-		}
-	}
-
+	/// <summary>
+	/// Gets the numeric ID of the window
+	/// </summary>
+	/// <value>
+	/// The numeric ID of the window, or <c>0</c> on failure (check <see cref="Error.TryGet(out string?)"/> for more information)
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// This the ID that SDL uses to identify windows in <see cref="WindowEvent"/>s and some other events.
+	/// It's a necessity in order to map such events to their corresponding <see cref="Window"/> instances using <see cref="TryGetFromId(uint, out Window?)"/>.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
 	public uint Id
 	{
 		get
@@ -586,6 +643,24 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Gets or sets a value indicating whether the window should always be above other windows
+	/// </summary>
+	/// <value>
+	/// A value indicating whether the window should always be above other windows
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// Setting this property to <c><see langword="true"/></c> will bring the window to the front and keep it above other windows.
+	/// </para>
+	/// <para>
+	/// The value of this property is reflected as the <see cref="WindowFlags.AlwaysOnTop"/> flag in the <see cref="Flags"/> property of the window.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">When setting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	public bool IsAlwaysOnTop
 	{
 		get => (Flags & WindowFlags.AlwaysOnTop) is not 0;
@@ -594,11 +669,32 @@ public abstract partial class Window : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetWindowAlwaysOnTop(mWindow, value));
+				SdlErrorHelper.ThrowIfFailed(SDL_SetWindowAlwaysOnTop(mWindow, value));
 			}
 		}
 	}
 
+	/// <summary>
+	/// Gets or sets a value indicating whether the window has a border (decorations) around the client area
+	/// </summary>
+	/// <value>
+	/// A value indicating whether the window has a border (decorations) around the client area
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// Changing this property will add or remove the window's border (decorations) around the client area. It's a no-op if the window's border state already matches the given value.
+	/// </para>
+	/// <para>
+	/// You can't change the border state of a fullscreen window!
+	/// </para>
+	/// <para>
+	/// The inverse value of this property is reflected as the <see cref="WindowFlags.Borderless"/> flag in the <see cref="Flags"/> property of the window.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">When setting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	public bool IsBordered
 	{
 		get => (Flags & WindowFlags.Borderless) is 0;
@@ -607,11 +703,26 @@ public abstract partial class Window : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetWindowBordered(mWindow, value));
+				SdlErrorHelper.ThrowIfFailed(SDL_SetWindowBordered(mWindow, value));
 			}
 		}
 	}
 
+	/// <summary>
+	/// Gets or sets a value indicating whether the window may have input focus
+	/// </summary>
+	/// <value>
+	/// A value indicating whether the window may have input focus
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The inverse value of this property is reflected as the <see cref="WindowFlags.NotFocusable"/> flag in the <see cref="Flags"/> property of the window.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">When setting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	public bool IsFocusable
 	{
 		get => (Flags & WindowFlags.NotFocusable) is 0;
@@ -620,11 +731,37 @@ public abstract partial class Window : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetWindowFocusable(mWindow, value));
+				SdlErrorHelper.ThrowIfFailed(SDL_SetWindowFocusable(mWindow, value));
 			}
 		}
 	}
 
+	/// <summary>
+	/// Gets or sets a value indicating whether the window is currently in fullscreen mode
+	/// </summary>
+	/// <value>
+	/// A value indicating whether the window is currently in fullscreen mode
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// By default a window in fullscreen mode uses borderless fullscreen desktop mode, but you can specify an exclusive display mode using the <see cref="FullscreenMode"/> property.
+	/// </para>
+	/// <para>
+	/// On some windowing backends, a request to change this setting is asynchronous and the new fullscreen state may not have have been applied immediately upon setting this property.
+	/// If an immediate change is required, you can call <see cref="TrySync"/> to block until the changes have taken effect.
+	/// </para>
+	/// <para>
+	/// When the fullscreen state changed, an <see cref="EventType.WindowEnterFullscreen"/> or an <see cref="EventType.WindowLeaveFullscreen"/> event will be emitted.
+	/// Windowing backends can also deny the request to change this setting altogether.
+	/// </para>
+	/// <para>
+	/// The value of this property is reflected as the <see cref="WindowFlags.Fullscreen"/> flag in the <see cref="Flags"/> property of the window.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">When setting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	public bool IsFullscreen
 	{
 		get => (Flags & WindowFlags.Fullscreen) is not 0;
@@ -633,14 +770,45 @@ public abstract partial class Window : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetWindowFullscreen(mWindow, value));
+				SdlErrorHelper.ThrowIfFailed(SDL_SetWindowFullscreen(mWindow, value));
 			}
 		}
 	}
 
+	/// <summary>
+	/// Gets a value indicating whether the window has <see cref="HdrHeadroom">HDR headroom</see> above the <see cref="SdrWhiteLevel">SDR white level</see>
+	/// </summary>
+	/// <value>
+	/// A value indicating whether the window has <see cref="HdrHeadroom">HDR headroom</see> above the <see cref="SdrWhiteLevel">SDR white level</see>
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The value of this property can change dynamically at runtime when a <see cref="EventType.WindowHdrStateChanged"/> event is sent.
+	/// </para>
+	/// </remarks>
 	public bool IsHdrEnabled => Properties?.TryGetBooleanValue(PropertyNames.HdrEnabledBoolean, out var hdrEnabled) is true
 		&& hdrEnabled;
 
+	/// <summary>
+	/// Gets or sets a value indicating whether the window is modal
+	/// </summary>
+	/// <value>
+	/// A value indicating whether the window is modal
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// <em>To enable the modal state for a window, the window must be a child of another window</em>,
+	/// or else this property will <see langword="throw"/> a <see cref="SdlException"/> when you attempt to set it to <c><see langword="true"/></c>.
+	/// You can set the parent of a window using the <see cref="Parent"/> property.
+	/// </para>
+	/// <para>
+	/// The value of this property is reflected as the <see cref="WindowFlags.Modal"/> flag in the <see cref="Flags"/> property of the window.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">When setting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	public bool IsModal
 	{
 		get => (Flags & WindowFlags.Modal) is not 0;
@@ -649,11 +817,29 @@ public abstract partial class Window : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetWindowModal(mWindow, value));
+				SdlErrorHelper.ThrowIfFailed(SDL_SetWindowModal(mWindow, value));
 			}
 		}
 	}
 
+	/// <summary>
+	/// Gets or sets a value indicating whether the window is resizable by the user
+	/// </summary>
+	/// <value>
+	/// A value indicating whether the window is resizable by the user
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// Changing this property will allow or disallow the user from resizing the window. It's a no-op if the window's resizable state already matches the given value.
+	/// </para>
+	/// <para>
+	/// The value of this property is reflected as the <see cref="WindowFlags.Resizable"/> flag in the <see cref="Flags"/> property of the window.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">When setting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	public bool IsResizable
 	{
 		get => (Flags & WindowFlags.Resizable) is not 0;
@@ -662,26 +848,51 @@ public abstract partial class Window : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetWindowResizable(mWindow, value));
+				SdlErrorHelper.ThrowIfFailed(SDL_SetWindowResizable(mWindow, value));
 			}
 		}
 	}
 
+	/// <summary>
+	/// Gets a value indicating whether the window is valid
+	/// </summary>
+	/// <value>
+	/// A value indicating whether the window is valid
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// A <see cref="Window"/> instance can become invalid after it's been <see cref="Dispose()">disposed</see>, or it's associated native window has been destroyed.
+	/// </para>
+	/// <para>
+	/// The latter can be the case, for example, for child windows that become invalid when their parent window is disposed/destroyed.
+	/// You need to be careful when handling the lifetime of child windows in relation to their parent windows.
+	/// It's the best to <see cref="Dispose()">dispose</see> child windows before their parent windows, or resetting their parent to something else (or <c><see langword="null"/></c>) before their parent windows are disposed/destroyed.
+	/// You can check if a window has a parent or change their parent using the <see cref="Parent"/> property.
+	/// </para>
+	/// </remarks>
 	public bool IsValid { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get { unsafe { return mWindow is not null; } } }
 
+	/// <summary>
+	/// Gets or sets the maximum size of the window's client area
+	/// </summary>
+	/// <value>
+	/// A value indicating the maximum size of the window's client area, or <c>0</c> individually for the width or height component to indicate no maximum limit set for that component
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">When setting or getting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	public (int Width, int Height) MaximumSize
 	{
 		get
 		{
 			unsafe
 			{
-				// For some reason getters on SDL windows aren't setting safe defaults for out parameters,
-				// before returning early because of failure (SDL does this literally everywhere else),
-				// therefore we have to safely initialize the return value ourselves in case SDL doesn't do it.
-				// So Unsafe.SkipInit for us.
-				(int Width, int Height) maxSize = default;
+				Unsafe.SkipInit(out (int Width, int Height) maxSize);
 
-				SDL_GetWindowMaximumSize(mWindow, &maxSize.Width, &maxSize.Height);
+				SdlErrorHelper.ThrowIfFailed(SDL_GetWindowMaximumSize(mWindow, &maxSize.Width, &maxSize.Height));
 
 				return maxSize;
 			}
@@ -691,24 +902,32 @@ public abstract partial class Window : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetWindowMaximumSize(mWindow, value.Width, value.Height));
+				SdlErrorHelper.ThrowIfFailed(SDL_SetWindowMaximumSize(mWindow, value.Width, value.Height));
 			}
 		}
 	}
 
+	/// <summary>
+	/// Gets or sets the minimum size of the window's client area
+	/// </summary>
+	/// <value>
+	/// A value indicating the minimum size of the window's client area, or <c>0</c> individually for the width or height component to indicate no minimum limit set for that component
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">When setting or getting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	public (int Width, int Height) MinimumSize
 	{
 		get
 		{
 			unsafe
 			{
-				// For some reason getters on SDL windows aren't setting safe defaults for out parameters,
-				// before returning early because of failure (SDL does this literally everywhere else),
-				// therefore we have to safely initialize the return value ourselves in case SDL doesn't do it.
-				// So Unsafe.SkipInit for us.
-				(int Width, int Height) minSize = default;
+				Unsafe.SkipInit(out (int Width, int Height) minSize);
 
-				SDL_GetWindowMinimumSize(mWindow, &minSize.Width, &minSize.Height);
+				SdlErrorHelper.ThrowIfFailed(SDL_GetWindowMinimumSize(mWindow, &minSize.Width, &minSize.Height));
 
 				return minSize;
 			}
@@ -718,11 +937,28 @@ public abstract partial class Window : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetWindowMinimumSize(mWindow, value.Width, value.Height));
+				SdlErrorHelper.ThrowIfFailed(SDL_SetWindowMinimumSize(mWindow, value.Width, value.Height));
 			}
 		}
 	}
 
+	/// <summary>
+	/// Gets or sets the area of the window the mouse cursor is confined to
+	/// </summary>
+	/// <value>
+	/// The area of the window the mouse cursor is confined to, or <c><see langword="null"/></c> if the mouse cursor is not confined 
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// Note that setting the value of this property to some non-<c><see langword="null"/></c> area, does <em>not</em> grab the cursor,
+	/// it only defines the area the mouse cursor is restricted to when the window has mouse focus.
+	/// If you want to grab the cursor, you can use the <see cref="HasMouseGrab"/> property for that.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">When setting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	public Rect<int>? MouseRect
 	{
 		get
@@ -743,12 +979,31 @@ public abstract partial class Window : IDisposable
 			{
 				fixed (Rect<int>* rect = &Nullable.GetValueRefOrDefaultRef(in value))
 				{
-					ErrorHelper.ThrowIfFailed(SDL_SetWindowMouseRect(mWindow, value.HasValue ? rect : null));
+					SdlErrorHelper.ThrowIfFailed(SDL_SetWindowMouseRect(mWindow, value.HasValue ? rect : null));
 				}
 			}
 		}
 	}
 
+	/// <summary>
+	/// Gets or sets the opacity of the window
+	/// </summary>
+	/// <value>
+	/// The opacity of the window, where <c>1.0</c> is fully opaque, <c>0.0</c> is fully transparent, and <c>-1.0</c> indicates an error when getting the value (check <see cref="Error.TryGet(out string?)"/> for more information)
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The value set will be clamped to the range of <c>0.0</c> to <c>1.0</c>.
+	/// </para>
+	/// <para>
+	/// If transparency isn't supported on the current platform, the value of this property will be <c>1.0</c> (as opposed to <c>-1.0</c> to indicate an error) when getting it,
+	/// but this property will still <see langword="throw"/> an <see cref="SdlException"/> when you attempt to set it.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">When setting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	public float Opacity
 	{
 		get
@@ -763,11 +1018,48 @@ public abstract partial class Window : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetWindowOpacity(mWindow, value));
+				SdlErrorHelper.ThrowIfFailed(SDL_SetWindowOpacity(mWindow, value));
 			}
 		}
 	}
 
+	/// <summary>
+	/// Gets or sets the parent of the window, if any
+	/// </summary>
+	/// <value>
+	/// The parent of the window, or <c><see langword="null"/></c> if the window has no parent
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// Setting the value of this property to a non-<c><see langword="null"/></c> window will make the current window a child of that window, and setting it to <c><see langword="null"/></c> will make the current window a top-level window.
+	/// If the window is already the child of an existing window, it will be reparented to the new parent window.
+	/// </para>
+	/// <para>
+	/// If a parent window is hidden or disposed/destroyed, this will also be recursively applied to all child windows.
+	/// </para>
+	/// <para>
+	/// Child windows that weren't explicitly hidden (e.g. via <see cref="TryHide"/>) but were only hidden because their parent was hidden,
+	/// will be automatically shown again when their parent is shown again.
+	/// </para>
+	/// <para>
+	/// You need to be careful when handling the lifetime of child windows in relation to their parent windows.
+	/// It's the best to <see cref="Dispose()">dispose</see> child windows before their parent windows, or resetting their parent to something else (or <c><see langword="null"/></c>) before their parent windows are disposed/destroyed.
+	/// </para>
+	/// <para>
+	/// Attempting to set the parent of a window that is currently in the modal state will <see langword="throw"/> a <see cref="SdlException"/>.
+	/// You can use the <see cref="IsModal"/> property to check if a window is currently in the modal state, and set it to <c><see langword="false"/></c> to disable the modal state before attempting to change the parent.
+	/// </para>
+	/// <para>
+	/// Additionally, popup windows cannot change parents and attempts to do so will <see langword="throw"/> a <see cref="SdlException"/>.
+	/// </para>
+	/// <para>
+	/// Setting a parent window that is currently the sibling or descendent of the child window results in undefined behavior. Please try to avoid doing that.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">When setting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	public Window? Parent
 	{
 		get
@@ -783,11 +1075,27 @@ public abstract partial class Window : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetWindowParent(mWindow, value is not null ? value.Pointer : null));
+				SdlErrorHelper.ThrowIfFailed(SDL_SetWindowParent(mWindow, value is not null ? value.Pointer : null));
 			}
 		}
 	}
 
+	/// <summary>
+	/// Gets the pixel density of the window
+	/// </summary>
+	/// <value>
+	/// The pixel density of the window, or <c>0.0</c> on failure (check <see cref="Error.TryGet(out string?)"/> for more information)
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The pixel density is the ratio of pixel size to window size.
+	/// For example, if the window is <c>1920</c> by <c>1080</c> and it has a high density back buffer of <c>3840</c> by <c>2160</c> pixels, it would have a pixel density of <c>2.0</c>.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">When setting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	public float PixelDensity
 	{
 		get
@@ -799,6 +1107,18 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Gets the pixel format associated with the window
+	/// </summary>
+	/// <value>
+	/// The pixel format associated with the window, or <see cref="PixelFormat.Unknown"/> on failure (check <see cref="Error.TryGet(out string?)"/> for more information)
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">When setting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	public PixelFormat PixelFormat
 	{
 		get
@@ -812,33 +1132,54 @@ public abstract partial class Window : IDisposable
 
 	internal unsafe SDL_Window* Pointer { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => mWindow; }
 
-	public (WindowPosition X, WindowPosition Y) Position
+	/// <summary>
+	/// Gets the position of the window
+	/// </summary>
+	/// <value>
+	/// The position of the window
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The value of this property is the position of the window as it was last reported by the windowing backend.
+	/// </para>
+	/// <para>
+	/// If you want to set the position of the window, you can use the <see cref="TrySetPosition(WindowPosition, WindowPosition)"/> method instead.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">When getting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
+	public (int X, int Y) Position
 	{
 		get
 		{
 			unsafe
 			{
-				// For some reason getters on SDL windows aren't setting safe defaults for out parameters,
-				// before returning early because of failure (SDL does this literally everywhere else),
-				// therefore we have to safely initialize the return value ourselves in case SDL doesn't do it.
-				// So Unsafe.SkipInit for us.
-				(WindowPosition X, WindowPosition Y) position = default;
+				Unsafe.SkipInit(out (int X, int Y) position);
 
-				SDL_GetWindowPosition(mWindow, unchecked((int*)&position.X), unchecked((int*)&position.Y));
+				SdlErrorHelper.ThrowIfFailed(SDL_GetWindowPosition(mWindow, &position.X, &position.Y));
 
 				return position;
 			}
 		}
-
-		set
-		{
-			unsafe
-			{
-				ErrorHelper.ThrowIfFailed(SDL_SetWindowPosition(mWindow, Unsafe.BitCast<WindowPosition, int>(value.X), Unsafe.BitCast<WindowPosition, int>(value.Y)));
-			}
-		}
 	}
 
+	/// <summary>
+	/// Gets or sets the state of the progress bar displayed for the window's taskbar entry
+	/// </summary>
+	/// <value>
+	/// The state of the progress bar displayed for the window's taskbar entry, or <see cref="ProgressState.Invalid"/> on failure (check <see cref="Error.TryGet(out string?)"/> for more information)
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// You can use this property in conjunction with the <see cref="ProgressValue"/> property to display a progress bar with a certain value in the taskbar entry for the window.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">When setting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	public ProgressState ProgressState
 	{
 		get
@@ -853,11 +1194,29 @@ public abstract partial class Window : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetWindowProgressState(mWindow, value));
+				SdlErrorHelper.ThrowIfFailed(SDL_SetWindowProgressState(mWindow, value));
 			}
 		}
 	}
 
+	/// <summary>
+	/// Gets or sets the value of the progress bar displayed for the window's taskbar entry
+	/// </summary>
+	/// <value>
+	/// The value of the progress bar displayed for the window's taskbar entry, where <c>0.0</c> is no progress, <c>1.0</c> is full progress
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The value set will be clamped to the range of <c>0.0</c> to <c>1.0</c>.
+	/// </para>
+	/// <para>
+	/// You can use this property in conjunction with the <see cref="ProgressState"/> property to display a progress bar with a certain value in the taskbar entry for the window.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">When setting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	public float ProgressValue
 	{
 		get
@@ -872,11 +1231,22 @@ public abstract partial class Window : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetWindowProgressValue(mWindow, value));
+				SdlErrorHelper.ThrowIfFailed(SDL_SetWindowProgressValue(mWindow, value));
 			}
 		}
 	}
 
+	/// <summary>
+	/// Gets the properties associated with the window
+	/// </summary>
+	/// <value>
+	/// The properties associated with the window, or <c><see langword="null"/></c> if the properties could not be retrieved successfully (check <see cref="Error.TryGet(out string?)"/> for more information)
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
 	public Properties? Properties
 	{
 		get
@@ -892,6 +1262,26 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Gets the renderer associated with the window, if any
+	/// </summary>
+	/// <value>
+	/// The renderer associated with the window, or <c><see langword="null"/></c> if the window has no renderer or the renderer couldn't be retrieved successfully (check <see cref="Error.TryGet(out string?)"/> for more information)
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// Initially, a window can have no renderer associated with it if it was created without one (e.g. it was created with <see cref="TryCreate(string, int, int, out Window?, WindowFlags)"/> instead of <see cref="TryCreateWithRenderer(string, int, int, out Window?, out Renderer?, WindowFlags)"/>).
+	/// The value of this property will be <c><see langword="null"/></c> in that case, as long as no renderer has been associated with the window yet.
+	/// </para>
+	/// <para>
+	/// The value of this property can also be <c><see langword="null"/></c> if the renderer couldn't be retrieved successfully.
+	/// You should check <see cref="Error.TryGet(out string?)"/> for more information and to see if that's the case.
+	/// </para>
+	/// <para>
+	/// You can set a renderer for a window by using any of the <c>TryCreateRenderer*</c> methods (e.g. <see cref="TryCreateRenderer(out Renderer?, ReadOnlySpan{string})"/>) on the window instance, but only once.
+	/// Once a renderer is successfully associated with the window, it can't be replaced and subsequently calls to any of the <c>TryCreateRenderer*</c> methods will fail.
+	/// </para>
+	/// </remarks>
 	public Renderer? Renderer
 	{
 		get
@@ -904,15 +1294,28 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Gets the safe area of the window
+	/// </summary>
+	/// <value>
+	/// The safe area of the window
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// Some devices have portions of the screen which are partially obscured or not interactive, possibly due to on-screen controls, curved edges, camera notches, TV overscan, etc.
+	/// This property provides the area of the current viewport which is safe to have interactible content.
+	/// You should continue rendering into the rest of the window, but it should not contain visually important or interactible content.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
 	public Rect<int> SafeArea
 	{
 		get
 		{
 			unsafe
 			{
-				// SDL_GetWindowSafeArea seems to be one of the few exceptions to the rule of getters on SDL windows
-				// not safely initializing out parameters before returning early because of failure.
-				// SDL_GetWindowSafeArea actually sets of its out parameters to zero in case of failure.
 				Unsafe.SkipInit(out Rect<int> rect);
 
 				SDL_GetWindowSafeArea(mWindow, &rect);
@@ -922,10 +1325,54 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Gets the value of SDR white in the <see cref="ColorSpace.Srgb"/> color space for the window
+	/// </summary>
+	/// <value>
+	/// The value of SDR white in the <see cref="ColorSpace.Srgb"/> color space for the window
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// On Windows the value of this property corresponds to the SDR white level in scRGB color space, and on Apple platform this is always <c>1.0</c> for EDR content.
+	/// </para>
+	/// <para>
+	/// The value of this property can change dynamically at runtime when a <see cref="EventType.WindowHdrStateChanged"/> event is sent.
+	/// </para>
+	/// </remarks>
 	public float SdrWhiteLevel => Properties?.TryGetFloatValue(PropertyNames.SdrWhiteLevelFloat, out var sdrWhiteLevel) is true
 		? sdrWhiteLevel
 		: default;
 
+	/// <summary>
+	/// Gets or sets the shape associated with the window, if any
+	/// </summary>
+	/// <value>
+	/// The shape associated with the window, or <c><see langword="null"/></c> if the window has no associated shape
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The alpha channel of the shape associated with the transparent window is used to determine the shape "visible" to the mouse cursor.
+	/// Fully transparent areas of the shape are also transparent to mouse clicks.
+	/// </para>
+	/// <para>
+	/// If you are using something else besides SDL to render the window, then you are responsible for drawing the alpha channel of the window to match the shape's alpha channel to get consistent cross-platform results.
+	/// </para>
+	/// <para>
+	/// The given <see cref="Video.Surface"/> when setting this property is copied, so you can safely dispose of it after setting the property if you don't need it anymore.
+	/// This also means that changes to the given surface after setting this property won't affect the shape of the window and you'd need to set this property again with the updated surface to change the shape of the window.
+	/// </para>
+	/// <para>
+	/// Setting this property is an expensive operation and should be done sparingly.
+	/// </para>
+	/// <para>
+	/// The window must have been created with the <see cref="WindowFlags.Transparent"/> flag to be able to associate a shape with it.
+	/// Attempting to set a shape for a window that wasn't created with the <see cref="WindowFlags.Transparent"/> flag will <see langword="throw"/> a <see cref="SdlException"/>.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">When setting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	public Surface? Shape
 	{
 		get
@@ -933,7 +1380,7 @@ public abstract partial class Window : IDisposable
 			unsafe
 			{
 				return Properties?.TryGetPointerValue(PropertyNames.ShapePointer, out var shapePtr) is true
-					&& Surface.TryGetOrCreate(unchecked((Surface.SDL_Surface*)shapePtr), out var shape)
+					&& Video.Surface.TryGetOrCreate(unchecked((Surface.SDL_Surface*)shapePtr), out var shape)
 					? shape
 					: default;
 			}
@@ -943,24 +1390,51 @@ public abstract partial class Window : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetWindowShape(mWindow, value is not null ? value.Pointer : null));
+				SdlErrorHelper.ThrowIfFailed(SDL_SetWindowShape(mWindow, value is not null ? value.Pointer : null));
 			}
 		}
 	}
 
+	/// <summary>
+	/// Gets or sets the size of the window's client area
+	/// </summary>
+	/// <value>
+	/// The size of the window's client area
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The size of the window's client area reported by this property might be different from the size in pixels of the window's client area.
+	/// This is especially the case if the window is on a display with a high pixel density.
+	/// To get the real client area size in pixels, you can use the <see cref="SizeInPixels"/> property or the <see cref="Renderer.OutputSize"/> property (on the associated <see cref="Renderer"/>) instead.
+	/// </para>
+	/// <para>
+	/// Setting the size of a window when the window is in fullscreen mode or maximized has no effect.
+	/// To change the size of a window in fullscreen mode, you can use the <see cref="FullscreenMode"/> property instead.
+	/// </para>
+	/// <para>
+	/// On some windowing backends, a request to change this setting is asynchronous and the new window size may not have have been applied immediately upon setting this property.
+	/// If an immediate change is required, you can call <see cref="TrySync"/> to block until the changes have taken effect.
+	/// </para>
+	/// <para>
+	/// When the window size changes, an <see cref="EventType.WindowResized"/> event will be emitted with the new window dimensions.
+	/// Note that the new dimensions may not match the exact size requested, as some windowing backends can restrict the window size in certain scenarios
+	/// (e.g. constraining the size of the content area to remain within the usable desktop bounds).
+	/// Additionally, windowing backends can also deny the request to change this setting altogether.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">When setting or getting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	public (int Width, int Height) Size
 	{
 		get
 		{
 			unsafe
 			{
-				// For some reason getters on SDL windows aren't setting safe defaults for out parameters,
-				// before returning early because of failure (SDL does this literally everywhere else),
-				// therefore we have to safely initialize the return value ourselves in case SDL doesn't do it.
-				// So Unsafe.SkipInit for us.
-				(int Width, int Height) size = default;
+				Unsafe.SkipInit(out (int Width, int Height) size);
 
-				SDL_GetWindowSize(mWindow, &size.Width, &size.Height);
+				SdlErrorHelper.ThrowIfFailed(SDL_GetWindowSize(mWindow, &size.Width, &size.Height));
 
 				return size;
 			}
@@ -970,70 +1444,125 @@ public abstract partial class Window : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetWindowSize(mWindow, value.Width, value.Height));
+				SdlErrorHelper.ThrowIfFailed(SDL_SetWindowSize(mWindow, value.Width, value.Height));
 			}
 		}
 	}
 
+	/// <summary>
+	/// Gets the size in pixels of the window's client area
+	/// </summary>
+	/// <value>
+	/// The size in pixels of the window's client area
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// The size in pixels of the window's client area reported by this property might be different from the size of the window's client area reported by the <see cref="Size"/> property.
+	/// This is especially the case if the window is on a display with a high pixel density.
+	/// </para>
+	/// <para>
+	/// If you want to set the size of the window's client area, you must use the <see cref="Size"/> property instead, but keep in mind that the sizes might differ.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="SdlException">When getting this property, SDL failed with an error (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	public (int Width, int Height) SizeInPixels
 	{
 		get
 		{
 			unsafe
 			{
-				// For some reason getters on SDL windows aren't setting safe defaults for out parameters,
-				// before returning early because of failure (SDL does this literally everywhere else),
-				// therefore we have to safely initialize the return value ourselves in case SDL doesn't do it.
-				// So Unsafe.SkipInit for us.
-				(int Width, int Height) sizeInPixels = default;
+				Unsafe.SkipInit(out (int Width, int Height) sizeInPixels);
 
-				SDL_GetWindowSizeInPixels(mWindow, &sizeInPixels.Width, &sizeInPixels.Height);
+				SdlErrorHelper.ThrowIfFailed(SDL_GetWindowSizeInPixels(mWindow, &sizeInPixels.Width, &sizeInPixels.Height));
 
 				return sizeInPixels;
 			}
 		}
 	}
 
-	// TODO: doc TryResetSurface
-	public Surface? Surface
+	private WindowSurface? mSurface = null;
+
+	/// <summary>
+	/// Gets the <see cref="WindowSurface"/> associated with the window
+	/// </summary>
+	/// <value>
+	/// The <see cref="WindowSurface"/> associated with the window
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// If necessary, a new surface will be created with the optimal format for the window.
+	/// While you don't need to <see cref="Surface.Dispose()">dispose</see> of the surface manually, doing so will invalidate the surface and a new one will be created the next time you access this property.
+	/// </para>
+	/// <para>
+	/// You can check the <see cref="HasSurface"/> to determine whether the window currently has a valid surface associated with it.
+	/// If the value of the <see cref="HasSurface"/> property is <c><see langword="true"/></c>, you can access the <see cref="Surface"/> property and get the existing associated surface,
+	/// otherwise, if the value is <see langword="false"/>, accessing the <see cref="Surface"/> property will create a new surface and associate it with the window.
+	/// If you don't want to create a new surface unnecessarily, you should check the <see cref="HasSurface"/> property before accessing the <see cref="Surface"/> property!
+	/// </para>
+	/// <para>
+	/// <see cref="WindowSurface"/>s can be used as an alternative to using a <see cref="Renderer"/> on the window.
+	/// </para>
+	/// <para>
+	/// To reflect changes made to the surface, you need to call either the <see cref="WindowSurface.TryUpdate"/> or <see cref="WindowSurface.TryUpdateRects(ReadOnlySpan{Rect{int}})"/> method on the surface,
+	/// in order for the surface to be copied to screen and displayed as the window's content. Changes to the surface won't be displayed until you call one of those methods.
+	/// </para>
+	/// <para>
+	/// Do <em>not</em> attempt to use a <see cref="WindowSurface"/> together with a <see cref="Renderer"/> on the same <see cref="Window"/>!
+	/// They are meant to be used mutually exclusively for the same <see cref="Window"/>.
+	/// </para>
+	/// <para>
+	/// The surface associated with the window will be invalidated if the window is resized. After resizing a window you need to access this property again to get a new valid surface.
+	/// </para>
+	/// <para>
+	/// This property is affected by the <see cref="Hint.FrameBufferAcceleration"/> hint.
+	/// </para>
+	/// <para>
+	/// This property should only be accessed from the main thread.
+	/// </para>
+	/// </remarks>
+	public WindowSurface Surface
 	{
 		get
 		{
 			unsafe
 			{
-				Surface.TryGetOrCreate(SDL_GetWindowSurface(mWindow), out var surface);
-				return surface;
+				var oldSurface = mSurface;
+				try
+				{
+					SdlErrorHelper.ThrowIfFailed(WindowSurface.TryGetOrCreate(this, out mSurface));
+
+					// We rely on SDL actually setting an error message when it fails to get or create the surface.
+					// In that case the previous statement would have thrown an exception and mSurface would have been set to null (which is alright),
+					// or else mSurface would have been set to the new or existing surface. Thus mSurface is non-null at this point.
+
+					return mSurface!;
+				}
+				finally
+				{
+					if (!ReferenceEquals(oldSurface, mSurface) && oldSurface is not null)
+					{
+						oldSurface.DontDestroy = true; // SDL already destroyed the previous surface if it was invalidate or replaced with a new one
+						oldSurface.Dispose();
+					}
+				}
 			}
 		}
 	}
 
-	public WindowSurfaceVSync SurfaceVSync
-	{
-		get
-		{
-			unsafe
-			{
-				// For some reason getters on SDL windows aren't setting safe defaults for out parameters,
-				// before returning early because of failure (SDL does this literally everywhere else),
-				// therefore we have to safely initialize the return value ourselves in case SDL doesn't do it.
-				// So Unsafe.SkipInit for us.
-				WindowSurfaceVSync vsync = default;
-
-				SDL_GetWindowSurfaceVSync(mWindow, &vsync);
-
-				return vsync;
-			}
-		}
-
-		set
-		{
-			unsafe
-			{
-				ErrorHelper.ThrowIfFailed(SDL_SetWindowSurfaceVSync(mWindow, value));
-			}
-		}
-	}
-
+	/// <summary>
+	/// Gets or sets the title of the window
+	/// </summary>
+	/// <value>
+	/// The title of the window
+	/// </value>
+	/// <remarks>
+	/// <para>
+	/// Depending on the platform and windowing backend, Unicode characters may be allowed in the window title.
+	/// </para>
+	/// </remarks>
 	public string Title
 	{
 		get
@@ -1051,7 +1580,7 @@ public abstract partial class Window : IDisposable
 				var valueUtf8 = Utf8StringMarshaller.ConvertToUnmanaged(value);
 				try
 				{
-					ErrorHelper.ThrowIfFailed(SDL_SetWindowTitle(mWindow, valueUtf8));
+					SdlErrorHelper.ThrowIfFailed(SDL_SetWindowTitle(mWindow, valueUtf8));
 				}
 				finally
 				{
@@ -1061,6 +1590,18 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Disposes the window
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// After disposing a <see cref="Window"/>, it becomes <see cref="IsValid">invalid</see> and all of its associated resources (e.g. <see cref="Renderer"/>, <see cref="Surface"/>, etc.) will be invalidated as well.
+	/// Do not attempt to access or use any of those resources after the window has been disposed.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
 	public void Dispose()
 	{
 		GC.SuppressFinalize(this);
@@ -1073,6 +1614,13 @@ public abstract partial class Window : IDisposable
 		{
 			if (mWindow is not null)
 			{
+				if (mSurface is not null)
+				{
+					mSurface.DontDestroy = true; // SDL_DestroyWindow will automatically destroy the surface if it exists
+					mSurface.Dispose();
+					mSurface = null;
+				}
+
 				if (forget)
 				{
 					mKnownInstances.TryRemove(unchecked((IntPtr)mWindow), out _);
@@ -1082,7 +1630,7 @@ public abstract partial class Window : IDisposable
 				{
 					// Hopefully 'EventWatchDestroyImpl' doesn't change its address during the lifetime of the window (it shouldn't)
 					// and 'GCHandle.ToIntPtr' always returns the same value for the same GCHandle (it should).
-					Sdl.SDL_RemoveEventWatch(&EventWatchDestroyImpl, unchecked((void*)GCHandle.ToIntPtr(mSelfHandle)));
+					Sdl.SDL_RemoveEventWatch(&EventWatchResizeOrDestroy, unchecked((void*)GCHandle.ToIntPtr(mSelfHandle)));
 
 					mSelfHandle.Free();
 					mSelfHandle = default;
@@ -1094,6 +1642,50 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
+	// TODO: add cref for OpenGL and Vulkan library types once they are implemented
+	/// <summary>
+	/// Tries to create a new <see cref="Window"/> with the specified title, size, and flags
+	/// </summary>
+	/// <param name="title">The title of the window. Depending on the platform and windowing backend, Unicode characters may be allowed in the window title.</param>
+	/// <param name="width">The width of the window</param>
+	/// <param name="height">The height of the window</param>
+	/// <param name="window">The resulting <see cref="Window"/>, if this method returns <c><see langword="true"/></c>; otherwise, <c><see langword="null"/></c></param>
+	/// <param name="flags">The flags the window should be created with</param>
+	/// <returns><c><see langword="true"/></c>, if the window was created successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The actual size of the created window may differ from the specified size, based on the desktop layout and window manager's policies. You should be prepared to handle windows of any size.
+	/// </para>
+	/// <para>
+	/// The resulting window will be immediately shown if the <see cref="WindowFlags.Hidden"/> flag isn't specified, otherwise it will be created hidden and you can show it later using the <see cref="TryShow"/> method.
+	/// </para>
+	/// <para>
+	/// On Apple's macOS, you <em>must</em> set the <c>NSHighResolutionCapable</c> property in your <c>Info.plist</c> to <c>YES</c>, otherwise you will not receive a high-DPI OpenGL canvas.
+	/// </para>
+	/// <para>
+	/// The <see cref="SizeInPixels">window's size in pixels</see> may differ from its <see cref="Size">window's coordinate size</see> if the window is on a high pixel density display.
+	/// You can use the <see cref="Size"/> property to get the window's coordinate size and the <see cref="SizeInPixels"/> property or the <see cref="Renderer.OutputSize"/> property on the associated <see cref="Renderer"/> to get the window's drawable size in pixels.
+	/// Note that the drawable size of a window can vary after the window is created and should be checked again after an <see cref="EventType.WindowPixelSizeChanged"/> event is received.
+	/// </para>
+	/// <para>
+	/// If the window is created with any of the <see cref="WindowFlags.OpenGL"/> or <see cref="WindowFlags.Vulkan"/> flags,
+	/// then the corresponding library (<see cref=""/> or <see cref=""/>) will be loaded upon creation, if necessary.
+	/// Afterwards, when the window is <see cref="Dispose()">disposed</see>/destroyed the corresponding library will be unloaded again.
+	/// </para>
+	/// <para>
+	/// If the <see cref="WindowFlags.Vulkan"/> flag is specified and there isn't a working Vulkan driver SDL can use, this method will fail.
+	/// </para>
+	/// <para>
+	/// If the <see cref="WindowFlags.Metal"/> flag is specified and the platform doesn't support Metal, this method will fail.
+	/// </para>
+	/// <para>
+	/// If you intend to use the newly created window with a <see cref="Rendering.Renderer"/>, you can use the <see cref="TryCreateWithRenderer(string, int, int, out Window?, out Renderer?, WindowFlags)"/> method instead, to avoid window flicker.
+	/// Otherwise, you can create a <see cref="Rendering.Renderer"/> for the window later using any of its <c>TryCreateRenderer*</c> methods (e.g. <see cref="TryCreateRenderer(out Renderer?, ReadOnlySpan{string})"/>).
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
 	public static bool TryCreate(string title, int width, int height, [NotNullWhen(true)] out Window? window, WindowFlags flags = WindowFlags.None)
 	{
 		unsafe
@@ -1119,10 +1711,10 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
-	private static bool TryCreate<TFactory, TWindow>([NotNullWhen(true)] out TWindow? window, bool? alwaysOnTop = default, bool? bordered = default, bool? constrainPopup = default, bool? externalGraphicsContext = default,bool? focusable = default,
-		bool? fullscreen = default, int? height = default, bool? hidden = default, bool? highPixelDensity = default, bool? maximized = default, bool? menu = default, bool? metal = default, bool? minimized = default,
-		bool? modal = default, bool? mouseGrabbed = default, bool? openGL = default, Window? parent = default, bool? resizable = default, string? title = default, bool? transparent = default, bool? tooltip = default,
-		bool? utility = default, bool? vulkan = default, int? width = default, int? x = default, int? y = default, Properties? properties = default)
+	private static bool TryCreate<TFactory, TWindow>([NotNullWhen(true)] out TWindow? window, bool? alwaysOnTop = default, bool? bordered = default, bool? constrainPopup = default, bool? externalGraphicsContext = default, WindowFlags? flags = default,
+		bool? focusable = default, bool? fullscreen = default, int? height = default, bool? hidden = default, bool? highPixelDensity = default, bool? maximized = default, bool? menu = default, bool? metal = default,
+		bool? minimized = default, bool? modal = default, bool? mouseGrabbed = default, bool? openGL = default, Window? parent = default, bool? resizable = default, string? title = default, bool? transparent = default,
+		bool? tooltip = default, bool? utility = default, bool? vulkan = default, int? width = default, WindowPosition? x = default, WindowPosition? y = default, Properties? properties = default)
 		where TFactory : notnull, IFactory<TWindow>
 		where TWindow : notnull, Window
 	{
@@ -1133,6 +1725,7 @@ public abstract partial class Window : IDisposable
 			Unsafe.SkipInit(out bool? borderedBackup);
 			Unsafe.SkipInit(out bool? constrainPopupBackup);
 			Unsafe.SkipInit(out bool? externalGraphicsContextBackup);
+			Unsafe.SkipInit(out WindowFlags? flagsBackup);
 			Unsafe.SkipInit(out bool? focusableBackup);
 			Unsafe.SkipInit(out bool? fullscreenBackup);
 			Unsafe.SkipInit(out int? heightBackup);
@@ -1153,8 +1746,8 @@ public abstract partial class Window : IDisposable
 			Unsafe.SkipInit(out bool? utilityBackup);
 			Unsafe.SkipInit(out bool? vulkanBackup);
 			Unsafe.SkipInit(out int? widthBackup);
-			Unsafe.SkipInit(out int? xBackup);
-			Unsafe.SkipInit(out int? yBackup);
+			Unsafe.SkipInit(out WindowPosition? xBackup);
+			Unsafe.SkipInit(out WindowPosition? yBackup);
 
 			if (properties is null)
 			{
@@ -1178,6 +1771,11 @@ public abstract partial class Window : IDisposable
 				if (externalGraphicsContext is bool externalGraphicsContextValue)
 				{
 					propertiesUsed.TrySetBooleanValue(PropertyNames.CreateExternalGraphicsContextBoolean, externalGraphicsContextValue);
+				}
+
+				if (flags is WindowFlags flagsValue)
+				{
+					propertiesUsed.TrySetNumberValue(PropertyNames.CreateFlagsNumber, unchecked((long)(ulong)flagsValue));
 				}
 
 				if (focusable is bool focusableValue)
@@ -1280,14 +1878,14 @@ public abstract partial class Window : IDisposable
 					propertiesUsed.TrySetBooleanValue(PropertyNames.CreateVulkanBoolean, vulkanValue);
 				}
 
-				if (x is int xValue)
+				if (x is WindowPosition xValue)
 				{
-					propertiesUsed.TrySetNumberValue(PropertyNames.CreateXNumber, xValue);
+					propertiesUsed.TrySetNumberValue(PropertyNames.CreateXNumber, Unsafe.BitCast<WindowPosition, int>(xValue));
 				}
 
-				if (y is int yValue)
+				if (y is WindowPosition yValue)
 				{
-					propertiesUsed.TrySetNumberValue(PropertyNames.CreateYNumber, yValue);
+					propertiesUsed.TrySetNumberValue(PropertyNames.CreateYNumber, Unsafe.BitCast<WindowPosition, int>(yValue));
 				}
 			}
 			else
@@ -1328,6 +1926,15 @@ public abstract partial class Window : IDisposable
 						: null;
 
 					propertiesUsed.TrySetBooleanValue(PropertyNames.CreateExternalGraphicsContextBoolean, externalGraphicsContextValue);
+				}
+
+				if (flags is WindowFlags flagsValue)
+				{
+					flagsBackup = propertiesUsed.TryGetNumberValue(PropertyNames.CreateFlagsNumber, out var existingFlagsValue)
+						? unchecked((WindowFlags)(ulong)existingFlagsValue)
+						: null;
+
+					propertiesUsed.TrySetNumberValue(PropertyNames.CreateFlagsNumber, unchecked((long)(ulong)flagsValue));
 				}
 
 				if (focusable is bool focusableValue)
@@ -1510,21 +2117,22 @@ public abstract partial class Window : IDisposable
 					propertiesUsed.TrySetNumberValue(PropertyNames.CreateWidthNumber, widthValue);
 				}
 
-				if (x is int xValue)
+				if (x is WindowPosition xValue)
 				{
 					xBackup = propertiesUsed.TryGetNumberValue(PropertyNames.CreateXNumber, out var existingXValue)
-						? unchecked((int)existingXValue)
+						? Unsafe.BitCast<int, WindowPosition>(unchecked((int)existingXValue))
 						: null;
 
-					propertiesUsed.TrySetNumberValue(PropertyNames.CreateXNumber, xValue);
+					propertiesUsed.TrySetNumberValue(PropertyNames.CreateXNumber, Unsafe.BitCast<WindowPosition, int>(xValue));
 				}
 
-				if (y is int yValue)
+				if (y is WindowPosition yValue)
 				{
 					yBackup = propertiesUsed.TryGetNumberValue(PropertyNames.CreateYNumber, out var existingYValue)
-						? unchecked((int)existingYValue)
+						? Unsafe.BitCast<int, WindowPosition>(unchecked((int)existingYValue))
 						: null;
-					propertiesUsed.TrySetNumberValue(PropertyNames.CreateYNumber, yValue);
+
+					propertiesUsed.TrySetNumberValue(PropertyNames.CreateYNumber, Unsafe.BitCast<WindowPosition, int>(yValue));
 				}
 			}
 
@@ -1598,6 +2206,18 @@ public abstract partial class Window : IDisposable
 						else
 						{
 							propertiesUsed.TryRemove(PropertyNames.CreateExternalGraphicsContextBoolean);
+						}
+					}
+
+					if (flags.HasValue)
+					{
+						if (flagsBackup is WindowFlags flagsValue)
+						{
+							propertiesUsed.TrySetNumberValue(PropertyNames.CreateFlagsNumber, unchecked((long)(ulong)flagsValue));
+						}
+						else
+						{
+							propertiesUsed.TryRemove(PropertyNames.CreateFlagsNumber);
 						}
 					}
 
@@ -1843,9 +2463,9 @@ public abstract partial class Window : IDisposable
 
 					if (x.HasValue)
 					{
-						if (xBackup is int xValue)
+						if (xBackup is WindowPosition xValue)
 						{
-							propertiesUsed.TrySetNumberValue(PropertyNames.CreateXNumber, xValue);
+							propertiesUsed.TrySetNumberValue(PropertyNames.CreateXNumber, Unsafe.BitCast<WindowPosition, int>(xValue));
 						}
 						else
 						{
@@ -1855,9 +2475,9 @@ public abstract partial class Window : IDisposable
 
 					if (y.HasValue)
 					{
-						if (yBackup is int yValue)
+						if (yBackup is WindowPosition yValue)
 						{
-							propertiesUsed.TrySetNumberValue(PropertyNames.CreateYNumber, yValue);
+							propertiesUsed.TrySetNumberValue(PropertyNames.CreateYNumber, Unsafe.BitCast<WindowPosition, int>(yValue));
 						}
 						else
 						{
@@ -1869,21 +2489,110 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
-	public static bool TryCreate([NotNullWhen(true)] out Window? window, bool? alwaysOnTop = default, bool? bordered = default, bool? constrainPopup = default, bool? externalGraphicsContext = default, bool? focusable = default,
-		bool? fullscreen = default, int? height = default, bool? hidden = default, bool? highPixelDensity = default, bool? maximized = default, bool? menu = default, bool? metal = default, bool? minimized = default,
-		bool? modal = default, bool? mouseGrabbed = default, bool? openGL = default, Window? parent = default, bool? resizable = default, string? title = default, bool? transparent = default, bool? tooltip = default,
-		bool? utility = default, bool? vulkan = default, int? width = default, int? x = default, int? y = default, Properties? properties = default)
+	/// <summary>
+	/// Tries to create a new <see cref="Window"/> with the specified parameters
+	/// </summary>
+	/// <param name="window">The resulting <see cref="Window"/>, if this method returns <c><see langword="true"/></c>; otherwise, <c><see langword="null"/></c></param>
+	/// <param name="alwaysOnTop">A value indicating whether the window should always be above others</param>
+	/// <param name="bordered">A value indicating whether the window should have a border (decorations)</param>
+	/// <param name="constrainPopup">
+	/// A value indicating whether a "tooltip" or "menu" popup window should be automatically constrained to the bounds of the display.
+	/// If this parameter is <c><see langword="null"/></c> (the default), the default behavior is to constrain popup windows.
+	/// </param>
+	/// <param name="externalGraphicsContext">A value indicating whether the window will be used with an externally managed graphics context</param>
+	/// <param name="flags">The flags the window should be created with</param>
+	/// <param name="focusable">
+	/// A value indicating whether the window should accept input focus.
+	/// If this parameter is <c><see langword="null"/></c> (the default), the default behavior is to accept input focus.
+	/// </param>
+	/// <param name="fullscreen">A value indicating whether the window should be created initially in fullscreen mode at desktop resolution</param>
+	/// <param name="height">The height of the window</param>
+	/// <param name="hidden">A value indicating whether the window should be created initially hidden</param>
+	/// <param name="highPixelDensity">A value indicating whether the window should be created with a high pixel density buffer, if possible</param>
+	/// <param name="maximized">A value indicating whether the window should be created initially maximized</param>
+	/// <param name="menu">
+	/// A value indicating whether the window should be created as a "menu" popup window.
+	/// If this parameter is set to <c><see langword="true"/></c>, you must specify a <paramref name="parent"/> window for the window to be created.
+	/// </param>
+	/// <param name="metal">A value indicating whether the window will be used with Metal rendering</param>
+	/// <param name="minimized">A value indicating whether the window should be created initially minimized</param>
+	/// <param name="modal">
+	/// A value indicating whether the window should be created as modal to its parent window.
+	/// If this parameter is set to <c><see langword="true"/></c>, you must specify a <paramref name="parent"/> window for the window to be created.
+	/// </param>
+	/// <param name="mouseGrabbed">A value indicating whether the window should be created initially with the mouse grabbed</param>
+	/// <param name="openGL">A value indicating whether the window will be used with OpenGL rendering</param>
+	/// <param name="parent">
+	/// The parent <see cref="Window"/> of the window to be created.
+	/// You must specify a non-<c><see langword="null"/></c> window when you want to create a "tooltip" or "menu" popup window or a window that should be modal to its parent window.
+	/// </param>
+	/// <param name="resizable">A value indicating whether the window should be resizable by the user</param>
+	/// <param name="title">The title of the window. Depending on the platform and windowing backend, Unicode characters may be allowed in the window title.</param>
+	/// <param name="transparent">
+	/// A value indicating whether the window should be created with a transparent buffer.
+	/// The value of this parameter will determine whether the window will be shown transparent in areas where the alpha channel value of the window's buffer is equal to <c>0</c>.
+	/// </param>
+	/// <param name="tooltip">A value indicating whether the window should be created as a "tooltip" popup window</param>
+	/// <param name="utility">A value indicating whether the window should be created as a utility window (e.g. not showing in the task bar and window list)</param>
+	/// <param name="vulkan">A value indicating whether the window will be used with Vulkan rendering</param>
+	/// <param name="width">The width of the window</param>
+	/// <param name="x">
+	/// The X coordinate of the window, <see cref="WindowPosition.Centered"/>, <see cref="WindowPosition.Undefined"/>, or a value obtained from using the <see cref="WindowPosition.CenteredOn(Display)"/> or <see cref="WindowPosition.UndefinedOn(Display)"/> methods.
+	/// You can either specify definitive coordinates as the value for this parameter,
+	/// or you can use <see cref="WindowPosition.Centered"/>, <see cref="WindowPosition.Undefined"/>, <see cref="WindowPosition.CenteredOn(Display)"/>, or <see cref="WindowPosition.UndefinedOn(Display)"/>
+	/// to specify some special window positions to be determined in relation to the primary display or a specific display.
+	/// </param>
+	/// <param name="y">
+	/// The Y coordinate of the window, <see cref="WindowPosition.Centered"/>, <see cref="WindowPosition.Undefined"/>, or a value obtained from using the <see cref="WindowPosition.CenteredOn(Display)"/> or <see cref="WindowPosition.UndefinedOn(Display)"/> methods.
+	/// You can either specify definitive coordinates as the value for this parameter,
+	/// or you can use <see cref="WindowPosition.Centered"/>, <see cref="WindowPosition.Undefined"/>, <see cref="WindowPosition.CenteredOn(Display)"/>, or <see cref="WindowPosition.UndefinedOn(Display)"/>
+	/// to specify some special window positions to be determined in relation to the primary display or a specific display.
+	/// </param>
+	/// <param name="properties">Additional properties to use when creating the window</param>
+	/// <returns><c><see langword="true"/></c>, if the window was created successfully; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The actual size of the created window may differ from the specified size, based on the desktop layout and window manager's policies. You should be prepared to handle windows of any size.
+	/// </para>
+	/// <para>
+	/// The resulting window will be immediately shown if the <paramref name="hidden"/> parameter isn't set to <c><see langword="true"/></c>, otherwise it will be created hidden and you can show it later using the <see cref="TryShow"/> method.
+	/// </para>
+	/// <para>
+	/// If this window is intended to being be used with a <see cref="Rendering.Renderer"/>, you should not use a graphics API specific parameter (<paramref name="openGL"/>, <paramref name="vulkan"/>, etc), as SDL will handle that internally when it chooses a renderer,
+	/// while creating the renderer with any of the <c>TryCreateRenderer*</c> methods.
+	/// However, SDL might need to recreate your window at that point, which may cause the window to appear briefly, and then flicker as it is recreated.
+	/// The correct approach to this is to create the window with the <paramref name="hidden"/> parameter set to <c><see langword="true"/></c>, then create the renderer, then show the window with <see cref="TryShow"/>.
+	/// </para>
+	/// <para>
+	/// You can see the <see cref="TryCreate(string, int, int, out Window?, WindowFlags)"/> method for more in-depth information about creating windows and the available flags.
+	/// </para>
+	/// <para>
+	/// You can see the <see cref="TryCreatePopup(int, int, int, int, out Window?, WindowFlags)"/> method for more in-depth information about creating popup windows and how "tooltip" and "menu" popup windows work.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	public static bool TryCreate([NotNullWhen(true)] out Window? window, bool? alwaysOnTop = default, bool? bordered = default, bool? constrainPopup = default, bool? externalGraphicsContext = default, WindowFlags? flags = default,
+		bool? focusable = default, bool? fullscreen = default, int? height = default, bool? hidden = default, bool? highPixelDensity = default, bool? maximized = default, bool? menu = default, bool? metal = default,
+		bool? minimized = default, bool? modal = default, bool? mouseGrabbed = default, bool? openGL = default, Window? parent = default, bool? resizable = default, string? title = default, bool? transparent = default,
+		bool? tooltip = default, bool? utility = default, bool? vulkan = default, int? width = default, WindowPosition? x = default, WindowPosition? y = default, Properties? properties = default)
 		=> TryCreate<RegisteredDriverOrGenericFallbackDriverFactory, Window>(
-			out window, alwaysOnTop, bordered, constrainPopup, externalGraphicsContext, focusable,
-			fullscreen, height, hidden, highPixelDensity, maximized, menu, metal, minimized,
-			modal, mouseGrabbed, openGL, parent, resizable, title, transparent, tooltip,
-			utility, vulkan, width, x, y, properties
+			out window, alwaysOnTop, bordered, constrainPopup, externalGraphicsContext, flags,
+			focusable, fullscreen, height, hidden, highPixelDensity, maximized, menu, metal,
+			minimized, modal, mouseGrabbed, openGL, parent, resizable, title, transparent,
+			tooltip, utility, vulkan, width, x, y, properties
 		);
 
-	internal static bool TryCreate<TDriver>([NotNullWhen(true)] out Window<TDriver>? window, bool? alwaysOnTop = default, bool? bordered = default, bool? constrainPopup = default, bool? externalGraphicsContext = default, bool? focusable = default,
-		bool? fullscreen = default, int? height = default, bool? hidden = default, bool? highPixelDensity = default, bool? maximized = default, bool? menu = default, bool? metal = default, bool? minimized = default,
-		bool? modal = default, bool? mouseGrabbed = default, bool? openGL = default, Window? parent = default, bool? resizable = default, string? title = default, bool? transparent = default, bool? tooltip = default,
-		bool? utility = default, bool? vulkan = default, int? width = default, int? x = default, int? y = default, Properties? properties = default)
+	/// <inheritdoc cref="TryCreate(out Window?, bool?, bool?, bool?, bool?, WindowFlags?, bool?, bool?, int?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, Window?, bool?, string?, bool?, bool?, bool?, bool?, int?, WindowPosition?, WindowPosition?, Properties?)"/>
+	/// <typeparam name="TDriver">
+	/// The windowing driver type associated with the resulting window. 
+	/// Note that this method will fail if the currently active windowing driver does not match the specified <typeparamref name="TDriver"/> type.
+	/// </typeparam>
+	public static bool TryCreate<TDriver>([NotNullWhen(true)] out Window<TDriver>? window, bool? alwaysOnTop = default, bool? bordered = default, bool? constrainPopup = default, bool? externalGraphicsContext = default, WindowFlags? flags = default,
+		bool? focusable = default, bool? fullscreen = default, int? height = default, bool? hidden = default, bool? highPixelDensity = default, bool? maximized = default, bool? menu = default, bool? metal = default,
+		bool? minimized = default, bool? modal = default, bool? mouseGrabbed = default, bool? openGL = default, Window? parent = default, bool? resizable = default, string? title = default, bool? transparent = default,
+		bool? tooltip = default, bool? utility = default, bool? vulkan = default, int? width = default, WindowPosition? x = default, WindowPosition? y = default, Properties? properties = default)
 		where TDriver : notnull, IWindowingDriver
 	{
 		if (!WindowingDriverExtensions.get_IsActive<TDriver>())
@@ -1893,25 +2602,49 @@ public abstract partial class Window : IDisposable
 		}
 
 		return TryCreateUnchecked(
-			out window, alwaysOnTop, bordered, constrainPopup, externalGraphicsContext, focusable,
-			fullscreen, height, hidden, highPixelDensity, maximized, menu, metal, minimized,
-			modal, mouseGrabbed, openGL, parent, resizable, title, transparent, tooltip,
-			utility, vulkan, width, x, y, properties
+			out window, alwaysOnTop, bordered, constrainPopup, externalGraphicsContext, flags,
+			focusable, fullscreen, height, hidden, highPixelDensity, maximized, menu, metal,
+			minimized, modal, mouseGrabbed, openGL, parent, resizable, title, transparent,
+			tooltip, utility, vulkan, width, x, y, properties
 		);
 	}
 
-	internal static bool TryCreateUnchecked<TDriver>([NotNullWhen(true)] out Window<TDriver>? window, bool? alwaysOnTop = default, bool? bordered = default, bool? constrainPopup = default, bool? externalGraphicsContext = default, bool? focusable = default,
-		bool? fullscreen = default, int? height = default, bool? hidden = default, bool? highPixelDensity = default, bool? maximized = default, bool? menu = default, bool? metal = default, bool? minimized = default,
-		bool? modal = default, bool? mouseGrabbed = default, bool? openGL = default, Window? parent = default, bool? resizable = default, string? title = default, bool? transparent = default, bool? tooltip = default,
-		bool? utility = default, bool? vulkan = default, int? width = default, int? x = default, int? y = default, Properties? properties = default)
+	internal static bool TryCreateUnchecked<TDriver>([NotNullWhen(true)] out Window<TDriver>? window, bool? alwaysOnTop = default, bool? bordered = default, bool? constrainPopup = default, bool? externalGraphicsContext = default, WindowFlags? flags = default,
+		bool? focusable = default, bool? fullscreen = default, int? height = default, bool? hidden = default, bool? highPixelDensity = default, bool? maximized = default, bool? menu = default, bool? metal = default,
+		bool? minimized = default, bool? modal = default, bool? mouseGrabbed = default, bool? openGL = default, Window? parent = default, bool? resizable = default, string? title = default, bool? transparent = default,
+		bool? tooltip = default, bool? utility = default, bool? vulkan = default, int? width = default, WindowPosition? x = default, WindowPosition? y = default, Properties? properties = default)
 		where TDriver : notnull, IWindowingDriver
 		=> TryCreate<Factory<TDriver>, Window<TDriver>>(
-			out window, alwaysOnTop, bordered, constrainPopup, externalGraphicsContext, focusable,
-			fullscreen, height, hidden, highPixelDensity, maximized, menu, metal, minimized,
-			modal, mouseGrabbed, openGL, parent, resizable, title, transparent, tooltip,
-			utility, vulkan, width, x, y, properties
+			out window, alwaysOnTop, bordered, constrainPopup, externalGraphicsContext, flags,
+			focusable, fullscreen, height, hidden, highPixelDensity, maximized, menu, metal,
+			minimized, modal, mouseGrabbed, openGL, parent, resizable, title, transparent,
+			tooltip, utility, vulkan, width, x, y, properties
 		);
 
+	/// <summary>
+	/// Tries to create a new <see cref="Window"/> with the specified title, size and flags, and an associated default <see cref="Rendering.Renderer"/>
+	/// </summary>
+	/// <param name="title">The title of the window. Depending on the platform and windowing backend, Unicode characters may be allowed in the window title.</param>
+	/// <param name="width">The width of the window</param>
+	/// <param name="height">The height of the window</param>
+	/// <param name="window">The resulting <see cref="Window"/>, if this method returns <c><see langword="true"/></c>; otherwise, <c><see langword="null"/></c></param>
+	/// <param name="renderer">The resulting default <see cref="Rendering.Renderer"/>, if this method returns <c><see langword="true"/></c>; otherwise, <c><see langword="null"/></c></param>
+	/// <param name="flags">The flags the window should be created with</param>
+	/// <returns><c><see langword="true"/></c> if the window and renderer were successfully created; otherwise, <c><see langword="false"/></c></returns>
+	/// <remarks>
+	/// <para>
+	/// You can also access the created <see cref="Rendering.Renderer"/> later using the <see cref="Renderer"/> property of the resulting <paramref name="window"/>.
+	/// </para>
+	/// <para>
+	/// If a window is created with an associated <see cref="Rendering.Renderer"/>, don't try to create another renderer for the same window.
+	/// </para>
+	/// <para>
+	/// You can see the <see cref="TryCreate(string, int, int, out Window?, WindowFlags)"/> method for more in-depth information about creating windows and the available flags.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
 	public static bool TryCreateWithRenderer(string title, int width, int height, [NotNullWhen(true)] out Window? window, [NotNullWhen(true)] out Renderer? renderer, WindowFlags flags = WindowFlags.None)
 	{
 		unsafe
@@ -1951,7 +2684,87 @@ public abstract partial class Window : IDisposable
 
 	private protected abstract bool TryCreatePopupImpl(int x, int y, int width, int height, [NotNullWhen(true)] out Window? popupWindow, WindowFlags flags = default);
 
-	public bool TryCreatePopup(int x, int y, int width, int height, [NotNullWhen(true)] out Window? popupWindow, WindowFlags flags = default)
+	/// <summary>
+	/// Tries to create a new popup <see cref="Window"/> as a child of the window with the specified position, size and flags.
+	/// </summary>
+	/// <param name="x">The X coordinate of the popup window relative to the parent window</param>
+	/// <param name="y">The Y coordinate of the popup window relative to the parent window</param>
+	/// <param name="width">The width of the popup window</param>
+	/// <param name="height">The height of the popup window</param>
+	/// <param name="popupWindow">The resulting popup <see cref="Window"/>, if the method returns <see langword="true"/>; otherwise, <see langword="null"/></param>
+	/// <param name="flags">The flags the window should be created with</param>
+	/// <returns><c><see langword="true"/></c>, if the popup window was created successfully; otherwise, <c><see langword="false"/></c></returns>
+	/// <remarks>
+	/// <para>
+	/// The actual size of the created window may differ from the specified size, based on the desktop layout and window manager's policies. You should be prepared to handle windows of any size.
+	/// </para>
+	/// <para>
+	/// The given <paramref name="flags"/> argument <em>must</em> contain at least one of the following flags:
+	/// <list type="bullet">
+	///		<item>
+	///			<term><see cref="WindowFlags.Tooltip"/></term>
+	///			<description>The newly create popup window is a tooltip and will not pass any input events</description>
+	///		</item>
+	///		<item>
+	///			<term><see cref="WindowFlags.PopupMenu"/></term>
+	///			<description>The newly create popup window is a popup menu. The topmost popup menu will implicitly gain the keyboard focus</description>
+	///		</item>
+	/// </list>
+	/// The <paramref name="flags"/> parameter defaults to <see cref="WindowFlags.Tooltip"/> if not specified.
+	/// </para>
+	/// <para>
+	/// The following flags will be ignored if specified in the <paramref name="flags"/> argument:
+	/// <list type="bullet">
+	///		<item><description><see cref="WindowFlags.Minimized"/></description></item>
+	///		<item><description><see cref="WindowFlags.Maximized"/></description></item>
+	///		<item><description><see cref="WindowFlags.Fullscreen"/></description></item>
+	///		<item><description><see cref="WindowFlags.Borderless"/></description></item>
+	/// </list>
+	/// </para>
+	/// <para>
+	/// The given <paramref name="flags"/> argument <em>must not</em> contain any of the following flags:
+	/// <list type="bullet">
+	///		<item><description><see cref="WindowFlags.Utility"/></description></item>
+	///		<item><description><see cref="WindowFlags.Modal"/></description></item>
+	/// </list>
+	/// If the <paramref name="flags"/> argument contains any of the above flags, this method will fail.
+	/// </para>
+	/// <para>
+	/// The parent of a popup window can be either a regular, toplevel window, or another popup window.
+	/// </para>
+	/// <para>
+	/// Popup windows cannot be <see cref="TryMinimize">minimized</see>, be <see cref="TryMaximize">maximized</see>, be made <see cref="IsFullscreen">fullscreen</see>, <see cref="TryRaise">raised</see>, be made <see cref="TryFlash(FlashOperation)">flash</see>,
+	/// be made a <see cref="IsModal">modal window</see>, be the <see cref="Parent">parent</see> of a toplevel window, or grab the <see cref="HasMouseGrab">mouse</see> and/or <see cref="HasKeyboardGrab">keyboard</see>.
+	/// Attempts to do so will fail.
+	/// </para>
+	/// <para>
+	/// Popup windows implicitly do not have borders or decorations and do not appear on the taskbar, dock, or in lists of windows such as <kbd>Alt</kbd>+<kbd>Tab</kbd>-menus.
+	/// </para>
+	/// <para>
+	/// By default, popup window positions will automatically be constrained to keep the entire window within display bounds.
+	/// If you want to create an unconstrained popup window, you must manually construct it using the
+	/// <see cref="TryCreate(out Window?, bool?, bool?, bool?, bool?, WindowFlags?, bool?, bool?, int?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, Window?, bool?, string?, bool?, bool?, bool?, bool?, int?, WindowPosition?, WindowPosition?, Properties?)"/>
+	/// method with the <c>constrainPopup</c> parameter set to <c><see langword="false"/></c>.
+	/// </para>
+	/// <para>
+	/// By default, popup menus will automatically grab keyboard focus from the parent when shown. This behavior can be overridden by specifying the <see cref="WindowFlags.NotFocusable"/> flag,
+	/// by constructing the popup menu using the
+	/// <see cref="TryCreate(out Window?, bool?, bool?, bool?, bool?, WindowFlags?, bool?, bool?, int?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, Window?, bool?, string?, bool?, bool?, bool?, bool?, int?, WindowPosition?, WindowPosition?, Properties?)"/>
+	/// method with the <c>focusable</c> parameter set to <c><see langword="false"/></c>,
+	/// or by setting the <see cref="IsFocusable"/> property to <c><see langword="false"/></c> after creating the popup menu.
+	/// </para>
+	/// <para>
+	/// If a parent window is hidden or disposed/destroyed, this will also be recursively applied to all child windows.
+	/// </para>
+	/// <para>
+	/// Child windows that weren't explicitly hidden (e.g. via <see cref="TryHide"/>) but were only hidden because their parent was hidden,
+	/// will be automatically shown again when their parent is shown again.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	public bool TryCreatePopup(int x, int y, int width, int height, [NotNullWhen(true)] out Window? popupWindow, WindowFlags flags = WindowFlags.Tooltip)
 		=> TryCreatePopupImpl(x, y, width, height, out popupWindow, flags);
 
 	/// <summary>
@@ -2478,6 +3291,16 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to make the window flash in order to demand the user's attention
+	/// </summary>
+	/// <param name="operation">The flash operation to perform</param>
+	/// <returns><c><see langword="true"/></c>, if the flash operation was successfully initiated or canceled; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
 	public bool TryFlash(FlashOperation operation)
 	{
 		unsafe
@@ -2486,6 +3309,21 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to get an existing <see cref="Window"/> by its numeric ID
+	/// </summary>
+	/// <param name="id">The numeric ID of the window</param>
+	/// <param name="result">The existing <see cref="Window"/> associated with the specified <paramref name="id"/>, if the method returns <c><see langword="true"/></c>; otherwise, <see langword="null"/></param>
+	/// <returns><c><see langword="true"/></c>, if a window with the specified <paramref name="id"/> exists; otherwise, <c><see langword="false"/></c></returns>
+	/// <remarks>
+	/// <para>
+	/// This method makes use of the ID that SDL uses to identify windows in <see cref="WindowEvent"/>s and some other events
+	/// and maps such events to their corresponding <see cref="Window"/> instances using their <see cref="Id"/>.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
 	public static bool TryGetFromId(uint id, [NotNullWhen(true)] out Window? result)
 	{
 		unsafe
@@ -2493,7 +3331,21 @@ public abstract partial class Window : IDisposable
 			return TryGetOrCreate(SDL_GetWindowFromID(id), out result);
 		}
 	}
-	public bool TryGetICCProfile([NotNullWhen(true)] out NativeMemoryManager? iccProfileData)
+
+	/// <summary>
+	/// Tries to get the raw ICC profile data associated with the screen the window is currently displayed on
+	/// </summary>
+	/// <param name="iccProfileData">The raw ICC profile data associated with the screen the window is currently displayed on, if the method returns <c><see langword="true"/></c>; otherwise, <see langword="null"/></param>
+	/// <returns><c><see langword="true"/></c>, if the ICC profile data was successfully retrieved; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// Please remember to <see cref="NativeMemoryManagerBase.Dispose()">dispose</see> the resulting <paramref name="iccProfileData"/> when you don't need it anymore to release the underlying unmanaged resources.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	public bool TryGetICCProfileData([NotNullWhen(true)] out NativeMemoryManager? iccProfileData)
 	{
 		unsafe
 		{
@@ -2604,6 +3456,21 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to hide the window
+	/// </summary>
+	/// <returns><c><see langword="true"/></c>, if the window was successfully hidden; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// To show a hidden window again, you can use the <see cref="TryShow"/> method.
+	/// </para>
+	/// <para>
+	/// This method recursively hides all child windows of this window as well.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
 	public bool TryHide()
 	{
 		unsafe
@@ -2612,6 +3479,30 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to maximize the window (e.g. make it as large as possible)
+	/// </summary>
+	/// <returns><c><see langword="true"/></c>, if the window was successfully maximized; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// Non-resizable windows can't be maximized. The window must have the <see cref="WindowFlags.Resizable"/> flag set, or a call to this method will have no effect.
+	/// </para>
+	/// <para>
+	/// On some windowing backends, a request to maximize a window is asynchronous and the new window state may not have have been applied immediately after calling this method.
+	/// If an immediate change is required, you can call <see cref="TrySync"/> to block until the changes have taken effect.
+	/// </para>
+	/// <para>
+	/// When the window state changes, an <see cref="EventType.WindowMaximized"/> event will be emitted.
+	/// Windowing backends can also deny the request to change this setting altogether.
+	/// </para>
+	/// <para>
+	/// When maximizing a window, whether the constraints set via <see cref="MaximumSize"/> are honored depends on the policy of the window manager.
+	/// On Windows and macOS, the constraints are enforced when maximizing, while X11 and Wayland window managers may vary.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
 	public bool TryMaximize()
 	{
 		unsafe
@@ -2620,6 +3511,26 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to minimize the window (e.g. bring it to an iconic representation)
+	/// </summary>
+	/// <returns><c><see langword="true"/></c>, if the window was successfully minimized; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// If the window is in fullscreen mode, a call to this method has no direct effect, but it may alter the state the window is returned to when leaving fullscreen.
+	/// </para>
+	/// <para>
+	/// On some windowing backends, a request to minimize a window is asynchronous and the new window state may not have have been applied immediately after calling this method.
+	/// If an immediate change is required, you can call <see cref="TrySync"/> to block until the changes have taken effect.
+	/// </para>
+	/// <para>
+	/// When the window state changes, an <see cref="EventType.WindowMinimized"/> event will be emitted.
+	/// Windowing backends can also deny the request to change this setting altogether.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
 	public bool TryMinimize()
 	{
 		unsafe
@@ -2628,6 +3539,19 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to raise the window above other windows and to let it gain the input focus
+	/// </summary>
+	/// <returns><c><see langword="true"/></c>, if the window was successfully raised; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// The result of a request to raise a window is subject to desktop window manager policy, particularly if raising the requested window would result in stealing focus from another application.
+	/// If the window is successfully raised and gains input focus, an <see cref="EventType.WindowFocusGained"/> event will be emitted, and the window will have the <see cref="WindowFlags.InputFocus"/> flag set.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
 	public bool TryRaise()
 	{
 		unsafe
@@ -2636,14 +3560,26 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
-	public bool TryResetSurface()
-	{
-		unsafe
-		{
-			return SDL_DestroyWindowSurface(mWindow);
-		}
-	}
-
+	/// <summary>
+	/// Tries to restore the size and position of the previously minimized or maximized window
+	/// </summary>
+	/// <returns><c><see langword="true"/></c>, if the window was successfully restored; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// If the window is in fullscreen mode, a call to this method has no direct effect, but it may alter the state the window is returned to when leaving fullscreen.
+	/// </para>
+	/// <para>
+	/// On some windowing backends, a request to restore a window is asynchronous and the new window state may not have have been applied immediately after calling this method.
+	/// If an immediate change is required, you can call <see cref="TrySync"/> to block until the changes have taken effect.
+	/// </para>
+	/// <para>
+	/// When the window state changes, an <see cref="EventType.WindowRestored"/> event will be emitted.
+	/// Windowing backends can also deny the request to change this setting altogether.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
 	public bool TryRestore()
 	{
 		unsafe
@@ -2652,6 +3588,92 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to set the icon for the window
+	/// </summary>
+	/// <param name="icon">The icon to set for the window</param>
+	/// <returns><c><see langword="true"/></c>, if the icon was successfully set; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// If the given <paramref name="icon"/> is a surface with <see cref="Surface.Images">alternate representations</see>, the surface will be interpreted as the content to be used for 100% display scale, and the alternate representations will be used for high DPI situations.
+	/// For example, if the original surface is <c>32</c> by <c>32</c>, then on a 2x macOS display or 200% display scale on Windows, a <c>64</c> by <c>64</c> version of the image will be used, if available.
+	/// </para>
+	/// <para>
+	/// If a matching version of the image isn't available, the closest larger size image will be downscaled to the appropriate size and be used instead, if available.
+	/// Otherwise, the closest smaller image will be upscaled and be used instead.
+	/// </para>
+	/// <para>
+	/// The given <paramref name="icon"/> as well as all of its <see cref="Surface.Images">alternate representations</see> will be copied, so you can safely dispose of it after passing it if you don't need it anymore.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	public bool TrySetIcon(Surface icon)
+	{
+		unsafe
+		{
+			return SDL_SetWindowIcon(mWindow, icon is not null ? icon.Pointer : null);
+		}
+	}
+
+	/// <summary>
+	/// Tries to set the position of the window
+	/// </summary>
+	/// <param name="x">
+	/// The new X coordinate of the window, <see cref="WindowPosition.Centered"/>, <see cref="WindowPosition.Undefined"/>, or a value obtained from using the <see cref="WindowPosition.CenteredOn(Display)"/> or <see cref="WindowPosition.UndefinedOn(Display)"/> methods.
+	/// </param>
+	/// <param name="y">
+	/// The new Y coordinate of the window, <see cref="WindowPosition.Centered"/>, <see cref="WindowPosition.Undefined"/>, or a value obtained from using the <see cref="WindowPosition.CenteredOn(Display)"/> or <see cref="WindowPosition.UndefinedOn(Display)"/> methods.
+	/// </param>
+	/// <returns><c><see langword="true"/></c>, if the position was successfully set; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// You can either specify definitive coordinates for the new window position,
+	/// or you can use <see cref="WindowPosition.Centered"/>, <see cref="WindowPosition.Undefined"/>, <see cref="WindowPosition.CenteredOn(Display)"/>, or <see cref="WindowPosition.UndefinedOn(Display)"/>
+	/// to specify some special window positions to be determined in relation to the primary display or a specific display.
+	/// </para>
+	/// <para>
+	/// If the window is in exclusive fullscreen mode or maximized state, a call to this method has no effect.
+	/// </para>
+	/// <para>
+	/// However, this method can be used to reposition fullscreen-desktop windows onto a different display.
+	/// Whereas exclusive fullscreen windows are locked to a specific display, they can only be repositioned programmatically by setting <see cref="FullscreenMode"/>.
+	/// </para>
+	/// <para>
+	/// On some windowing backends, a request to change the position of a window is asynchronous and the new window position may not have have been applied immediately after calling this method.
+	/// If an immediate change is required, you can call <see cref="TrySync"/> to block until the changes have taken effect.
+	/// </para>
+	/// <para>
+	/// When the window position changes, an <see cref="EventType.WindowMoved"/> event will be emitted with the new window position.
+	/// Note that the new position may not match the exact coordinates requested, as some windowing backends can restrict the window position in certain scenarios
+	/// (e.g. constraining the position so the window is always within desktop bounds).
+	/// Additionally, windowing backends can also deny the request to change this setting altogether.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
+	public bool TrySetPosition(WindowPosition x, WindowPosition y)
+	{
+		unsafe
+		{
+			return SDL_SetWindowPosition(mWindow, Unsafe.BitCast<WindowPosition, int>(x), Unsafe.BitCast<WindowPosition, int>(y));
+		}
+	}
+
+	/// <summary>
+	/// Tries to show the previously hidden window
+	/// </summary>
+	/// <returns><c><see langword="true"/></c>, if the window was successfully shown; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This method recursively shows all child windows of this window that weren't explicitly hidden (e.g. via <see cref="TryHide"/>) but were only hidden because their parent was hidden.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
 	public bool TryShow()
 	{
 		unsafe
@@ -2660,6 +3682,23 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to show the system-level menu for the window
+	/// </summary>
+	/// <param name="x">The X coordinate of the menu to show, relative to the top-left corner of the window's client area</param>
+	/// <param name="y">The Y coordinate of the menu to show, relative to the top-left corner of the window's client area</param>
+	/// <returns><c><see langword="true"/></c>, if the system-level menu was successfully shown; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// This default window menu is provided by the system and on some platforms provides functionality for setting or changing privileged state on the window, such as moving it between workspaces or displays, or toggling the always-on-top property.
+	/// </para>
+	/// <para>
+	/// On platforms or in environments where showing a system-level menu isn't supported, this method does nothing.
+	/// </para>
+	/// <para>
+	/// This method should only be called from the main thread.
+	/// </para>
+	/// </remarks>
 	public bool TryShowSystemMenu(int x, int y)
 	{
 		unsafe
@@ -2668,30 +3707,26 @@ public abstract partial class Window : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Tries to block until any pending changes to the window state have been applied
+	/// </summary>
+	/// <returns><c><see langword="true"/></c>, if the window state was successfully fully synchronized before timing out; otherwise, <c><see langword="false"/></c> (check <see cref="Error.TryGet(out string?)"/> for more information)</returns>
+	/// <remarks>
+	/// <para>
+	/// On asynchronous windowing backends, this method acts as a synchronization barrier for pending window states.
+	/// A call to this method will attempt to wait until any pending window state has been applied and is guaranteed to return within finite time.
+	/// Note that for how long it can potentially block depends on the underlying window backend,
+	/// as window state changes sometimes may involve somewhat lengthy animations that must complete before the window is in its final requested state.
+	/// </para>
+	/// <para>
+	/// On windowing backends where changes are immediate, this does nothing.
+	/// </para>
+	/// </remarks>
 	public bool TrySync()
 	{
 		unsafe
 		{
 			return SDL_SyncWindow(mWindow);
-		}
-	}
-
-	public bool TryUpdateSurface()
-	{
-		unsafe
-		{
-			return SDL_UpdateWindowSurface(mWindow);
-		}
-	}
-
-	public bool TryUpdateSurfaceRects(ReadOnlySpan<Rect<int>> rects)
-	{
-		unsafe
-		{
-			fixed (Rect<int>* rectsPtr = rects)
-			{
-				return SDL_UpdateWindowSurfaceRects(mWindow, rectsPtr, rects.Length);
-			}
 		}
 	}
 }

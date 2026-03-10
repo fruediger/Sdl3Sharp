@@ -124,7 +124,7 @@ public abstract partial class Renderer : IDisposable
 			{
 				Unsafe.SkipInit(out Rect<int> rect);
 
-				ErrorHelper.ThrowIfFailed(SDL_GetRenderClipRect(mRenderer, &rect), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_GetRenderClipRect(mRenderer, &rect), filterError: GetInvalidRendererErrorMessage());
 
 				return rect;
 			}
@@ -134,7 +134,7 @@ public abstract partial class Renderer : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetRenderClipRect(mRenderer, &value), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_SetRenderClipRect(mRenderer, &value), filterError: GetInvalidRendererErrorMessage());
 			}
 		}
 	}
@@ -169,7 +169,7 @@ public abstract partial class Renderer : IDisposable
 			{
 				Unsafe.SkipInit(out float scale);
 
-				ErrorHelper.ThrowIfFailed(SDL_GetRenderColorScale(mRenderer, &scale), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_GetRenderColorScale(mRenderer, &scale), filterError: GetInvalidRendererErrorMessage());
 
 				return scale;
 			}
@@ -179,7 +179,7 @@ public abstract partial class Renderer : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetRenderColorScale(mRenderer, value), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_SetRenderColorScale(mRenderer, value), filterError: GetInvalidRendererErrorMessage());
 			}
 		}
 	}
@@ -213,7 +213,7 @@ public abstract partial class Renderer : IDisposable
 			{
 				Unsafe.SkipInit(out (int Width, int Height) result);
 
-				ErrorHelper.ThrowIfFailed(SDL_GetCurrentRenderOutputSize(mRenderer, &result.Width, &result.Height), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_GetCurrentRenderOutputSize(mRenderer, &result.Width, &result.Height), filterError: GetInvalidRendererErrorMessage());
 
 				return result;
 			}
@@ -248,7 +248,7 @@ public abstract partial class Renderer : IDisposable
 			{
 				Unsafe.SkipInit(out ScaleMode scaleMode);
 
-				ErrorHelper.ThrowIfFailed(SDL_GetDefaultTextureScaleMode(mRenderer, &scaleMode), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_GetDefaultTextureScaleMode(mRenderer, &scaleMode), filterError: GetInvalidRendererErrorMessage());
 
 				return scaleMode;
 			}
@@ -258,7 +258,7 @@ public abstract partial class Renderer : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetDefaultTextureScaleMode(mRenderer, value), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_SetDefaultTextureScaleMode(mRenderer, value), filterError: GetInvalidRendererErrorMessage());
 			}
 		}
 	}
@@ -295,7 +295,7 @@ public abstract partial class Renderer : IDisposable
 			{
 				Unsafe.SkipInit(out BlendMode blendMode);
 
-				ErrorHelper.ThrowIfFailed(SDL_GetRenderDrawBlendMode(mRenderer, &blendMode), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_GetRenderDrawBlendMode(mRenderer, &blendMode), filterError: GetInvalidRendererErrorMessage());
 
 				return blendMode;
 			}
@@ -305,7 +305,7 @@ public abstract partial class Renderer : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetRenderDrawBlendMode(mRenderer, value), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_SetRenderDrawBlendMode(mRenderer, value), filterError: GetInvalidRendererErrorMessage());
 				// throws if value is BlendMode.Invalid or value is an unsupported blend mode for the renderer
 				// Although the offical SDL docs say that "If the blend mode is not supported, the closest supported mode is chosen.",
 				// that doesn't appear to be the case looking at the SDL source code.
@@ -354,7 +354,7 @@ public abstract partial class Renderer : IDisposable
 			{
 				Unsafe.SkipInit(out (byte R, byte G, byte B, byte A) color);
 
-				ErrorHelper.ThrowIfFailed(SDL_GetRenderDrawColor(mRenderer, &color.R, &color.G, &color.B, &color.A), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_GetRenderDrawColor(mRenderer, &color.R, &color.G, &color.B, &color.A), filterError: GetInvalidRendererErrorMessage());
 
 				return Unsafe.BitCast<(byte R, byte G, byte B, byte A), Color<byte>>(color);
 			}
@@ -364,7 +364,7 @@ public abstract partial class Renderer : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetRenderDrawColor(mRenderer, value.R, value.G, value.B, value.A), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_SetRenderDrawColor(mRenderer, value.R, value.G, value.B, value.A), filterError: GetInvalidRendererErrorMessage());
 			}
 		}
 	}
@@ -409,7 +409,7 @@ public abstract partial class Renderer : IDisposable
 			{
 				Unsafe.SkipInit(out (float R, float G, float B, float A) color);
 
-				ErrorHelper.ThrowIfFailed(SDL_GetRenderDrawColorFloat(mRenderer, &color.R, &color.G, &color.B, &color.A), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_GetRenderDrawColorFloat(mRenderer, &color.R, &color.G, &color.B, &color.A), filterError: GetInvalidRendererErrorMessage());
 
 				return Unsafe.BitCast<(float R, float G, float B, float A), Color<float>>(color);
 			}
@@ -419,7 +419,7 @@ public abstract partial class Renderer : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetRenderDrawColorFloat(mRenderer, value.R, value.G, value.B, value.A), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_SetRenderDrawColorFloat(mRenderer, value.R, value.G, value.B, value.A), filterError: GetInvalidRendererErrorMessage());
 			}
 		}
 	}
@@ -555,7 +555,7 @@ public abstract partial class Renderer : IDisposable
 			{
 				Unsafe.SkipInit(out (int Width, int Height, RendererLogicalPresentation Mode) result);
 
-				ErrorHelper.ThrowIfFailed(SDL_GetRenderLogicalPresentation(mRenderer, &result.Width, &result.Height, &result.Mode), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_GetRenderLogicalPresentation(mRenderer, &result.Width, &result.Height, &result.Mode), filterError: GetInvalidRendererErrorMessage());
 
 				return result;
 			}
@@ -565,7 +565,7 @@ public abstract partial class Renderer : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetRenderLogicalPresentation(mRenderer, value.Width, value.Height, value.Mode), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_SetRenderLogicalPresentation(mRenderer, value.Width, value.Height, value.Mode), filterError: GetInvalidRendererErrorMessage());
 			}
 		}
 	}
@@ -597,7 +597,7 @@ public abstract partial class Renderer : IDisposable
 			{
 				Unsafe.SkipInit(out Rect<float> rect);
 
-				ErrorHelper.ThrowIfFailed(SDL_GetRenderLogicalPresentationRect(mRenderer, &rect), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_GetRenderLogicalPresentationRect(mRenderer, &rect), filterError: GetInvalidRendererErrorMessage());
 
 				return rect;
 			}
@@ -691,7 +691,7 @@ public abstract partial class Renderer : IDisposable
 			{
 				Unsafe.SkipInit(out (int Width, int Height) result);
 
-				ErrorHelper.ThrowIfFailed(SDL_GetRenderOutputSize(mRenderer, &result.Width, &result.Height), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_GetRenderOutputSize(mRenderer, &result.Width, &result.Height), filterError: GetInvalidRendererErrorMessage());
 
 				return result;
 			}
@@ -749,7 +749,7 @@ public abstract partial class Renderer : IDisposable
 			{
 				Unsafe.SkipInit(out Rect<int> rect);
 
-				ErrorHelper.ThrowIfFailed(SDL_GetRenderSafeArea(mRenderer, &rect), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_GetRenderSafeArea(mRenderer, &rect), filterError: GetInvalidRendererErrorMessage());
 
 				return rect;
 			}
@@ -791,7 +791,7 @@ public abstract partial class Renderer : IDisposable
 			{
 				Unsafe.SkipInit(out (float ScaleX, float ScaleY) scale);
 
-				ErrorHelper.ThrowIfFailed(SDL_GetRenderScale(mRenderer, &scale.ScaleX, &scale.ScaleY), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_GetRenderScale(mRenderer, &scale.ScaleX, &scale.ScaleY), filterError: GetInvalidRendererErrorMessage());
 
 				return scale;
 			}
@@ -801,7 +801,7 @@ public abstract partial class Renderer : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetRenderScale(mRenderer, value.ScaleX, value.ScaleY), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_SetRenderScale(mRenderer, value.ScaleX, value.ScaleY), filterError: GetInvalidRendererErrorMessage());
 			}
 		}
 	}
@@ -966,7 +966,7 @@ public abstract partial class Renderer : IDisposable
 					}
 				}
 
-				ErrorHelper.ThrowIfFailed(SDL_SetRenderTarget(Pointer, texturePtr), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_SetRenderTarget(Pointer, texturePtr), filterError: GetInvalidRendererErrorMessage());
 			}
 
 			[DoesNotReturn]
@@ -999,7 +999,7 @@ public abstract partial class Renderer : IDisposable
 			{
 				Unsafe.SkipInit(out (TextureAddressMode UMode, TextureAddressMode VMode) modes);
 
-				ErrorHelper.ThrowIfFailed(SDL_GetRenderTextureAddressMode(mRenderer, &modes.UMode, &modes.VMode), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_GetRenderTextureAddressMode(mRenderer, &modes.UMode, &modes.VMode), filterError: GetInvalidRendererErrorMessage());
 
 				return modes;
 			}
@@ -1009,7 +1009,7 @@ public abstract partial class Renderer : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetRenderTextureAddressMode(mRenderer, value.UMode, value.VMode), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_SetRenderTextureAddressMode(mRenderer, value.UMode, value.VMode), filterError: GetInvalidRendererErrorMessage());
 			}
 		}
 	}
@@ -1054,7 +1054,7 @@ public abstract partial class Renderer : IDisposable
 			{
 				Unsafe.SkipInit(out Rect<int> rect);
 
-				ErrorHelper.ThrowIfFailed(SDL_GetRenderViewport(mRenderer, &rect), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_GetRenderViewport(mRenderer, &rect), filterError: GetInvalidRendererErrorMessage());
 
 				return rect;
 			}
@@ -1064,7 +1064,7 @@ public abstract partial class Renderer : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetRenderViewport(mRenderer, &value), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_SetRenderViewport(mRenderer, &value), filterError: GetInvalidRendererErrorMessage());
 			}
 		}
 	}
@@ -1106,7 +1106,7 @@ public abstract partial class Renderer : IDisposable
 			{
 				Unsafe.SkipInit(out RendererVSync vsync);
 
-				ErrorHelper.ThrowIfFailed(SDL_GetRenderVSync(mRenderer, &vsync), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_GetRenderVSync(mRenderer, &vsync), filterError: GetInvalidRendererErrorMessage());
 
 				return vsync;
 			}
@@ -1116,7 +1116,7 @@ public abstract partial class Renderer : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetRenderVSync(mRenderer, value), filterError: GetInvalidRendererErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_SetRenderVSync(mRenderer, value), filterError: GetInvalidRendererErrorMessage());
 			}
 		}
 	}
@@ -1189,7 +1189,7 @@ public abstract partial class Renderer : IDisposable
 	{
 		unsafe
 		{
-			ErrorHelper.ThrowIfFailed(SDL_SetRenderClipRect(mRenderer, rect: null), filterError: GetInvalidRendererErrorMessage());
+			SdlErrorHelper.ThrowIfFailed(SDL_SetRenderClipRect(mRenderer, rect: null), filterError: GetInvalidRendererErrorMessage());
 		}
 	}
 
@@ -1212,7 +1212,7 @@ public abstract partial class Renderer : IDisposable
 	{
 		unsafe
 		{
-			ErrorHelper.ThrowIfFailed(SDL_SetRenderTarget(mRenderer, texture: null), filterError: GetInvalidRendererErrorMessage());
+			SdlErrorHelper.ThrowIfFailed(SDL_SetRenderTarget(mRenderer, texture: null), filterError: GetInvalidRendererErrorMessage());
 		}
 	}
 
@@ -1235,7 +1235,7 @@ public abstract partial class Renderer : IDisposable
 	{
 		unsafe
 		{
-			ErrorHelper.ThrowIfFailed(SDL_SetRenderViewport(mRenderer, rect: null), filterError: GetInvalidRendererErrorMessage());
+			SdlErrorHelper.ThrowIfFailed(SDL_SetRenderViewport(mRenderer, rect: null), filterError: GetInvalidRendererErrorMessage());
 		}
 	}
 
@@ -1655,7 +1655,7 @@ public abstract partial class Renderer : IDisposable
 			// but the resulting surface is detached from the renderer's lifetime, and is explicitly stated as needing to be freed with SDL_DestroySurface.
 			// That means, that if we were to use Surface.TryGetOrCreate here, the ref counter would be off by one, resulting in the need to call SDL_DestroySurface twice.
 			// Therefore, this is one of the rare cases where we need to call the Surface constructor directly.
-			pixels = new Surface(surfacePtr);
+			pixels = new Surface(surfacePtr, register: true);
 			return true;
 		}
 	}
@@ -1700,7 +1700,7 @@ public abstract partial class Renderer : IDisposable
 			// but the resulting surface is detached from the renderer's lifetime, and is explicitly stated as needing to be freed with SDL_DestroySurface.
 			// That means, that if we were to use Surface.TryGetOrCreate here, the ref counter would be off by one, resulting in the need to call SDL_DestroySurface twice.
 			// Therefore, this is one of the rare cases where we need to call the Surface constructor directly.
-			pixels = new Surface(surfacePtr);
+			pixels = new Surface(surfacePtr, register: true);
 			return true;
 		}
 	}

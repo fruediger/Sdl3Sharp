@@ -8,7 +8,7 @@ partial class DisplayExtensions
 	extension(Display<Wayland>.PropertyNames)
 	{
 		/// <summary>
-		/// The name of a <em>read-only</em> property <see cref="Properties">property</see> that holds a pointer to the Wayland <c><see href="https://wayland.freedesktop.org/docs/html/apa.html#protocol-spec-wl_output">wl_output</see></c> associated with the display
+		/// The name of a <em>read-only</em> property <see cref="Properties">property</see> that holds a pointer to the <c><see href="https://wayland.freedesktop.org/docs/html/apa.html#protocol-spec-wl_output">wl_output</see></c> associated with the display
 		/// </summary>
 		public static string WaylandWlOutputPointer => "SDL.display.Wayland.wl_output";
 	}
@@ -16,10 +16,10 @@ partial class DisplayExtensions
 	extension(Display<Wayland> display)
 	{
 		/// <summary>
-		/// Gets a pointer to the Wayland <c><see href="https://wayland.freedesktop.org/docs/html/apa.html#protocol-spec-wl_output">wl_output</see></c> associated with the display
+		/// Gets a pointer to the <c><see href="https://wayland.freedesktop.org/docs/html/apa.html#protocol-spec-wl_output">wl_output</see></c> associated with the display
 		/// </summary>
 		/// <value>
-		/// A pointer to the Wayland <c><see href="https://wayland.freedesktop.org/docs/html/apa.html#protocol-spec-wl_output">wl_output</see></c> associated with the display
+		/// A pointer to the <c><see href="https://wayland.freedesktop.org/docs/html/apa.html#protocol-spec-wl_output">wl_output</see></c> associated with the display
 		/// </value>
 		/// <remarks>
 		/// <para>

@@ -223,7 +223,7 @@ public abstract partial class Texture : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetTextureBlendMode(mTexture, value), filterError: GetTextureInvalidTextureErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_SetTextureBlendMode(mTexture, value), filterError: GetTextureInvalidTextureErrorMessage());
 				// throws if value is BlendMode.Invalid or value is an unsupported blend mode for the renderer
 				// Although the offical SDL docs say that "If the blend mode is not supported, the closest supported mode is chosen and this function returns false.",
 				// that doesn't appear to be the case looking at the SDL source code.
@@ -437,7 +437,7 @@ public abstract partial class Texture : IDisposable
 				// If SDL_SetTexturePalette does destroy the old palette, there shouldn't be a registered managed wrapper around it anymore,
 				// and if there would be a registered managed wrapper, SDL_SetTexturePalette shouldn't destroy the native instance yet (as it's ref counter shouldn't go to zero).
 
-				ErrorHelper.ThrowIfFailed(SDL_SetTexturePalette(mTexture, value is not null ? value.Pointer : null), filterError: GetTextureInvalidTextureErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_SetTexturePalette(mTexture, value is not null ? value.Pointer : null), filterError: GetTextureInvalidTextureErrorMessage());
 			}
 		}
 	}
@@ -512,7 +512,7 @@ public abstract partial class Texture : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetTextureScaleMode(mTexture, value), filterError: GetTextureInvalidTextureErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_SetTextureScaleMode(mTexture, value), filterError: GetTextureInvalidTextureErrorMessage());
 				// if value is ScaleMode.Invalid or none of the defined scale modes
 				// Although the offical SDL docs say that "If the scale mode is not supported, the closest supported mode is chosen.",
 				// that doesn't appear to be the case looking at the SDL source code.

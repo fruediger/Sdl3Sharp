@@ -1,7 +1,7 @@
 ﻿namespace Sdl3Sharp.Video.Windowing;
 
 /// <summary>
-/// Represents the operation to perform when <see cref="IWindow.TryFlash(Sdl3Sharp.Video.Windowing.FlashOperation)">flashing</see> a <see cref="IWindow"/>
+/// Represents the operation to perform when <see cref="Window.TryFlash(FlashOperation)">flashing</see> a <see cref="Window"/>
 /// </summary>
 public enum FlashOperation
 {

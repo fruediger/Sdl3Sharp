@@ -18,13 +18,33 @@ partial class Window
 	internal readonly struct SDL_Window;
 
 	[UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
-	private static unsafe CBool EventWatchDestroyImpl(void* userdata, Event* @event)
+	private static unsafe CBool EventWatchResizeOrDestroy(void* userdata, Event* @event)
 	{
-		if (@event->Type is EventType.WindowDestroyed && Unsafe.AsRef<Event>(@event).TryAsReadOnly<WindowEvent>(out var windowEventRef)
-			&& userdata is not null && GCHandle.FromIntPtr(unchecked((IntPtr)userdata)) is { IsAllocated: true, Target: Window { Id: var windowId } window }
-			&& windowEventRef.GetReferenceOrNull().WindowId == windowId)
+		if (Unsafe.AsRef<Event>(@event).TryAsReadOnly<WindowEvent>(out var windowEventRef))
 		{
-			window.Dispose();
+			ref readonly var windowEvent = ref windowEventRef.GetReferenceOrNull();
+
+			if (userdata is not null && GCHandle.FromIntPtr(unchecked((IntPtr)userdata)) is { IsAllocated: true, Target: Window { Id: var windowId } window } && windowEvent.WindowId == windowId)
+			{
+				switch (windowEvent)
+				{
+					case { Type: EventType.WindowResized }:
+						// resizing the window invalidates the surfaces that's associated with it,
+						// so we dispose the existing associated WindowSurface, if any
+						// we don't destroy the surface, because SDL already did that while invalidating the surface after the resize
+						if (window.mSurface is not null)
+						{
+							window.mSurface.DontDestroy = true;
+							window.mSurface.Dispose();
+							window.mSurface = null;
+						}
+						break;
+
+					case { Type: EventType.WindowDestroyed }:
+						window.Dispose();
+						break;
+				}
+			}
 		}
 
 		return default; // The return value doesn't matter in event watches, it's ignored by SDL
@@ -532,20 +552,6 @@ partial class Window
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_DestroyWindow">SDL_DestroyWindow</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
 	internal unsafe static partial void SDL_DestroyWindow(SDL_Window* window);
-
-	/// <summary>
-	/// Destroys the surface associated with the window
-	/// </summary>
-	/// <param name="window">The window to update</param>
-	/// <returns>Returns true on success or false on failure; call <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>() for more information</returns>
-	/// <remarks>
-	/// <para>
-	/// This function should only be called on the main thread.
-	/// </para>
-	/// </remarks>
-	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_DestroyWindowSurface">SDL_DestroyWindowSurface</seealso>
-	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_DestroyWindowSurface(SDL_Window* window);
 
 	/// <summary>
 	/// Requests a window to demand attention from the user
@@ -1228,47 +1234,6 @@ partial class Window
 	internal unsafe static partial CBool SDL_GetWindowSizeInPixels(SDL_Window* window, int* w, int* h);
 
 	/// <summary>
-	/// Gets the SDL surface associated with the window
-	/// </summary>
-	/// <param name="window">The window to query</param>
-	/// <returns>Returns the surface associated with the window, or NULL on failure; call <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>() for more information.</returns>
-	/// <remarks>
-	/// <para>
-	/// A new surface will be created with the optimal format for the window, if necessary. This surface will be freed when the window is destroyed. Do not free this surface.
-	/// </para>
-	/// <para>
-	/// This surface will be invalidated if the window is resized. After resizing a window this function must be called again to return a valid surface.
-	/// </para>
-	/// <para>
-	/// You may not combine this with 3D or the rendering API on this window.
-	/// </para>
-	/// <para>
-	/// This function is affected by <see href="https://wiki.libsdl.org/SDL3/SDL_HINT_FRAMEBUFFER_ACCELERATION"><c>SDL_HINT_FRAMEBUFFER_ACCELERATION</c></see>.
-	/// </para>
-	/// <para>
-	/// This function should only be called on the main thread.
-	/// </para>
-	/// </remarks>
-	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetWindowSurface">SDL_GetWindowSurface</seealso>
-	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial Surface.SDL_Surface* SDL_GetWindowSurface(SDL_Window* window);
-
-	/// <summary>
-	/// Gets VSync for the window surface
-	/// </summary>
-	/// <param name="window">The window to query</param>
-	/// <param name="vsync">An int filled with the current vertical refresh sync interval. <see href="https://wiki.libsdl.org/SDL3/SDL_SetWindowSurfaceVSync">See SDL_SetWindowSurfaceVSync</see>() for the meaning of the value.</param>
-	/// <returns>Returns true on success or false on failure; call <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>() for more information</returns>
-	/// <remarks>
-	/// <para>
-	/// This function should only be called on the main thread.
-	/// </para>
-	/// </remarks>
-	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_GetWindowSurfaceVSync">SDL_GetWindowSurfaceVSync</seealso>
-	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_GetWindowSurfaceVSync(SDL_Window* window, WindowSurfaceVSync* vsync);
-
-	/// <summary>
 	/// Gets the title of a window
 	/// </summary>
 	/// <param name="window">The window to query</param>
@@ -1902,30 +1867,6 @@ partial class Window
 	internal unsafe static partial CBool SDL_SetWindowSize(SDL_Window* window, int w, int h);
 
 	/// <summary>
-	/// Toggles VSync for the window surface
-	/// </summary>
-	/// <param name="window">The window</param>
-	/// <param name="vsync">The vertical refresh sync interval.</param>
-	/// <returns>Returns true on success or false on failure; call <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>() for more information</returns>
-	/// <remarks>
-	/// <para>
-	/// When a window surface is created, vsync defaults to <see href="https://wiki.libsdl.org/SDL3/SDL_WINDOW_SURFACE_VSYNC_DISABLED">SDL_WINDOW_SURFACE_VSYNC_DISABLED</see>.
-	/// </para>
-	/// <para>
-	/// The <c><paramref name="vsync"/></c> parameter can be 1 to synchronize present with every vertical refresh, 2 to synchronize present with every second vertical refresh, etc.,
-	/// <see href="https://wiki.libsdl.org/SDL3/SDL_WINDOW_SURFACE_VSYNC_ADAPTIVE">SDL_WINDOW_SURFACE_VSYNC_ADAPTIVE</see> for late swap tearing (adaptive vsync),
-	/// or <see href="https://wiki.libsdl.org/SDL3/SDL_WINDOW_SURFACE_VSYNC_DISABLED">SDL_WINDOW_SURFACE_VSYNC_DISABLED</see> to disable.
-	/// Not every value is supported by every driver, so you should check the return value to see whether the requested setting is supported.
-	/// </para>
-	/// <para>
-	/// This function should only be called on the main thread.
-	/// </para>
-	/// </remarks>
-	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_SetWindowSurfaceVSync">SDL_SetWindowSurfaceVSync</seealso>
-	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_SetWindowSurfaceVSync(SDL_Window* window, WindowSurfaceVSync vsync);
-
-	/// <summary>
 	/// Sets the title of a window
 	/// </summary>
 	/// <param name="window">The window to change</param>
@@ -2000,52 +1941,6 @@ partial class Window
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_SyncWindow">SDL_SyncWindow</seealso>
 	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
 	internal unsafe static partial CBool SDL_SyncWindow(SDL_Window* window);
-
-	/// <summary>
-	/// Copies the window surface to the screen
-	/// </summary>
-	/// <param name="window">The window to update</param>
-	/// <returns>Returns true on success or false on failure; call <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>() for more information</returns>
-	/// <remarks>
-	/// <para>
-	/// This is the function you use to reflect any changes to the surface on the screen.
-	/// </para>
-	/// <para>
-	/// This function is equivalent to the SDL 1.2 API <see href="https://wiki.libsdl.org/SDL3/SDL_Flip">SDL_Flip</see>().
-	/// </para>
-	/// <para>
-	/// This function should only be called on the main thread.
-	/// </para>
-	/// </remarks>
-	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_UpdateWindowSurface">SDL_UpdateWindowSurface</seealso>
-	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_UpdateWindowSurface(SDL_Window* window);
-
-	/// <summary>
-	/// Copies areas of the window surface to the screen
-	/// </summary>
-	/// <param name="window">The window to update</param>
-	/// <param name="rects">An array of <see href="https://wiki.libsdl.org/SDL3/SDL_Rect">SDL_Rect</see> structures representing areas of the surface to copy, in pixels</param>
-	/// <param name="numrects">The number of rectangles</param>
-	/// <returns>Returns true on success or false on failure; call <see href="https://wiki.libsdl.org/SDL3/SDL_GetError">SDL_GetError</see>() for more information</returns>
-	/// <remarks>
-	/// <para>
-	/// This is the function you use to reflect changes to portions of the surface on the screen.
-	/// </para>
-	/// <para>
-	/// This function is equivalent to the SDL 1.2 API <see href="https://wiki.libsdl.org/SDL3/SDL_UpdateRects">SDL_UpdateRects</see>().
-	/// </para>
-	/// <para>
-	/// Note that this function will update <em>at least</em> the rectangles specified, but this is only intended as an optimization;
-	/// in practice, this might update more of the screen (or all of the screen!), depending on what method SDL uses to send pixels to the system.
-	/// </para>
-	/// <para>
-	/// This function should only be called on the main thread.
-	/// </para>
-	/// </remarks>
-	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_UpdateWindowSurfaceRects">SDL_UpdateWindowSurfaceRects</seealso>
-	[NativeImportFunction<Library>(CallConvs = [typeof(CallConvCdecl)])]
-	internal unsafe static partial CBool SDL_UpdateWindowSurfaceRects(SDL_Window* window, Rect<int>* rects, int numrects);
 
 	/// <summary>
 	/// Returns whether the window has a surface associated with it

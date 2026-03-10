@@ -6,7 +6,7 @@ using System.Runtime.InteropServices.Marshalling;
 
 namespace Sdl3Sharp.Internal;
 
-internal static class ErrorHelper
+internal static class SdlErrorHelper
 {
 	internal const string ParameterInvalidErrorFormat = "Parameter '{0}' is invalid";
 

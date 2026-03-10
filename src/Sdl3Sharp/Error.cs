@@ -126,7 +126,7 @@ public static partial class Error
 		{
 			message = Utf8StringMarshaller.ConvertToManaged(SDL_GetError());
 
-			return message is not null;
+			return !string.IsNullOrEmpty(message); // SDL returns an empty string when there was no error message set
 		}
 	}
 }

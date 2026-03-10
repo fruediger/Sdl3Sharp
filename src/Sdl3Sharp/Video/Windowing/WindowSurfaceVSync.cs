@@ -1,7 +1,7 @@
 ﻿namespace Sdl3Sharp.Video.Windowing;
 
 /// <summary>
-/// Represents the vertical synchronization (VSync) mode or interval for the surface of a window
+/// Represents the vertical synchronization (VSync) mode or interval for the <see cref="WindowSurface">surface of a window</see>
 /// </summary>
 public enum WindowSurfaceVSync : int
 {

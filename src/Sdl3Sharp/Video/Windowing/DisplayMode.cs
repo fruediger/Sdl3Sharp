@@ -15,7 +15,7 @@ namespace Sdl3Sharp.Video.Windowing;
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
 public abstract partial class DisplayMode : IFormattable, ISpanFormattable
 {
-	private static readonly ConcurrentDictionary<IntPtr, WeakReference<UnmanagedDisplayMode>> mKnownUnmanagedInstances = [];
+	private static readonly ConcurrentDictionary<IntPtr, WeakReference<Unmanaged>> mKnownUnmanagedInstances = [];
 
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private string DebuggerDisplay => ToString(formatProvider: CultureInfo.InvariantCulture);
@@ -121,7 +121,7 @@ public abstract partial class DisplayMode : IFormattable, ISpanFormattable
 
 	internal static ref SDL_DisplayMode CreateManaged(out DisplayMode result)
 	{
-		var managed = new ManagedDisplayMode();
+		var managed = new Managed();
 		result = managed;
 		return ref managed.MutableMode;
 	}
@@ -212,8 +212,8 @@ public abstract partial class DisplayMode : IFormattable, ISpanFormattable
 		result = target;
 		return true;
 
-		static WeakReference<UnmanagedDisplayMode> createRef(IntPtr mode) => new(create(unchecked((SDL_DisplayMode*)mode)));
+		static WeakReference<Unmanaged> createRef(IntPtr mode) => new(create(unchecked((SDL_DisplayMode*)mode)));
 
-		static UnmanagedDisplayMode create(SDL_DisplayMode* mode) => new(mode);
+		static Unmanaged create(SDL_DisplayMode* mode) => new(mode);
 	}
 }

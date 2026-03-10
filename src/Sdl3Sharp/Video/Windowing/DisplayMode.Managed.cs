@@ -4,7 +4,7 @@ namespace Sdl3Sharp.Video.Windowing;
 
 partial class DisplayMode
 {
-	private sealed class ManagedDisplayMode : DisplayMode
+	private sealed class Managed : DisplayMode
 	{
 		private SDL_DisplayMode mMode;
 

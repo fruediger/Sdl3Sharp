@@ -18,7 +18,7 @@ partial class Renderer
 	[StructLayout(LayoutKind.Sequential, Size = 0)]
 	internal readonly struct SDL_Renderer;
 
-	[FormattedConstant(ErrorHelper.ParameterInvalidErrorFormat, nameof(renderer))]
+	[FormattedConstant(SdlErrorHelper.ParameterInvalidErrorFormat, nameof(renderer))]
 	private protected unsafe static partial ReadOnlySpan<byte> GetInvalidRendererErrorMessage(SDL_Renderer* renderer = default);
 
 #if SDL3_4_0_OR_GREATER

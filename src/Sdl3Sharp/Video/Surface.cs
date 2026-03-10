@@ -24,7 +24,7 @@ namespace Sdl3Sharp.Video;
 /// <see cref="Surface"/>s make serious efforts to manage images in various formats, and provide a reasonable toolbox for transforming the data, including copying between <see cref="Surface"/>s, filling rectangles in the image data, etc.
 /// </para>
 /// </remarks>
-public sealed partial class Surface : IDisposable
+public partial class Surface : IDisposable
 {
 	private interface IUnsafeConstructorDispatch;
 
@@ -88,54 +88,53 @@ public sealed partial class Surface : IDisposable
 	private MemoryHandle mMemoryHandle = default;
 	private Palette? mPalette = null; // Use this to keep the managed Palette alive
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	private unsafe Surface(SDL_Surface* surface, IUnsafeConstructorDispatch? _ = default) => mSurface = surface;
-
 	/// <remarks>
 	/// <para>
 	/// Use this only for newly created SDL surfaces that start with native <see cref="SDL_Surface.RefCount"/> equal to <c>1</c>;
 	/// do not call <see cref="TryGetOrCreate"/> for such owner instances.
 	/// </para>
 	/// </remarks>
-	internal unsafe Surface(SDL_Surface* surface) :
-#pragma warning disable IDE0034 // Keep it that way for explicitness sake
-		this(surface, default(IUnsafeConstructorDispatch?))
-#pragma warning restore IDE0034
+	internal unsafe Surface(SDL_Surface* surface, bool register)
 	{
-		if (mSurface is not null)
+		mSurface = surface;
+
+		if (register)
 		{
-			// Neither addRef nor updateRef increase the native ref counter for a very simple reason:
-			// If we're on this constructor path, we created the native instance ourselves, so its ref counter is already set to 1.
-			// That's totally right, since atm the managed wrapper is the sole borrower of a reference to the native instance.
-
-			mKnownInstances.AddOrUpdate(unchecked((IntPtr)mSurface), addRef, updateRef, this);
-		}
-
-		static WeakReference<Surface> addRef(IntPtr surface, Surface newSurface) => new(newSurface);
-
-		static WeakReference<Surface> updateRef(IntPtr surface, WeakReference<Surface> previousSurfaceRef, Surface newSurface)
-		{
-			if (previousSurfaceRef.TryGetTarget(out var previousSurface))
+			if (surface is not null)
 			{
+				// Neither addRef nor updateRef increase the native ref counter for a very simple reason:
+				// If we're on this constructor path, we created the native instance ourselves, so its ref counter is already set to 1.
+				// That's totally right, since atm the managed wrapper is the sole borrower of a reference to the native instance.
+
+				mKnownInstances.AddOrUpdate(unchecked((IntPtr)mSurface), addRef, updateRef, this);
+			}
+
+			static WeakReference<Surface> addRef(IntPtr surface, Surface newSurface) => new(newSurface);
+
+			static WeakReference<Surface> updateRef(IntPtr surface, WeakReference<Surface> previousSurfaceRef, Surface newSurface)
+			{
+				if (previousSurfaceRef.TryGetTarget(out var previousSurface))
+				{
 #pragma warning disable IDE0079
 #pragma warning disable CA1816
-				GC.SuppressFinalize(previousSurface);
+					GC.SuppressFinalize(previousSurface);
 #pragma warning restore CA1816
 #pragma warning restore IDE0079
 
-				// Dispose calls SDL_DestroySurface and already decreases the ref count, so we don't need to do it here manually
-				previousSurface.Dispose(disposing: true, forget: false);
+					// Dispose calls SDL_DestroySurface and already decreases the ref count, so we don't need to do it here manually
+					previousSurface.Dispose(disposing: true, forget: false);
+				}
+
+				previousSurfaceRef.SetTarget(newSurface);
+
+				return previousSurfaceRef;
 			}
-
-			previousSurfaceRef.SetTarget(newSurface);
-
-			return previousSurfaceRef;
 		}
 	}
 
 	/// <exception cref="SdlException">The <see cref="Surface"/> could not be created (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	private unsafe Surface(int width, int height, PixelFormat format, IUnsafeConstructorDispatch? _ = default) :
-		this(SDL_CreateSurface(width, height, format))
+		this(SDL_CreateSurface(width, height, format), register: true)
 	{
 		if (mSurface is null)
 		{
@@ -245,7 +244,7 @@ public sealed partial class Surface : IDisposable
 	/// </remarks>
 	/// <exception cref="SdlException">The <see cref="Surface"/> could not be created (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	public unsafe Surface(int width, int height, PixelFormat format, void* pixels, int pitch) :
-		this(SDL_CreateSurfaceFrom(width, height, format, pixels, pitch))
+		this(SDL_CreateSurfaceFrom(width, height, format, pixels, pitch), register: true)
 	{
 		if (mSurface is null)
 		{
@@ -259,7 +258,7 @@ public sealed partial class Surface : IDisposable
 #if SDL3_4_0_OR_GREATER
 	/// <exception cref="SdlException">The <see cref="Surface"/> could not be created (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	private unsafe Surface(string file, IUnsafeConstructorDispatch? _ = default) :
-		this(SDL_LoadSurface(Utf8Convert(file, out var fileUtf8)))
+		this(SDL_LoadSurface(Utf8Convert(file, out var fileUtf8)), register: true)
 	{
 		try
 		{
@@ -300,7 +299,7 @@ public sealed partial class Surface : IDisposable
 #if SDL3_4_0_OR_GREATER
 	/// <exception cref="SdlException">The <see cref="Surface"/> could not be created (check <see cref="Error.TryGet(out string?)"/> for more information)</exception>
 	private unsafe Surface(Stream source, bool closeAfterwards, IUnsafeConstructorDispatch? _ = default) :
-		this(SDL_LoadSurface_IO(source is not null ? source.Pointer : null, closeAfterwards))
+		this(SDL_LoadSurface_IO(source is not null ? source.Pointer : null, closeAfterwards), register: true)
 	{
 		try
 		{
@@ -412,7 +411,7 @@ public sealed partial class Surface : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetSurfaceBlendMode(mSurface, value), filterError: GetInvalidSurfaceErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_SetSurfaceBlendMode(mSurface, value), filterError: GetInvalidSurfaceErrorMessage());
 				// throws if value is BlendMode.Invalid or value is an unsupported blend mode
 			}
 		}
@@ -500,7 +499,7 @@ public sealed partial class Surface : IDisposable
 		{
 			unsafe
 			{
-				ErrorHelper.ThrowIfFailed(SDL_SetSurfaceColorKey(mSurface, enabled: value.HasValue, key: value.GetValueOrDefault()), filterError: GetInvalidSurfaceErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_SetSurfaceColorKey(mSurface, enabled: value.HasValue, key: value.GetValueOrDefault()), filterError: GetInvalidSurfaceErrorMessage());
 				// throws if the key as palette index is invalid
 			}
 		}
@@ -756,6 +755,9 @@ public sealed partial class Surface : IDisposable
 	/// <para>
 	/// Reading this property can be very expensive, you should consider caching it's value and reusing it as long as you're sure that the alternate images of the surface don't change.
 	/// </para>
+	/// <para>
+	/// You can manipulate the list of alternate images of a surface using the <see cref="TryAddAlternateImage(Surface)"/> and <see cref="ClearAlternateImages"/> methods.
+	/// </para>
 	/// </remarks>
 	public Surface[] Images
 	{
@@ -999,7 +1001,7 @@ public sealed partial class Surface : IDisposable
 				// If SDL_SetSurfacePalette does destroy the old palette, there shouldn't be a registered managed wrapper around it anymore,
 				// and if there would be a registered managed wrapper, SDL_SetSurfacePalette shouldn't destroy the native instance yet (as it's ref counter shouldn't go to zero).
 
-				ErrorHelper.ThrowIfFailed(SDL_SetSurfacePalette(mSurface, value is not null ? value.Pointer : null), filterError: GetInvalidSurfaceErrorMessage());
+				SdlErrorHelper.ThrowIfFailed(SDL_SetSurfacePalette(mSurface, value is not null ? value.Pointer : null), filterError: GetInvalidSurfaceErrorMessage());
 			}
 		}
 	}
@@ -1245,6 +1247,12 @@ public sealed partial class Surface : IDisposable
 		}
 	}
 
+	private protected unsafe virtual void Destroy(SDL_Surface* surface)
+	{
+		// SDL_DestroySurface decreases the native ref counter, so we don't need to do it manually here
+		SDL_DestroySurface(surface);
+	}
+
 	/// <inheritdoc/>
 	public void Dispose()
 	{
@@ -1262,7 +1270,7 @@ public sealed partial class Surface : IDisposable
 	/// This unpins any <see cref="Utilities.NativeMemory"/> instances or <see cref="Memory{T}"/> instances used to create the surface.
 	/// </para>
 	/// </remarks>
-	private void Dispose(bool disposing, bool forget)
+	protected virtual void Dispose(bool disposing, bool forget)
 	{
 		unsafe
 		{
@@ -1273,8 +1281,7 @@ public sealed partial class Surface : IDisposable
 					mKnownInstances.TryRemove(unchecked((IntPtr)mSurface), out _);
 				}
 
-				// SDL_DestroySurface decreases the native ref counter, so we don't need to do it manually here
-				SDL_DestroySurface(mSurface);
+				Destroy(mSurface);
 				mSurface = null;
 			}
 
@@ -2386,7 +2393,7 @@ public sealed partial class Surface : IDisposable
 				return false;
 			}
 
-			result = new(surface);
+			result = new(surface, register: true);
 			return true;
 		}
 	}
@@ -2420,7 +2427,7 @@ public sealed partial class Surface : IDisposable
 				return false;
 			}
 
-			result = new(surface);
+			result = new(surface, register: true);
 			return true;
 		}
 	}
@@ -2971,7 +2978,7 @@ public sealed partial class Surface : IDisposable
 				return false;
 			}
 
-			duplicate = new(duplicatePtr);
+			duplicate = new(duplicatePtr, register: true);
 
 			return true;
 		}
@@ -3228,6 +3235,19 @@ public sealed partial class Surface : IDisposable
 		}
 	}
 
+	internal unsafe static bool TryGet(SDL_Surface* surface, [NotNullWhen(true)] out Surface? result)
+	{
+		if (surface is not null
+			&& mKnownInstances.TryGetValue(unchecked((IntPtr)surface), out var surfaceRef)
+			&& surfaceRef.TryGetTarget(out result))
+		{
+			return true;
+		}
+
+		result = null;
+		return false;
+	}
+
 	/// <remarks>
 	/// <para>
 	/// Use this only for <see cref="SDL_Surface"/> pointers owned by SDL (e.g. returned from other APIs);
@@ -3262,12 +3282,7 @@ public sealed partial class Surface : IDisposable
 			// "Borrow" an additional native reference for remembering the managed instance
 			surface->RefCount++;
 
-			// Notice: this calls the non-registering constructor
-			return new(surface,
-#pragma warning disable IDE0034 // Keep it that way for explicitness sake
-				default(IUnsafeConstructorDispatch)
-#pragma warning restore IDE0034
-			);
+			return new(surface, register: false);
 		}
 	}
 
@@ -3301,7 +3316,7 @@ public sealed partial class Surface : IDisposable
 					return false;
 				}
 
-				surface = new(surfacePtr);
+				surface = new(surfacePtr, register: true);
 				return true;
 			}
 			finally
@@ -3340,7 +3355,7 @@ public sealed partial class Surface : IDisposable
 					return false;
 				}
 
-				surface = new(surfacePtr);
+				surface = new(surfacePtr, register: true);
 				return true;
 			}
 			finally
@@ -3388,7 +3403,7 @@ public sealed partial class Surface : IDisposable
 					return false;
 				}
 
-				surface = new(surfacePtr);
+				surface = new(surfacePtr, register: true);
 				return true;
 			}
 			finally
@@ -3433,7 +3448,7 @@ public sealed partial class Surface : IDisposable
 					return false;
 				}
 
-				surface = new(surfacePtr);
+				surface = new(surfacePtr, register: true);
 				return true;
 			}
 			finally
@@ -3789,7 +3804,7 @@ public sealed partial class Surface : IDisposable
 				return false;
 			}
 
-			rotatedSurface = new(rotatedPtr);
+			rotatedSurface = new(rotatedPtr, register: true);
 			return true;
 		}
 	}
@@ -3927,7 +3942,7 @@ public sealed partial class Surface : IDisposable
 				return false;
 			}
 
-			scaledSurface = new(scaledPtr);
+			scaledSurface = new(scaledPtr, register: true);
 			return true;
 		}
 	}

@@ -1,4 +1,6 @@
 ﻿using Sdl3Sharp.Input;
+using Sdl3Sharp.Video.Rendering.Drivers;
+using Sdl3Sharp.Video.Windowing;
 using System.Runtime.CompilerServices;
 
 namespace Sdl3Sharp;
@@ -894,7 +896,7 @@ partial struct Hint
 	}
 
 	/// <summary>SDL_HINT_EGL_*</summary>
-	public static class Egl
+	public static class EGL
 	{
 		/// <summary>
 		/// Gets a hint specifying the EGL library to load
@@ -1194,16 +1196,19 @@ partial struct Hint
 	///		</item>
 	///		<item>
 	///			<term>Any other string</term>
-	///			<description>Enable 3D acceleration, using the specified <em>valid</em> rendering drivers (e.g. <c>"direct3d"</c>, <c>"opengl"</c>, etc.)</description>
+	///			<description>
+	///				Enable 3D acceleration, using the specified <em>valid</em> <see cref="IRenderingDriver">rendering drivers</see> (e.g. <c>"direct3d"</c>, <c>"opengl"</c>, etc.).
+	///				You can use the <see cref="IRenderingDriver.Name"/> value of any of the predefined rendering drivers to set this hint (e.g. <see cref="Direct3D11.Name"/>).
+	///			</description>
 	///		</item>
 	/// </list>
 	/// </para>
 	/// <para>
-	/// This hint should be set before calling <see cref="SDL_GetWindowSurface"/>()
+	/// This hint should be set before accessing a <see cref="Window.Surface"/>.
 	/// </para>
 	/// </remarks>
 	/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_FRAMEBUFFER_ACCELERATION">SDL_HINT_FRAMEBUFFER_ACCELERATION</seealso>
-	public static Hint FramebufferAcceleration { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_FRAMEBUFFER_ACCELERATION"); }
+	public static Hint FrameBufferAcceleration { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_FRAMEBUFFER_ACCELERATION"); }
 
 	/// <summary>SDL_HINT_GAMECONTROLLER*</summary>
 	public static class GameController
@@ -3755,6 +3760,37 @@ partial struct Hint
 		/// </remarks>
 		/// <seealso href="https://wiki.libsdl.org/SDL3/SDL_HINT_JOYSTICK_ZERO_CENTERED_DEVICES">SDL_HINT_JOYSTICK_ZERO_CENTERED_DEVICES</seealso>
 		public static Hint ZeroCenteredDevices { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_JOYSTICK_ZERO_CENTERED_DEVICES"); }
+	}
+
+	/// <summary>SDL_HINT_VIDEO_*</summary>
+	public static class Video
+	{
+		/// <summary>
+		/// Gets a hint controlling whether the screen saver is enabled
+		/// </summary>
+		/// <value>
+		/// A hint controlling whether the screen saver is enabled
+		/// </value>
+		/// <remarks>
+		/// <para>
+		/// The hint can be set to the following values:
+		/// <list type="bullet">
+		///		<item>
+		///			<term><c>"0"</c></term>
+		///			<description>The screen saver is disabled (default)</description>
+		///		</item>
+		///		<item>
+		///			<term><c>"1"</c></term>
+		///			<description>The screen saver is enabled</description>
+		///		</item>
+		/// </list>
+		/// </para>
+		/// <para>
+		/// This hint should be set before <see cref="Sdl(Sdl.BuildAction?)">SDL is initialized</see>.
+		/// </para>
+		/// </remarks>
+		/// <seealso hcref="https://wiki.libsdl.org/SDL3/SDL_HINT_VIDEO_ALLOW_SCREENSAVER">SDL_HINT_VIDEO_ALLOW_SCREENSAVER</seealso>
+		public static Hint AllowScreenSaver { [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] get => new("SDL_VIDEO_ALLOW_SCREENSAVER"); }
 	}
 
 	/// <summary>
