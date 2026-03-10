@@ -39,7 +39,7 @@ public abstract partial class Display : IFormattable, ISpanFormattable
 	[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private string DebuggerDisplay => ToString(formatProvider: CultureInfo.InvariantCulture);
 
-	private readonly uint mDisplayId;
+	private uint mDisplayId;
 
 	private protected Display(uint displayId, bool register)
 	{
@@ -79,6 +79,8 @@ public abstract partial class Display : IFormattable, ISpanFormattable
 		{
 			mKnownInstances.TryRemove(mDisplayId, out _);
 		}
+
+		mDisplayId = 0;
 	}
 
 	/// <summary>

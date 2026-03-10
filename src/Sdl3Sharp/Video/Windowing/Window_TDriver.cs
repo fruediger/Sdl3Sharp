@@ -42,13 +42,13 @@ namespace Sdl3Sharp.Video.Windowing;
 /// <see cref="WindowExtensions.TryCreate(out Sdl3Sharp.Video.Windowing.Window{Windows}?, bool?, bool?, bool?, bool?, Sdl3Sharp.Video.Windowing.WindowFlags?, bool?, bool?, int?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, Sdl3Sharp.Video.Windowing.Window?, bool?, string?, bool?, bool?, bool?, bool?, int?, Sdl3Sharp.Video.Windowing.WindowPosition?, Sdl3Sharp.Video.Windowing.WindowPosition?, nint?, nint?, Sdl3Sharp.Properties?)">Windows</see>,
 /// <see cref="WindowExtensions.TryCreate(out Sdl3Sharp.Video.Windowing.Window{Cocoa}?, bool?, bool?, bool?, bool?, Sdl3Sharp.Video.Windowing.WindowFlags?, bool?, bool?, int?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, Sdl3Sharp.Video.Windowing.Window?, bool?, string?, bool?, bool?, bool?, bool?, int?, Sdl3Sharp.Video.Windowing.WindowPosition?, Sdl3Sharp.Video.Windowing.WindowPosition?, nint?, nint?, Sdl3Sharp.Properties?)">Cocoa</see>,
 /// and some more.
-/// A similar rules apply to these methods as well: if the currently active <see cref="IWindowingDriver">windowing driver</see> doesn't match the specified one, these method will fail.
+/// Similar rules apply to these methods as well: if the currently active <see cref="IWindowingDriver">windowing driver</see> doesn't match the specified one, these method will fail.
 /// </para>
 /// <para>
 /// For the most part <see cref="Window{TDriver}"/>s are not thread-safe, and most of their properties and methods should only be accessed from the main thread!
 /// </para>
 /// <para>
-/// <see cref="Window{TDriver}"/>s are concrete display types, associated with a specific windowing driver.
+/// <see cref="Window{TDriver}"/>s are concrete window types, associated with a specific windowing driver.
 /// </para>
 /// <para>
 /// If you want to use them in a more general way, you can use them as <see cref="Window"/> instances, which serve as common abstractions.
