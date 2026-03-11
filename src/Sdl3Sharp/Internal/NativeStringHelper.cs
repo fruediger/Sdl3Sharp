@@ -12,27 +12,17 @@ internal static class NativeStringHelper
 			return true;
 		}
 
-		if (str1 is null || str2 is null)
+		if (str1 is not null && str2 is not null)
 		{
-			return false;
+			for (var ch = *str1; ch == *str2; ch = *++str1, ++str2)
+			{
+				if (ch is (byte)'\0')
+				{
+					return true;
+				}
+			}
 		}
 
-		while (true)
-		{
-			var ch = *str1;
-
-			if (ch != *str2)
-			{
-				return false;
-			}
-
-			if (ch is (byte)'\0')
-			{
-				return true;
-			}
-
-			str1++;
-			str2++;
-		}
+		return false;
 	}
 }
