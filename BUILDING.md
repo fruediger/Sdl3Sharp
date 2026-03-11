@@ -1,4 +1,4 @@
-# Building Sdl3Sharp
+# Building SDL3#
 
 This project uses [make.cs](https://github.com/fruediger/make.cs) as its build tool. All build and packaging tasks should be performed through the provided wrapper scripts rather than invoking `dotnet build` directly.
 

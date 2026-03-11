@@ -1,6 +1,6 @@
 # Contributing to this project
 
-Thank you for taking the time to contribute to Sdl3Sharp! Every bit of help is appreciated.
+Thank you for taking the time to contribute to SDL3#! Every bit of help is appreciated.
 
 The following is a set of guidelines for contributing to this project. These are guidelines, not hard rules, so use your best judgment and feel free to propose changes to this document itself via a pull request.
 
@@ -30,7 +30,7 @@ Found something that doesn't work as expected? Search the [issue tracker](../../
 - A clear and descriptive title.
 - A concise description of the problem and what you expected to happen instead.
 - Reliable steps to reproduce the issue.
-- Your environment: OS, .NET version, the version of Sdl3Sharp you encountered the issue with, and anything else that seems relevant.
+- Your environment: OS, .NET version, the version of SDL3# (Sdl3Sharp) you encountered the issue with, and anything else that seems relevant.
 - Any relevant logs, stack traces, or code snippets.
 
 ### Suggesting features

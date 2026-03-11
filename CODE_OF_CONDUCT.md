@@ -19,7 +19,7 @@
 
 ## Our pledge
 
-Sdl3Sharp and its maintainers are committed to making participation in this project a welcoming and dignified experience for everyone. This document is not a list of rules imposed from above. It is a statement of the values this project stands behind and pledges to uphold and protect.
+SDL3# and its maintainers are committed to making participation in this project a welcoming and dignified experience for everyone. This document is not a list of rules imposed from above. It is a statement of the values this project stands behind and pledges to uphold and protect.
 
 We trust everyone who participates in this project to be a person of good faith. That trust is extended freely and unconditionally from the start, and only reconsidered if clearly and demonstrably proven otherwise.
 
