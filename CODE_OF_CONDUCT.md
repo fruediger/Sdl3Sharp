@@ -9,13 +9,11 @@
 
 ## Table of contents
 
-- [Code of conduct](#code-of-conduct)
-  - [Table of contents](#table-of-contents)
-  - [Our pledge](#our-pledge)
-  - [Our values](#our-values)
-  - [Scope](#scope)
-  - [Unacceptable behavior](#unacceptable-behavior)
-  - [Enforcement](#enforcement)
+- [Our pledge](#our-pledge)
+- [Our values](#our-values)
+- [Scope](#scope)
+- [Unacceptable behavior](#unacceptable-behavior)
+- [Enforcement](#enforcement)
 
 ---
 

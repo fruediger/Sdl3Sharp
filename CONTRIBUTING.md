@@ -11,15 +11,13 @@ The following is a set of guidelines for contributing to this project. These are
 
 ## Table of contents
 
-- [Contributing to this project](#contributing-to-this-project)
-  - [Table of contents](#table-of-contents)
-  - [How to contribute](#how-to-contribute)
-    - [Reporting bugs](#reporting-bugs)
-    - [Suggesting features](#suggesting-features)
-    - [Submitting changes](#submitting-changes)
-  - [Guidelines for contributions](#guidelines-for-contributions)
-    - [Coding conventions](#coding-conventions)
-    - [A note on AI-assisted contributions](#a-note-on-ai-assisted-contributions)
+- [How to contribute](#how-to-contribute)
+  - [Reporting bugs](#reporting-bugs)
+  - [Suggesting features](#suggesting-features)
+  - [Submitting changes](#submitting-changes)
+- [Guidelines for contributions](#guidelines-for-contributions)
+  - [Coding conventions](#coding-conventions)
+  - [A note on AI-assisted contributions](#a-note-on-ai-assisted-contributions)
 
 ---
 
