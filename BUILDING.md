@@ -1,9 +1,9 @@
 # Building SDL3#
 
-This project uses [make.cs](https://github.com/fruediger/make.cs) as its build tool.\
+This project uses [make.cs](https://github.com/Sdl3Sharp/make.cs) as its build tool.\
 All build and packaging tasks should be performed through the provided wrapper scripts rather than invoking `dotnet build` directly.
 
-You don't need to get [make.cs](https://github.com/fruediger/make.cs) separately, as it is included as a Git submodule in this repository. Just make sure to [initialize the submodules](#getting-the-source) when you clone the repository.
+You don't need to get [make.cs](https://github.com/Sdl3Sharp/make.cs) separately, as it is included as a Git submodule in this repository. Just make sure to [initialize the submodules](#getting-the-source) when you clone the repository.
 
 ## Requirements
 
@@ -20,7 +20,7 @@ This repository uses Git submodules. Make sure they are initialized before attem
 The recommended way to get the source is to clone the repository with submodules included upfront:
 
 ```shell
-git clone --recurse-submodules https://github.com/fruediger/Sdl3Sharp.git
+git clone --recurse-submodules https://github.com/Sdl3Sharp/Sdl3Sharp.git
 ```
 
 ### Initialize submodules separately
@@ -28,7 +28,7 @@ git clone --recurse-submodules https://github.com/fruediger/Sdl3Sharp.git
 If you prefer to initialize submodules separately, or if you already cloned the repository without them, start with or continue from a normal clone:
 
 ```shell
-git clone https://github.com/fruediger/Sdl3Sharp.git
+git clone https://github.com/Sdl3Sharp/Sdl3Sharp.git
 ```
 
 Then change into the project directory:
@@ -77,7 +77,7 @@ All wrapper scripts forward their arguments directly to `make.cs`.
 
 ## Native library binaries
 
-By default, the build tool downloads pre-built SDL3 native library binaries from the [SDL-native](https://github.com/fruediger/SDL-native) releases. This is configured via the `runtimesUrl` property in `make.json`, or equivalently via the `--runtimes-url` CLI option.
+By default, the build tool downloads pre-built SDL3 native library binaries from the [SDL-native](https://github.com/Sdl3Sharp/SDL-native) releases. This is configured via the `runtimesUrl` property in `make.json`, or equivalently via the `--runtimes-url` CLI option.
 
 If you want to use a custom build of SDL3 instead, pass `--runtimes-url` with a URL pointing to your own archive, or update the `runtimesUrl` property in `make.json` accordingly. Local paths are supported using `file://` URLs.
 
@@ -86,7 +86,7 @@ If you want to use a custom build of SDL3 instead, pass `--runtimes-url` with a 
 
 ## Commands
 
-For a full list of available options, run `./make.sh --help` or `./make.sh <subcommand> --help`. You can also refer to the [make.cs repository](https://github.com/fruediger/make.cs) for further documentation.
+For a full list of available options, run `./make.sh --help` or `./make.sh <subcommand> --help`. You can also refer to the [make.cs repository](https://github.com/Sdl3Sharp/make.cs) for further documentation.
 
 ### build
 

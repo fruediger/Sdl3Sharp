@@ -15,7 +15,7 @@
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <RepositoryUrl>https://github.com/fruediger/Sdl3Sharp</RepositoryUrl>
+    <RepositoryUrl>https://github.com/Sdl3Sharp/Sdl3Sharp</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 

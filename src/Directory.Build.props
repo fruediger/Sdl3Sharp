@@ -8,7 +8,7 @@
         <Description>SDL3# - SDL bindings for C#/.NET</Description>
         <Authors>Felix Rüdiger</Authors>
 
-        <PackageProjectUrl>https://github.com/fruediger/Sdl3Sharp</PackageProjectUrl>
+        <PackageProjectUrl>https://github.com/Sdl3Sharp/Sdl3Sharp</PackageProjectUrl>
         <PackageTags>sdl;sdl3;sdl3sharp;sdl3#</PackageTags>
         <PackageIcon>icon.png</PackageIcon>
         <PackageReadmeFile>README.md</PackageReadmeFile>
