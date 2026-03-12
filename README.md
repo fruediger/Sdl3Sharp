@@ -1,13 +1,15 @@
 # SDL3#
 
+![SDL3# Banner](https://github.com/fruediger/Sdl3Sharp-assets/blob/main/banner.png)
+
 [![GitHub Release](https://img.shields.io/github/v/release/fruediger/Sdl3Sharp?logo=github&label=GitHub%20Release)](https://github.com/fruediger/Sdl3Sharp/releases/latest)
-
 [![NuGet Version](https://img.shields.io/nuget/v/Sdl3Sharp?logo=nuget&label=NuGet%20Package)](https://www.nuget.org/packages/Sdl3Sharp/latest)
-
 [![SDL Native Library](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Ffruediger%2FSdl3Sharp%2Frefs%2Fheads%2Fmain%2Fmake.json&query=%24.runtimesVersion&prefix=v&logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1%2BjfqAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm%2B48GgAAAB50RVh0VGl0bGUAU2ltcGxlIERpcmVjdE1lZGlhIExheWVy7JOkpQAAANdJREFUKM%2B1kTFLQmEARc8nBr0%2BkMzBGkQQFAuittDf0NAvaHVqEaJd8Cc0tYhNES0F1d5S0OAa4SZBY6FbnNfwKMihzXvXy%2BFyb5D%2FlWPhgTzQoEPCPU3W%2BOSSD7r0CASmGeGWlGuqdIhEnmhzQsKMdZqAeOXUG1uOPRRHnptaEvFYcsAR%2B3xxBkCBDd5%2BC9Qzwrt3vth37KsTB26bOvLZPS8EMXHLslixahSXrFlz16E7PwHmHDzw1E2RIOQpsUxghUiRVQoUeeAxqxH%2BfBGZzQ8VFn%2FWN3OLaWMFnvBEAAAAAElFTkSuQmCC&label=SDL%20Native%20Library)
 ](https://github.com/fruediger/SDL-native)
 
-SDL3# is a C# language binding for [SDL3](https://www.libsdl.org/).
+## About
+
+**SDL3# provides hand-crafted C# language bindings for [SDL3](https://www.libsdl.org/)**.
 
 In contrast to the [promoted C# bindings (SDL3-CS)](https://github.com/flibitijibibo/SDL3-CS), SDL3# is entirely hand-crafted, with no auto-generation of API code based on the native library.\
 Every part of the API is deliberately designed to feel native to C#, translating SDL's functionality into idiomatic, well thought-out counterparts that existing C# users should feel right at home with.\
@@ -144,4 +146,5 @@ In the spirit of transparency, and in line with the [contributing guidelines](CO
 ## License
 
 SDL3# is licensed under the [MIT License](./LICENSE.md). See [NOTICE.md](./NOTICE.md) for third-party notices.
+
 
