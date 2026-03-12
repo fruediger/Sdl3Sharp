@@ -4,12 +4,51 @@ This project uses [make.cs](https://github.com/fruediger/make.cs) as its build t
 
 ## Requirements
 
+- Git 1.7.5 or later (only required to clone the source from GitHub)
 - .NET 10 SDK or later
 - The `dotnet` CLI must be available in your PATH
 
+## Getting the source
+
+This repository uses Git submodules. Make sure they are initialized before attempting to build.
+
+### Clone with submodules
+
+The recommended way to get the source is to clone the repository with submodules included upfront:
+
+```shell
+git clone --recurse-submodules https://github.com/fruediger/Sdl3Sharp.git
+```
+
+### Initialize submodules separately
+
+If you prefer to initialize submodules separately, or if you already cloned the repository without them, start with or continue from a normal clone:
+
+```shell
+git clone https://github.com/fruediger/Sdl3Sharp.git
+```
+
+Then change into the project directory:
+
+```shell
+cd Sdl3Sharp
+```
+
+And initialize and fetch the submodules:
+
+```shell
+git submodule update --init --recursive
+```
+
 ## Running the build tool
 
-Invoke the build tool using one of the following wrapper scripts, depending on your platform:
+Change into the project directory first, if you have not done so already:
+
+```shell
+cd Sdl3Sharp
+```
+
+Then invoke the build tool using one of the following wrapper scripts, depending on your platform:
 
 **Unix-like systems:**
 
