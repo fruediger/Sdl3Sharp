@@ -22,6 +22,14 @@ It makes heavy use of modern C# features to provide an API that is expressive an
 
 For instructions on how to build the project from source, see [BUILDING.md](BUILDING.md).
 
+## Documentation
+
+At the moment, there's a very crude API documentation available under <https://sdl3sharp.github.io/Sdl3Sharp/api/Sdl3Sharp.html>.
+
+For now it's very limited and kind of neglected, and it might stay that way for at least as long as [DocFx](https://dotnet.github.io/docfx/) has some major issues with C# 14 features. SDL3# makes heavy use of those features, which, in turn, renders the generated API documentation partially broken. For now, it might be at least useful as a starting point. For everything else, you'll have to rely on IntelliSense (or a comparable tool in the IDE of you choice) and the source code itself.
+
+We'll improve the documentation eventually!
+
 ## Usage
 
 ### Requirements
