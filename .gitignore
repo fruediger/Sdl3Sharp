@@ -406,6 +406,7 @@ FodyWeavers.xsd
 ### DocFx ###
 .cache
 /**/_site/
+/**/api/
 
 ### DotnetCore ###
 # .NET Core build folders
@@ -789,3 +790,6 @@ TemplateEngineHost/
 build/
 .cache/
 .temp/
+
+# For local dotnet tools, especially needed for docfx, because make.cs requires a --local installation
+dotnet-tools.json
