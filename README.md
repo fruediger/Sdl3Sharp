@@ -31,7 +31,7 @@ You can donate via PayPal using the button below:
 
 [![Donate with PayPal button](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=UKHU838H8M2H2)
 
-Or your just scan the QR code below:
+Or you can just scan the QR code below:
 
 ![Donate with PayPal](paypal_donations_qr.png)
 
