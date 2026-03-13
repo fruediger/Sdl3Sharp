@@ -18,7 +18,7 @@ It makes heavy use of modern C# features to provide an API that is expressive an
 > [!WARNING]
 > This project is a work in progress and is not yet complete or usable in production. The public .NET API is subject to change at any time and in any form without prior notice. Use at your own risk.
 
-## Donations
+## Donating
 
 At the moment, I'm the sole maintainer and contributor to this project, and all of it I do in my free time.
 
