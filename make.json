@@ -7,6 +7,8 @@
   "runtimesLicenseFileUrl":     "https://github.com/Sdl3Sharp/SDL/releases/download/v{0}/LICENSE.txt",
   "runtimesLicenseSpdxFileUrl": "https://github.com/Sdl3Sharp/SDL/releases/download/v{0}/LICENSE.spdx",
 
+  "docfx":                      "./docs/docfx.json",
+
   "outputDir":                  "./build",
   "cacheDir":                   "./src/.cache",
   "tempDir":                    "./src/.temp",
