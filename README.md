@@ -18,9 +18,22 @@ It makes heavy use of modern C# features to provide an API that is expressive an
 > [!WARNING]
 > This project is a work in progress and is not yet complete or usable in production. The public .NET API is subject to change at any time and in any form without prior notice. Use at your own risk.
 
-## Building
+## Donations
 
-For instructions on how to build the project from source, see [BUILDING.md](BUILDING.md).
+At the moment, I'm the sole maintainer and contributor to this project, and all of it I do in my free time.
+
+If you like this project and like what I'm doing, please consider supporting it by donating. It would help me dedicate more time into developing and improving SDL3#.
+
+Any donation, one-time or recurring, in any amount, is deeply appreciated!\
+Thank you so much for your help and support. ❤️
+
+You can donate via PayPal using the button below:
+
+[![Donate with PayPal button](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=UKHU838H8M2H2)
+
+Or your just scan the QR code below:
+
+![Donate with PayPal](paypal_donations_qr.png)
 
 ## Documentation
 
@@ -29,6 +42,10 @@ At the moment, there's a very crude API documentation available under <https://s
 For now it's very limited and kind of neglected, and it might stay that way for at least as long as [DocFx](https://dotnet.github.io/docfx/) has some major issues with C# 14 features. SDL3# makes heavy use of those features, which, in turn, renders the generated API documentation partially broken. For now, it might be at least useful as a starting point. For everything else, you'll have to rely on IntelliSense (or a comparable tool in the IDE of you choice) and the source code itself.
 
 We'll improve the documentation eventually!
+
+## Building
+
+For instructions on how to build the project from source, see [BUILDING.md](BUILDING.md).
 
 ## Usage
 
