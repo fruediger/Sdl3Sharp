@@ -35,7 +35,7 @@ jobs:
         shell: pwsh
 
       - name: Build documentation
-        run: ./make.ps1 docs --docs-output ./docs/_site
+        run: ./make.ps1 docs --docs-output ./docs/_site --build-before-docs --configuration Release
         shell: pwsh
 
       - name: Upload Pages artifact
