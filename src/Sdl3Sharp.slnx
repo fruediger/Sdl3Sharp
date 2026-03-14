@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Sdl3Sharp.SourceGeneration.RegisterDriver/Sdl3Sharp.SourceGeneration.RegisterDriver.csproj" />
+  <Project Path="Sdl3Sharp.SourceGeneration/Sdl3Sharp.SourceGeneration.csproj" />
+  <Project Path="Sdl3Sharp/Sdl3Sharp.csproj" />
+</Solution>
