@@ -11,13 +11,15 @@ The following is a set of guidelines for contributing to this project. These are
 
 ## Table of contents
 
-- [How to contribute](#how-to-contribute)
-  - [Reporting bugs](#reporting-bugs)
-  - [Suggesting features](#suggesting-features)
-  - [Submitting changes](#submitting-changes)
-- [Guidelines for contributions](#guidelines-for-contributions)
-  - [Coding conventions](#coding-conventions)
-  - [A note on AI-assisted contributions](#a-note-on-ai-assisted-contributions)
+- [Contributing to this project](#contributing-to-this-project)
+  - [Table of contents](#table-of-contents)
+  - [How to contribute](#how-to-contribute)
+    - [Reporting bugs](#reporting-bugs)
+    - [Suggesting features](#suggesting-features)
+    - [Submitting changes](#submitting-changes)
+  - [Guidelines for contributions](#guidelines-for-contributions)
+    - [Coding conventions](#coding-conventions)
+    - [A note on AI-assisted contributions](#a-note-on-ai-assisted-contributions)
 
 ---
 
@@ -53,12 +55,22 @@ Ready to contribute a fix, improvement, or new feature? Search the [issue tracke
 
 ### Coding conventions
 
-This project is written almost entirely in C#. There are no strictly enforced style rules, but please orient your code around the [Microsoft C# identifier naming conventions](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/identifier-names) and the [Microsoft C# coding conventions](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions) as a baseline.
+This project is written almost entirely in C#. There are no strictly enforced stylistic rules, but please orient your code around the [Microsoft C# identifier naming conventions](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/identifier-names) and the [Microsoft C# coding conventions](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions) as a baseline.
 
-A few things to keep in mind:
+That said, there is a single, strongly enforced coding rule:
 
-- Private fields use the `m` prefix (e.g., `mSomeField`).
-- Code should be easy to follow for an onlooker. Avoid unnecessarily obscure constructs.
+- **All public, user-facing API code must be documented with XML documentation comments to an adequate degree. The documentation should be clear and extensive enough\*, and, regarding tone and style, should be consistent with the existing documentation.**\
+  Your documentation should at least answer the following questions:
+  - **What** does the API do?
+  - **How** to generally use the API (if not clearly obvious)?
+  - **Are** there any unusual or non-obvious aspects of the API that the user should be aware of?
+
+  \**"enough" is a subjective standard, but as a general rule of thumb, try posing yourself as a user of the API who has never seen something similar before. Then add enough documentation to answer the questions above.*
+
+A few things to also keep in mind:
+
+- Private fields use the `m` prefix (e.g., `mSomeField`). This is not strictly enforced, but is the preferred style.
+- Code should be easy to follow for an onlooker. Avoid unnecessarily obscure constructs. That doesn't mean that you should sacrifice more performant constructs for overly verbose ones. Performance is still a top-level concern for the project.
 
 ### A note on AI-assisted contributions
 
